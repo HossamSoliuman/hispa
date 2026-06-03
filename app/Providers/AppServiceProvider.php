@@ -47,22 +47,14 @@ class AppServiceProvider extends ServiceProvider
         // Avoid database queries during composer scripts, migrations or when the
         // settings table does not exist yet (fresh install or during migrations).
         try {
-            if (Schema::hasTable('settings')) {
-                Cache::forget('site_settings');
-                $settings = Cache::rememberForever('site_settings', function () {
-                    return Setting::all()->pluck('value', 'key')->toArray();
-                });
+            $settings = Cache::rememberForever('site_settings', function () {
+                return Schema::hasTable('settings')
+                    ? Setting::all()->pluck('value', 'key')->toArray()
+                    : [];
+            });
 
-                View::share('settings', $settings);
-            } else {
-                // Provide an empty settings array to avoid undefined index in views
-                View::share('settings', []);
-            }
+            View::share('settings', $settings);
         } catch (\Exception $e) {
-            // In case the database is not available (during install/update),
-            // don't break the application bootstrap — share an empty settings
-            // array. This prevents composer post scripts (like package:discover)
-            // from failing when tables aren't created yet.
             View::share('settings', []);
         }
 

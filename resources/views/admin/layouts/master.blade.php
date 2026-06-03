@@ -87,6 +87,149 @@
         }
     </style>
     <!-- ================== END core-css ================== -->
+
+    <!-- ── HUD Global Theme ───────────────────────────────────── -->
+    <style>
+        /* ── tokens ── */
+        :root {
+            --hud-accent:     #3675c2;
+            --hud-accent-rgb: 54, 117, 194;
+            --hud-border:     rgba(0, 0, 0, .11);
+        }
+
+        /* ── sharp corners everywhere ── */
+        .card, .card-header, .card-footer,
+        .modal-content, .modal-header, .modal-footer,
+        .dropdown-menu, .badge, .alert,
+        .form-control, .form-select,
+        .input-group > *, .input-group-text,
+        .nav-tabs .nav-link,
+        .pagination .page-link,
+        .progress, .progress-bar,
+        .list-group-item {
+            border-radius: 0 !important;
+        }
+        .btn:not(.btn-pill):not(.btn-rounded):not([class*="btn-icon"]) {
+            border-radius: 0 !important;
+        }
+
+        /* ── cards: flat, thin border, no shadow ── */
+        .card {
+            box-shadow: none !important;
+            border: 1px solid var(--hud-border) !important;
+            background: #fff;
+            position: relative;
+        }
+        .card-header {
+            background: rgba(0, 0, 0, .025) !important;
+            border-bottom: 1px solid var(--hud-border) !important;
+        }
+
+        /* ── corner bracket arrows: full definition + brand-blue color ── */
+        .card-arrow {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .card-arrow > div {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+        }
+        .card-arrow > div::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 9px;
+            background: rgba(var(--hud-accent-rgb), .5);
+        }
+        .card-arrow > div::after {
+            content: '';
+            position: absolute;
+            width: 9px;
+            height: 2px;
+            background: rgba(var(--hud-accent-rgb), .5);
+        }
+        .card-arrow-top-left           { top: 0;    left: 0;  }
+        .card-arrow-top-left::before   { top: 2px;  left: 0;  }
+        .card-arrow-top-left::after    { top: 0;    left: 0;  }
+        .card-arrow-top-right          { top: 0;    right: 0; }
+        .card-arrow-top-right::before  { top: 2px;  right: 0; }
+        .card-arrow-top-right::after   { top: 0;    right: 0; }
+        .card-arrow-bottom-left        { bottom: 0; left: 0;  }
+        .card-arrow-bottom-left::before  { bottom: 2px; left: 0; }
+        .card-arrow-bottom-left::after   { bottom: 0;   left: 0; }
+        .card-arrow-bottom-right       { bottom: 0; right: 0; }
+        .card-arrow-bottom-right::before { bottom: 2px; right: 0; }
+        .card-arrow-bottom-right::after  { bottom: 0;   right: 0; }
+
+        /* card content stays above the arrow overlay */
+        .card > *:not(.card-arrow) { position: relative; z-index: 1; }
+
+        /* ── section-head utility (usable on any page) ── */
+        .hud-section-head {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            margin: .25rem 0 1.1rem;
+        }
+        .hud-section-head .ico {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(var(--hud-accent-rgb), .1);
+            border: 1px solid var(--hud-accent);
+            color: var(--hud-accent);
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .hud-section-head h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: .25px;
+        }
+        .hud-section-head .hud-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0,0,0,.12), transparent);
+        }
+        .hud-section-head small { font-size: 11.5px; color: rgba(0,0,0,.45); }
+
+        /* ── HUD flat stat card (used via hud-stat-card component) ── */
+        .hud-card {
+            position: relative;
+            background: #fff;
+            border: 1px solid var(--hud-border) !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        .hud-card-body { padding: 1rem 1.1rem; position: relative; z-index: 1; }
+        .hud-card-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,.45); margin-bottom: .55rem; }
+        .hud-stat-value { font-size: 1.55rem; font-weight: 800; color: #1a1a2e; line-height: 1.1; }
+        .hud-stat-value .unit { font-size: .85rem; font-weight: 600; opacity: .5; }
+        .hud-icon-box {
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(var(--hud-accent-rgb), .08);
+            border: 1px solid rgba(var(--hud-accent-rgb), .22);
+            color: var(--hud-accent);
+            font-size: 15px; flex-shrink: 0;
+        }
+        .hud-card-arrow { position: absolute; inset: 0; pointer-events: none; }
+        .hud-arrow-tl, .hud-arrow-tr, .hud-arrow-bl, .hud-arrow-br { position: absolute; width: 10px; height: 10px; }
+        .hud-arrow-tl::before, .hud-arrow-tr::before, .hud-arrow-bl::before, .hud-arrow-br::before { content:''; position:absolute; width:2px; height:9px; background:rgba(var(--hud-accent-rgb),.55); }
+        .hud-arrow-tl::after,  .hud-arrow-tr::after,  .hud-arrow-bl::after,  .hud-arrow-br::after  { content:''; position:absolute; width:9px; height:2px; background:rgba(var(--hud-accent-rgb),.55); }
+        .hud-arrow-tl { top:0; left:0; }   .hud-arrow-tl::before { top:2px; left:0; }   .hud-arrow-tl::after { top:0; left:0; }
+        .hud-arrow-tr { top:0; right:0; }  .hud-arrow-tr::before { top:2px; right:0; }  .hud-arrow-tr::after { top:0; right:0; }
+        .hud-arrow-bl { bottom:0; left:0; } .hud-arrow-bl::before { bottom:2px; left:0; } .hud-arrow-bl::after { bottom:0; left:0; }
+        .hud-arrow-br { bottom:0; right:0; } .hud-arrow-br::before { bottom:2px; right:0; } .hud-arrow-br::after { bottom:0; right:0; }
+    </style>
+    <!-- ── end HUD Global Theme ─────────────────────────────── -->
+
     @yield('css')
 
     <style>
@@ -247,6 +390,23 @@
             });
         </script>
     @endif
+
+    <script>
+        /* Auto-inject HUD corner brackets into every .card that doesn't have them */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.card').forEach(function(card) {
+                if (card.querySelector('.card-arrow')) { return; }
+                var arrow = document.createElement('div');
+                arrow.className = 'card-arrow';
+                arrow.innerHTML =
+                    '<div class="card-arrow-top-left"></div>' +
+                    '<div class="card-arrow-top-right"></div>' +
+                    '<div class="card-arrow-bottom-left"></div>' +
+                    '<div class="card-arrow-bottom-right"></div>';
+                card.appendChild(arrow);
+            });
+        });
+    </script>
 
 </body>
 
