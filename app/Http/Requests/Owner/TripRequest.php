@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Requests\Owner;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class TripRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     */
+    public function rules(): array
+    {
+        $id = $this->route('trip');
+
+        return [
+
+            'name' => 'required|max:255',
+            'name_en' => 'required|max:255',
+            'license_number' => 'required|max:255|unique:trips,license_number,'.$id,
+            'start_date' => 'required|date_format:Y-m-d\TH:i',
+            'owner_id' => 'required|integer|exists:users,id',
+            'captain_id' => 'required|integer|exists:users,id',
+            'boat_id' => 'required|numeric|exists:boats,id',
+            'boat_name' => 'nullable|max:255',
+            'notes' => 'nullable|max:255',
+
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'الاسم مطلوب',
+            'name_en.required' => 'الاسم باللغة الإنجليزية مطلوب',
+            'license_number.required' => 'رقم الترخيص مطلوب',
+            'start_date.required' => 'تاريخ البدء مطلوب',
+            'end_date.required' => 'تاريخ الانتهاء مطلوب',
+            'owner_id.required' => 'الصيّاد مطلوب',
+            'captain_id.required' => 'القائد مطلوب',
+            'boat_id.required' => 'القارب مطلوب',
+            'boat_name.required' => 'اسم القارب مطلوب',
+            'notes.required' => 'الملاحظات مطلوبة',
+        ];
+    }
+}

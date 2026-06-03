@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers\Owner\Report;
+
+use App\DataTable\Owner\Report\TripReportDataTable;
+use App\Http\Controllers\Controller;
+use App\Models\Fish;
+use App\Models\Setting;
+use App\Models\Trip;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class TripReportController extends Controller
+{
+    private $datatable;
+
+    public function __construct()
+    {
+        $this->datatable = new TripReportDataTable;
+
+    }
+
+    public function index()
+    {
+        $fish = Fish::Active()->select('scientific_name as name', 'id')->get();
+
+        return view('owner.report.tripe', compact('fish'));
+    }
+
+    public function getTripData(Request $request)
+    {
+        return $this->datatable->getData($request);
+
+    }
+
+    public function printTripReport(Request $request, $trip_id = null)
+    {
+        // For owner area the authenticated user's id is the owner id
+        // Some user models may not have owner_id property — use auth()->id() as primary fallback
+        $owner_id = auth()->id();
+
+        // Build query
+        $query = Trip::with(['boat', 'captain', 'fishStocks.fish'])
+            ->where('owner_id', $owner_id);
+
+        // Filter by specific trip if provided
+        if ($trip_id) {
+            $query->where('id', $trip_id);
+        }
+
+        // Date range filter
+        if ($request->filled('from_date')) {
+            $query->whereDate('start_date', '>=', Carbon::parse($request->from_date));
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('start_date', '<=', Carbon::parse($request->to_date));
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Boat filter
+        if ($request->filled('boat_id')) {
+            $query->where('boat_id', $request->boat_id);
+        }
+
+        $trips = $query->orderBy('start_date', 'desc')->get();
+
+        // Prepare filters for diagnostics and view
+        $filters = [
+            'trip_id' => $trip_id,
+            'from_date' => $request->filled('from_date') ? $request->from_date : null,
+            'to_date' => $request->filled('to_date') ? $request->to_date : null,
+            'status' => $request->filled('status') ? $request->status : null,
+            'boat_id' => $request->filled('boat_id') ? $request->boat_id : null,
+        ];
+
+        // If no trips found, log useful debug info to help diagnose empty reports
+        if ($trips->isEmpty()) {
+            \Illuminate\Support\Facades\Log::debug('TripReportController: no trips found', [
+                'owner_id' => $owner_id,
+                'filters' => [
+                    'trip_id' => $trip_id,
+                    'from_date' => $request->filled('from_date') ? $request->from_date : null,
+                    'to_date' => $request->filled('to_date') ? $request->to_date : null,
+                    'status' => $request->filled('status') ? $request->status : null,
+                    'boat_id' => $request->filled('boat_id') ? $request->boat_id : null,
+                ],
+            ]);
+        }
+
+        // Calculate statistics
+        $statistics = [
+            'total_trips' => $trips->count(),
+            'total_catch' => $trips->sum(function ($trip) {
+                return $trip->fishStocks->sum('weight');
+            }),
+            'total_revenue' => $trips->sum(function ($trip) {
+                return $trip->fishStocks->sum(function ($stock) {
+                    return $stock->fish ? ($stock->weight * ($stock->fish->price ?? 0)) : 0;
+                });
+            }),
+            'completed_trips' => $trips->where('status', 'completed')->count(),
+            'total_boats' => $trips->pluck('boat_id')->unique()->count(),
+            'fish_types' => $trips->flatMap(function ($trip) {
+                return $trip->fishStocks->pluck('fish_id');
+            })->unique()->count(),
+        ];
+
+        // Get settings for report header
+        $settings = [
+            'title' => Setting::where('key', 'site_name')->value('value') ?? 'حسبة',
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        ];
+
+        // Generate QR code payload (TLV) and image using Dalal controller pattern
+        $qrPayload = [
+            'seller_name' => $settings['title'] ?? 'حسبة',
+            'vat_number' => Setting::where('key', 'vat_number')->value('value') ?? '',
+            'timestamp' => now()->toIso8601String(),
+            'total' => number_format((float) ($statistics['total_revenue'] ?? 0), 2, '.', ''),
+            'vat_amount' => number_format(0, 2, '.', ''),
+        ];
+
+        $tlvBase64 = $this->generateQRCode($qrPayload);
+        $qrCode = $this->generateQRCodeImage($tlvBase64);
+
+        // Date range for display
+        $fromDate = $request->filled('from_date') ? Carbon::parse($request->from_date)->format('Y-m-d') : null;
+        $toDate = $request->filled('to_date') ? Carbon::parse($request->to_date)->format('Y-m-d') : null;
+
+        // Get single trip for detailed view
+        $trip = $trip_id ? $trips->first() : null;
+
+        return view('owner.reports.print.trip-report', compact(
+            'trips',
+            'statistics',
+            'settings',
+            'qrCode',
+            'fromDate',
+            'toDate',
+            'trip',
+            'owner_id',
+            'filters'
+        ));
+    }
+
+    public function printAllTripsReport(Request $request)
+    {
+        return $this->printTripReport($request, null);
+    }
+
+    /**
+     * Generate QR Code image as base64 data URL
+     * Uses api.qrserver.com as a fallback when QR library is not installed
+     */
+    private function generateQRCodeImage($url)
+    {
+        // Use QR Server API - reliable and free
+        try {
+            $size = '200';
+            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size='.$size.'x'.$size.'&data='.urlencode($url);
+
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 5,
+                    'ignore_errors' => true,
+                    'user_agent' => 'Mozilla/5.0 (compatible)',
+                ],
+            ]);
+
+            $imageData = @file_get_contents($qrUrl, false, $context);
+
+            if ($imageData !== false && ! empty($imageData) && strlen($imageData) > 100) {
+                return 'data:image/png;base64,'.base64_encode($imageData);
+            }
+        } catch (\Throwable $e) {
+            // Fall through to SVG fallback
+        }
+
+        // If external API fails, create a simple SVG placeholder with URL
+        return $this->generateQRPlaceholder($url);
+    }
+
+    /**
+     * Generate a simple QR placeholder SVG when external services fail
+     */
+    private function generateQRPlaceholder($url)
+    {
+        $shortUrl = parse_url($url, PHP_URL_HOST).parse_url($url, PHP_URL_PATH);
+        $svg = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="2"/>
+            <text x="100" y="100" font-family="Arial" font-size="12" text-anchor="middle" fill="#7f8c8d">QR Code</text>
+            <text x="100" y="120" font-family="Arial" font-size="8" text-anchor="middle" fill="#95a5a6">'.htmlspecialchars(substr($shortUrl, 0, 30)).'</text>
+        </svg>';
+
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
+    }
+
+    /**
+     * Generate QR Code for ZATCA compliance
+     * TLV Format: Tag-Length-Value encoding
+     */
+    private function generateQRCode($data)
+    {
+        // TLV encoding for ZATCA e-invoice QR
+        $tlv = '';
+
+        // Tag 1: Seller name (UTF-8)
+        $sellerName = $data['seller_name'] ?? '';
+        $tlv .= $this->encodeTLV(1, $sellerName);
+
+        // Tag 2: VAT registration number
+        $vatNumber = $data['vat_number'] ?? '';
+        $tlv .= $this->encodeTLV(2, $vatNumber);
+
+        // Tag 3: Timestamp (ISO 8601)
+        $timestamp = $data['timestamp'] ?? now()->toIso8601String();
+        $tlv .= $this->encodeTLV(3, $timestamp);
+
+        // Tag 4: Invoice total (with VAT)
+        $total = number_format((float) ($data['total'] ?? 0), 2, '.', '');
+        $tlv .= $this->encodeTLV(4, $total);
+
+        // Tag 5: VAT amount
+        $vatAmount = number_format((float) ($data['vat_amount'] ?? 0), 2, '.', '');
+        $tlv .= $this->encodeTLV(5, $vatAmount);
+
+        // Base64 encode the TLV data
+        return base64_encode($tlv);
+    }
+
+    /**
+     * Encode data in TLV format
+     */
+    private function encodeTLV($tag, $value)
+    {
+        $valueBytes = $value;
+        $length = strlen($valueBytes);
+
+        return chr($tag).chr($length).$valueBytes;
+    }
+}

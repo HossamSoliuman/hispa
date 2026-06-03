@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Requests\Gov;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class FishingToolRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name_ar' => 'required|max:255',
+            'name_en' => 'required|max:255',
+            'status' => 'required|in:1,0',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name_ar.required' => 'الاسم باللغة العربية مطلوب',
+            'name_en.required' => 'الاسم باللغة الإنجليزية مطلوب',
+            'status.required' => 'الحالة مطلوبة',
+            'status.in' => 'الحالة يجب أن تكون 1 أو 0',
+        ];
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'status' => $this->status ? 1 : 0,
+        ]);
+    }
+}

@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Http\Controllers\Owner\Report;
+
+use App\Http\Controllers\Controller;
+use App\Models\Boat;
+use App\Models\Setting;
+use Illuminate\Http\Request;
+
+class BoatReportController extends Controller
+{
+    public function printBoatReport(Request $request, $boat_id = null)
+    {
+        $owner_id = auth()->id();
+
+        $query = Boat::with(['captain', 'boat_type', 'maintenances', 'expenses'])
+            ->where('owner_id', $owner_id);
+
+        if ($boat_id) {
+            $query->where('id', $boat_id);
+        }
+
+        $boats = $query->orderBy('name_en')->get();
+
+        // compute additional statistics
+        $totalMaintenanceCost = 0;
+        $totalPayload = 0;
+        foreach ($boats as $b) {
+            $totalMaintenanceCost += (float) $b->maintenances->sum('cost');
+            // some boats use 'payload' or 'cargo_capacity' - use payload if available
+            $totalPayload += (float) ($b->payload ?? 0);
+        }
+
+        $statistics = [
+            'total_boats' => $boats->count(),
+            'active_boats' => $boats->where('status', 1)->count(),
+            'total_maintenance_cost' => $totalMaintenanceCost,
+            'total_payload' => $totalPayload,
+        ];
+
+        $settings = [
+            'title' => Setting::where('key', 'site_name')->value('value') ?? 'حسبة',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        ];
+
+        // QR payload and image using same TLV approach as other reports
+        $qrPayload = [
+            'seller_name' => $settings['title'] ?? 'حسبة',
+            'vat_number' => Setting::where('key', 'vat_number')->value('value') ?? '',
+            'timestamp' => now()->toIso8601String(),
+            'total' => number_format((float) ($statistics['total_boats'] ?? 0), 2, '.', ''),
+            'vat_amount' => number_format(0, 2, '.', ''),
+        ];
+
+        $tlvBase64 = $this->generateQRCode($qrPayload);
+        $qrCode = $this->generateQRCodeImage($tlvBase64);
+
+        return view('owner.reports.print.boat-report', compact('boats', 'statistics', 'settings', 'qrCode', 'boat_id'));
+    }
+
+    public function printAllBoatsReport(Request $request)
+    {
+        return $this->printBoatReport($request, null);
+    }
+
+    // --- QR helpers copied from Dalal ReportsController ---
+    private function generateQRCodeImage($url)
+    {
+        try {
+            $size = '200';
+            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size='.$size.'x'.$size.'&data='.urlencode($url);
+            $context = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0 (compatible)']]);
+            $imageData = @file_get_contents($qrUrl, false, $context);
+            if ($imageData !== false && ! empty($imageData) && strlen($imageData) > 100) {
+                return 'data:image/png;base64,'.base64_encode($imageData);
+            }
+        } catch (\Throwable $e) {
+        }
+
+        return $this->generateQRPlaceholder($url);
+    }
+
+    private function generateQRPlaceholder($url)
+    {
+        $shortUrl = parse_url($url, PHP_URL_HOST).parse_url($url, PHP_URL_PATH);
+        $svg = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">'
+            .'<rect width="200" height="200" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="2"/>'
+            .'<text x="100" y="100" font-family="Arial" font-size="12" text-anchor="middle" fill="#7f8c8d">QR Code</text>'
+            .'<text x="100" y="120" font-family="Arial" font-size="8" text-anchor="middle" fill="#95a5a6">'.htmlspecialchars(substr($shortUrl, 0, 30)).'</text>'
+            .'</svg>';
+
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
+    }
+
+    private function generateQRCode($data)
+    {
+        $tlv = '';
+        $tlv .= $this->encodeTLV(1, $data['seller_name'] ?? '');
+        $tlv .= $this->encodeTLV(2, $data['vat_number'] ?? '');
+        $tlv .= $this->encodeTLV(3, $data['timestamp'] ?? now()->toIso8601String());
+        $tlv .= $this->encodeTLV(4, number_format((float) ($data['total'] ?? 0), 2, '.', ''));
+        $tlv .= $this->encodeTLV(5, number_format((float) ($data['vat_amount'] ?? 0), 2, '.', ''));
+
+        return base64_encode($tlv);
+    }
+
+    private function encodeTLV($tag, $value)
+    {
+        $valueBytes = $value;
+        $length = strlen($valueBytes);
+
+        return chr($tag).chr($length).$valueBytes;
+    }
+}

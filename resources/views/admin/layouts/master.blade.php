@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
+    data-bs-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ __('admin.title') }} | @yield('title')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="{{ __('admin.generated.meta_desc_hasbah') }}" />
+    <meta name="author" content="{{ __('admin.generated.meta_author') }}" />
+    <meta name="keywords" content="{{ __('admin.generated.meta_keywords') }}" />
+    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- ================== BEGIN core-css ================== -->
+    <link href="{{ asset('dashboard/assets/css/vendor.min.css') }}" rel="stylesheet">
+    @if (app()->getLocale() == 'ar')
+        <link href="{{ asset('dashboard/assets/css/app.min-rtl.css') }}" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @else
+        <link href="{{ asset('dashboard/assets/css/app.min.css') }}" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
+    <!-- ================== END core-css ================== -->
+
+    <!-- ================== BEGIN page-css ================== -->
+    <link href="{{ asset('dashboard/assets/plugins/jvectormap-next/jquery-jvectormap.css') }}" rel="stylesheet">
+    <!-- ================== END page-css ================== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- DataTables -->
+    <link href="{{ asset('dashboard/assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}"
+        rel="stylesheet">
+    <link href="{{ asset('dashboard/assets/plugins/datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css') }}"
+        rel="stylesheet">
+    <link
+        href="{{ asset('dashboard/assets/plugins/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css') }}"
+        rel="stylesheet">
+    <link href="{{ asset('dashboard/assets/plugins/bootstrap-table/dist/bootstrap-table.min.css') }}" rel="stylesheet">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <style>
+        .invalid-feedback,
+        .text-danger {
+            color: red;
+        }
+
+        .error {
+            border: 1px solid red;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .menu-submenu .menu-submenu {
+            padding-inline-start: 0 !important;
+        }
+
+        .menu-submenu .menu-submenu .menu-item {
+            padding-inline-start: 15px !important;
+        }
+
+        .app-header {
+            background: #3675c2;
+        }
+
+        .app-header .brand .brand-logo img {
+            height: 65px !important;
+            filter: brightness(0) invert(1);
+        }
+
+        .app-header .menu-toggler .bar {
+            background: #fff !important;
+        }
+
+        .app-header .menu .menu-item .menu-link .menu-icon,
+        .app-header .menu .menu-item .menu-link .menu-text {
+            color: #fff;
+        }
+
+        th {
+            text-align: center !important;
+        }
+    </style>
+    <!-- ================== END core-css ================== -->
+    @yield('css')
+
+    <style>
+        #datatableDefault_filter,
+        .dataTables_filter {
+            justify-self: end !important;
+        }
+
+        table.table.dataTable {
+            max-width: 100% !important;
+        }
+
+        #datatableDefault_paginate,
+        .pagination,
+        .dataTables_paginate {
+            margin-top: 15px;
+            justify-self: end !important;
+        }
+
+        .dataTables_info,
+        #datatableDefault_info {
+            margin-top: 15px;
+        }
+
+        div.dt-container div.dt-search input {
+            margin-left: 0 !important;
+        }
+
+        .small-text th,
+        .small-text td {
+            font-size: 12px;
+            text-align: center !important;
+            vertical-align: middle;
+            font-weight: bold;
+        }
+
+        .small-text th {
+            font-weight: bold !important;
+            color: #000 !important;
+        }
+
+        .btn-outline-danger,
+        .btn-outline-success,
+        .btn-outline-primary,
+        .btn-outline-info,
+        .btn-outline-warning,
+        .btn-outline-secondary {
+            border-radius: 0px !important;
+        }
+
+        .btn-border-radius {
+            border-radius: 5px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- BEGIN #app -->
+    <div id="app" class="app app-footer-fixed">
+        <!-- BEGIN #header -->
+        @include('admin.partial.header')
+        <!-- END #header -->
+
+        <!-- BEGIN #sidebar -->
+        @include('admin.partial.sidebar')
+        <!-- END #sidebar -->
+
+        <!-- BEGIN mobile-sidebar-backdrop -->
+        <button class="app-sidebar-mobile-backdrop" data-toggle-target=".app"
+            data-toggle-class="app-sidebar-mobile-toggled"></button>
+        <!-- END mobile-sidebar-backdrop -->
+
+        <!-- BEGIN #content -->
+        <div id="content" class="app-content">
+            @include('admin.alert.alert')
+
+            @yield('content')
+
+        </div>
+        @include('admin.partial.footer')
+        <!-- END #content -->
+
+        <!-- BEGIN btn-scroll-top -->
+        <a href="#" data-toggle="scroll-to-top" class="btn-scroll-top fade"><i class="fa fa-arrow-up"></i></a>
+        <!-- END btn-scroll-top -->
+    </div>
+
+    <!-- END #app -->
+
+    <!-- ================== BEGIN core-js ================== -->
+    <script src="{{ asset('dashboard/assets/js/vendor.min.js') }}"></script>
+    <script src="{{ asset('dashboard/assets/js/app.min.js') }}"></script>
+    <!-- ================== END core-js ================== -->
+
+    <!-- DataTables -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net/js/dataTables.min.js') }}"></script>
+
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-responsive/js/dataTables.responsive.min.js') }}">
+    </script>
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js') }}">
+    </script>
+
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-buttons/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-buttons/js/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('dashboard/assets/plugins/datatables.net-buttons/js/buttons.colVis.min.js') }}"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+    <!-- ================== BEGIN page-js ================== -->
+    <script src="{{ asset('dashboard/assets/js/notify.js') }}"></script>
+
+    <!-- Global DataTables defaults (language) -->
+    <script>
+        (function() {
+            function applyDtDefaults() {
+                if (window.jQuery && $.fn.dataTable) {
+                    $.extend(true, $.fn.dataTable.defaults, {
+                        language: {
+                            @if (app()->getLocale() == 'ar')
+                                url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json"
+                            @endif
+                        },
+                    });
+                }
+            }
+
+            // If jQuery/DataTables already loaded, apply immediately, otherwise wait for DOM
+            if (window.jQuery && $.fn.dataTable) {
+                applyDtDefaults();
+            } else {
+                document.addEventListener('DOMContentLoaded', applyDtDefaults);
+            }
+        })();
+    </script>
+
+    @yield('script')
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.getElementsByClassName('success-alert');
+                if (alerts.length > 0) {
+                    alerts[0].style.display = 'none';
+                }
+            }, 3000);
+        });
+    </script>
+    @if (session()->has('success'))
+        <script>
+            $(function() {
+                $.notify("{{ session('success') }}", "success");
+            });
+        </script>
+    @endif
+
+</body>
+
+</html>
+
+@include('partials.support-floating-button')

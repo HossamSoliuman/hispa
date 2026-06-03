@@ -1,0 +1,258 @@
+/* =========================
+   GLOBAL STYLES
+   ========================= */
+
+/* CSS Custom Properties - Primary Color */
+:root {
+  --color-primary: #3778BC;
+  --color-primary-dark: #2d5f96;
+  --color-primary-light: #4a8dd4;
+  --color-primary-50: #e8f0f8;
+  --color-primary-100: #d1e1f1;
+  --color-primary-shadow: rgba(55, 120, 188, 0.09);
+  --color-paragraph: #929292;
+}
+
+/* Smooth anchor scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Apply Almarai font */
+body {
+  font-family: 'Almarai', sans-serif;
+}
+
+/* Paragraph text color */
+.text-paragraph {
+  color: var(--color-paragraph) !important;
+}
+
+/* Apply paragraph color to all p tags by default */
+p {
+  color: var(--color-paragraph);
+}
+
+/* Primary Color Utilities - Use these instead of blue-600 classes */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.hover\:bg-primary-dark:hover {
+  background-color: var(--color-primary-dark) !important;
+}
+
+.hover\:text-primary-dark:hover {
+  color: var(--color-primary-dark) !important;
+}
+
+.hover\:bg-primary-light:hover {
+  background-color: var(--color-primary-light) !important;
+}
+
+.bg-primary-50 {
+  background-color: var(--color-primary-50) !important;
+}
+
+.border-primary-100 {
+  border-color: var(--color-primary-100) !important;
+}
+
+/* Override Tailwind's blue-600 with primary color */
+.text-blue-600 {
+  color: var(--color-primary) !important;
+}
+
+.bg-blue-600 {
+  background-color: var(--color-primary) !important;
+}
+
+.border-blue-600 {
+  border-color: var(--color-primary) !important;
+}
+
+.border-blue-200 {
+  border-color: var(--color-primary-100) !important;
+}
+
+.bg-blue-50 {
+  background-color: var(--color-primary-50) !important;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--color-primary-dark) !important;
+}
+
+.hover\:bg-blue-50:hover {
+  background-color: var(--color-primary-50) !important;
+}
+
+.hover\:text-blue-700:hover {
+  color: var(--color-primary-dark) !important;
+}
+
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: var(--color-primary) !important;
+}
+
+.text-blue-100 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.after\:bg-blue-600::after {
+  background-color: var(--color-primary) !important;
+}
+
+/* Additional blue color overrides */
+.ring-blue-500 {
+  --tw-ring-color: var(--color-primary) !important;
+}
+
+.bg-blue-600\/50 {
+  background-color: rgba(55, 120, 188, 0.5) !important;
+}
+
+/* SVG and icon colors */
+.text-blue-600 svg,
+.text-blue-600 path,
+.text-blue-600 circle {
+  color: var(--color-primary) !important;
+  fill: var(--color-primary) !important;
+  stroke: var(--color-primary) !important;
+}
+
+/* Text shadow effect with primary color at 9% opacity */
+.text-shadow-primary {
+  text-shadow: 0 0 40px var(--color-primary-shadow), 
+               0 0 80px var(--color-primary-shadow),
+               0 0 120px var(--color-primary-shadow);
+}
+
+/* Image shadow effect with primary color at 9% opacity */
+.img-shadow-primary {
+  filter: drop-shadow(0 0 60px var(--color-primary-shadow)) 
+          drop-shadow(0 0 120px var(--color-primary-shadow))
+          drop-shadow(0 0 180px var(--color-primary-shadow))
+          drop-shadow(0 0 240px var(--color-primary-shadow));
+}
+
+/* Swiper Testimonials Custom Styles */
+  .swiper-button-next,
+  .swiper-button-prev {
+  color: white !important;
+  background: #3C74BE !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin-top: 0 !important;
+  transition: all 0.3s ease !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 10 !important;
+  position: absolute !important;
+}
+
+  .swiper-button-next:hover,
+  .swiper-button-prev:hover {
+  background: #437dca !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-50%)  !important;
+}
+
+  .swiper-button-next::after,
+  .swiper-button-prev::after {
+  font-size: 18px !important;
+  font-weight: bold !important;
+}
+
+/* RTL adjustments for Swiper - Position arrows around cards */
+[dir="rtl"] .testimonials-swiper .swiper-button-next {
+  left: -60px !important;
+  right: auto !important;
+}
+
+[dir="rtl"] .testimonials-swiper .swiper-button-prev {
+  right: -60px !important;
+  left: auto !important;
+}
+
+/* Make all testimonial cards same height */
+.testimonials-swiper .swiper-wrapper {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.testimonials-swiper .swiper-slide {
+  height: auto !important;
+  display: flex !important;
+}
+
+.testimonials-swiper .swiper-slide article {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.testimonials-swiper .swiper-slide article > div {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Mobile adjustments - Position arrows under swiper */
+@media (max-width: 640px) {
+  /* Target all swiper buttons in testimonials section */
+   .swiper-button-next,
+  .swiper-button-prev {
+    width: 40px !important;
+    height: 40px !important;
+    top: auto !important;
+    bottom: -20px !important;
+    /* transform: translateX(0) !important; */
+    margin-top: 0 !important;
+  }
+  
+  /* Position arrows centered under swiper */
+  [dir="rtl"] .testimonials-swiper .swiper-button-next {
+    left: calc(50% - 50px) !important;
+    right: auto !important;
+    transform: translateX(0) !important;
+  }
+  
+  [dir="rtl"] .testimonials-swiper .swiper-button-prev {
+    right: calc(50% - 50px) !important;
+    left: auto !important;
+    transform: translateX(0) !important;
+  }
+  .swiper-button-next{
+
+    right: calc(50% - 50px) !important;
+  }
+  .swiper-button-prev{
+    left: calc(50% - 50px) !important;
+  }
+  /* Add padding to swiper container to accommodate arrows */
+  .testimonials-swiper {
+    padding-bottom: 80px !important;
+  }
+  
+  /* Container wrapper adjustments for mobile */
+  .testimonials-swiper {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Ensure parent container has space for arrows */
+  .testimonials-swiper {
+    position: relative !important;
+  }
+}

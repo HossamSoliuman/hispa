@@ -1,0 +1,72 @@
+/* =========================
+   MOBILE MENU SHEET STYLES
+   ========================= */
+
+/* Mobile Sheet Menu Overlay */
+#mobileMenuOverlay {
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+#mobileMenuOverlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Mobile Sheet Menu Panel */
+#mobileMenuSheet {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#mobileMenuSheet.closed {
+  transform: translateX(100%);
+}
+
+#mobileMenuSheet.open {
+  transform: translateX(0);
+}
+
+/* Menu item animation */
+.mobile-nav-item {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#mobileMenuSheet.open .mobile-nav-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Staggered animation delays for menu items */
+#mobileMenuSheet.open .mobile-nav-item:nth-child(1) {
+  transition-delay: 0.05s;
+}
+
+#mobileMenuSheet.open .mobile-nav-item:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+#mobileMenuSheet.open .mobile-nav-item:nth-child(3) {
+  transition-delay: 0.15s;
+}
+
+#mobileMenuSheet.open .mobile-nav-item:nth-child(4) {
+  transition-delay: 0.2s;
+}
+
+#mobileMenuSheet.open .mobile-nav-item:nth-child(5) {
+  transition-delay: 0.25s;
+}
+
+#mobileMenuSheet.open .mobile-nav-item:nth-child(6) {
+  transition-delay: 0.3s;
+}
+
+#mobileMenuSheet.open .mobile-nav-item:nth-child(7) {
+  transition-delay: 0.35s;
+}
+
+/* Prevent body scroll when menu is open */
+body.menu-open {
+  overflow: hidden;
+}
