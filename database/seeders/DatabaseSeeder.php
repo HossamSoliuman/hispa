@@ -14,8 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(AdminTableSeeder::class);
         $this->call(RoleSeeder::class);
-        // ✅ Run GovPermissionSeeder BEFORE UserSeeder to ensure 'super' role exists
-        $this->call(GovPermissionSeeder::class);
+        $this->call(GovPermissionSeeder::class); // must run before UserSeeder ('super' role assignment)
         $this->call(PermissionSeeder::class);
         $this->call(UserSeeder::class);
         $this->call(PermitTypeSeeder::class);

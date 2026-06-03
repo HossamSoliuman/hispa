@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DefaultMasterSeeder extends Seeder
 {
@@ -12,6 +13,13 @@ class DefaultMasterSeeder extends Seeder
      */
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        DB::table('trips')->truncate();
+        DB::table('customers')->truncate();
+        DB::table('payment_methods')->truncate();
+        DB::table('fish')->truncate();
+        Schema::enableForeignKeyConstraints();
+
         // 🐟 الأسماك
         DB::table('fish')->insert([
             ['scientific_name' => 'Sparus aurata', 'english_name' => 'Gilt-head bream', 'local_name_primary' => 'دنيس', 'status' => 1],
@@ -24,7 +32,6 @@ class DefaultMasterSeeder extends Seeder
             ['name' => 'شركة البحر الأبيض', 'phone' => '0599123456', 'email' => 'white@sea.com'],
             ['name' => 'مطعم المرسى', 'phone' => '0599876543', 'email' => 'marssa@fish.ps'],
         ]);
-
 
         // 💳 طرق الدفع
         DB::table('payment_methods')->insert([
@@ -42,7 +49,7 @@ class DefaultMasterSeeder extends Seeder
             'status' => 1,
             'permit_type' => 'يومي',
             'owner_id' => 1,
-            'captain_id' => 2,
+            'captain_id' => 1,
             'boat_name' => 'أمواج غزة',
             'boat_number' => 'BO123',
             'boat_color' => 'أزرق',

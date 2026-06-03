@@ -12,13 +12,13 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $roles = ['owner', 'captain', 'counter', 'dalal', 'gov'];
+        // Only 'owner' is enforced by route middleware (routes/web.php & routes/owner.php → role:owner).
+        // captain/counter/dalal are identified by users.role string column only.
+        // gov uses its own guard; its 'super' role is created by GovPermissionSeeder.
+        Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
 
-        foreach ($roles as $role) {
-            Role::firstOrCreate([
-                'name' => $role,
-                'guard_name' => 'web',
-            ]);
-        }
+        Role::where('guard_name', 'web')
+            ->where('name', '!=', 'owner')
+            ->delete();
     }
 }
