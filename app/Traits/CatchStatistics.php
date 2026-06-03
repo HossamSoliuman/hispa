@@ -52,16 +52,24 @@ trait CatchStatistics
     {
         $sellerId = auth()->user()->id;
 
+        $isMySQL = DB::connection()->getDriverName() === 'mysql';
+        $monthExpr = $isMySQL
+            ? "DATE_FORMAT(sales.created_at, '%Y-%m') as month"
+            : "strftime('%Y-%m', sales.created_at) as month";
+        $groupExpr = $isMySQL
+            ? "DATE_FORMAT(sales.created_at, '%Y-%m')"
+            : "strftime('%Y-%m', sales.created_at)";
+
         $data = DB::table('sale_details')
             ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
             ->select(
-                DB::raw("DATE_FORMAT(sales.created_at, '%Y-%m') as month"),
+                DB::raw($monthExpr),
                 DB::raw('COUNT(DISTINCT sale_details.sale_id) as catch_count'),
                 DB::raw('SUM(sale_details.total_price) as total_revenue'),
                 DB::raw('SUM(sale_details.weight) as total_weight_kg')
             )
             ->where('sales.seller_id', $sellerId)
-            ->groupBy(DB::raw("DATE_FORMAT(sales.created_at, '%Y-%m')"))
+            ->groupBy(DB::raw($groupExpr))
             ->orderBy('month', 'asc')
             ->get()
             ->map(function ($item) {

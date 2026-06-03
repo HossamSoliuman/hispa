@@ -280,16 +280,16 @@ class ExpenseRepository
     public function expensesQueryForDataTable($request)
     {
         return Expense::with(['boat', 'category', 'vendor', 'paymentMethod'])
-            ->when($request->boat_id, fn($q) => $q->where('boat_id', $request->boat_id))
+            ->when($request->boat_id, fn ($q) => $q->where('boat_id', $request->boat_id))
             ->when($request->category_id, function ($q) use ($request) {
                 $q->whereHas('category', function ($query) use ($request) {
                     $query->where('id', $request->category_id)
                         ->orWhere('parent_id', $request->category_id);
                 });
             })
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->from_date, fn($q) => $q->whereDate('date', '>=', $request->from_date))
-            ->when($request->to_date, fn($q) => $q->whereDate('date', '<=', $request->to_date))
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
+            ->when($request->from_date, fn ($q) => $q->whereDate('date', '>=', $request->from_date))
+            ->when($request->to_date, fn ($q) => $q->whereDate('date', '<=', $request->to_date))
             ->orderByDesc('created_at');
     }
 
@@ -447,11 +447,11 @@ class ExpenseRepository
 
     private function generateExpenseNumber(): string
     {
-        $prefix = 'EXP-' . date('Y') . '-';
+        $prefix = 'EXP-'.date('Y').'-';
         $last = Expense::where('number', 'like', "$prefix%")->orderBy('id', 'desc')->first();
         $num = $last ? (int) substr($last->number, strlen($prefix)) + 1 : 1;
 
-        return $prefix . str_pad((string) $num, 4, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) $num, 4, '0', STR_PAD_LEFT);
     }
 
     public function analytics(): array
@@ -460,7 +460,7 @@ class ExpenseRepository
             ->select('category_id', DB::raw('SUM(final_price) as total'))
             ->groupBy('category_id')
             ->get()
-            ->groupBy(fn($row) => $row->category?->parent?->id ?? $row->category?->id)
+            ->groupBy(fn ($row) => $row->category?->parent?->id ?? $row->category?->id)
             ->map(function ($group) {
                 $parent = $group->first()->category->parent ?? $group->first()->category;
 
@@ -475,17 +475,22 @@ class ExpenseRepository
             ->select('boat_id', DB::raw('SUM(final_price) as total'))
             ->groupBy('boat_id')
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'boat' => $row->boat?->name ?? 'عام',
                 'total' => $row->total,
             ]);
 
+        $isMySQL = DB::connection()->getDriverName() === 'mysql';
+        $monthExpr = $isMySQL
+            ? "DATE_FORMAT(date, '%Y-%m') as month"
+            : "strftime('%Y-%m', date) as month";
+
         $monthlyTrends = Expense::select(
-            DB::raw("DATE_FORMAT(date, '%Y-%m') as month"),
+            DB::raw($monthExpr),
             DB::raw('SUM(final_price) as total'),
             DB::raw('COUNT(*) as count')
         )
-            ->groupBy('month')
+            ->groupBy(DB::raw($isMySQL ? "DATE_FORMAT(date, '%Y-%m')" : "strftime('%Y-%m', date)"))
             ->orderBy('month')
             ->get();
 

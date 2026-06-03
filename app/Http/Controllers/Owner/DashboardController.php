@@ -7,7 +7,6 @@ use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\FishQuantityStock;
-use App\Models\FishStock;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use App\Models\Trip;
@@ -77,8 +76,11 @@ class DashboardController extends Controller
     public function overviewData()
     {
         // الإيرادات والأرباح الشهرية (مثلاً آخر 6 أشهر)
-        $monthly = Sale::selectRaw('MONTH(created_at) as month, SUM(net_owner_amount) as revenue')
-            ->groupBy('month')
+        $isMySQL = DB::connection()->getDriverName() === 'mysql';
+        $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
+
+        $monthly = Sale::selectRaw("$monthExpr as month, SUM(net_owner_amount) as revenue")
+            ->groupBy(DB::raw($monthExpr))
             ->orderBy('month')
             ->get();
 
@@ -124,7 +126,7 @@ class DashboardController extends Controller
         foreach ($sales as $sale) {
             $activities[] = [
                 'icon' => 'bi-cash-coin text-success',
-                'message' => "بيع لمطعم {$sale->customer_name} - ر.س" . number_format($sale->total_price),
+                'message' => "بيع لمطعم {$sale->customer_name} - ر.س".number_format($sale->total_price),
                 'time' => $sale->updated_at->diffForHumans(),
                 'badge_class' => 'bg-success',
             ];
@@ -249,7 +251,7 @@ class DashboardController extends Controller
         if ($totalTrips > 0) {
             $avgCatch = $totalWeight / $totalTrips;
             $avgRevenue = $totalRevenue / $totalTrips;
-            $avgCatchPerTrip =  floor($avgCatch);
+            $avgCatchPerTrip = floor($avgCatch);
             $avgRevenuePerTrip = floor($avgRevenue);
         }
 
