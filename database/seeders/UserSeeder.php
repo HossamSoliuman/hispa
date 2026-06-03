@@ -20,7 +20,6 @@ class UserSeeder extends Seeder
         DB::table('users')->truncate();
         Schema::enableForeignKeyConstraints();
 
-        // 🟢 Owner
         $owner = User::create([
             'name' => 'Owner User',
             'phone' => '0500000001',
@@ -30,7 +29,6 @@ class UserSeeder extends Seeder
             'status' => 1,
         ]);
 
-        // 🟢 Captain (تابع للـ owner)
         $captain = User::create([
             'name' => 'Captain User',
             'phone' => '0500000002',
@@ -46,7 +44,6 @@ class UserSeeder extends Seeder
             'crew_count' => 5,
         ]);
 
-        // 🟢 Counter (تابع للـ owner)
         $counter = User::create([
             'name' => 'Counter User',
             'phone' => '0500000003',
@@ -56,7 +53,6 @@ class UserSeeder extends Seeder
             'status' => 1,
         ]);
 
-        // 🟢 Dalal (تابع للـ owner)
         $dalal = User::create([
             'name' => 'Dalal User',
             'phone' => '0500000004',

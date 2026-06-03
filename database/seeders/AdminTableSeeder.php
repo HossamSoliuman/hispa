@@ -11,10 +11,8 @@ class AdminTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $role = Role::firstOrCreate([
             'name' => 'owner',
