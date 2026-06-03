@@ -21,8 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PageSeeder::class);
         $this->call(LocationSeeder::class);
         $this->call(DefaultMasterSeeder::class);
-
-        // Uncomment below to seed comprehensive test data
-        // $this->call(ComprehensiveTestSeeder::class);
+        $this->call(CategorySeeder::class);
+        $this->call(DemoDataSeeder::class);
     }
 }
