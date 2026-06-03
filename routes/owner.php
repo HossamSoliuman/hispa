@@ -3,9 +3,7 @@
 use App\Http\Controllers\Frontend\Auth\LoginController;
 use App\Http\Controllers\Owner\AnalyticsController;
 use App\Http\Controllers\Owner\AssetController;
-use App\Http\Controllers\Owner\BasicDataController;
 use App\Http\Controllers\Owner\BoatController;
-use App\Http\Controllers\Owner\BoatTypeController;
 use App\Http\Controllers\Owner\CaptainController;
 use App\Http\Controllers\Owner\CatchController;
 use App\Http\Controllers\Owner\CategoryController;
@@ -73,8 +71,6 @@ Route::group([
         Route::get('/financial-summary', [DashboardController::class, 'summary'])->name('financial.summary');
         Route::get('/operations/data', [DashboardController::class, 'getOperationsData'])->name('operations.data');
         Route::get('/analytics-data', [DashboardController::class, 'getAnalyticsData'])->name('analytics.data');
-        // Basic Data
-        // Route::resource('/basic_data', BasicDataController::class);
         // users_Requests
         Route::resource('/user_request', UserRequestController::class);
 
@@ -128,9 +124,6 @@ Route::group([
         Route::get('/getBoatData', [BoatController::class, 'getBoatData'])->name('getBoatData');
         Route::get('/getBoatInfo/{id}', [BoatController::class, 'getBoatInfo'])->name('getBoatInfo');
         Route::get('/getBoatInfoByTrip/{id}', [BoatController::class, 'getBoatInfoByTrip'])->name('getBoatInfoByTrip');
-
-        // Route::resource('/boat_types', BoatTypeController::class);
-        // Route::get('/getBoatTypeData', [BoatTypeController::class, 'getBoatTypeData'])->name('getBoatTypeData');
 
         Route::resource('/assets', AssetController::class);
         Route::get('/getAssetsData', [AssetController::class, 'getAssetsData'])->name('getAssetsData');
@@ -322,7 +315,7 @@ Route::group([
         // Contact submission from floating button
         Route::post('/contact', function (\Illuminate\Http\Request $request) {
             \App\Models\Contact::create([
-                'name' => trim($request->first_name . ' ' . $request->last_name),
+                'name' => trim($request->first_name.' '.$request->last_name),
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'subject' => $request->subject,
