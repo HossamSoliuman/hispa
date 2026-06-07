@@ -9,6 +9,7 @@ use App\Models\Fish;
 use App\Models\Governorate;
 use App\Models\Port;
 use App\Models\Region;
+use App\Models\User;
 
 class SettingsController extends Controller
 {
@@ -20,7 +21,11 @@ class SettingsController extends Controller
         $governorates = Governorate::OrderByDesc('id')->get();
         $ports = Port::Active()->get();
         $boatTypes = BoatType::orderByDesc('id')->get();
+        $captains = User::Active()->CaptainRole()
+            ->where('owner_id', auth()->id())
+            ->select('id', 'name')
+            ->get();
 
-        return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents'));
+        return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents', 'captains'));
     }
 }

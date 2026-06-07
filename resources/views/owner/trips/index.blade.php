@@ -47,9 +47,6 @@
         </div>
 
         <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
-            <a href="{{ route('owner.trips.create') }}" class="btn btn-outline-theme btn-equal">
-                <i class="fa fa-plus-circle btn-success fa-fw me-1"></i> {{ __('owner.trips.add_trip') }}
-            </a>
             <a href="{{ route('owner.reports.print.all_trips') }}" target="_blank"
                 class="btn btn-outline-info btn-border-radius">
                 <i class="bi bi-printer me-1"></i> {{ __('owner.trips.print_all_trips') }}

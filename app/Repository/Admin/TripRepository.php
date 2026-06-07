@@ -34,8 +34,8 @@ class TripRepository implements CRUD
         foreach ($statusKeys as $key => $value) {
             // $key is the numeric status (1, 2, 3, etc.)
             // $value might be the same or a string key depending on translation
-            $statusNumber = is_numeric($key) ? (int)$key : (int)$value;
-            
+            $statusNumber = is_numeric($key) ? (int) $key : (int) $value;
+
             $tripStatusCards[] = [
                 'status' => $statusNumber,
                 'label' => $statusLabels[$statusNumber] ?? 'غير معروف',
@@ -94,10 +94,15 @@ class TripRepository implements CRUD
             DB::commit();
             session()->flash('success', 'تم اضافة البيانات بنجاح');
 
+            if ($request->filled('redirect_to')) {
+                return redirect($request->redirect_to)->with('success', 'تم اضافة البيانات بنجاح');
+            }
+
             $guard = $request->guard ?? 'web';
             if ($guard === 'admin') {
                 return redirect()->route('admin.trips.index');
             }
+
             return redirect()->route('owner.trips.index');
 
         } catch (\Exception $ex) {
@@ -159,6 +164,7 @@ class TripRepository implements CRUD
             if ($guard === 'admin') {
                 return redirect()->route('admin.trips.index');
             }
+
             return redirect()->route('owner.trips.index');
 
         } catch (\Exception $ex) {
