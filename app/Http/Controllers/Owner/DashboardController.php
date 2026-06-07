@@ -75,14 +75,41 @@ class DashboardController extends Controller
 
     public function overviewData()
     {
-        // الإيرادات والأرباح الشهرية (مثلاً آخر 6 أشهر)
+        $year = now()->year;
         $isMySQL = DB::connection()->getDriverName() === 'mysql';
         $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
 
-        $monthly = Sale::selectRaw("$monthExpr as month, SUM(net_owner_amount) as revenue")
+        $monthlySales = Sale::selectRaw("$monthExpr as month, SUM(net_owner_amount) as revenue")
+            ->whereYear('created_at', $year)
             ->groupBy(DB::raw($monthExpr))
             ->orderBy('month')
-            ->get();
+            ->get()
+            ->keyBy('month');
+
+        $monthlyExpenses = Expense::selectRaw("$monthExpr as month, SUM(final_price) as expenses")
+            ->whereYear('created_at', $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $arabicMonths = [
+            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
+        ];
+
+        $monthly = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $revenue = (float) ($monthlySales->get($m)?->revenue ?? 0);
+            $expenses = (float) ($monthlyExpenses->get($m)?->expenses ?? 0);
+            $monthly[] = [
+                'month' => $m,
+                'month_name' => $arabicMonths[$m],
+                'revenue' => round($revenue, 2),
+                'profit' => round($revenue - $expenses, 2),
+            ];
+        }
 
         $catchComposition = DB::table('sale_details')
             ->selectRaw('fish_name, SUM(weight * price_per_kilo) as total_value')
@@ -96,6 +123,10 @@ class DashboardController extends Controller
             return $item;
         });
 
+        $totalCatchKg = DB::table('sale_details')->sum('weight');
+        $totalRevenue = Sale::sum('net_owner_amount');
+        $totalExpenses = Expense::sum('final_price');
+
         // الأنشطة الأخيرة (آخر 5 أحداث)
         $activities = Trip::latest()->take(5)->get();
 
@@ -103,6 +134,12 @@ class DashboardController extends Controller
             'monthly' => $monthly,
             'catchComposition' => $catchComposition,
             'activities' => $activities,
+            'totalCatchKg' => (float) $totalCatchKg,
+            'summary' => [
+                'revenue' => round((float) $totalRevenue, 2),
+                'profit' => round((float) ($totalRevenue - $totalExpenses), 2),
+                'avgPricePerKg' => $totalCatchKg > 0 ? round((float) $totalRevenue / (float) $totalCatchKg, 2) : 0,
+            ],
         ]);
     }
 
