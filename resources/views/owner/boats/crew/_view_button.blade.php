@@ -1,0 +1,20 @@
+<button type="button" class="btn btn-outline-info btn-sm viewCrewBtn" title="{{ __('owner.actions.show') }}"
+    data-name="{{ $user->name }}"
+    data-email="{{ $user->email }}"
+    data-phone="{{ $user->phone }}"
+    data-job_title="{{ $user->job_title }}"
+    data-nationality="{{ $user->nationality }}"
+    data-id_number="{{ $user->id_number ?? $user->passport_number }}"
+    data-salary_type="{{ $user->salary_type === 'percentage' ? __('owner.crew.edit.salary_option_percentage') : __('owner.crew.edit.salary_option_salary') }}"
+    data-salary_amount="{{ $user->salary_amount }}"
+    data-fishing_license_number="{{ $user->fishing_license_number }}"
+    data-fishing_license_expiry="{{ $user->fishing_license_expiry }}"
+    data-region="{{ $user->region->name ?? '--' }}"
+    data-governorate="{{ $user->governorate->name ?? '--' }}"
+    data-port="{{ $user->port->name ?? '--' }}"
+    data-bank_name="{{ $user->bank_name }}"
+    data-account_number="{{ $user->account_number }}"
+    data-iban="{{ $user->IBAN }}"
+    data-status="{{ $user->status ? __('owner.status.active') : __('owner.status.inactive') }}">
+    <i class="bi bi-eye"></i>
+</button>
