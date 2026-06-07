@@ -4,6 +4,7 @@ use App\Http\Controllers\Frontend\Auth\LoginController;
 use App\Http\Controllers\Owner\AnalyticsController;
 use App\Http\Controllers\Owner\AssetController;
 use App\Http\Controllers\Owner\BoatController;
+use App\Http\Controllers\Owner\BoatTypeController;
 use App\Http\Controllers\Owner\CaptainController;
 use App\Http\Controllers\Owner\CatchController;
 use App\Http\Controllers\Owner\CategoryController;
@@ -336,5 +337,6 @@ Route::group([
         Route::resource('/governorates', GovernorateController::class);
         Route::resource('/ports', PortController::class);
         Route::resource('/regions', RegionController::class);
+        Route::resource('/boat-types', BoatTypeController::class)->only(['store', 'update', 'destroy']);
     });
 });

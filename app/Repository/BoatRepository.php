@@ -123,6 +123,10 @@ class BoatRepository implements CRUD
             DB::commit();
             session()->flash('success', trans('api.boat_added'));
 
+            if ($request->filled('redirect_to')) {
+                return redirect($request->redirect_to)->with('success', trans('api.boat_added'));
+            }
+
             if ($request['guard'] == 'owner') {
                 return redirect()->route('owner.boats.index');
             } else {

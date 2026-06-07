@@ -19,7 +19,7 @@ class SettingsController extends Controller
         $parents = Category::whereNull('parent_id')->get();
         $governorates = Governorate::OrderByDesc('id')->get();
         $ports = Port::Active()->get();
-        $boatTypes = BoatType::Active()->get();
+        $boatTypes = BoatType::orderByDesc('id')->get();
 
         return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents'));
     }

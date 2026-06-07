@@ -63,7 +63,7 @@ class BoatDataTable extends DataTables
         <a href="'.$showUrl.'" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-eye"></i></a>
         <a href="'.$editUrl.'" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil"></i></a>
         <a href="'.$printUrl.'" target="_blank" class="btn btn-sm btn-outline-secondary me-1" title="Print Boat"><i class="bi bi-printer"></i></a>
-       <a href="#" onclick="deleteRecord('.$row->id.')"
+       <a href="#" onclick="deleteBoatRecord('.$row->id.')"
     class="btn btn-outline-danger btn-sm" title="حذف">
     <i class="bi bi-trash"></i></a>
     ';

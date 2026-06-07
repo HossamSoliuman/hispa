@@ -56,7 +56,7 @@
         </div>
 
         <div class="col-md-6 col-sm-12 text-md-end text-sm-start d-flex justify-content-md-end gap-2">
-            <a href="{{ route('owner.boats.create') }}" class="btn btn-outline-theme btn-equal">
+            <a href="{{ route('owner.settings.index') }}?tab=add_boat" class="btn btn-outline-theme btn-equal">
                 <i class="fa fa-plus-circle btn-success fa-fw me-1"></i> {{ __('owner.boats.add_boat') }}
             </a>
             <button class="btn btn-outline-warning btn-equal btn-border-radius" data-bs-toggle="modal"
@@ -498,7 +498,7 @@
         $("#createForm").validate();
     </script>
     <script>
-        function deleteRecord(recordId) {
+        function deleteBoatRecord(recordId) {
             Swal.fire({
                 title: swalOptions.title,
                 text: swalOptions.text,
