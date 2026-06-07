@@ -12,6 +12,9 @@
                     <input type="hidden" id="inspection_id" name="id">
 
                     <div class="row g-3">
+                        @if(isset($fixedBoat))
+                        <input type="hidden" name="boat_id" value="{{ $fixedBoat->id }}">
+                        @else
                         <div class="col-md-12">
                             <label>{{ __('owner.boats.name') }}</label>
                             <select name="boat_id" class="form-select">
@@ -21,6 +24,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endif
                         <div class="col-md-12">
                             <label>{{ __('owner.assets.status') }}</label>
                             <select name="status" class="form-select">

@@ -81,8 +81,8 @@
     <!-- Tabs Card -->
     <div class="card mt-4">
         @include('owner.partials._card_arrow')
-        <div class="card-header border-bottom">
-            <ul class="nav nav-tabs card-header-tabs justify-content-start" id="boatTabs" role="tablist">
+        <div class="card-header border-bottom d-flex align-items-center flex-wrap gap-2">
+            <ul class="nav nav-tabs card-header-tabs justify-content-start flex-grow-1" id="boatTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
                         type="button" role="tab" aria-controls="overview" aria-selected="true">
@@ -101,7 +101,33 @@
                         {{ __('owner.boats.tab_trips') }}
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="crew-tab" data-bs-toggle="tab" data-bs-target="#boat-crew"
+                        type="button" role="tab" aria-controls="boat-crew" aria-selected="false">
+                        {{ __('owner.boats.crew') }}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#boat-maintenance"
+                        type="button" role="tab" aria-controls="boat-maintenance" aria-selected="false">
+                        {{ __('owner.boats.maintenance') }}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="inspections-tab" data-bs-toggle="tab" data-bs-target="#boat-inspections"
+                        type="button" role="tab" aria-controls="boat-inspections" aria-selected="false">
+                        {{ __('owner.boats.inspections') }}
+                    </button>
+                </li>
             </ul>
+            <div class="ms-auto d-flex gap-2 me-3 mb-2">
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#maintenanceModal">
+                    <i class="bi bi-tools me-1"></i>{{ __('owner.boats.maintenance_schedule') }}
+                </button>
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#inspectionModal">
+                    <i class="bi bi-plus-circle me-1"></i>{{ __('owner.generated.add_inspection') }}
+                </button>
+            </div>
         </div>
 
         <div class="card-body tab-content" id="boatTabsContent">
@@ -291,10 +317,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Crew Tab -->
+            <div class="tab-pane fade" id="boat-crew" role="tabpanel" aria-labelledby="crew-tab">
+                @include('owner.boats.crew.table')
+            </div>
+
+            <!-- Maintenance Tab -->
+            <div class="tab-pane fade" id="boat-maintenance" role="tabpanel" aria-labelledby="maintenance-tab">
+                @include('owner.boats.maintenance.table')
+            </div>
+
+            <!-- Inspections Tab -->
+            <div class="tab-pane fade" id="boat-inspections" role="tabpanel" aria-labelledby="inspections-tab">
+                @include('owner.boats.inspections.table')
+            </div>
         </div>
     </div>
 
     @include('owner.boats.partials._modals', ['boat' => $boat])
+    @include('owner.boats.crew.show_modal')
+    @include('owner.boats.maintenance.modal', ['fixedBoat' => $boat, 'categories' => $categories])
+    @include('owner.boats.inspections.modal', ['fixedBoat' => $boat])
     {{-- </div> --}}
 @endsection
 
@@ -339,13 +383,44 @@
 @endsection
 
 @section('script')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         var boat_id = "{{ $boat->id }}";
+        window.currentBoatId = {{ $boat->id }};
         window.routes = {
             getTripData: "{{ route('owner.getTripData') }}",
+            crewData: "{{ route('owner.getCrewData') }}",
+            maintenanceData: "{{ route('owner.maintenance.data') }}",
+            maintenanceStore: "{{ route('owner.maintenance.store') }}",
+            maintenanceUpdate: "{{ route('owner.maintenance.update', ':id') }}",
+            maintenanceDestroy: "{{ route('owner.maintenance.destroy', ':id') }}",
+            maintenanceEdit: "{{ route('owner.maintenance.edit', ':id') }}",
+            maintenanceShow: "{{ route('owner.maintenance.show', ':id') }}",
+            inspectionData: "{{ route('owner.inspections.data') }}",
+            inspectionStore: "{{ route('owner.inspections.store') }}",
+            inspectionUpdate: "{{ route('owner.inspections.update', ':id') }}",
+            inspectionDestroy: "{{ route('owner.inspections.destroy', ':id') }}",
+            inspectionEdit: "{{ route('owner.inspections.edit', ':id') }}",
+            inspectionShow: "{{ route('owner.inspections.show', ':id') }}",
+        };
+        let appLocale = '{{ app()->getLocale() }}';
+        let languageOptions = {};
+        if (appLocale === 'ar') {
+            languageOptions = { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json" };
+        }
+        let swalOptions = {
+            title: '{{ __('owner.swal.confirm_title') }}',
+            text: '{{ __('owner.swal.confirm_text') }}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+            cancelButtonText: '{{ __('owner.swal.cancel') }}'
         };
     </script>
-    <script src="{{ asset('dashboard/assets/js/owner/boats.js') }}"></script>
+    <script src="{{ asset('dashboard/assets/js/owner/boats.js') }}?v={{ filemtime(public_path('dashboard/assets/js/owner/boats.js')) }}"></script>
+    <script src="{{ asset('dashboard/assets/js/owner/boat-crew.js') }}?v={{ filemtime(public_path('dashboard/assets/js/owner/boat-crew.js')) }}"></script>
+    <script src="{{ asset('dashboard/assets/js/owner/maintenance.js') }}?v={{ filemtime(public_path('dashboard/assets/js/owner/maintenance.js')) }}"></script>
+    <script src="{{ asset('dashboard/assets/js/owner/inspection.js') }}?v={{ filemtime(public_path('dashboard/assets/js/owner/inspection.js')) }}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>

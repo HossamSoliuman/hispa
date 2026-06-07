@@ -56,16 +56,6 @@
         </div>
 
         <div class="col-md-6 col-sm-12 text-md-end text-sm-start d-flex justify-content-md-end gap-2">
-            <a href="{{ route('owner.settings.index') }}?tab=add_boat" class="btn btn-outline-theme btn-equal">
-                <i class="fa fa-plus-circle btn-success fa-fw me-1"></i> {{ __('owner.boats.add_boat') }}
-            </a>
-            <button class="btn btn-outline-warning btn-equal btn-border-radius" data-bs-toggle="modal"
-                data-bs-target="#maintenanceModal">
-                <i class="bi bi-tools"></i> {{ __('owner.boats.maintenance_schedule') }}
-            </button>
-            <button class="btn btn-outline-danger btn-equal btn-border-radius" data-bs-toggle="modal"
-                data-bs-target="#inspectionModal">
-                <i class="bi bi-plus-circle"></i> {{ __('owner.generated.add_inspection') }}</button>
             <a href="{{ route('owner.reports.print.all_boats') }}" target="_blank"
                 class="btn btn-outline-info btn-border-radius">
                 <i class="bi bi-printer me-1"></i> {{ __('owner.boats.print_all_boats') }}
@@ -127,230 +117,23 @@
 
 
     <!-- {{ __('owner.generated.item_032380') }} -->
-    <ul class="nav nav-tabs mt-4" id="fleetTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="vessels-tab" data-bs-toggle="tab" data-bs-target="#vessels" type="button"
-                role="tab">
-                {{ __('owner.boats.boats') }}
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button"
-                role="tab">
-                {{ __('owner.boats.maintenance') }}
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="inspections-tab" data-bs-toggle="tab" data-bs-target="#inspections" type="button"
-                role="tab">
-                {{ __('owner.boats.inspections') }}
-            </button>
-        </li>
-    </ul>
-
-    <!-- {{ __('owner.generated.item_4150fb') }} -->
-    <div class="tab-content" id="fleetTabContent">
-        <!-- {{ __('owner.generated.item_e654a2') }} -->
-        <div class="tab-pane fade show active" id="vessels" role="tabpanel" aria-labelledby="vessels-tab">
-
-            <div class="tab-content py-4">
-                <div class="tab-pane fade show active" id="allTab">
-                    <!-- BEGIN #datatable -->
-                    <div id="datatable" class="mb-5">
-                        {{-- <div class="card"> --}}
-                        {{-- <div class="card-body"> --}}
-                        <table id="datatableDefault"
-                            class="table table-sm table-bordered table-hover text-center small-text" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>{{ __('owner.boats.name') }}</th>
-                                    <th>{{ __('owner.boats.class') }}</th>
-                                    <th>{{ __('owner.boats.type') }}</th>
-                                    <th>{{ __('owner.boats.captain') }}</th>
-                                    <th>{{ __('owner.boats.status') }}</th>
-                                    <th>{{ __('owner.boats.next_inspection') }}</th>
-                                    <th>{{ __('owner.boats.actions') }}</th>
+    <table id="datatableDefault"
+        class="table table-sm table-bordered table-hover text-center small-text mt-4" style="width:100%">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{{ __('owner.boats.name') }}</th>
+                <th>{{ __('owner.boats.class') }}</th>
+                <th>{{ __('owner.boats.type') }}</th>
+                <th>{{ __('owner.boats.captain') }}</th>
+                <th>{{ __('owner.boats.status') }}</th>
+                <th>{{ __('owner.boats.actions') }}</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
 
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-arrow">
-                        <div class="card-arrow-top-left"></div>
-                        <div class="card-arrow-top-right"></div>
-                        <div class="card-arrow-bottom-left"></div>
-                        <div class="card-arrow-bottom-right"></div>
-                    </div>
-
-                </div>
-            </div>
-
-
-        </div>
-
-        <!-- {{ __('owner.generated.item_b1bbf0') }} -->
-        <div class="tab-pane fade" id="maintenance" role="tabpanel" aria-labelledby="maintenance-tab">
-            <div class="card mt-3 shadow-sm border-0">
-                <div class="">
-                    @include('owner.boats.maintenance.table')
-                </div>
-            </div>
-        </div>
-
-        <!-- {{ __('owner.generated.item_cdfb22') }} -->
-        <div class="tab-pane fade" id="inspections" role="tabpanel" aria-labelledby="inspections-tab">
-            <div class="card mt-3 shadow-sm border-0">
-                <div class="">
-                    @include('owner.boats.inspections.table')
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    @include('owner.boats.maintenance.modal', ['boats' => $boats, 'categories' => $categories])
-    @include('owner.boats.inspections.modal', ['boats' => $boats, 'categories' => $categories])
-
-
-    <!-- Modal: {{ __('owner.generated.item_d6eb2d') }} -->
-    <div class="modal fade" id="vesselModal" tabindex="-1" aria-labelledby="vesselModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="vesselModalLabel">{{ __('owner.boats.create.title') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="{{ __('owner.generated.btn_close_modal') }}"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="vesselForm">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.broker_name') }}({{ __('owner.generated.arabic') }})</label>
-                                <input type="text" name="arabic_name" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.broker_name') }}({{ __('owner.generated.english') }})</label>
-                                <input type="text" name="english_name" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.broker_number') }}</label>
-                                <input type="text" name="vessel_number" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.boats.length') }}</label>
-                                <input type="text" name="length" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.boats.width') }}</label>
-                                <input type="text" name="width" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.boats.color') }}</label>
-                                <input type="text" name="color" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.assets.type') }}</label>
-                                <select name="type" class="form-control">
-                                    <option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.licensing_process') }}</label>
-                                <input type="text" name="license_process" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.licensing_region') }}</label>
-                                <input type="text" name="license_area" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.licensing_date') }}</label>
-                                <input type="date" name="license_date" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.license_expiry_date') }}</label>
-                                <input type="date" name="license_expiry" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.body_type') }}</label>
-                                <input type="text" name="body_type" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.boats.body_number') }}</label>
-                                <input type="text" name="hull_number" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.engine_status') }}</label>
-                                <input type="text" name="engine_status" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.call_sign_number') }}</label>
-                                <input type="text" name="call_sign" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.serial_number') }}</label>
-                                <input type="text" name="serial_number" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.boats.engine_type') }}</label>
-                                <input type="text" name="engine_type" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.boats.engine_power') }}</label>
-                                <input type="text" name="engine_power" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.fishermen_count') }}</label>
-                                <input type="text" name="fishermen_count" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>{{ __('owner.generated.load_capacity') }}</label>
-                                <input type="text" name="capacity" class="form-control">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">{{ __('owner.payrolls.create.confirm_save_cancel') }}</button>
-                    <button type="submit" class="btn btn-primary"
-                        form="vesselForm">{{ __('owner.generated.save_boat') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection
 @section('script')
     <script src="{{ asset('dashboard/assets/plugins/@highlightjs/cdn-assets/highlight.min.js') }}"></script>
@@ -375,23 +158,7 @@
 
 
     <script>
-        window.routes = {
-            maintenanceIndex: "{{ route('owner.maintenance.index') }}",
-            maintenanceData: "{{ route('owner.maintenance.data') }}",
-            maintenanceStore: "{{ route('owner.maintenance.store') }}",
-            maintenanceUpdate: "{{ route('owner.maintenance.update', ':id') }}",
-            maintenanceDestroy: "{{ route('owner.maintenance.destroy', ':id') }}",
-            maintenanceEdit: "{{ route('owner.maintenance.edit', ':id') }}",
-            maintenanceShow: "{{ route('owner.maintenance.show', ':id') }}",
-
-            inspectionIndex: "{{ route('owner.inspections.index') }}",
-            inspectionData: "{{ route('owner.inspections.data') }}",
-            inspectionStore: "{{ route('owner.inspections.store') }}",
-            inspectionUpdate: "{{ route('owner.inspections.update', ':id') }}",
-            inspectionDestroy: "{{ route('owner.inspections.destroy', ':id') }}",
-            inspectionEdit: "{{ route('owner.inspections.edit', ':id') }}",
-            inspectionShow: "{{ route('owner.inspections.show', ':id') }}",
-        };
+        window.routes = {};
     </script>
     <script>
         let appLocale = '{{ app()->getLocale() }}';
@@ -411,9 +178,6 @@
             cancelButtonText: '{{ __('owner.swal.cancel') }}'
         };
     </script>
-    <script src="{{ asset('dashboard/assets/js/owner/maintenance.js') }}"></script>
-    <script src="{{ asset('dashboard/assets/js/owner/inspection.js') }}"></script>
-
     <script type="text/javascript">
         $(function() {
             // Check if the DataTable is already initialized and destroy it
@@ -470,11 +234,6 @@
                         data: 'status',
                         name: 'status'
                     },
-                    {
-                        data: 'status',
-                        name: 'status'
-                    },
-
                     {
                         data: 'action',
                         name: 'action',

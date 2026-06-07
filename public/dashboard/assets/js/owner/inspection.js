@@ -2,7 +2,14 @@ $(function () {
     let table = $('#datatableinspections').DataTable({
         processing: true,
         serverSide: true,
-        ajax: window.routes.inspectionData,
+        ajax: {
+            url: window.routes.inspectionData,
+            data: function (d) {
+                if (window.currentBoatId) {
+                    d.boat_id = window.currentBoatId;
+                }
+            }
+        },
         language: languageOptions,
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },

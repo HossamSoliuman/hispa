@@ -1,5 +1,5 @@
 <div class="card shadow-sm border-0">
-    <div class="">
+    <div class="p-3">
         <h5 class="mb-3">{{ __('owner.boats.maintenance_table') }}</h5>
         <table id="datatableMaintenance" class="table table-sm table-bordered table-hover text-center small-text"
             style="width:100%">

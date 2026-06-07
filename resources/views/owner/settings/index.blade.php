@@ -814,7 +814,66 @@
             ],
             responsive: true,
         });
+
+        // Crew DataTable (management moved here from the boat profile page)
+        if ($.fn.DataTable.isDataTable('#crewSettingsTable')) {
+            $('#crewSettingsTable').DataTable().destroy();
+        }
+
+        $('#crewSettingsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            language: boatLangOptions,
+            ajax: {
+                url: "{{ route('owner.getCrewData') }}",
+            },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'name', name: 'name' },
+                { data: 'email', name: 'email' },
+                { data: 'phone', name: 'phone' },
+                { data: 'nationality', name: 'nationality' },
+                { data: 'id_number', name: 'id_number' },
+                { data: 'job_title', name: 'job_title' },
+                { data: 'boat', name: 'boat' },
+                { data: 'region', name: 'region' },
+                { data: 'governorate', name: 'governorate' },
+                { data: 'port', name: 'port' },
+                { data: 'status', name: 'status' },
+                { data: 'action', name: 'action', orderable: false, searchable: false },
+            ],
+            responsive: true,
+        });
     });
+
+    function deleteCrewRecord(recordId) {
+        Swal.fire({
+            title: '{{__('owner.swal.confirm_title')}}',
+            text: "{{__('owner.swal.confirm_text')}}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '{{__('owner.swal.confirm_yes')}}',
+            cancelButtonText: '{{__('owner.swal.cancel')}}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ url('owner/crew') }}/" + recordId,
+                    type: 'DELETE',
+                    data: { _token: '{{ csrf_token() }}' },
+                    success: function (response) {
+                        Swal.fire('{{__('owner.swal.deleted')}}', response.message, 'success');
+                        $('#crewSettingsTable').DataTable().ajax.reload();
+                    },
+                    error: function (xhr) {
+                        let message = xhr.responseJSON?.message || '{{ __('owner.generated.item_843b15') }}';
+                        Swal.fire('{{__('owner.swal.error')}}', message, 'error');
+                    }
+                });
+            }
+        });
+    }
 
     function deleteBoatRecord(recordId) {
         Swal.fire({

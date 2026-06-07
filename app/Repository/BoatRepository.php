@@ -69,6 +69,12 @@ class BoatRepository implements CRUD
         // Expenses Categories Chart
         $expensesCategories = $this->getExpensesCategoriesChart($boat);
 
+        $categories = \App\Models\Category::where('type', 'maintenance')
+            ->whereNotNull('parent_id')
+            ->get();
+
+        $regions = \App\Models\Region::Active()->select('id', 'name')->get();
+
         return compact(
             'boat',
             'crewStats',
@@ -78,7 +84,9 @@ class BoatRepository implements CRUD
             'expenses',
             'lastTripData',
             'lastMaintenance',
-            'expensesCategories'
+            'expensesCategories',
+            'categories',
+            'regions'
         );
     }
 

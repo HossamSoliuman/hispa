@@ -256,7 +256,7 @@
 
     </script>
     <script>
-        function deleteRecord(recordId) {
+        function deleteCrewRecord(recordId) {
             Swal.fire({
                 title: '{{ __('owner.swal.confirm_title') }}',
                 text: "{{ __('owner.swal.confirm_text') }}",

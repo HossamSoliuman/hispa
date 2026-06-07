@@ -31,9 +31,13 @@ class MaintenanceController extends Controller
     public function getMaintenanceData(Request $request)
     {
         if ($request->ajax()) {
-            $maintenances = Maintenance::with(['boat', 'category', 'owner'])->latest();
+            $query = Maintenance::with(['boat', 'category', 'owner'])->latest();
 
-            return $this->datatable->getData($maintenances);
+            if ($request->filled('boat_id')) {
+                $query->where('boat_id', $request->boat_id);
+            }
+
+            return $this->datatable->getData($query);
         }
     }
 

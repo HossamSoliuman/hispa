@@ -31,9 +31,13 @@ class InspectionsController extends Controller
 
     public function getInspectionData(Request $request)
     {
-        $inspections = Inspection::with(['boat'])->get();
+        $query = Inspection::with(['boat'])->latest();
 
-        return $this->datatable->getData($inspections);
+        if ($request->filled('boat_id')) {
+            $query->where('boat_id', $request->boat_id);
+        }
+
+        return $this->datatable->getData($query->get());
     }
 
     public function store(InspectionRequest $request)

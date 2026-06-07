@@ -54,19 +54,8 @@ class BoatDataTable extends DataTables
                 })
                 ->addColumn('action', function ($row) {
                     $showUrl = route('owner.boats.show', $row->id);
-                    $editUrl = route('owner.boats.edit', $row->id);
-                    $deleteUrl = route('owner.boats.destroy', $row->id);
-                    $printUrl = url('owner/reports/print/boat').'/'.$row->id;
 
-                    // Buttons: view, edit, print, delete
-                    return '
-        <a href="'.$showUrl.'" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-eye"></i></a>
-        <a href="'.$editUrl.'" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil"></i></a>
-        <a href="'.$printUrl.'" target="_blank" class="btn btn-sm btn-outline-secondary me-1" title="Print Boat"><i class="bi bi-printer"></i></a>
-       <a href="#" onclick="deleteBoatRecord('.$row->id.')"
-    class="btn btn-outline-danger btn-sm" title="حذف">
-    <i class="bi bi-trash"></i></a>
-    ';
+                    return '<a href="'.$showUrl.'" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>';
                 })
                 ->with([
                     'boat_active_count' => $boat_active_count,

@@ -435,6 +435,7 @@ return [
         'breadcrumb_manage' => 'ادارة الطاقم',
         'page_header' => 'ضبط طاقم العمل',
         'add_new' => 'إضافة عضو طاقم جديد',
+        'details_title' => 'تفاصيل عضو الطاقم',
         'cards' => [
             'total' => 'إجمالي طاقم العمل',
             'active' => 'الطاقم النشط',

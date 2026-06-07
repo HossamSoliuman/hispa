@@ -73,10 +73,15 @@ class CrewRepository implements CRUD
                 $data['salary_amount'] = $data['percentage_amount'] ?? 0;
             }
             // للنوع salary، salary_amount موجود بالفعل في $data
-            
+
             User::create($data);
 
             DB::commit();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => trans('api.crew_added')]);
+            }
+
             session()->flash('success', trans('api.crew_added'));
             if ($request['guard'] == 'owner') {
                 return redirect()->route('owner.crew.index');
@@ -85,6 +90,10 @@ class CrewRepository implements CRUD
             }
         } catch (\Throwable $e) {
             DB::rollBack();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => trans('api.error_saving'), 'error' => $e->getMessage()], 500);
+            }
 
             return back()->withErrors(['error' => trans('api.error_saving').$e->getMessage()])->withInput();
         }
@@ -146,7 +155,7 @@ class CrewRepository implements CRUD
                     $data['salary_amount'] = $data['percentage_amount'] ?? 0;
                 }
             }
-            
+
             $crew->update($data);
 
             DB::commit();

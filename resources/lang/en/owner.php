@@ -435,6 +435,7 @@ return [
         'breadcrumb_manage' => 'Manage Crew',
         'page_header' => 'Crew Settings',
         'add_new' => 'Add New Crew Member',
+        'details_title' => 'Crew Member Details',
         'cards' => [
             'total' => 'Total Crew',
             'active' => 'Active Crew',

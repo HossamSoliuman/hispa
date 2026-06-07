@@ -59,17 +59,23 @@ class CrewDataTable extends DataTables
                         return '<span class="badge bg-danger">غير مفعل</span>';
                     }
                 })
-                ->addColumn('action', function (User $user) {
+                ->addColumn('action', function (User $user) use ($request) {
+                    // On the boat profile page the crew list is read-only: only a view
+                    // button that opens a details modal. Management lives in settings.
+                    if ($request->has('boat_id')) {
+                        return view('owner.boats.crew._view_button', compact('user'))->render();
+                    }
+
                     $btn = '';
 
                     // زر التعديل
-                    $btn .= '<a  href="' . route('owner.crew.edit', $user->id) . '"
+                    $btn .= '<a  href="'.route('owner.crew.edit', $user->id).'"
         class="edit btn btn-outline-primary btn-sm editBtn" title="تعديل">
         <i class="bi bi-pencil"></i>
     </a> ';
 
                     // زر الحذف
-                    $btn .= '<a href="#" onclick="deleteRecord(' . $user->id . ')"
+                    $btn .= '<a href="#" onclick="deleteCrewRecord('.$user->id.')"
         class="btn btn-outline-danger btn-sm" title="حذف">
         <i class="bi bi-trash"></i>
     </a>';
@@ -98,10 +104,10 @@ class CrewDataTable extends DataTables
 
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('boat_name', fn($row) => optional($row->boat)->name ?? '---')
+            ->addColumn('boat_name', fn ($row) => optional($row->boat)->name ?? '---')
             ->addColumn(
                 'trip_name',
-                fn($row) => $row->boat && $row->boat->trips->count()
+                fn ($row) => $row->boat && $row->boat->trips->count()
                     ? $row->boat->trips->pluck('name')->implode(', ')
                     : '---'
             )

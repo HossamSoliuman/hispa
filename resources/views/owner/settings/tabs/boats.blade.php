@@ -391,3 +391,36 @@
         @endforeach
     </tbody>
 </table>
+
+<hr class="my-4">
+
+{{-- ================== CREW SUBSECTION ================== --}}
+<div class="d-flex align-items-center mb-3">
+    <h5 class="mb-0">{{ __('owner.crew.title') }}</h5>
+    <div class="ms-auto">
+        <a href="{{ route('owner.crew.create') }}" class="btn btn-outline-theme btn-equal">
+            <i class="fa fa-plus-circle btn-success fa-fw me-1"></i> {{ __('owner.crew.add_new') }}
+        </a>
+    </div>
+</div>
+
+<table id="crewSettingsTable" class="table table-sm table-bordered table-hover text-center small-text">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>{{ __('owner.crew.table.name') }}</th>
+            <th>{{ __('owner.crew.table.email') }}</th>
+            <th>{{ __('owner.crew.table.phone') }}</th>
+            <th>{{ __('owner.crew.table.nationality') }}</th>
+            <th>{{ __('owner.crew.table.id_number') }}</th>
+            <th>{{ __('owner.crew.table.job_title') }}</th>
+            <th>{{ __('owner.crew.table.boat') }}</th>
+            <th>{{ __('owner.crew.table.region') }}</th>
+            <th>{{ __('owner.crew.table.governorate') }}</th>
+            <th>{{ __('owner.crew.table.port') }}</th>
+            <th>{{ __('owner.crew.table.status') }}</th>
+            <th>{{ __('owner.crew.table.actions') }}</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
