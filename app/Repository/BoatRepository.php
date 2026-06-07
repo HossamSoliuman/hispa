@@ -25,6 +25,7 @@ class BoatRepository implements CRUD
             $boat_types = BoatType::Active()
                 ->orderBy(App::getLocale() === 'ar' ? 'name_ar' : 'name_en')
                 ->get();
+
             return view('admin.boats.index', compact('boat_types'));
         }
     }
@@ -32,7 +33,7 @@ class BoatRepository implements CRUD
     public function getDetail($id)
     {
         $boat = Boat::findOrFail($id);
-        
+
         // Check if user is admin or owner of the boat
         if (auth('admin')->check()) {
             // Admin can view any boat
@@ -47,7 +48,7 @@ class BoatRepository implements CRUD
 
         $crewStats = $this->getCrewStatusCount($boat);
         $payrolls = Payroll::where('boat_id', $boat->id)->sum('crew_total');
-        $totalCatch = $boat->tripDetails()->sum('weight');
+        $totalCatch = 0; // trip_details removed
         $revenues = $boat->trips->flatMap->sales->sum('total_price');
         $expenses = $boat->expenses()->sum('final_price');
         $lastMaintenance = $boat->maintenances()->latest()->first();

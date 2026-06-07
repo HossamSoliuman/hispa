@@ -353,12 +353,20 @@
         const revenues = {{ $revenues }};
 
         document.addEventListener('DOMContentLoaded', function() {
-            const expensesCategories = @json($expensesCategories);
-            const labels = Object.keys(expensesCategories);
-            const data = Object.values(expensesCategories);
+            let chartsInitialized = false;
 
-            // Expenses Distribution Chart (Doughnut)
-            new Chart(document.getElementById('expensesDistributionChart'), {
+            function initBoatAnalyticsCharts() {
+                if (chartsInitialized) {
+                    return;
+                }
+                chartsInitialized = true;
+
+                const expensesCategories = @json($expensesCategories);
+                const labels = Object.keys(expensesCategories);
+                const data = Object.values(expensesCategories);
+
+                // Expenses Distribution Chart (Doughnut)
+                new Chart(document.getElementById('expensesDistributionChart'), {
                 type: 'doughnut',
                 data: {
                     labels: labels,
@@ -455,6 +463,17 @@
                     }
                 }
             });
+            }
+
+            const analyticsTab = document.getElementById('analytics-tab');
+            if (analyticsTab) {
+                analyticsTab.addEventListener('shown.bs.tab', initBoatAnalyticsCharts);
+
+                // In case the Analytics tab is already active on load
+                if (analyticsTab.classList.contains('active')) {
+                    initBoatAnalyticsCharts();
+                }
+            }
         });
     </script>
 @endsection

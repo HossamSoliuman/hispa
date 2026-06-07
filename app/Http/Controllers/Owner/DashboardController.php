@@ -209,7 +209,50 @@ class DashboardController extends Controller
             'profit' => $profit,
             'margin' => $margin,
             'categories' => $categories, // return category names and sums
+            'monthly' => $this->getMonthlyFinancials(),
         ]);
+    }
+
+    /**
+     * @return array<int, array{month: int, month_name: string, revenue: float, expenses: float}>
+     */
+    private function getMonthlyFinancials(): array
+    {
+        $year = now()->year;
+        $isMySQL = DB::connection()->getDriverName() === 'mysql';
+        $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
+
+        $monthlySales = Sale::selectRaw("$monthExpr as month, SUM(net_owner_amount) as revenue")
+            ->whereYear('created_at', $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyExpenses = Expense::selectRaw("$monthExpr as month, SUM(final_price) as expenses")
+            ->whereYear('created_at', $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $arabicMonths = [
+            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
+        ];
+
+        $monthly = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthly[] = [
+                'month' => $m,
+                'month_name' => $arabicMonths[$m],
+                'revenue' => round((float) ($monthlySales->get($m)?->revenue ?? 0), 2),
+                'expenses' => round((float) ($monthlyExpenses->get($m)?->expenses ?? 0), 2),
+            ];
+        }
+
+        return $monthly;
     }
 
     public function getOperationsData()
@@ -305,6 +348,49 @@ class DashboardController extends Controller
                 'avgTripsPerCaptain' => $avgTripsPerCaptain,
                 'avgPricePerKg' => $avgPricePerKg,
             ],
+            'comparison' => $this->getMonthlyComparison(),
         ]);
+    }
+
+    /**
+     * @return array<int, array{month: int, label: string, catch: float, revenue: float}>
+     */
+    private function getMonthlyComparison(): array
+    {
+        $year = now()->year;
+        $isMySQL = DB::connection()->getDriverName() === 'mysql';
+        $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
+
+        $monthlyCatch = SaleDetail::selectRaw("$monthExpr as month, SUM(weight) as total_weight")
+            ->whereYear('created_at', $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyRevenue = Sale::selectRaw("$monthExpr as month, SUM(total_price) as revenue")
+            ->whereYear('created_at', $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $arabicMonths = [
+            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
+        ];
+
+        $comparison = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $comparison[] = [
+                'month' => $m,
+                'label' => $arabicMonths[$m],
+                'catch' => round((float) ($monthlyCatch->get($m)?->total_weight ?? 0), 2),
+                'revenue' => round((float) ($monthlyRevenue->get($m)?->revenue ?? 0), 2),
+            ];
+        }
+
+        return $comparison;
     }
 }

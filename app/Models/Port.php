@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Port extends Model
 {
@@ -77,6 +78,11 @@ class Port extends Model
     public function boats()
     {
         return $this->hasMany(Boat::class);
+    }
+
+    public function boatTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(BoatType::class, 'port_boat_types')->withPivot('max')->withTimestamps();
     }
 
     // In Port model
