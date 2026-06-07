@@ -86,30 +86,6 @@
                     </div>
                     <button type="submit" class="mt-2 h-11 w-full rounded-md bg-[#3B74B8] text-sm font-semibold text-white shadow-sm hover:bg-[#336aa9] focus:outline-none focus:ring-4 focus:ring-blue-500/30">{{ __('site.login.submit') }}</button>
                     <p id="formMsg" class="hidden text-center text-sm"></p>
-
-                    @env('local')
-                    <div class="mt-5 border-t border-dashed border-slate-200 pt-4">
-                        <p class="mb-3 text-center text-xs text-slate-400">تسجيل دخول سريع · بيئة التطوير فقط</p>
-                        <div class="flex flex-wrap justify-center gap-3">
-                            <x-login-link
-                                email="owner@example.com"
-                                label="Owner"
-                                :redirect-url="route('owner.dashboard')"
-                                guard="owner"
-                            />
-                            <x-login-link
-                                email="dalal@example.com"
-                                label="Dalal"
-                                guard="dalal"
-                            />
-                            <x-login-link
-                                email="counter@example.com"
-                                label="Counter"
-                                guard="counter"
-                            />
-                        </div>
-                    </div>
-                    @endenv
                 </form>
             </div>
         </section>
