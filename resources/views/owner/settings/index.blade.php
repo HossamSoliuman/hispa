@@ -455,34 +455,6 @@
     </script>
 
 
-{{-- boat types --}}
-<script>
-    $(function () {
-        $('#boatTypesTable').DataTable({
-            language: '{{ app()->getLocale() }}' === 'ar'
-                ? { url: "{{ asset('dashboard/assets/js/ar.json') }}" }
-                : {}
-        });
-
-        $(document).on('click', '[data-bs-target="#boatTypeEditModal"]', function () {
-            let btn = $(this);
-            $('#boatTypeEditModal').one('shown.bs.modal', function () {
-                $('#boatType_id').val(btn.data('id'));
-                $('#boatType_name_ar').val(btn.data('name_ar'));
-                $('#boatType_name_en').val(btn.data('name_en'));
-                $('#boatType_status').prop('checked', btn.data('status') == 1);
-            });
-        });
-
-        $(document).on('click', '[data-bs-target="#boatTypeDeleteModal"]', function () {
-            $('#boatTypeDeleteModal').one('shown.bs.modal', () => {
-                $('#boatType_delete_id').val($(this).data('id'));
-            });
-        });
-    });
-</script>
-{{-- end boat types --}}
-
 {{-- region --}}
 <script>
     $(function () {
@@ -730,181 +702,240 @@
     });
 </script>
 
-{{-- boats tab --}}
+{{-- boat wizard --}}
 <script>
-    $(document).ready(function () {
-        let oldRegionId = '{{ old('region_id') }}';
-        let oldGovernorateId = '{{ old('governorate_id') }}';
-        let oldPortId = '{{ old('port_id') }}';
+    $(function () {
+        const $wizard = $('#boatWizard');
+        if (!$wizard.length) {
+            return;
+        }
 
-        $('#addBoat_region_id').on('change', function () {
-            let regionId = $(this).val();
-            $('#addBoat_governorate_id').empty().append('<option value="">{{ __('owner.loading') }}</option>');
-            $('#addBoat_port_id').empty().append('<option value="">{{ __('owner.actions.choose') }}</option>');
+        const govUrl = $wizard.data('governorates-url');
+        const portUrl = $wizard.data('ports-url');
+        const saudi = '{{ __('owner.generated.saudi') }}';
+        const loadingText = '{{ __('owner.loading') }}';
+        const choose = '{{ __('owner.actions.choose') }}';
 
-            if (regionId) {
-                $.get("{{ route('owner.getGovernorates', ['region_id' => 'REGION_ID']) }}".replace('REGION_ID', regionId), function (data) {
-                    $('#addBoat_governorate_id').empty().append('<option value="">{{ __('owner.actions.choose') }}</option>');
-                    $.each(data, function (i, item) {
-                        $('#addBoat_governorate_id').append('<option value="' + item.id + '">' + item.name + '</option>');
-                    });
-                });
+        let boatId = null;
+        let currentStep = 1;
+
+        function notify(message) {
+            if (typeof toastr !== 'undefined') {
+                toastr.success(message);
+            } else if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'success', title: message, timer: 1500, showConfirmButton: false });
             }
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            $wizard.find('.wizard-step').hide();
+            $wizard.find('.wizard-step[data-step="' + step + '"]').show();
+            $wizard.find('[data-step-pill]').removeClass('active');
+            $wizard.find('[data-step-pill="' + step + '"]').addClass('active');
+            $('html, body').animate({ scrollTop: $wizard.offset().top - 80 }, 200);
+        }
+
+        // ---- region / governorate / port cascades ----
+        $wizard.on('change', '.wizard-region', function () {
+            const $region = $(this);
+            const $gov = $($region.data('gov-target'));
+            const $port = $region.data('port-target') ? $($region.data('port-target')) : null;
+            const regionId = $region.val();
+
+            $gov.empty().append('<option value="">' + loadingText + '</option>');
+            if ($port) {
+                $port.empty().append('<option value="">' + choose + '</option>');
+            }
+            if (!regionId) {
+                $gov.empty().append('<option value="">' + choose + '</option>');
+                return;
+            }
+            $.get(govUrl.replace('REGION_ID', regionId), function (data) {
+                $gov.empty().append('<option value="">' + choose + '</option>');
+                $.each(data, function (i, item) {
+                    $gov.append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+            });
         });
 
-        $('#addBoat_governorate_id').on('change', function () {
-            let govId = $(this).val();
-            $('#addBoat_port_id').empty().append('<option value="">{{ __('owner.loading') }}</option>');
-
-            if (govId) {
-                $.get("{{ route('owner.getPorts', ['gov_id' => 'GOV_ID']) }}".replace('GOV_ID', govId), function (data) {
-                    $('#addBoat_port_id').empty().append('<option value="">{{ __('owner.actions.choose') }}</option>');
-                    $.each(data, function (i, item) {
-                        $('#addBoat_port_id').append('<option value="' + item.id + '">' + item.name + '</option>');
-                    });
-                });
+        $wizard.on('change', '.wizard-governorate', function () {
+            const $gov = $(this);
+            const $port = $($gov.data('port-target'));
+            const govId = $gov.val();
+            $port.empty().append('<option value="">' + loadingText + '</option>');
+            if (!govId) {
+                $port.empty().append('<option value="">' + choose + '</option>');
+                return;
             }
+            $.get(portUrl.replace('GOV_ID', govId), function (data) {
+                $port.empty().append('<option value="">' + choose + '</option>');
+                $.each(data, function (i, item) {
+                    $port.append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+            });
         });
 
-        if (oldRegionId && !$('#addBoat_governorate_id option:selected').val()) {
-            $.get("{{ route('owner.getGovernorates', ['region_id' => 'REGION_ID']) }}".replace('REGION_ID', oldRegionId), function (governorates) {
-                $('#addBoat_governorate_id').empty().append('<option value="">{{ __('owner.actions.choose') }}</option>');
-                $.each(governorates, function (i, item) {
-                    let selected = (item.id == oldGovernorateId) ? 'selected' : '';
-                    $('#addBoat_governorate_id').append('<option value="' + item.id + '" ' + selected + '>' + item.name + '</option>');
-                });
+        // ---- nationality (saudi / non-saudi) toggles ----
+        function applyNationality($select) {
+            const prefix = $select.data('prefix');
+            const $form = $select.closest('form');
+            const isSaudi = $select.val() === saudi;
+            const hasValue = !!$select.val();
+            $form.find('.' + prefix + '-saudi-fields').toggle(isSaudi);
+            $form.find('.' + prefix + '-non-saudi-fields').toggle(hasValue && !isSaudi);
+        }
+        $wizard.on('change', '.wizard-nationality', function () {
+            applyNationality($(this));
+        });
 
-                if (oldGovernorateId) {
-                    $.get("{{ route('owner.getPorts', ['gov_id' => 'GOV_ID']) }}".replace('GOV_ID', oldGovernorateId), function (ports) {
-                        $('#addBoat_port_id').empty().append('<option value="">{{ __('owner.actions.choose') }}</option>');
-                        $.each(ports, function (i, item) {
-                            let selected = (item.id == oldPortId) ? 'selected' : '';
-                            $('#addBoat_port_id').append('<option value="' + item.id + '" ' + selected + '>' + item.name + '</option>');
-                        });
-                    });
+        // ---- salary type toggle ----
+        function applySalaryType($select) {
+            const prefix = $select.data('prefix');
+            const $form = $select.closest('form');
+            $form.find('.' + prefix + '-salary-value').toggle($select.val() !== 'percentage');
+        }
+        $wizard.on('change', '.wizard-salary-type', function () {
+            applySalaryType($(this));
+        });
+
+        function resetConditionalFields($form) {
+            $form.find('.wizard-nationality').each(function () { applyNationality($(this)); });
+            $form.find('.wizard-salary-type').each(function () { applySalaryType($(this)); });
+        }
+
+        // initialise conditional visibility for captain & crew forms
+        $wizard.find('#wizardCaptainForm, #wizardCrewForm').each(function () {
+            resetConditionalFields($(this));
+        });
+
+        // ---- validation error rendering ----
+        function clearErrors($form) {
+            $form.find('.is-invalid').removeClass('is-invalid');
+            $form.find('.wizard-error').remove();
+        }
+        function showErrors($form, errors) {
+            clearErrors($form);
+            $.each(errors, function (field, messages) {
+                const $input = $form.find('[name="' + field + '"]');
+                $input.addClass('is-invalid');
+                const $target = $input.length ? $input.last() : $form;
+                $('<span class="text-danger d-block wizard-error"></span>').text(messages[0]).insertAfter($target);
+            });
+        }
+
+        function submitStep($form, onSuccess) {
+            clearErrors($form);
+            const $btn = $form.find('[type="submit"]');
+            $btn.prop('disabled', true);
+            $.ajax({
+                url: $form.data('url') || $form.attr('action'),
+                type: 'POST',
+                data: new FormData($form[0]),
+                processData: false,
+                contentType: false,
+                headers: { 'Accept': 'application/json' },
+                success: function (res) {
+                    onSuccess(res);
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422 && xhr.responseJSON) {
+                        showErrors($form, xhr.responseJSON.errors || {});
+                    } else {
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) || '{{ __('owner.swal.error') }}';
+                        if (typeof Swal !== 'undefined') { Swal.fire('{{ __('owner.swal.error') }}', msg, 'error'); }
+                    }
+                },
+                complete: function () {
+                    $btn.prop('disabled', false);
                 }
             });
         }
 
-        $('#addBoatForm').validate();
-
-        // Boats DataTable
-        let appLocale = '{{ app()->getLocale() }}';
-        let boatLangOptions = appLocale === 'ar' ? { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json" } : {};
-
-        if ($.fn.DataTable.isDataTable('#boatsSettingsTable')) {
-            $('#boatsSettingsTable').DataTable().destroy();
+        function setBoatId(id) {
+            boatId = id;
+            $wizard.find('.wizard-boat-id').val(id);
         }
 
-        $('#boatsSettingsTable').DataTable({
-            processing: true,
-            serverSide: true,
-            language: boatLangOptions,
-            ajax: {
-                url: "{{ route('owner.getBoatData') }}",
-            },
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'name' },
-                { data: 'category', name: 'category' },
-                { data: 'type', name: 'type' },
-                { data: 'captain', name: 'captain' },
-                { data: 'status', name: 'status' },
-                { data: 'action', name: 'action', orderable: false, searchable: false },
-            ],
-            responsive: true,
+        // ---- Step 1: Boat ----
+        $('#wizardBoatForm').attr('action', $wizard.data('store-boat')).on('submit', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+            submitStep($form, function (res) {
+                setBoatId(res.id);
+                notify(res.message || '{{ __('owner.boat_wizard.success_boat') }}');
+                goToStep(2);
+            });
         });
 
-        // Crew DataTable (management moved here from the boat profile page)
-        if ($.fn.DataTable.isDataTable('#crewSettingsTable')) {
-            $('#crewSettingsTable').DataTable().destroy();
-        }
+        // ---- Step 2: Captain ----
+        $('#wizardCaptainForm').attr('action', $wizard.data('store-captain')).on('submit', function (e) {
+            e.preventDefault();
+            submitStep($(this), function (res) {
+                notify(res.message);
+                goToStep(3);
+            });
+        });
 
-        $('#crewSettingsTable').DataTable({
-            processing: true,
-            serverSide: true,
-            language: boatLangOptions,
-            ajax: {
-                url: "{{ route('owner.getCrewData') }}",
-            },
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'name' },
-                { data: 'email', name: 'email' },
-                { data: 'phone', name: 'phone' },
-                { data: 'nationality', name: 'nationality' },
-                { data: 'id_number', name: 'id_number' },
-                { data: 'job_title', name: 'job_title' },
-                { data: 'boat', name: 'boat' },
-                { data: 'region', name: 'region' },
-                { data: 'governorate', name: 'governorate' },
-                { data: 'port', name: 'port' },
-                { data: 'status', name: 'status' },
-                { data: 'action', name: 'action', orderable: false, searchable: false },
-            ],
-            responsive: true,
+        // ---- Step 3: Crew (add multiple) ----
+        $('#wizardCrewForm').attr('action', $wizard.data('store-crew')).on('submit', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+            const name = $form.find('[name="name"]').val();
+            const email = $form.find('[name="email"]').val();
+            submitStep($form, function (res) {
+                notify(res.message);
+                $('#crewEmptyItem').remove();
+                $('<li class="list-group-item"></li>')
+                    .text(name + (email ? ' — ' + email : ''))
+                    .appendTo('#crewAddedList');
+                $form[0].reset();
+                setBoatId(boatId);
+                resetConditionalFields($form);
+            });
+        });
+
+        // ---- Step 4: Maintenance ----
+        $('#wizardMaintenanceForm').attr('action', $wizard.data('store-maintenance')).on('submit', function (e) {
+            e.preventDefault();
+            submitStep($(this), function (res) {
+                notify(res.message);
+                goToStep(5);
+            });
+        });
+
+        // ---- Step 5: Inspection ----
+        $('#wizardInspectionForm').attr('action', $wizard.data('store-inspection')).on('submit', function (e) {
+            e.preventDefault();
+            submitStep($(this), function (res) {
+                notify(res.message);
+                goToStep(6);
+            });
+        });
+
+        // ---- skip / continue / restart ----
+        $wizard.on('click', '[data-action="skip"], [data-action="continue"]', function () {
+            goToStep(currentStep + 1);
+        });
+        $wizard.find('.wizard-step[data-step="3"] [data-action="next"]').on('click', function () {
+            goToStep(4);
+        });
+        $wizard.on('click', '[data-action="restart"]', function () {
+            boatId = null;
+            $wizard.find('form').each(function () {
+                this.reset();
+                clearErrors($(this));
+            });
+            $wizard.find('.wizard-boat-id').val('');
+            $('#crewAddedList').html('<li class="list-group-item text-muted" id="crewEmptyItem">{{ __('owner.boat_wizard.no_crew_added') }}</li>');
+            $wizard.find('#wizardCaptainForm, #wizardCrewForm').each(function () {
+                resetConditionalFields($(this));
+            });
+            goToStep(1);
         });
     });
-
-    function deleteCrewRecord(recordId) {
-        Swal.fire({
-            title: '{{__('owner.swal.confirm_title')}}',
-            text: "{{__('owner.swal.confirm_text')}}",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '{{__('owner.swal.confirm_yes')}}',
-            cancelButtonText: '{{__('owner.swal.cancel')}}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "{{ url('owner/crew') }}/" + recordId,
-                    type: 'DELETE',
-                    data: { _token: '{{ csrf_token() }}' },
-                    success: function (response) {
-                        Swal.fire('{{__('owner.swal.deleted')}}', response.message, 'success');
-                        $('#crewSettingsTable').DataTable().ajax.reload();
-                    },
-                    error: function (xhr) {
-                        let message = xhr.responseJSON?.message || '{{ __('owner.generated.item_843b15') }}';
-                        Swal.fire('{{__('owner.swal.error')}}', message, 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    function deleteBoatRecord(recordId) {
-        Swal.fire({
-            title: '{{__('owner.swal.confirm_title')}}',
-            text: "{{__('owner.swal.confirm_text')}}",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '{{__('owner.swal.confirm_yes')}}',
-            cancelButtonText: '{{__('owner.swal.cancel')}}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "{{ url('owner/boats') }}/" + recordId,
-                    type: 'DELETE',
-                    data: { _token: '{{ csrf_token() }}' },
-                    success: function (response) {
-                        Swal.fire('{{__('owner.swal.deleted')}}', response.message, 'success');
-                        $('#boatsSettingsTable').DataTable().ajax.reload();
-                    },
-                    error: function (xhr) {
-                        let message = xhr.responseJSON?.message || '{{ __('owner.generated.item_843b15') }}';
-                        Swal.fire('{{__('owner.swal.error')}}', message, 'error');
-                    }
-                });
-            }
-        });
-    }
 </script>
-{{-- end boats tab --}}
+{{-- end boat wizard --}}
 
 
 <script>
