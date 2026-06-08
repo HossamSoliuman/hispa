@@ -131,6 +131,10 @@ class BoatRepository implements CRUD
             DB::commit();
             session()->flash('success', trans('api.boat_added'));
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['id' => $boat->id, 'message' => trans('api.boat_added')]);
+            }
+
             if ($request->filled('redirect_to')) {
                 return redirect($request->redirect_to)->with('success', trans('api.boat_added'));
             }
@@ -142,6 +146,10 @@ class BoatRepository implements CRUD
             }
         } catch (\Exception $e) {
             DB::rollback();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => trans('api.error_saving'), 'error' => $e->getMessage()], 500);
+            }
 
             // Optionally log error: \Log::error($e);
             return back()->withErrors(['error' => trans('api.error_saving').$e->getMessage()])->withInput();

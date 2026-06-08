@@ -174,20 +174,6 @@
                             {{ __('admin.auth.login_button') }}
                         </button>
 
-                        @env('local')
-                        <div class="mt-4 pt-3" style="border-top: 1px dashed #e2e8f0;">
-                            <p class="text-center text-muted small mb-2">تسجيل دخول سريع (بيئة التطوير)</p>
-                            <div class="d-flex justify-content-center">
-                                <x-login-link
-                                    email="admin@admin.com"
-                                    label="Admin"
-                                    :redirect-url="route('admin.dashboard')"
-                                    guard="admin"
-                                    :user-model="\App\Models\Admin::class"
-                                />
-                            </div>
-                        </div>
-                        @endenv
                     </form>
                 </div>
             </div>

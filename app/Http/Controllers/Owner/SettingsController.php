@@ -21,11 +21,12 @@ class SettingsController extends Controller
         $governorates = Governorate::OrderByDesc('id')->get();
         $ports = Port::Active()->get();
         $boatTypes = BoatType::orderByDesc('id')->get();
+        $categories = Category::where('type', 'maintenance')->whereNotNull('parent_id')->get();
         $captains = User::Active()->CaptainRole()
             ->where('owner_id', auth()->id())
             ->select('id', 'name')
             ->get();
 
-        return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents', 'captains'));
+        return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents', 'captains', 'categories'));
     }
 }

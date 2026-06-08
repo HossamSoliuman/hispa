@@ -70,6 +70,11 @@ class CaptainRepository implements CRUD
 
             DB::commit();
             session()->flash('success', trans('api.captain_added'));
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => trans('api.captain_added')]);
+            }
+
             if ($request['guard'] == 'owner') {
                 return redirect()->route('owner.captain.index');
 
@@ -80,6 +85,10 @@ class CaptainRepository implements CRUD
 
         } catch (\Throwable $e) {
             DB::rollBack();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => trans('api.error_saving'), 'error' => $e->getMessage()], 500);
+            }
 
             return back()->withErrors(['error' => trans('api.error_saving').$e->getMessage()])->withInput();
         }
