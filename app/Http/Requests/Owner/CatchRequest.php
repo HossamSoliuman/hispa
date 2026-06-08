@@ -30,12 +30,6 @@ class CatchRequest extends FormRequest
 
             'weight' => 'required|array|min:1',
             'weight.*' => 'required|numeric|min:0.1',
-
-            'price_per_kg' => 'required|array|min:1',
-            'price_per_kg.*' => 'required|numeric|min:0',
-
-            'total_price' => 'required|array|min:1',
-            'total_price.*' => 'required|numeric|min:0.1',
         ];
     }
 
@@ -47,12 +41,6 @@ class CatchRequest extends FormRequest
 
             'weight.*.required' => 'الوزن مطلوب',
             'weight.*.numeric' => 'الوزن يجب أن يكون رقمًا',
-
-            'total_price.*.required' => 'السعر مطلوب',
-            'total_price.*.numeric' => 'السعر يجب أن يكون رقمًا',
-
-            'price_per_kg.*.required' => 'سعر الكيلو مطلوب',
-            'price_per_kg.*.numeric' => 'سعر الكيلو يجب أن يكون رقمًا',
         ];
     }
 }

@@ -157,109 +157,72 @@
         $("#createForm").validate();
     </script>
 
-@if(request()->has('trip_id')) 
 <script>
-    
-        const tripId = {{ request()->get('trip_id') }};
+    const catchDetailsUrl = "{{ route('owner.catchDetails', ':id') }}";
+
+    function buildFishRow(detail) {
+        const price = detail.price_per_kg > 0 ? detail.price_per_kg : '';
+        return `
+            <div class="row mb-2 fish-row align-items-center">
+                <div class="col-md-3">
+                    <input type="hidden" name="fish_id[]" value="${detail.fish_id}">
+                    <input type="text" class="form-control" value="${detail.fish.name}" disabled>
+                </div>
+
+                <div class="col-md-3">
+                    <input type="number" step="0.01" min="0" max="${detail.quantity}"
+                           name="weight[]" class="form-control weight"
+                           placeholder="≤ ${detail.quantity}">
+                </div>
+
+                <div class="col-md-3">
+                    <input type="number" step="0.01" min="0"
+                           name="price_per_kilo[]" class="form-control price-per-kg"
+                           value="${price}"
+                           placeholder="{{ __('owner.sales.price_per_kilo') }}">
+                </div>
+
+                <div class="col-md-3">
+                    <span class="fw-bold total-price-text">0.00</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function loadCatchDetails(tripId) {
         const wrapper = document.getElementById('fish-wrapper');
-
-        wrapper.innerHTML = '';        
-
-        const catchDetailsUrl = "{{ route('owner.catchDetails', ':id') }}";
-
-        fetch(catchDetailsUrl.replace(':id', tripId))
-            .then(res => res.json())
-            .then(data => {
-                if (!data || data.length === 0) {
-                    wrapper.innerHTML = '<p class="text-muted">{{ __('owner.generated.no_items') }}</p>';
-                    return;
-                }
-
-                data.forEach(detail => {
-                    wrapper.insertAdjacentHTML('beforeend', `
-                        <div class="row mb-2 fish-row align-items-center">
-                            <div class="col-md-3">
-                                <input type="hidden" name="fish_id[]" value="${detail.fish_id}">
-                                <input type="text" class="form-control" value="${detail.fish.name}" disabled>
-                            </div>
-
-                            <div class="col-md-3">
-                                <input type="number"
-                                       step="0.01"
-                                       name="weight[]"
-                                       max="${detail.quantity}"
-                                       class="form-control weight"
-                                       placeholder="≤ ${detail.quantity}">
-                            </div>
-
-                            <div class="col-md-3">
-                                <input type="hidden" name="price_per_kilo[]" value="${detail.price_per_kg}">                              
-                                <span class="fw-bold price-per-kg">${detail.price_per_kg}</span>
-                            </div>
-
-                            <div class="col-md-3">
-                                <span class="fw-bold total-price-text">0.00</span>
-                            </div>
-                        </div>
-                    `);
-                });
-            })
-            .catch(() => {
-                wrapper.innerHTML = '<p class="text-danger">{{ __('owner.generated.error_fetch') }}</p>';
-            });    
-</script>
-@endif
-<script>
-    document.getElementById('trip_id').addEventListener('change', function () {
-        const tripId = this.value;
-        const wrapper = document.getElementById('fish-wrapper');
-
         wrapper.innerHTML = '';
-
-        if (!tripId) return;
-
-        const catchDetailsUrl = "{{ route('owner.catchDetails', ':id') }}";
+        if (!tripId) {
+            calculateGrandTotal();
+            return;
+        }
 
         fetch(catchDetailsUrl.replace(':id', tripId))
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) {
                     wrapper.innerHTML = '<p class="text-muted">{{ __('owner.generated.no_items') }}</p>';
+                    calculateGrandTotal();
                     return;
                 }
 
-                data.forEach(detail => {
-                    wrapper.insertAdjacentHTML('beforeend', `
-                        <div class="row mb-2 fish-row align-items-center">
-                            <div class="col-md-3">
-                                <input type="hidden" name="fish_id[]" value="${detail.fish_id}">
-                                <input type="text" class="form-control" value="${detail.fish.name}" disabled>
-                            </div>
-
-                            <div class="col-md-3">
-                                <input type="number"
-                                       step="0.01"
-                                       name="weight[]"
-                                       max="${detail.quantity}"
-                                       class="form-control weight"
-                                       placeholder="≤ ${detail.quantity}">
-                            </div>
-
-                            <div class="col-md-3">
-                                <input type="hidden" name="price_per_kilo[]" value="${detail.price_per_kg}">                              
-                                <span class="fw-bold price-per-kg">${detail.price_per_kg}</span>
-                            </div>
-
-                            <div class="col-md-3">
-                                <span class="fw-bold total-price-text">0.00</span>
-                            </div>
-                        </div>
-                    `);
-                });
+                data.forEach(detail => wrapper.insertAdjacentHTML('beforeend', buildFishRow(detail)));
+                calculateGrandTotal();
             })
             .catch(() => {
                 wrapper.innerHTML = '<p class="text-danger">{{ __('owner.generated.error_fetch') }}</p>';
             });
+    }
+
+    document.getElementById('trip_id').addEventListener('change', function () {
+        loadCatchDetails(this.value);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const initialTrip = document.getElementById('trip_id').value;
+        if (initialTrip) {
+            loadCatchDetails(initialTrip);
+        }
     });
 </script>
 
@@ -341,22 +304,19 @@
         });
     </script>
 <script>
-    function calculateRow(row) {
-        const weight = parseFloat(row.querySelector('.weight')?.value) || 0;
-        const price = parseFloat(row.querySelector('.price-per-kg')?.innerText) || 0;
-        const total = weight * price;
-
-        row.querySelector('.total-price-text').innerText = total.toFixed(2);
-        calculateGrandTotal();
-    }
-
     function calculateGrandTotal() {
         let sum = 0;
 
         document.querySelectorAll('.fish-row').forEach(row => {
             const weight = parseFloat(row.querySelector('.weight')?.value) || 0;
-            const price = parseFloat(row.querySelector('.price-per-kg')?.innerText) || 0;
-            sum += weight * price;
+            const price = parseFloat(row.querySelector('.price-per-kg')?.value) || 0;
+            const total = weight * price;
+
+            const cell = row.querySelector('.total-price-text');
+            if (cell) {
+                cell.innerText = total.toFixed(2);
+            }
+            sum += total;
         });
 
         document.getElementById('grand_total_text').innerText = sum.toFixed(2);
@@ -364,8 +324,8 @@
 
     // Event delegation
     document.addEventListener('input', function (e) {
-        if (e.target.classList.contains('weight')) {
-            calculateRow(e.target.closest('.fish-row'));
+        if (e.target.classList.contains('weight') || e.target.classList.contains('price-per-kg')) {
+            calculateGrandTotal();
         }
     });
 </script>

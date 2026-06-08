@@ -70,7 +70,7 @@
 
                     <div id="fish-wrapper">
                         <div class="row fish-row mb-2">
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <select name="fish_id[]" class="form-select" required>
                                     <option value="">{{ __('owner.catch.choose_fish') }}</option>
                                     @foreach ($fish as $f)
@@ -79,27 +79,9 @@
                                 </select>
                             </div>
 
-                            {{-- <div class="col-md-4">
-                            <input type="number" step="0.01" name="weight[]" class="form-control" placeholder="{{ __('owner.catch.weight') }}" required>
-                        </div>
-
-                        <div class="col-md-3">
-                            <input type="number" step="0.01" name="total_price[]" class="form-control" placeholder="{{ __('owner.catch.total_price') }}" required>
-                        </div> --}}
-
-                            <div class="col-md-2">
+                            <div class="col-md-5">
                                 <input type="number" step="0.01" name="weight[]" class="form-control weight"
                                     placeholder="{{ __('owner.catch.weight') }}" required>
-                            </div>
-
-                            <div class="col-md-2">
-                                <input type="number" step="0.01" name="price_per_kg[]" class="form-control price-per-kg"
-                                    placeholder="{{ __('owner.generated.input_price_per_kg') }}" required>
-                            </div>
-
-                            <div class="col-md-3">
-                                <input type="number" step="0.01" name="total_price[]" class="form-control total-price"
-                                    placeholder="{{ __('owner.catch.total_price') }}" readonly>
                             </div>
 
                             <div class="col-md-1 text-center">
@@ -277,16 +259,6 @@
 </script> --}}
 
     <script>
-        function calculateRowTotal(row) {
-            let weight = parseFloat(row.find('.weight').val()) || 0;
-            let pricePerKg = parseFloat(row.find('.price-per-kg').val()) || 0;
-            row.find('.total-price').val((weight * pricePerKg).toFixed(2));
-        }
-
-        $(document).on('input', '.weight, .price-per-kg', function() {
-            calculateRowTotal($(this).closest('.fish-row'));
-        });
-
         function addFishRow() {
             let row = $('.fish-row:first').clone(false);
 

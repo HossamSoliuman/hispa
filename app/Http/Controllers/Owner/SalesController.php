@@ -93,7 +93,7 @@ class SalesController extends Controller
                 'customer_id' => $request->customer_id,
                 'customer_name' => $customer?->name,
                 'total_price' => 0,
-                'payment_method_id' => auth()->user()->getAuthIdentifier(),
+                'payment_method_id' => $request->payment_method_id,
                 'payment_status' => $request->payment_status,
                 'status' => $request->payment_status == 'paid' ? 2 : 1,
                 'sale_datetime' => $request->sale_datetime,
@@ -103,36 +103,55 @@ class SalesController extends Controller
             ]);
 
             $totalPrice = 0;
+            $soldRows = 0;
 
             foreach ($request->fish_id as $index => $fishId) {
-                $weight = $request->weight[$index];
-                $price = $request->price_per_kilo[$index];
-                if ($weight > 0 && $price > 0) {
-                    $fishStock = FishQuantityStock::where('fish_id', $fishId)
-                        ->where('catch_id', ($catch->id ?? 0))
-                        ->where('trip_id', $request->trip_id)
-                        ->first();
-                    if (! $fishStock || $fishStock->quantity < $weight) {
-                        throw new \Exception('الكمية المطلوبة أكبر من المخزون المتوفر');
-                    }
-                    $fishStock->decrement('quantity', $weight);
+                $weight = (float) ($request->weight[$index] ?? 0);
+                $price = (float) ($request->price_per_kilo[$index] ?? 0);
 
-                    SaleDetail::create([
-                        'sale_id' => $sale->id,
-                        'fish_id' => $fishId,
-                        'fish_name' => optional(Fish::find($fishId))->scientific_name,
-                        'weight' => $weight,
-                        'price_per_kilo' => $price,
-                        'total_price' => ($price * $weight),
-                    ]);
-
-                    $totalPrice += ($price * $weight);
+                if ($weight <= 0) {
+                    continue;
                 }
+
+                if ($price <= 0) {
+                    throw new \Exception('يجب إدخال سعر الكيلو للأصناف المباعة');
+                }
+
+                $fishStock = FishQuantityStock::where('fish_id', $fishId)
+                    ->where('catch_id', ($catch->id ?? 0))
+                    ->where('trip_id', $request->trip_id)
+                    ->first();
+                if (! $fishStock || $fishStock->quantity < $weight) {
+                    throw new \Exception('الكمية المطلوبة أكبر من المخزون المتوفر');
+                }
+                $fishStock->decrement('quantity', $weight);
+
+                SaleDetail::create([
+                    'sale_id' => $sale->id,
+                    'fish_id' => $fishId,
+                    'fish_name' => optional(Fish::find($fishId))->scientific_name,
+                    'weight' => $weight,
+                    'price_per_kilo' => $price,
+                    'total_price' => ($price * $weight),
+                ]);
+
+                $totalPrice += ($price * $weight);
+                $soldRows++;
             }
+
+            if ($soldRows === 0) {
+                throw new \Exception('يجب إدخال وزن صنف واحد على الأقل');
+            }
+
+            $paidAmount = match ($request->payment_status) {
+                'paid' => $totalPrice,
+                'partially_paid' => (float) $request->paid_amount,
+                default => 0,
+            };
 
             $sale->update([
                 'total_price' => $totalPrice,
-                'remaining_total' => ($totalPrice - $request->paid_amount),
+                'remaining_total' => ($totalPrice - $paidAmount),
             ]);
 
             DB::commit();

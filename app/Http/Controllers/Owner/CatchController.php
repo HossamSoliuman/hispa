@@ -97,21 +97,16 @@ class CatchController extends Controller
             ]);
 
             $totalWeight = 0;
-            $totalPrice = 0;
 
             foreach ($request->fish_id as $index => $fishId) {
 
                 $weight = $request->weight[$index];
-                $price = $request->total_price[$index];
-                $price_per_kg = $request->price_per_kg[$index];
 
                 CatchDetail::create([
                     'catch_id' => $catch->id,
                     'fish_id' => $fishId,
                     'fish_name' => optional(Fish::find($fishId))->scientific_name,
                     'weight' => $weight,
-                    'price_per_kg' => $price_per_kg,
-                    'total_price' => $price,
                 ]);
 
                 $stock = FishQuantityStock::firstOrCreate(
@@ -123,20 +118,15 @@ class CatchController extends Controller
                     ],
                     [
                         'quantity' => 0,
-                        // 'price_per_kg' => $price / $weight,
-                        'price_per_kg' => $price_per_kg,
-
                     ]
                 );
                 $stock->increment('quantity', $weight);
 
                 $totalWeight += $weight;
-                $totalPrice += $price;
             }
 
             $catch->update([
                 'total_weight' => $totalWeight,
-                'total_amount' => $totalPrice,
             ]);
 
             DB::commit();
