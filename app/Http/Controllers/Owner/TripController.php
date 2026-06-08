@@ -28,7 +28,12 @@ class TripController extends Controller
 
     public function index()
     {
-        return view('owner.trips.index');
+        $captains = User::Active()->CaptainRole()
+            ->where('owner_id', auth()->id())
+            ->select('id', 'name')
+            ->get();
+
+        return view('owner.trips.index', compact('captains'));
     }
 
     public function getTripData(Request $request)

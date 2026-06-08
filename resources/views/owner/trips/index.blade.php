@@ -46,7 +46,10 @@
             <h2 class=" fw-bold text-dark mb-1">{{ __('owner.trips.title') }}</h2>
         </div>
 
-        <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
+        <div class="col-md-6 col-sm-12 text-md-end text-sm-start d-flex gap-2 justify-content-md-end">
+            <button type="button" class="btn btn-success btn-border-radius" data-bs-toggle="modal" data-bs-target="#addTripModal">
+                <i class="bi bi-plus me-1"></i> {{ __('owner.trips.add_trip') }}
+            </button>
             <a href="{{ route('owner.reports.print.all_trips') }}" target="_blank"
                 class="btn btn-outline-info btn-border-radius">
                 <i class="bi bi-printer me-1"></i> {{ __('owner.trips.print_all_trips') }}
@@ -127,6 +130,82 @@
 
         </div>
     </div>
+    <!-- Modal: Add Trip -->
+    <div class="modal fade" id="addTripModal" tabindex="-1" aria-labelledby="addTripModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTripModalLabel">{{ __('owner.trips.title') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('owner.generated.btn_close_modal') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('owner.trips.store') }}" method="post" id="addTripForm">
+                        @csrf
+                        <input type="hidden" name="_form" value="add_trip">
+                        <input type="hidden" name="redirect_to" value="{{ route('owner.trips.index') }}">
+                        <input type="hidden" name="owner_id" value="{{ auth()->user()->getAuthIdentifier() }}">
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ __('owner.trips.name') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="name" value="{{ old('name') }}" class="form-control" required placeholder="{{ __('owner.trips.name') }}">
+                                @error('name') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ __('owner.trips.name_en') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="name_en" value="{{ old('name_en') }}" class="form-control" required placeholder="{{ __('owner.trips.name_en') }}">
+                                @error('name_en') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ __('owner.trips.license_number') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="license_number" value="{{ old('license_number') }}" class="form-control" required placeholder="{{ __('owner.trips.license_number') }}">
+                                @error('license_number') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ __('owner.trips.start_date') }} <span class="text-danger">*</span></label>
+                                <input type="datetime-local" name="start_date" value="{{ old('start_date', now()->format('Y-m-d\TH:i')) }}" class="form-control" required>
+                                @error('start_date') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ __('owner.trips.captain_name') }} <span class="text-danger">*</span></label>
+                                <select name="captain_id" id="trip_captain_id" class="form-control" required>
+                                    <option value="">{{ __('owner.actions.choose') }}</option>
+                                    @foreach($captains as $captain)
+                                        <option value="{{ $captain->id }}" {{ old('captain_id') == $captain->id ? 'selected' : '' }}>{{ $captain->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('captain_id') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ __('owner.trips.boat_name') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="boat_name" id="trip_boat_name" class="form-control" readonly value="{{ old('boat_name') }}" placeholder="{{ __('owner.trips.boat_name') }}">
+                                <input type="hidden" name="boat_id" id="trip_boat_id" value="{{ old('boat_id') }}">
+                                @error('boat_name') <span class="text-danger">{{ $message }}</span> @enderror
+                                @error('boat_id') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">{{ __('owner.trips.notes') }}</label>
+                                <textarea name="notes" class="form-control" placeholder="{{ __('owner.trips.notes') }}">{{ old('notes') }}</textarea>
+                                @error('notes') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="modal-footer px-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('owner.payrolls.create.confirm_save_cancel') }}</button>
+                            <button type="submit" class="btn btn-success">{{ __('owner.actions.save') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Create/Edit Trip with Tabs -->
     <div class="modal fade" id="tripModal" tabindex="-1" aria-labelledby="tripModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -462,6 +541,25 @@
 
     <script>
         $("#createForm").validate();
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#trip_captain_id').on('change', function () {
+                let captainId = $(this).val();
+                if (!captainId) {
+                    $('#trip_boat_id').val('');
+                    $('#trip_boat_name').val('');
+                    return;
+                }
+                let url = "{{ route('owner.getBoatInfo', ['id' => 'CAPTAIN_ID']) }}".replace('CAPTAIN_ID', captainId);
+                $.get(url, function (data) {
+                    $('#trip_boat_id').val(data.boat_id);
+                    $('#trip_boat_name').val(data.boat_name);
+                }).fail(function () {
+                    console.error('Failed to load boat info');
+                });
+            });
+        });
     </script>
     <script>
         function endTrip(recordId) {

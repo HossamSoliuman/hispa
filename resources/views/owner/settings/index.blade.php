@@ -36,10 +36,6 @@
                 <i class="fas fa-ship me-1"></i> {{ __('owner.boats.title') }}</a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('tab') == 'trips' ? 'active' : '' }}"  href="?tab=trips"  id="trips-tab" aria-controls="trips" aria-selected="{{ request('tab') == 'trips' ? 'true' : 'false' }}">
-                <i class="fas fa-route me-1"></i> {{ __('owner.trips.title') }}</a>
-        </li>
-        <li class="nav-item" role="presentation">
             <a class="nav-link  {{ request('tab') == 'fish'? 'active' : '' }}" href="?tab=fish" id="fish-tab"   aria-controls="fish" aria-selected="{{ request('tab') == 'fish' ? 'true' : 'false' }}">
                 <i class="fas fa-fish me-1"></i> {{ __('owner.fish.page_header') }}</a>
         </li>
@@ -69,10 +65,6 @@
 
         <div class="tab-pane fade {{ request('tab') == 'boats' ? 'show active' : '' }}" id="boats" role="tabpanel" aria-labelledby="boats-tab">
             @include('owner.settings.tabs.boats')
-        </div>
-
-        <div class="tab-pane fade {{ request('tab') == 'trips' ? 'show active' : '' }}" id="trips" role="tabpanel" aria-labelledby="trips-tab">
-            @include('owner.settings.tabs.trips')
         </div>
 
         <div class="tab-pane fade  {{ request('tab') == 'fish'  ? 'show active' : '' }}" id="fish" role="tabpanel" aria-labelledby="fish-tab">
@@ -914,27 +906,6 @@
 </script>
 {{-- end boats tab --}}
 
-{{-- trips tab --}}
-<script>
-    $(document).ready(function () {
-        $('#settings_captain_id').on('change', function () {
-            let captainId = $(this).val();
-            if (!captainId) {
-                $('#settings_boat_id').val('');
-                $('#settings_boat_name').val('');
-                return;
-            }
-            let url = "{{ route('owner.getBoatInfo', ['id' => 'CAPTAIN_ID']) }}".replace('CAPTAIN_ID', captainId);
-            $.get(url, function (data) {
-                $('#settings_boat_id').val(data.boat_id);
-                $('#settings_boat_name').val(data.boat_name);
-            }).fail(function () {
-                console.error('Failed to load boat info');
-            });
-        });
-    });
-</script>
-{{-- end trips tab --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
