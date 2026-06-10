@@ -77,6 +77,23 @@ return [
         ],
     ],
 
+    'actions' => [
+        'start_trip' => 'Start Trip',
+        'finish_trip' => 'Finish Trip',
+        'start_counting' => 'Start Counting',
+        'finish_counting' => 'Finish Counting',
+        'mark_ready' => 'Mark Ready to Sell',
+        'mark_sold' => 'Mark as Sold',
+        'cancel_trip' => 'Cancel Trip',
+    ],
+
+    'errors' => [
+        'trip_terminal' => 'Cannot change status of a completed or cancelled trip.',
+        'invalid_transition' => 'This transition is not allowed from the current status.',
+        'cancel_reason_required' => 'A cancellation reason is required.',
+        'catch_required' => 'Catch data must be added before starting counting.',
+    ],
+
     'duration' => [
         'day_singular' => 'Day',
         'day_plural' => 'Days',

@@ -2,6 +2,7 @@
 
 namespace App\Repository\Admin;
 
+use App\Enums\TripStatus;
 use App\Interfaces\CRUD;
 use App\Models\Port;
 use App\Models\Region;
@@ -24,24 +25,11 @@ class TripRepository implements CRUD
             ->pluck('count', 'status')
             ->toArray();
 
-        // بناء الكروت مع الترجمة
-        $statusLabels = Trip::getStatusLabels();
-        $statusKeys = Trip::statuses();
-
-        $tripStatusCards = [];
-
-        // Iterate through status keys (1-8)
-        foreach ($statusKeys as $key => $value) {
-            // $key is the numeric status (1, 2, 3, etc.)
-            // $value might be the same or a string key depending on translation
-            $statusNumber = is_numeric($key) ? (int) $key : (int) $value;
-
-            $tripStatusCards[] = [
-                'status' => $statusNumber,
-                'label' => $statusLabels[$statusNumber] ?? 'غير معروف',
-                'count' => $statusCounts[$statusNumber] ?? 0,
-            ];
-        }
+        $tripStatusCards = array_map(fn (TripStatus $s) => [
+            'status' => $s->value,
+            'label' => $s->label(),
+            'count' => $statusCounts[(string) $s->value] ?? 0,
+        ], TripStatus::cases());
         $salesStats = (object) [
             'trips_count' => $tripsCount,
             'trip_items_count' => $totalItemsCount ?? 0,

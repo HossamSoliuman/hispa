@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\TripStatus;
 use App\Observers\TripObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -13,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 #[ObservedBy(TripObserver::class)]
 class Trip extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'trips';
 
@@ -55,70 +57,29 @@ class Trip extends Model
         'updated_by',
     ];
 
-    protected $casts = [
-        'boat_length' => 'float',
-        'boat_width' => 'float',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-        'departure_time' => 'datetime:H:i',
-        'return_time' => 'datetime:H:i',
-        'actual_start_datetime' => 'datetime',
-        'actual_end_datetime' => 'datetime',
-    ];
-
-    /** Status ID => Bootstrap badge color (e.g. primary, success). */
-    public static function statusBadgeColors(): array
+    protected function casts(): array
     {
         return [
-            1 => 'primary',
-            2 => 'info',
-            3 => 'danger',
-            4 => 'secondary',
-            5 => 'warning',
-            6 => 'warning',
-            7 => 'success',
-            8 => 'success',
+            'boat_length' => 'float',
+            'boat_width' => 'float',
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+            'departure_time' => 'datetime:H:i',
+            'return_time' => 'datetime:H:i',
+            'actual_start_datetime' => 'datetime',
+            'actual_end_datetime' => 'datetime',
+            'status' => TripStatus::class,
         ];
     }
 
-    public function getStatusBadgeColorAttribute(): string
+    public function getLicenseAttachmentAttribute($key): string
     {
-        return self::statusBadgeColors()[$this->status ?? 1] ?? 'dark';
-    }
-
-    /**
-     * Returns the translated status label for a given status ID (uses admin.trip_statuses).
-     */
-    public static function getStatusLabelById(?int $status): string
-    {
-        if ($status === null || $status < 1) {
-            return '—';
-        }
-        $labels = __('admin.trip_statuses');
-        if (is_array($labels) && isset($labels[$status])) {
-            $label = $labels[$status];
-            return is_string($label) ? $label : (string) $status;
-        }
-        return (string) $status;
-    }
-
-    public function getStatusLabelAttribute(): string
-    {
-        return self::getStatusLabelById($this->status);
-    }
-
-    public function getLicenseAttachmentAttribute($key)
-    {
-
-        // check if request is from laravel nova
         if ($key == '' || is_null($key)) {
             return asset('uploads/default.jpg');
-        } else {
-            // return Storage::disk('ocean')->url($key);
-            return Storage::url($key);
         }
-    }
 
+        return Storage::url($key);
+    }
 
     public function boat()
     {
@@ -154,15 +115,13 @@ class Trip extends Model
         $days = Carbon::parse($this->start_date)->diffInDays(Carbon::parse($this->end_date)) + 1;
         $dayLabel = $days == 1 ? __('trips.duration.day_singular') : __('trips.duration.day_plural');
 
-        return $days . ' ' . $dayLabel;
+        return $days.' '.$dayLabel;
     }
 
-    // علاقات المستخدمين
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
-
 
     public function captain()
     {
@@ -179,7 +138,6 @@ class Trip extends Model
         return $this->belongsTo(User::class, 'dalal_id');
     }
 
-    // العلاقات الجغرافية
     public function region()
     {
         return $this->belongsTo(Region::class);
@@ -195,7 +153,6 @@ class Trip extends Model
         return $this->belongsTo(Port::class);
     }
 
-
     public function fishQuantityStocks()
     {
         return $this->hasMany(FishQuantityStock::class);
@@ -204,83 +161,6 @@ class Trip extends Model
     public function sales()
     {
         return $this->hasMany(Sale::class);
-    }
-
-    public static function allowedStatusUpdatesByRole(): array
-    {
-        return [
-            'captain' => [2, 3, 4],
-            'counter' => [5, 6],  // progress_count, counter_done
-            'owner' => [7, 8],  // ready_to_sell, sent_to_broker
-            //            'dalal'   => [9, 10, 11], // awaiting_broker, selling, completed
-        ];
-    }
-
-    public static function isValidTransition($role, $current, $next): bool
-    {
-        $map = [
-            'captain' => [
-                1 => [2, 3],    // new -> in_progress or cancel
-                2 => [4, 3],    // in_progress -> complete or cancel
-            ],
-            'counter' => [
-                4 => [5, 6],    // captain_done -> awaiting_count or counting
-                5 => [6],       // awaiting_count -> counting
-                6 => [7],       // counting -> ready_to_sell
-            ],
-            'owner' => [
-                6 => [7],       // ready_to_sell -> sent_to_broker
-                7 => [8],       // ready_to_sell -> sent_to_broker
-            ],
-
-        ];
-
-        return in_array($next, $map[$role][$current] ?? []);
-    }
-
-    public static function statuses()
-    {
-        $statusKeys = __('trips.status_keys');
-        
-        // If translation returns a string (key not found), return default array
-        if (!is_array($statusKeys)) {
-            return [1, 2, 3, 4, 5, 6, 7, 8];
-        }
-        
-        return $statusKeys;
-    }
-
-    public static function getStatusLabels()
-    {
-        $labels = __('trips.status_labels');
-        
-        // If translation returns a string (key not found), return default labels
-        if (!is_array($labels)) {
-            return [
-                1 => __('admin.trip_statuses.1', [], 'New'),
-                2 => __('admin.trip_statuses.2', [], 'In Progress'),
-                3 => __('admin.trip_statuses.3', [], 'Cancelled'),
-                4 => __('admin.trip_statuses.4', [], 'Finished by Captain'),
-                5 => __('admin.trip_statuses.5', [], 'Counting'),
-                6 => __('admin.trip_statuses.6', [], 'Count Completed'),
-                7 => __('admin.trip_statuses.7', [], 'Ready for Sale'),
-                8 => __('admin.trip_statuses.8', [], 'Completed'),
-            ];
-        }
-        
-        return $labels;
-    }
-
-    public function getStatusNameAttribute(): string
-    {
-        return self::getStatusLabelById($this->status);
-    }
-
-    public function getStatusLabelForRole(string $role): string
-    {
-        $statusKey = self::statuses()[$this->status] ?? 'unknown';
-
-        return __('trips.roles.' . $role . '.' . $statusKey) ?? $statusKey;
     }
 
     public function getNameAttribute()

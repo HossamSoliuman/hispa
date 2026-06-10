@@ -26,11 +26,7 @@
         </div>
 
         <div class="col-md-6 col-sm-12 text-md-end text-sm-start justify-content-lg-end">
-            @if (filled($data->start_date) && blank($data->end_date))
-                <a href="#" id="end_trip_button" onclick="endTrip({{ $data->id }})" class="btn btn-red btn-sm">
-                    <i class="bi bi-clock"></i> {{ __('owner.trips.end_trip') }}
-                </a>
-            @endif
+            @include('owner.trips._actions', ['trip' => $data])
         </div>
 
     </div>
@@ -105,27 +101,13 @@
                                 <td>{{ $data->license_number ?? '---' }}</td>
                             </tr>
 
-                            @php
-                                $colors = [
-                                    'new' => 'primary',
-                                    'in_progress' => 'info',
-                                    'cancelled' => 'danger',
-                                    'captain_done' => 'secondary',
-                                    'progress_count' => 'warning',
-                                    'counter_done' => 'warning',
-                                    'ready_to_sell' => 'success',
-                                    'completed' => 'success',
-                                ];
-                                $statusKey = \App\Models\Trip::statuses()[$data->status] ?? 'unknown';
-                                $color = $colors[$statusKey] ?? 'dark';
-                                $label = $data->status_name;
-                            @endphp
-
                             <tr>
                                 <th>{{ __('owner.trips.show.status') }}</th>
                                 <td>
-                                    <span class="badge bg-{{ $color }} fs-6"><i class="fas fa-info-circle me-1"></i>
-                                        {{ $label }}</span>
+                                    <span class="badge bg-{{ $data->status->color() }} fs-6">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        {{ $data->status->label() }}
+                                    </span>
                                 </td>
                             </tr>
 
@@ -339,61 +321,68 @@
     <script>
         $("#createForm").validate();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function endTrip(recordId) {
-            Swal.fire({
-                title: '{{ __('owner.trips.confirm_end_trip_title') }}',
-                text: '{{ __('owner.trips.confirm_end_trip_text') }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: '{{ __('owner.trips.confirm_end_trip_yes') }}',
-                cancelButtonText: '{{ __('owner.trips.confirm_end_trip_cancel') }}'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ url('owner/endTrip') }}/" + recordId,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire('{{ __('owner.trips.confirm_end_trip_ended') }}', response
-                                .message, 'success');
-                            $('#end_trip_button').hide();
-                        },
-                        error: function(xhr) {
-                            let message = xhr.responseJSON?.message ||
-                                '{{ __('owner.swal.unexpected_error') }}';
-                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
-                        }
+        function tripTransition(tripId, toStatus, needsReason) {
+            let cancelReason = null;
 
-                    });
-                }
-            });
-        }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusSelect = document.getElementById('trip-status');
-            const reasonWrapper = document.getElementById('cancel-reason-wrapper');
-            const reasonInput = document.getElementById('cancel_reason');
+            function doTransition() {
+                let postData = { _token: '{{ csrf_token() }}', to: toStatus };
+                if (cancelReason) { postData.cancel_reason = cancelReason; }
 
-            function toggleReasonField() {
-                if (statusSelect.value == '3') {
-                    reasonWrapper.style.display = 'block';
-                    reasonInput.setAttribute('required', 'required');
-                } else {
-                    reasonWrapper.style.display = 'none';
-                    reasonInput.removeAttribute('required');
-                    reasonInput.value = '';
-                }
+                $.ajax({
+                    url: "{{ route('owner.trips.transition', ['trip' => '__ID__']) }}".replace('__ID__', tripId),
+                    type: 'POST',
+                    data: postData,
+                    success: function(response) {
+                        Swal.fire('{{ __('owner.swal.success_title') ?? __('owner.swal.success') }}', response.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        let message = xhr.responseJSON?.message || '{{ __('owner.swal.unexpected_error') }}';
+                        Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                    }
+                });
             }
 
-            // Trigger on load and on change
-            toggleReasonField();
-            statusSelect.addEventListener('change', toggleReasonField);
-        });
+            if (needsReason) {
+                Swal.fire({
+                    title: '{{ __('owner.trips.confirm_cancel_trip_title') }}',
+                    input: 'textarea',
+                    inputLabel: '{{ __('trips.errors.cancel_reason_required') }}',
+                    inputPlaceholder: '{{ __('trips.errors.cancel_reason_required') }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: '{{ __('owner.trips.confirm_cancel_trip_yes') }}',
+                    cancelButtonText: '{{ __('owner.trips.confirm_cancel_trip_cancel') }}',
+                    preConfirm: (reason) => {
+                        if (!reason) {
+                            Swal.showValidationMessage('{{ __('trips.errors.cancel_reason_required') }}');
+                        }
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        cancelReason = result.value;
+                        doTransition();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: '{{ __('owner.swal.confirm_title') }}',
+                    text: '{{ __('owner.swal.confirm_text') }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                    cancelButtonText: '{{ __('owner.swal.cancel') }}'
+                }).then((result) => {
+                    if (result.isConfirmed) { doTransition(); }
+                });
+            }
+        }
     </script>
 @endsection

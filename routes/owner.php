@@ -117,8 +117,7 @@ Route::group([
         // trips
         Route::resource('/trips', TripController::class);
         Route::get('/getTripData', [TripController::class, 'getTripData'])->name('getTripData');
-        Route::post('/endTrip/{id}', [TripController::class, 'endTrip'])->name('endTrip');
-        Route::post('/cancelTrip/{id}', [TripController::class, 'cancelTrip'])->name('cancelTrip');
+        Route::post('/trips/{trip}/transition', [TripController::class, 'transition'])->name('trips.transition');
 
         // boats
         Route::resource('/boats', BoatController::class);

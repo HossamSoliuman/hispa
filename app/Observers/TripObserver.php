@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\TripStatus;
 use App\Models\Admin;
 use App\Models\Trip;
 use App\Models\User;
@@ -9,16 +10,12 @@ use App\Notifications\TripNotification;
 
 class TripObserver
 {
-    /**
-     * Handle the Trip "created" event.
-     */
     public function created(Trip $trip): void
     {
-
         if ($trip->captain) {
             $data = [
                 'trip_id' => $trip->id,
-                'sender_name' => auth()->user()->name,
+                'sender_name' => auth()->user()?->name ?? 'النظام',
                 'title' => [
                     'ar' => 'رحلة جديدة بانتظارك',
                     'en' => 'New trip waiting for you',
@@ -29,23 +26,16 @@ class TripObserver
                 ],
             ];
 
-            $channels = ['database'];
-
-            // إرسال الإشعار للقبطان
-            $trip->captain->notify(new TripNotification($data, $channels));
+            $trip->captain->notify(new TripNotification($data, ['database']));
         }
     }
 
-    /**
-     * Handle the Trip "updated" event.
-     */
     public function updated(Trip $trip): void
     {
         $channels = ['database'];
 
-        // إشعار للقبطان حسب التغيرات
         if ($trip->captain) {
-            if ($trip->status == 1 || $trip->status == 2) {
+            if ($trip->status === TripStatus::New || $trip->status === TripStatus::InProgress) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => auth()->user()->name ?? 'النظام',
@@ -61,7 +51,7 @@ class TripObserver
                 $trip->captain->notify(new TripNotification($data, $channels));
             }
 
-            if ($trip->status == 2) {
+            if ($trip->status === TripStatus::InProgress) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => $trip->captain->name ?? null,
@@ -77,7 +67,7 @@ class TripObserver
                 $trip->captain->notify(new TripNotification($data, $channels));
             }
 
-            if ($trip->status == 3) {
+            if ($trip->status === TripStatus::Cancelled) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => $trip->captain->name ?? null,
@@ -93,7 +83,7 @@ class TripObserver
                 $trip->captain->notify(new TripNotification($data, $channels));
             }
 
-            if ($trip->status == 4) {
+            if ($trip->status === TripStatus::Finished) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => $trip->captain->name ?? null,
@@ -110,13 +100,11 @@ class TripObserver
             }
         }
 
-        // إشعار للعدادين القريبين عند status = 4 && counter_id = null
-        if ($trip->status == 4 && $trip->counter_id == null) {
+        if ($trip->status === TripStatus::Finished && $trip->counter_id === null) {
             $nearbyCounters = User::counterRole()
                 ->where(function ($q) use ($trip) {
                     $q->where('region_id', $trip->region_id)
                         ->orWhere('governorate_id', $trip->governorate_id);
-                    //                        ->orWhere('city_id', $trip->city_id);
                 })->get();
 
             foreach ($nearbyCounters as $counter) {
@@ -132,13 +120,12 @@ class TripObserver
                         'en' => "Trip #{$trip->number} is ready for counting and is located in your area. You can accept it now.",
                     ],
                 ];
-
                 $counter->notify(new TripNotification($data, $channels));
             }
         }
 
         if ($trip->counter) {
-            if ($trip->status == 5) {
+            if ($trip->status === TripStatus::Counting) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => $trip->counter->name ?? null,
@@ -154,7 +141,7 @@ class TripObserver
                 $trip->counter->notify(new TripNotification($data, $channels));
             }
 
-            if ($trip->status == 6) {
+            if ($trip->status === TripStatus::Counted) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => $trip->counter->name ?? null,
@@ -171,9 +158,8 @@ class TripObserver
             }
         }
 
-        // إشعار للصيّاد عند جاهزية البيع
         if ($trip->owner) {
-            if ($trip->status == 7) {
+            if ($trip->status === TripStatus::ReadyToSell) {
                 $data = [
                     'trip_id' => $trip->id,
                     'sender_name' => $trip->captain->name ?? null,
@@ -190,8 +176,7 @@ class TripObserver
             }
         }
 
-        // إشعار للإدارة والصيّاد عند اكتمال جميع مراحل الرحلة
-        if ($trip->status == 8) {
+        if ($trip->status === TripStatus::Sold) {
             $admins = Admin::whereJsonContains('roles_name', 'owner')->get();
             foreach ($admins as $admin) {
                 $data = [
@@ -227,27 +212,9 @@ class TripObserver
         }
     }
 
-    /**
-     * Handle the Trip "deleted" event.
-     */
-    public function deleted(Trip $trip): void
-    {
-        //
-    }
+    public function deleted(Trip $trip): void {}
 
-    /**
-     * Handle the Trip "restored" event.
-     */
-    public function restored(Trip $trip): void
-    {
-        //
-    }
+    public function restored(Trip $trip): void {}
 
-    /**
-     * Handle the Trip "force deleted" event.
-     */
-    public function forceDeleted(Trip $trip): void
-    {
-        //
-    }
+    public function forceDeleted(Trip $trip): void {}
 }

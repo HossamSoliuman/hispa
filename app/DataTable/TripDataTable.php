@@ -2,6 +2,7 @@
 
 namespace App\DataTable;
 
+use App\Enums\TripStatus;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -36,7 +37,7 @@ class TripDataTable extends DataTables
             Cache::forget('sidebar_trip_counts');
 
             $data = $query->get();
-            
+
             // إحصائيات الرحلات
             $totalTrips = Trip::count();
             $completedTrips = Trip::whereIn('status', [7, 8])->count(); // مكتملة
@@ -73,11 +74,13 @@ class TripDataTable extends DataTables
                 })
                 ->addColumn('item_count', function (Trip $trip) {
                     $count = $trip->fishQuantityStocks ? $trip->fishQuantityStocks->count() : 0;
+
                     return $count > 0 ? $count : '--';
                 })
 
                 ->addColumn('item_weight', function (Trip $trip) {
                     $weight = $trip->fishQuantityStocks ? $trip->fishQuantityStocks->sum('weight') : 0;
+
                     return $weight > 0 ? $weight : '--';
                 })
 
@@ -108,17 +111,16 @@ class TripDataTable extends DataTables
                     return '--';
                 })
                 ->addColumn('status', function (Trip $trip) {
-                    $label = Trip::getStatusLabelById($trip->status);
-                    $color = $trip->status_badge_color;
-                    $labelSafe = e($label);
+                    $label = e($trip->status->label());
+                    $color = $trip->status->color();
 
-                    return '<span class="badge bg-'.$color.' px-2 py-1 rounded">'.$labelSafe.'</span>';
+                    return '<span class="badge bg-'.$color.' px-2 py-1 rounded">'.$label.'</span>';
                 })
 
                 ->addColumn('action', function (Trip $trip) {
                     $btn = '';
 
-                    if ($trip->status == 1) {
+                    if ($trip->status === TripStatus::New) {
                         if (auth()->user()->can('update_trips')) {
 
                             // زر التعديل

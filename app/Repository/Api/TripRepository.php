@@ -2,10 +2,11 @@
 
 namespace App\Repository\Api;
 
+use App\Enums\TripStatus;
 use App\Http\Resources\TripResource;
 use App\Interfaces\CRUD;
-use App\Models\FishStock;
 use App\Models\Trip;
+use App\Services\TripTransitionService;
 use App\Traits\RespondsWithHttpStatus;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -18,15 +19,14 @@ class TripRepository implements CRUD
     {
         $role = request()->user()->role;
 
-        // استلام جميع الفلاتر
-        $status = request()->input('status'); // يقبل array أو single
+        $status = request()->input('status');
         $search = request()->input('search');
         $startDate = request()->input('start_date');
         $endDate = request()->input('end_date');
         if (is_string($status) && str_starts_with($status, '[')) {
             $status = json_decode($status, true);
         }
-        // اختيار الرحلات حسب نوع المستخدم
+
         switch ($role) {
             case 'captain':
                 $data = Trip::CaptainId();
@@ -106,13 +106,11 @@ class TripRepository implements CRUD
 
             default:
                 return $this->success(trans('site.not_authorization'), [], 403);
-
         }
 
         $trip = $query->find($id);
         if (! $trip) {
             return $this->failure(trans('site.page_not_found'), [], 404);
-
         }
 
         return $this->success(trans('site.getData'), new TripResource($trip), 200);
@@ -126,78 +124,32 @@ class TripRepository implements CRUD
     public function updateData($request, $id)
     {
         try {
-            $user = $request->user();
-            $role = $user->role;
             $newStatus = (int) $request->status;
             $cancelReason = $request->cancel_reason ?? null;
+            $targetStatus = TripStatus::tryFrom($newStatus);
 
-            return DB::transaction(function () use ($id, $role, $newStatus, $user, $cancelReason) {
+            if (! $targetStatus) {
+                return $this->failure(trans('api.status_not_authorized'), [], 403);
+            }
+
+            $service = new TripTransitionService;
+
+            return DB::transaction(function () use ($id, $targetStatus, $cancelReason, $service) {
                 $trip = Trip::where('id', $id)->lockForUpdate()->first();
 
                 if (! $trip) {
-                    throw new ModelNotFoundException(trans('api.trip_not_found'), [], 404);
+                    throw new ModelNotFoundException(trans('api.trip_not_found'));
                 }
 
-                if ($trip->status == 3) {
-                    return $this->failure(trans('api.trip_canceled'), [], 422);
-                }
+                $service->transition($trip, $targetStatus, $cancelReason);
 
-                $allowedStatuses = Trip::allowedStatusUpdatesByRole();
-                if (! in_array($newStatus, $allowedStatuses[$role] ?? [])) {
-                    return $this->failure(trans('api.status_not_authorized'), [], 403);
-                }
-
-                if (! Trip::isValidTransition($role, $trip->status, $newStatus)) {
-                    return $this->failure(trans('api.trip_invalid_transition'), [], 422);
-                }
-
-                // ✅ Allow only owner to update from 6 ➜ 7
-                if ($trip->status == 6 && $newStatus == 7 && $role != 'owner') {
-                    return $this->failure(trans('api.trip_invalid_owner_transition'), [], 403);
-                }
-
-                // شروط خاصة بالكابتن
-                if ($role == 'captain') {
-                    if ($newStatus == 3) {
-                        if ($trip->actual_start_datetime) {
-                            return $this->failure(trans('api.trip_invalid_captain_cancel'), [], 403);
-                        }
-
-                        if (empty($cancelReason)) {
-                            return $this->failure(trans('api.cancel_reason_required'), [], 422);
-                        }
-
-                        $trip->cancel_reason = $cancelReason;
-                    }
-
-                    if ($newStatus == 4) {
-                        $hasFish = FishStock::where('trip_id', $trip->id)
-                            ->where('added_by', $user->id)
-                            ->exists();
-
-                        if (! $hasFish) {
-                            return $this->failure(trans('api.trip_invalid_captain_end'), [], 422);
-                        }
-                    }
-                }
-
-                // شروط خاصة بالعداد
-                if ($role == 'counter') {
-                    if ($trip->status == 4 && ! $trip->counter_id) {
-                        $trip->counter_id = $user->id;
-                    } elseif ($trip->counter_id != $user->id) {
-                        return $this->failure(trans('api.trip_counter_assigned'), [], 403);
-                    }
-                }
-
-                $trip->status = $newStatus;
-                $trip->save();
-
-                return $this->success(trans('api.trip_updated'), new TripResource($trip), 200);
+                return $this->success(trans('api.trip_updated'), new TripResource($trip->fresh()), 200);
             });
 
         } catch (ModelNotFoundException $e) {
             return $this->failure(trans('api.trip_not_found'), [], 404);
+        } catch (\DomainException $e) {
+            return $this->failure($e->getMessage(), [], 422);
         } catch (\Throwable $e) {
             return $this->failure(trans('api.error'), [], 500);
         }

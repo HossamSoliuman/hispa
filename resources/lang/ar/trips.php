@@ -78,6 +78,23 @@ return [
         ],
     ],
 
+    'actions' => [
+        'start_trip' => 'بدء الرحلة',
+        'finish_trip' => 'إنهاء الرحلة',
+        'start_counting' => 'بدء العد',
+        'finish_counting' => 'إنهاء العد',
+        'mark_ready' => 'تحديد جاهز للبيع',
+        'mark_sold' => 'تحديد مباع',
+        'cancel_trip' => 'إلغاء الرحلة',
+    ],
+
+    'errors' => [
+        'trip_terminal' => 'لا يمكن تغيير حالة رحلة مكتملة أو ملغاة.',
+        'invalid_transition' => 'الانتقال غير مسموح به من الحالة الحالية.',
+        'cancel_reason_required' => 'سبب الإلغاء مطلوب.',
+        'catch_required' => 'يجب إضافة بيانات الصيد قبل بدء العد.',
+    ],
+
     'duration' => [
         'day_singular' => 'يوم',
         'day_plural' => 'أيام',

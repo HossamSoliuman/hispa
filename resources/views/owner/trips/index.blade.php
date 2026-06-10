@@ -498,33 +498,10 @@
                         name: 'total_sales'
                     },
                     {
-                        data: 'id',
+                        data: 'actions',
                         name: 'actions',
                         orderable: false,
                         searchable: false,
-                        render: function(data, type, row) {
-                            let actions = `<a href="{{ url('owner/reports/print/trip') }}/${data}" target="_blank" class="btn btn-sm btn-outline-primary" title="{{ __('owner.trips.print_trip') }}">
-                                    <i class="bi bi-printer"></i>
-                                </a>`;
-                            if (row.status_int != 3 && row.start_date && !row.end_date) {
-                                actions += `<a href="#"  id="end_trip_button" onclick="endTrip(${row.id})" class="btn btn-sm btn-outline-red mx-2" title=" {{ __('owner.trips.end_trip') }}">
-                                    <i class="bi bi-clock"></i>
-                                </a>`;
-                            }
-                            if (row.status_int != 3 && row.status_int != 8) {
-                                actions += `<a href="#"  id="end_trip_button" onclick="cancelTrip(${row.id})" class="btn btn-sm btn-outline-red" title="{{ __('owner.generated.item_452553') }}">
-                                    <i class="bi bi-x"></i>
-                                </a>`;
-                            }
-                            if (row.catches === null && row.end_date && row.status_int != 3 && row
-                                .status_int == 8) {
-                                actions +=
-                                    `<a href="{{ route('owner.catch.create') }}?trip_id=${row.id}" class="btn btn-sm btn-outline-primary mx-2"><i class="bi bi-plus"></i>{{ __('owner.catch.add_catch') }}</a>`;
-                            }
-
-                            return actions;
-                        }
-
                     }
                 ],
                 responsive: true,
@@ -562,75 +539,65 @@
         });
     </script>
     <script>
-        function endTrip(recordId) {
-            Swal.fire({
-                title: '{{ __('owner.trips.confirm_end_trip_title') }}',
-                text: '{{ __('owner.trips.confirm_end_trip_text') }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: '{{ __('owner.trips.confirm_end_trip_yes') }}',
-                cancelButtonText: '{{ __('owner.trips.confirm_end_trip_cancel') }}'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ url('owner/endTrip') }}/" + recordId,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire('{{ __('owner.trips.confirm_end_trip_ended') }}', response
-                                .message, 'success');
-                            $('#end_trip_button').hide();
-                            $('#datatableDefault').DataTable().ajax.reload();
-                        },
-                        error: function(xhr) {
-                            let message = xhr.responseJSON?.message ||
-                                '{{ __('owner.swal.unexpected_error') }}';
-                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
-                        }
+        function tripTransition(tripId, toStatus, needsReason) {
+            let cancelReason = null;
 
-                    });
-                }
-            });
-        }
-    </script>
-    <script>
-        function cancelTrip(recordId) {
-            Swal.fire({
-                title: '{{ __('owner.trips.confirm_cancel_trip_title') }}',
-                text: '{{ __('owner.trips.confirm_cancel_trip_text') }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: '{{ __('owner.trips.confirm_cancel_trip_yes') }}',
-                cancelButtonText: '{{ __('owner.trips.confirm_cancel_trip_cancel') }}'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ url('owner/cancelTrip') }}/" + recordId,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire('{{ __('owner.trips.confirm_cancel_trip_ended') }}', response
-                                .message, 'success');
-                            $('#end_trip_button').hide();
-                            $('#datatableDefault').DataTable().ajax.reload();
-                        },
-                        error: function(xhr) {
-                            let message = xhr.responseJSON?.message ||
-                                '{{ __('owner.swal.unexpected_error') }}';
-                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
-                        }
+            function doTransition() {
+                let postData = { _token: '{{ csrf_token() }}', to: toStatus };
+                if (cancelReason) { postData.cancel_reason = cancelReason; }
 
-                    });
-                }
-            });
+                $.ajax({
+                    url: "{{ route('owner.trips.transition', ['trip' => '__ID__']) }}".replace('__ID__', tripId),
+                    type: 'POST',
+                    data: postData,
+                    success: function(response) {
+                        Swal.fire('{{ __('owner.swal.success_title') ?? __('owner.swal.success') }}', response.message, 'success');
+                        $('#datatableDefault').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        let message = xhr.responseJSON?.message || '{{ __('owner.swal.unexpected_error') }}';
+                        Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                    }
+                });
+            }
+
+            if (needsReason) {
+                Swal.fire({
+                    title: '{{ __('owner.trips.confirm_cancel_trip_title') }}',
+                    input: 'textarea',
+                    inputLabel: '{{ __('trips.errors.cancel_reason_required') }}',
+                    inputPlaceholder: '{{ __('trips.errors.cancel_reason_required') }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: '{{ __('owner.trips.confirm_cancel_trip_yes') }}',
+                    cancelButtonText: '{{ __('owner.trips.confirm_cancel_trip_cancel') }}',
+                    preConfirm: (reason) => {
+                        if (!reason) {
+                            Swal.showValidationMessage('{{ __('trips.errors.cancel_reason_required') }}');
+                        }
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        cancelReason = result.value;
+                        doTransition();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: '{{ __('owner.swal.confirm_title') }}',
+                    text: '{{ __('owner.swal.confirm_text') }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                    cancelButtonText: '{{ __('owner.swal.cancel') }}'
+                }).then((result) => {
+                    if (result.isConfirmed) { doTransition(); }
+                });
+            }
         }
     </script>
     <script>

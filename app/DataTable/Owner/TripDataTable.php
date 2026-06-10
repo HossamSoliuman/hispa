@@ -2,6 +2,7 @@
 
 namespace App\DataTable\Owner;
 
+use App\Enums\TripStatus;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -29,15 +30,15 @@ class TripDataTable extends DataTables
             if ($request->has('status') && in_array($request->status, range(1, 8))) {
                 $query->where('status', $request->status);
             } else {
-                $query->where('status', '!=', 3);
+                $query->where('status', '!=', TripStatus::Cancelled->value);
             }
 
             $data = $query->get();
 
             $trip_count = $data->count();
-            $trip_waiting_status = $data->where('status', 1)->count();
-            $trip_completed_status = $data->where('status', 8)->count();
-            $trip_has_catches = Trip::whereHas('catches')->where('status', '!=', 3)->where('owner_id', $owner_id)->count();
+            $trip_waiting_status = $data->where('status', TripStatus::New)->count();
+            $trip_completed_status = $data->where('status', TripStatus::Sold)->count();
+            $trip_has_catches = Trip::whereHas('catches')->where('status', '!=', TripStatus::Cancelled->value)->where('owner_id', $owner_id)->count();
             $sales_amount = $data->sum(fn (Trip $trip) => $trip->sales->sum('net_owner_amount'));
 
             return Datatables::of($data)
@@ -59,24 +60,12 @@ class TripDataTable extends DataTables
                 ->addColumn('start_date', fn (Trip $trip) => $trip->start_date ? Carbon::parse($trip->start_date)->format('H:i:s Y-m-d') : '--')
                 ->addColumn('end_date', fn (Trip $trip) => $trip->end_date ? Carbon::parse($trip->end_date)->format('H:i:s Y-m-d') : null)
                 ->addColumn('status', function (Trip $trip) {
-                    $statusLabels = __('owner.statusLabels');
-                    $colors = [
-                        1 => 'info',
-                        2 => 'primary',
-                        3 => 'danger',
-                        4 => 'warning',
-                        5 => 'secondary',
-                        6 => 'dark',
-                        7 => 'success',
-                        8 => 'success',
-                    ];
+                    $label = e($trip->status->label());
+                    $color = $trip->status->color();
 
-                    return '<span class="badge bg-'.($colors[$trip->status] ?? 'secondary').
-                        ' px-2 py-1 rounded">'.($statusLabels[$trip->status] ?? __('owner.unknown')).'</span>';
+                    return '<span class="badge bg-'.$color.' px-2 py-1 rounded">'.$label.'</span>';
                 })
-                ->addColumn('status_int', function (Trip $trip) {
-                    return $trip->status;
-                })
+                ->addColumn('actions', fn (Trip $trip) => view('owner.trips._actions', ['trip' => $trip])->render())
                 ->with([
                     'trip_count' => $trip_count,
                     'trip_waiting_status' => $trip_waiting_status,
@@ -84,7 +73,7 @@ class TripDataTable extends DataTables
                     'trip_has_catches' => $trip_has_catches,
                     'sales_amount' => $sales_amount,
                 ])
-                ->rawColumns(['status', 'number'])
+                ->rawColumns(['status', 'number', 'actions'])
                 ->make(true);
         }
     }

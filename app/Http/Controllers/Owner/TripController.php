@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Owner;
 
 use App\DataTable\Owner\TripDataTable;
+use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\BoatRequest;
 use App\Http\Requests\Owner\TripRequest;
+use App\Http\Requests\Owner\TripTransitionRequest;
 use App\Models\Boat;
 use App\Models\BoatType;
 use App\Models\Region;
 use App\Models\Trip;
 use App\Models\User;
 use App\Repository\Admin\TripRepository;
+use App\Services\TripTransitionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TripController extends Controller
@@ -43,10 +47,9 @@ class TripController extends Controller
 
     public function show($id)
     {
-
         $regions = Region::Active()->select('id', 'name')->get();
         $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
-        $data = Trip::with(['fishQuantityStocks.fish'])->find($id);
+        $data = Trip::with(['fishQuantityStocks.fish', 'catches'])->find($id);
 
         if (! $data) {
             return redirect()->back()->with(['error' => 'حدث خطأ ما']);
@@ -63,7 +66,6 @@ class TripController extends Controller
     public function create()
     {
         $regions = Region::Active()->get();
-        // $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
         $captains = User::Active()->CaptainRole()
             ->where('owner_id', auth()->id())
             ->select('id', 'name')
@@ -97,36 +99,21 @@ class TripController extends Controller
 
     public function destroy($id)
     {
-
         return $this->rep->deleteData($id);
     }
 
-    public function endTrip($id)
+    public function transition(TripTransitionRequest $request, Trip $trip, TripTransitionService $service): JsonResponse
     {
-        $trip = Trip::find($id);
-        if ($trip) {
-            Trip::where('id', $id)->update([
-                'end_date' => now()->format('Y-m-d H:i:s'),
-                'status' => 8,
-            ]);
-
-            return response()->json(['message' => 'Data saved successfully'], 200);
+        if ($trip->owner_id !== auth()->id()) {
+            return response()->json(['message' => __('owner.swal.error')], 403);
         }
 
-        return response()->json(['message' => 'Error Not Found'], 404);
-    }
+        try {
+            $service->transition($trip, TripStatus::from($request->to), $request->cancel_reason);
 
-    public function cancelTrip($id)
-    {
-        $trip = Trip::find($id);
-        if ($trip) {
-            Trip::where('id', $id)->update([
-                'status' => 3,
-            ]);
-
-            return response()->json(['message' => 'Data saved successfully'], 200);
+            return response()->json(['message' => __('owner.swal.success')]);
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
-
-        return response()->json(['message' => 'Error Not Found'], 404);
     }
 }
