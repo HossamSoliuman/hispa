@@ -20,7 +20,7 @@ return [
         'financial_management' => 'الإدارة المالية',
         'expenses' => 'النفقات',
         'payrolls' => 'الرواتب الثابتة',
-        'payrolls_percentage' => 'الدفع السريع',
+        'payrolls_percentage' => 'رواتب البحاره',
         'profit_loss' => 'الأرباح والخسائر',
         'reports' => 'التقارير',
         'sales_report' => 'تقرير المبيعات',
