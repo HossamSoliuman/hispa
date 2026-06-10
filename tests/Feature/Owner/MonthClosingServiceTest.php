@@ -1,0 +1,126 @@
+<?php
+
+namespace Tests\Feature\Owner;
+
+use App\Models\Category;
+use App\Models\Expense;
+use App\Models\Sale;
+use App\Models\User;
+use App\Service\Owner\MonthClosingService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class MonthClosingServiceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private MonthClosingService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app(MonthClosingService::class);
+    }
+
+    private function seedClientExample(): User
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 300000,
+            'net_owner_amount' => 300000,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        foreach ([['operating', 40000], ['general', 20000]] as [$type, $amount]) {
+            $category = Category::create(['name_ar' => $type, 'name_en' => $type, 'type' => $type, 'status' => 1]);
+            Expense::create([
+                'owner_id' => $owner->id,
+                'category_id' => $category->id,
+                'final_price' => $amount,
+                'total_price' => $amount,
+                'date' => '2026-06-10',
+            ]);
+        }
+
+        // Captain (2 shares), assistant (1.5), eight sailors (1 each) => Σ = 11.5
+        User::factory()->create(['role' => 'captain', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 2.0]);
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 1.5]);
+        for ($i = 0; $i < 8; $i++) {
+            User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+        }
+
+        return $owner;
+    }
+
+    public function test_preview_matches_client_distribution(): void
+    {
+        $owner = $this->seedClientExample();
+
+        $preview = $this->service->preview($owner->id, 2026, 6);
+
+        $this->assertSame(240000.0, $preview['financials']['net_profit']);
+        $this->assertSame(120000.0, $preview['financials']['crew_share']);
+        $this->assertSame(11.5, $preview['total_shares']);
+        $this->assertSame(10434.78, $preview['share_value']);
+
+        $captainDue = collect($preview['dues'])->firstWhere('role', 'captain');
+        $this->assertSame(20869.56, $captainDue['due_amount']);
+    }
+
+    public function test_close_persists_frozen_snapshot(): void
+    {
+        $owner = $this->seedClientExample();
+
+        $closing = $this->service->close($owner->id, 2026, 6);
+
+        $this->assertDatabaseHas('month_closings', [
+            'owner_id' => $owner->id,
+            'year' => 2026,
+            'month' => 6,
+            'status' => 'closed',
+        ]);
+        $this->assertSame('240000.00', $closing->net_profit);
+        $this->assertSame('120000.00', $closing->crew_share);
+        $this->assertCount(10, $closing->dues);
+
+        // Snapshot must not change when sales are later edited.
+        Sale::where('seller_id', $owner->id)->update(['total_price' => 999, 'net_owner_amount' => 999]);
+        $this->assertSame('240000.00', $closing->fresh()->net_profit);
+    }
+
+    public function test_cannot_close_twice(): void
+    {
+        $owner = $this->seedClientExample();
+        $this->service->close($owner->id, 2026, 6);
+
+        $this->expectException(\DomainException::class);
+        $this->service->close($owner->id, 2026, 6);
+    }
+
+    public function test_reopen_blocked_after_payment(): void
+    {
+        $owner = $this->seedClientExample();
+        $closing = $this->service->close($owner->id, 2026, 6);
+
+        $closing->dues()->first()->update(['paid_amount' => 100]);
+
+        $this->expectException(\DomainException::class);
+        $this->service->reopen($closing);
+    }
+
+    public function test_reopen_allowed_without_payments(): void
+    {
+        $owner = $this->seedClientExample();
+        $closing = $this->service->close($owner->id, 2026, 6);
+
+        $this->service->reopen($closing);
+
+        $this->assertDatabaseMissing('month_closings', ['id' => $closing->id]);
+        $this->assertNull($this->service->find($owner->id, 2026, 6));
+    }
+}

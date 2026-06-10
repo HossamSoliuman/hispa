@@ -119,9 +119,9 @@
             <h2 class="mb-2">{{ __('owner.profit_loss.title') }}</h2>
         </div>
         <div class="ms-auto">
-            {{-- <a href="{{ route('owner.profit.loss.print', request()->all()) }}" target="_blank" class="btn btn-outline-info btn-border-radius">
+            <a href="{{ route('owner.profit.loss.print', request()->all()) }}" target="_blank" class="btn btn-outline-info btn-border-radius">
                 <i class="fa fa-print me-2"></i>{{ __('owner.profit_loss.print') }}
-            </a> --}}
+            </a>
         </div>
     </div>
 
@@ -180,16 +180,16 @@
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.total_sales') }}</div>
                                 <div class="value">
-                                    {{ number_format($sales ?? 0, 2) }}
+                                    {{ number_format($f['gross_sales'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="stat-card expense">
-                                <div class="label">{{ __('owner.generated.expenses_and_fixed_salaries') }}</div>
+                                <div class="label">{{ __('owner.profit_loss.return') }}</div>
                                 <div class="value">
-                                    {{ number_format($total_expenses ?? 0, 2) }}
+                                    {{ number_format($f['returns'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
@@ -198,55 +198,100 @@
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.net_sales') }}</div>
                                 <div class="value">
-                                    {{ number_format($netSales ?? 0, 2) }}
+                                    {{ number_format($f['net_sales'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card expense">
+                                <div class="label">{{ __('owner.profit_loss.trip_expenses') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['trip_expenses'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card expense">
+                                <div class="label">{{ __('owner.profit_loss.general_expenses') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['general_expenses'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.generated.fishermen_ratio') }}</div>
+                                <div class="label">{{ __('owner.profit_loss.fixed_salaries') }}</div>
                                 <div class="value">
-                                    {{ number_format($ownerPercent ?? 0, 2) }}
+                                    {{ number_format($f['fixed_salaries'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card expense">
+                                <div class="label">{{ __('owner.profit_loss.depreciation') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['depreciation'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card expense">
+                                <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['total_expenses'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card {{ $f['net_profit'] >= 0 ? 'profit' : 'loss' }}">
+                                <div class="label">{{ __('owner.profit_loss.net_profit') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['net_profit'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="stat-card revenue">
-                                <div class="label">{{ __('owner.generated.owner_ratio') }}</div>
+                                <div class="label">{{ __('owner.generated.owner_ratio') }} ({{ number_format($f['owner_percent'], 0) }}%)</div>
                                 <div class="value">
-                                    {{ number_format($ownerPercent ?? 0, 2) }}
+                                    {{ number_format($f['owner_share'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.generated.fishermen_count') }}</div>
+                                <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
                                 <div class="value">
-                                    {{ number_format($total_captins ?? 0, 0) }}
-                                    {{-- <span class="currency-symbol"><x-riyal-icon size="sm" /></span> --}}
+                                    {{ number_format($f['crew_share'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
-                        @if (filled($boatId))
-                            <div class="col-md-12">
-                                @if ($total_captins > 0)
-                                    @php $netProfit = (float)(($ownerPercent/$total_captins) ?? 0); @endphp
-                                @else
-                                    @php $netProfit = 0; @endphp
-                                @endif
-                                <div class="stat-card {{ $netProfit >= 0 ? 'profit' : 'loss' }}">
-                                    <div class="label">{{ __('owner.generated.fisherman_net_profit') }}</div>
-                                    <div class="value">
-                                        {{ number_format($netProfit, 2) }}
-                                        <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                    </div>
-                                    {{-- <small class="text-muted d-block mt-2">{{ __('owner.profit_loss.formula_note') }}</small> --}}
+                        <div class="col-md-4">
+                            <div class="stat-card payroll">
+                                <div class="label">{{ __('owner.profit_loss.crew_count') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['crew_count'], 0) }}
                                 </div>
                             </div>
-                        @endif
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card {{ $f['per_fisherman'] >= 0 ? 'profit' : 'loss' }}">
+                                <div class="label">{{ __('owner.profit_loss.per_fisherman') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['per_fisherman'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -258,7 +303,7 @@
                             <div class="stat-card payroll">
                                 <div class="label">{{ __('owner.profit_loss.sales_tax') }}</div>
                                 <div class="value">
-                                    {{ number_format($sales_tax ?? 0, 2) }}
+                                    {{ number_format($f['sales_vat'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
@@ -267,16 +312,25 @@
                             <div class="stat-card expense">
                                 <div class="label">{{ __('owner.profit_loss.expenses_tax') }}</div>
                                 <div class="value">
-                                    {{ number_format($expenses_tax ?? 0, 2) }}
+                                    {{ number_format($f['expenses_vat'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="stat-card revenue">
-                                <div class="label">{{ __('owner.generated.depreciation_ratio') }}</div>
+                                <div class="label">{{ __('owner.profit_loss.net_tax') }}</div>
                                 <div class="value">
-                                    {{ number_format($depreciation ?? 0, 2) }}
+                                    {{ number_format($f['sales_vat'] - $f['expenses_vat'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="stat-card payroll">
+                                <div class="label">{{ __('owner.profit_loss.commission_labor') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['commission_labor'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
@@ -284,6 +338,7 @@
                     </div>
                 </div>
             </div>
+            <small class="text-muted d-block mt-2 px-2">{{ __('owner.profit_loss.formula_note') }}</small>
         </div>
     </div>
 

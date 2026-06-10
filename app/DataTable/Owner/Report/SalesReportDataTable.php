@@ -5,6 +5,7 @@ namespace App\DataTable\Owner\Report;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class SalesReportDataTable extends DataTables
@@ -15,11 +16,12 @@ class SalesReportDataTable extends DataTables
 
         if ($request->ajax()) {
             $query = Sale::with(['details', 'paymentMethod', 'seller', 'customer'])
+                ->where('seller_type', 'owner')
                 ->where('seller_id', $owner_id); // فلترة حسب الصيّاد
 
-            // فلترة حسب التاريخ
+            // فلترة حسب التاريخ (على عمود البيع لا الإنشاء)
             if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('created_at', [
+                $query->whereBetween(DB::raw('DATE(sale_datetime)'), [
                     $request->start_date,
                     $request->end_date,
                 ]);
@@ -76,7 +78,7 @@ class SalesReportDataTable extends DataTables
                         : '---';
                 })
                 ->addColumn('details', function ($row) {
-                    return '<a href="'.route('admin.sales.show', $row->id).'" class="btn btn-sm btn-info">عرض</a>';
+                    return '<a href="'.route('owner.sales.show', $row->id).'" class="btn btn-sm btn-info">عرض</a>';
                 })
                 ->rawColumns(['status', 'seller', 'details'])
                 ->with([

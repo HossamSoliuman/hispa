@@ -22,7 +22,11 @@ class DatabaseSeeder extends Seeder
         $this->call(LocationSeeder::class);
         $this->call(DefaultMasterSeeder::class);
         $this->call(CategorySeeder::class);
-        $this->call(DemoDataSeeder::class);
-        $this->call(AccountingErrorsDemoSeeder::class);
+
+        // Demo finance & trip data — disabled so a fresh seed leaves only the
+        // reference data (ports, cities, fish, categories, payment methods, users).
+        // Re-enable these to restore the demo dataset.
+        // $this->call(DemoDataSeeder::class);
+        // $this->call(AccountingErrorsDemoSeeder::class);
     }
 }

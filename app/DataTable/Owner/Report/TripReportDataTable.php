@@ -13,7 +13,7 @@ class TripReportDataTable extends DataTables
     {
         $owner_id = auth()->user()->id;
         if ($request->ajax()) {
-            $query = Trip::orderBy('created_at', 'desc');
+            $query = Trip::with(['catches.details', 'sales'])->orderBy('created_at', 'desc');
             $query->where('owner_id', $owner_id);
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
@@ -28,7 +28,7 @@ class TripReportDataTable extends DataTables
                 ->addIndexColumn()
                 ->addColumn('number', function (Trip $trip) {
                     $number = $trip->number ?? '--';
-                    $url = route('admin.trips.show', $trip->id); // تأكد أن هذا route موجود
+                    $url = route('owner.trips.show', $trip->id);
 
                     return "<a href='{$url}' class='text-primary fw-bold'>{$number}</a>";
                 })
@@ -47,13 +47,25 @@ class TripReportDataTable extends DataTables
                     return $trip->port->name ?? '--';
                 })
                 ->addColumn('item_count', function (Trip $trip) {
-                    return $trip->fishStocks->count() > 0 ? $trip->fishStocks->count() : '--';
+                    $count = $trip->catches?->details->count() ?? 0;
+
+                    return $count > 0 ? $count : '--';
                 })
 
                 ->addColumn('item_weight', function (Trip $trip) {
-                    $weight = $trip->fishStocks->sum('weight');
+                    $weight = (float) ($trip->catches?->details->sum('weight') ?? 0);
 
                     return $weight > 0 ? $weight : '--';
+                })
+                ->addColumn('sales_total', function (Trip $trip) {
+                    $total = (float) $trip->sales->where('seller_type', 'owner')->sum('total_price');
+
+                    return $total > 0 ? number_format($total, 2) : '--';
+                })
+                ->addColumn('net_owner_amount', function (Trip $trip) {
+                    $net = (float) $trip->sales->where('seller_type', 'owner')->sum('net_owner_amount');
+
+                    return $net > 0 ? number_format($net, 2) : '--';
                 })
 
                 ->addColumn('date', function (Trip $trip) {
@@ -101,8 +113,9 @@ class TripReportDataTable extends DataTables
 
                 ->with([
                     'trip_count' => $data->count(),
-                    'total_fish_count' => $data->sum(fn ($trip) => $trip->fishStocks->count()),
-                    'totalWeight' => $data->sum(fn ($trip) => $trip->fishStocks->sum('weight')).' كجم',
+                    'total_fish_count' => $data->sum(fn ($trip) => $trip->catches?->details->count() ?? 0),
+                    'totalWeight' => $data->sum(fn ($trip) => (float) ($trip->catches?->details->sum('weight') ?? 0)).' كجم',
+                    'total_sales' => number_format($data->sum(fn ($trip) => (float) $trip->sales->where('seller_type', 'owner')->sum('total_price')), 2),
                 ])
 
                 ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'counter', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges

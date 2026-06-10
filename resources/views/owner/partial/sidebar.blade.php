@@ -189,6 +189,8 @@
 
             <div
                 class="menu-item has-sub {{ request()->routeIs('owner.profit.loss') ||
+                request()->routeIs('owner.month-closing.*') ||
+                request()->routeIs('owner.reports.*') ||
                 request()->routeIs('owner.fishQuntity') ||
                 request()->routeIs('owner.sales.index') ||
                 request()->routeIs('owner.customers.index') ||
@@ -202,10 +204,22 @@
                 </a>
                 <div class="menu-submenu">
 
+                    <div class="menu-item {{ request()->routeIs('owner.reports.hub') ? 'active' : '' }} ">
+                        <a href="{{ route('owner.reports.hub') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.analysis_reports.hub_title') }}</span>
+                        </a>
+                    </div>
+
                     <!-- {{ __('owner.generated.item_57b5f1') }} -->
                     <div class="menu-item {{ request()->routeIs('owner.profit.loss') ? 'active' : '' }} ">
                         <a href="{{ route('owner.profit.loss') }}" class="menu-link">
                             <span class="menu-text">{{ __('owner.menu.profit_loss') }}</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item {{ request()->routeIs('owner.month-closing.*') ? 'active' : '' }} ">
+                        <a href="{{ route('owner.month-closing.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.menu.month_closing') }}</span>
                         </a>
                     </div>
 

@@ -149,6 +149,9 @@
 
         <!-- END row -->
 
+        {{-- Client's "أهم 5" landing section (plan §4.3) --}}
+        @include('owner.dashboard._top_five')
+
         <!-- BEGIN Tabs -->
         <div class="card mt-3">
             <div class="card-header border-bottom">
@@ -204,7 +207,7 @@
                                             <div class="d-flex gap-3 align-items-baseline justify-content-end mt-1">
                                                 <div class="text-end">
                                                     <div class="h6 mb-0 text-success fw-bold" id="summaryRevenue">
-                                                        {!! number_format($totalRevenue, 0) .
+                                                        {!! number_format($currentMonthRevenue, 0) .
                                                             ' ' .
                                                             view('components.riyal-icon', [
                                                                 'size' => 'sm',
@@ -216,7 +219,7 @@
                                                 </div>
                                                 <div class="text-end">
                                                     <div class="h6 mb-0 text-info fw-bold" id="summaryProfit">
-                                                        {!! number_format($profit, 0) .
+                                                        {!! number_format($currentMonthProfit, 0) .
                                                             ' ' .
                                                             view('components.riyal-icon', [
                                                                 'size' => 'sm',

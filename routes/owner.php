@@ -29,6 +29,7 @@ use App\Http\Controllers\Owner\GovernorateController;
 use App\Http\Controllers\Owner\InspectionsController;
 use App\Http\Controllers\Owner\LocationController;
 use App\Http\Controllers\Owner\MaintenanceController;
+use App\Http\Controllers\Owner\MonthClosingController;
 use App\Http\Controllers\Owner\NotificationController;
 use App\Http\Controllers\Owner\PayrollController;
 use App\Http\Controllers\Owner\PortController;
@@ -37,6 +38,8 @@ use App\Http\Controllers\Owner\ProfitLossController;
 use App\Http\Controllers\Owner\RegionController;
 use App\Http\Controllers\Owner\Report\DalalStockReportController;
 use App\Http\Controllers\Owner\Report\FishHistoryReportController;
+use App\Http\Controllers\Owner\Report\ProfitabilityReportController;
+use App\Http\Controllers\Owner\Report\ReportsHubController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
 use App\Http\Controllers\Owner\Report\StockReportController;
 use App\Http\Controllers\Owner\Report\TripReportController;
@@ -199,6 +202,19 @@ Route::group([
         // boat print reports
         Route::get('/reports/print/all-boats', [\App\Http\Controllers\Owner\Report\BoatReportController::class, 'printAllBoatsReport'])->name('reports.print.all_boats');
         Route::get('/reports/print/boat/{id}', [\App\Http\Controllers\Owner\Report\BoatReportController::class, 'printBoatReport'])->name('reports.print.boat');
+        // reports hub (landing) + expenses by category
+        Route::get('/reports', [ReportsHubController::class, 'index'])->name('reports.hub');
+        Route::get('/reports/expenses-by-category', [ProfitabilityReportController::class, 'expensesByCategory'])->name('reports.expenses-by-category');
+        Route::get('/reports/expenses-by-category/print', [ProfitabilityReportController::class, 'expensesByCategoryPrint'])->name('reports.expenses-by-category.print');
+
+        // analysis reports (P0): trip/boat profitability, production by species
+        Route::get('/reports/trip-profitability', [ProfitabilityReportController::class, 'tripProfitability'])->name('reports.trip-profitability');
+        Route::get('/reports/trip-profitability/print', [ProfitabilityReportController::class, 'tripProfitabilityPrint'])->name('reports.trip-profitability.print');
+        Route::get('/reports/boat-profitability', [ProfitabilityReportController::class, 'boatProfitability'])->name('reports.boat-profitability');
+        Route::get('/reports/boat-profitability/print', [ProfitabilityReportController::class, 'boatProfitabilityPrint'])->name('reports.boat-profitability.print');
+        Route::get('/reports/production-species', [ProfitabilityReportController::class, 'productionBySpecies'])->name('reports.production-species');
+        Route::get('/reports/production-species/print', [ProfitabilityReportController::class, 'productionBySpeciesPrint'])->name('reports.production-species.print');
+
         // fish_Stock_history
         Route::get('/fish_stock_history', [FishHistoryReportController::class, 'index'])->name('fish-history-report');
         Route::get('/getFishStockHistoryReport', [FishHistoryReportController::class, 'getFishHistoryData'])->name('getFishStockHistoryReport');
@@ -270,6 +286,14 @@ Route::group([
         Route::get('/payroll-boat-Periods/{boat}', [PayrollController::class, 'paidPeriods'])->name('payroll.paidPeriods');
         Route::get('/profit-loss', [ProfitLossController::class, 'index'])->name('profit.loss');
         Route::get('/profit-loss/print', [ProfitLossController::class, 'print'])->name('profit.loss.print');
+
+        // month-close (إقفال شهر الصيد)
+        Route::get('/month-closing', [MonthClosingController::class, 'index'])->name('month-closing.index');
+        Route::get('/month-closing/preview', [MonthClosingController::class, 'preview'])->name('month-closing.preview');
+        Route::post('/month-closing/close', [MonthClosingController::class, 'close'])->name('month-closing.close');
+        Route::get('/month-closing/{monthClosing}', [MonthClosingController::class, 'show'])->name('month-closing.show');
+        Route::get('/month-closing/{monthClosing}/print', [MonthClosingController::class, 'print'])->name('month-closing.print');
+        Route::post('/month-closing/{monthClosing}/reopen', [MonthClosingController::class, 'reopen'])->name('month-closing.reopen');
 
         Route::get('/fish-quntity', [ReportsController::class, 'fishQuntity'])->name('fishQuntity');
         Route::get('/asset_depreciation', [ReportsController::class, 'assetDepreciation'])->name('assetDepreciation');

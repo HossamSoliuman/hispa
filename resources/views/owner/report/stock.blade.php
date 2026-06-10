@@ -116,9 +116,9 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button id="filterBtn" class="btn btn-primary btn-sm px-2 py-0" style="min-width: 50px;">{{ __('owner.stock_report.filter') }}</button>
-                    <button id="resetBtn" class="btn btn-secondary btn-sm px-2 py-0" style="min-width: 50px;">{{ __('owner.stock_report.reset') }}</button>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button id="filterBtn" class="btn btn-primary btn-sm" style="min-width: 60px;">{{ __('owner.stock_report.filter') }}</button>
+                    <button id="resetBtn" class="btn btn-secondary btn-sm" style="min-width: 60px;">{{ __('owner.stock_report.reset') }}</button>
                 </div>
 
 

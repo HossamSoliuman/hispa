@@ -11,92 +11,10 @@ use App\Models\Sale;
 use App\Models\Trip;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PayrollService
 {
-    public function calculateBoatPayrollOLd(Boat $boat, Carbon $from, Carbon $to, ?float $ownerPercentage = null): array
-    {
-        // 1. Trips within date range
-        $trips = Trip::where('boat_id', $boat->id)
-            ->whereBetween('created_at', [$from, $to])
-            ->pluck('id');
-
-        // 2. Owner direct sales
-        $ownerSales = Sale::whereIn('trip_id', $trips)
-            ->where('seller_id', $boat->owner_id)
-            ->sum('net_owner_amount');
-
-        // 3. Dalal sales from owner's stock
-        $dalalSales = Sale::whereIn('trip_id', $trips)
-            ->whereIn('trip_id', function ($query) use ($boat) {
-                $query->select('trip_id')
-                    ->from('dalal_stocks')
-                    ->where('owner_id', $boat->owner_id);
-            })
-            ->sum('net_owner_amount');
-
-        $totalRevenues = $ownerSales + $dalalSales;
-
-        // 4. Expenses for boat
-        $expenses = Expense::where('boat_id', $boat->id)
-            ->whereBetween('created_at', [$from, $to])
-            ->sum('final_price');
-
-        // 5. Owner net profit
-        $ownerProfitPercent = $ownerPercentage ?? $boat->owner_profit_percent ?? 0;
-        $ownerNetProfit = $totalRevenues * ($ownerProfitPercent / 100);
-
-        // 6. Remaining balance for crew
-        $remainingBalance = $totalRevenues - $expenses - $ownerNetProfit;
-
-        $allCrew = $boat->crews->concat($boat->captain ? collect([$boat->captain]) : collect([]));
-
-        // 7. Fixed salaries
-        $totalFixedSalaries = $allCrew
-            ->where('salary_type', 'salary')
-            ->sum('salary_amount');
-
-        $remainingBalanceForCrew = $remainingBalance - $totalFixedSalaries;
-
-        // 8. Calculate each crew member salary
-        $crewWithCaptain = $allCrew->map(function ($member) use ($remainingBalanceForCrew) {
-            if ($member->salary_type === 'salary') {
-                $calculated = $member->salary_amount;
-            } else { // نسبة
-                $percentage = $member->salary_amount ?? 0;
-                $calculated = $remainingBalanceForCrew * ($percentage / 100);
-            }
-
-            return [
-                'user_id' => $member->id,
-                'name' => $member->name,
-                'phone' => $member->phone,
-                'role' => $member->role,
-                'salary_type' => $member->salary_type,
-                'salary_amount' => $member->salary_amount,
-                'fixed_amount' => $member->salary_type === 'salary' ? number_format($member->salary_amount, 2) : 0,
-                'percentage' => $member->salary_type === 'percentage' ? number_format($member->salary_amount, 2) : 0,
-                'calculated_salary' => round($calculated, 2),
-                'is_captain' => $member->role === 'captain',
-                'is_crew' => $member->role === 'crew',
-            ];
-        });
-
-        $totalCrewSalary = $crewWithCaptain->sum('calculated_salary');
-        $balanceAfterDistribution = $remainingBalance - $totalCrewSalary;
-
-        return [
-            'total_revenues' => round($totalRevenues, 2),
-            'total_expenses' => round($expenses, 2),
-            'owner_profit_percent' => $ownerProfitPercent,
-            'owner_net_profit' => round($ownerNetProfit, 2),
-            'remaining_balance' => round($remainingBalance, 2),
-            'crew' => $crewWithCaptain,
-            'total_crew_salary' => $totalCrewSalary,
-            'balance_after_distribution' => round($balanceAfterDistribution, 2),
-        ];
-    }
-
     public function calculateBoatPayroll(Boat $boat, Carbon $from, Carbon $to, ?float $ownerPercentage = null): array
     {
         // 1. جلب الرحلات ضمن الفترة
@@ -104,25 +22,14 @@ class PayrollService
             ->whereBetween('created_at', [$from, $to])
             ->pluck('id');
 
-        // 2. الإيرادات الخاصة بالصيّاد
-        $ownerSales = Sale::whereIn('trip_id', $trips)
+        // 2. إيرادات المالك من مبيعات رحلات القارب (التدفق القديم للدلال أُلغي)
+        $totalRevenues = Sale::whereIn('trip_id', $trips)
             ->where('seller_id', $boat->owner_id)
             ->sum('net_owner_amount');
 
-        // 3. الإيرادات الخاصة بالدلال
-        $dalalSales = Sale::whereIn('trip_id', $trips)
-            ->whereIn('trip_id', function ($query) use ($boat) {
-                $query->select('trip_id')
-                    ->from('dalal_stocks')
-                    ->where('owner_id', $boat->owner_id);
-            })
-            ->sum('net_owner_amount');
-
-        $totalRevenues = $ownerSales + $dalalSales;
-
         // 4. المصروفات للفترة
         $expenses = Expense::where('boat_id', $boat->id)
-            ->whereBetween('created_at', [$from, $to])
+            ->whereBetween('date', [$from, $to])
             ->sum('final_price');
 
         // 5. حساب صافي ربح الصيّاد
@@ -259,35 +166,36 @@ class PayrollService
             $startDate = Carbon::create($year, $month, 1)->startOfDay();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
 
+            $ownerId = $user->owner_id ?? auth()->id();
+
             $trips = Trip::where('boat_id', $user->boat_id)->pluck('id');
-            $sales = Sale::whereIn('trip_id', $trips)
-                ->whereBetween('sale_datetime', [$startDate, $endDate])
-                ->get();
-            $depreciation = ($sales->sum('total_price') * (5 / 100));
-            $sales = ( $sales->sum('total_price') - $depreciation );
+            $sales = (float) Sale::whereIn('trip_id', $trips)
+                ->whereBetween(DB::raw('DATE(sale_datetime)'), [$startDate->toDateString(), $endDate->toDateString()])
+                ->sum('total_price');
+
             $salaries = PayrollModel::where('year', $year)
                 ->where('month', $month)
                 ->where('type', 'salary')
-                ->with('details')
                 ->first();
 
-            $captins = User::whereIn('role', ['crew', 'captain'])->where('salary_type','salary')->where('boat_id', $user->boat_id)->pluck('id');
-            $employees = User::whereIn('role', ['employee'])->where('salary_type','salary')->pluck('id');
-            $boats = Boat::active()->where('owner_id', auth()->id())->count();
+            $captins = User::whereIn('role', ['crew', 'captain'])->where('salary_type', 'salary')->where('boat_id', $user->boat_id)->pluck('id');
+            $employees = User::whereIn('role', ['employee'])->where('salary_type', 'salary')->where('owner_id', $ownerId)->pluck('id');
+            $boats = max(Boat::active()->where('owner_id', $ownerId)->count(), 1);
 
+            $captinsTotalSalaries = $salaries
+                ? (float) $salaries->details()->whereIn('user_id', $captins)->sum('final_salary')
+                : 0.0;
+            $employeesTotalSalaries = $salaries
+                ? (float) $salaries->details()->whereIn('user_id', $employees)->sum('final_salary')
+                : 0.0;
 
-            $captinsTotalSalaries = $salaries->details()->whereIn('user_id',$captins)->sum('final_salary');
-            $employeesTotalSalaries = $salaries->details()->whereIn('user_id',$employees)->sum('final_salary');
+            $expenses = (float) Expense::where('boat_id', $user->boat_id)
+                ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+                ->sum('final_price');
 
-            $expenses = Expense::where('boat_id', $user->boat_id)
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->get();
-            $totalIncome = ($sales - ($expenses->sum('final_price') + $captinsTotalSalaries + ($employeesTotalSalaries/$boats)));                        
+            $totalIncome = $sales - ($expenses + $captinsTotalSalaries + ($employeesTotalSalaries / $boats));
 
-            $total_captinsValue = ($totalIncome / 2);
-
-            // $salary = $totalIncome*($user->salary_amount ? $user->salary_amount/100 : 0);
-            return $total_captinsValue;
+            return $totalIncome / 2;
         }
 
         return 0;

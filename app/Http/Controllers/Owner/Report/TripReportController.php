@@ -199,35 +199,14 @@ class TripReportController extends Controller
     }
 
     /**
-     * Generate QR Code image as base64 data URL
-     * Uses api.qrserver.com as a fallback when QR library is not installed
+     * Generate QR Code image as base64 data URL.
+     * Generated locally via ReportQrService; never blocks render on an external
+     * HTTP call. Falls back to an SVG placeholder when no QR library is present.
      */
     private function generateQRCodeImage($url)
     {
-        // Use QR Server API - reliable and free
-        try {
-            $size = '200';
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size='.$size.'x'.$size.'&data='.urlencode($url);
-
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 5,
-                    'ignore_errors' => true,
-                    'user_agent' => 'Mozilla/5.0 (compatible)',
-                ],
-            ]);
-
-            $imageData = @file_get_contents($qrUrl, false, $context);
-
-            if ($imageData !== false && ! empty($imageData) && strlen($imageData) > 100) {
-                return 'data:image/png;base64,'.base64_encode($imageData);
-            }
-        } catch (\Throwable $e) {
-            // Fall through to SVG fallback
-        }
-
-        // If external API fails, create a simple SVG placeholder with URL
-        return $this->generateQRPlaceholder($url);
+        return app(\App\Service\Owner\ReportQrService::class)->dataUri($url)
+            ?? $this->generateQRPlaceholder($url);
     }
 
     /**

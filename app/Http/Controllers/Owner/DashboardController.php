@@ -2,213 +2,296 @@
 
 namespace App\Http\Controllers\Owner;
 
+use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
+use App\Models\CatchDetail;
+use App\Models\CatchModel;
 use App\Models\Category;
 use App\Models\Expense;
-use App\Models\FishQuantityStock;
+use App\Models\MonthClosing;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use App\Models\Trip;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Service\Owner\MonthlyFinancialsService;
+use App\Service\Owner\MonthlyReportsService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    private const ARABIC_MONTHS = [
+        1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+        5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+        9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
+    ];
+
+    public function __construct(
+        private MonthlyFinancialsService $financials,
+        private MonthlyReportsService $reports,
+    ) {}
+
+    private function ownerId(): int
     {
-        $user = auth()->user();
-        // إجمالي الإيرادات (كل الوقت)
-        $totalRevenue = Sale::sum('total_price');
+        return (int) Auth::guard('owner')->id();
+    }
 
-        // الإيرادات الشهر الحالي
-        $currentMonthRevenue = Sale::whereBetween('created_at', [
-            Carbon::now()->startOfMonth(),
-            Carbon::now()->endOfMonth(),
-        ])->sum('total_price');
+    /**
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private function ownerSaleIds(int $ownerId)
+    {
+        return Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->pluck('id');
+    }
 
-        // الإيرادات الشهر الماضي
-        $previousMonthRevenue = Sale::whereBetween('created_at', [
-            Carbon::now()->subMonth()->startOfMonth(),
-            Carbon::now()->subMonth()->endOfMonth(),
-        ])->sum('total_price');
+    private function approvedReturns(int $ownerId, ?string $from = null, ?string $to = null): float
+    {
+        $query = DB::table('returns')
+            ->whereIn('sale_id', $this->ownerSaleIds($ownerId))
+            ->where('status', 'approved');
 
-        // نسبة النمو/النقصان
-        $percentageChange = 0;
-        if ($previousMonthRevenue > 0) {
-            $percentageChange = (($currentMonthRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100;
+        if ($from && $to) {
+            $query->whereBetween(DB::raw('DATE(returned_at)'), [$from, $to]);
         }
 
-        // مجموع الأوزان (كجم)
-        $totalCatch = 0;
-        // --------------------------------
-        // متوسط السعر لكل كغم
-        $averagePricePerKg = $totalCatch > 0 ? $totalRevenue / $totalCatch : 0;
-        // عدد القوارب النشطة
-        $activeBoats = Boat::where('status', 1)->count();
+        return (float) $query->sum('total_amount');
+    }
 
-        // عدد الرحلات المكتملة
-        $completedTrips = Trip::where('status', 8)->count();
+    public function index()
+    {
+        $ownerId = $this->ownerId();
 
-        // -----------------------
-        // إجمالي التكاليف (غير معروف عندك الجدول بالضبط، بفرض اسمه expenses)
-        $totalCosts = Expense::sum('final_price');
+        $ownerSales = fn () => Sale::where('seller_type', 'owner')->where('seller_id', $ownerId);
 
-        // حساب الربح
-        $profit = $totalRevenue - $totalCosts;
+        $totalRevenue = (float) $ownerSales()->sum('total_price');
 
-        // حساب هامش الربح %
-        $profitMargin = $totalRevenue > 0 ? ($profit / $totalRevenue) * 100 : 0;
+        $currentMonthRevenue = (float) $ownerSales()
+            ->whereBetween(DB::raw('DATE(sale_datetime)'), [
+                now()->startOfMonth()->toDateString(),
+                now()->endOfMonth()->toDateString(),
+            ])->sum('total_price');
+
+        $previousMonthRevenue = (float) $ownerSales()
+            ->whereBetween(DB::raw('DATE(sale_datetime)'), [
+                now()->subMonth()->startOfMonth()->toDateString(),
+                now()->subMonth()->endOfMonth()->toDateString(),
+            ])->sum('total_price');
+
+        $percentageChange = $previousMonthRevenue > 0
+            ? round((($currentMonthRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100, 1)
+            : 0;
+
+        $ownerTripIds = Trip::where('owner_id', $ownerId)->pluck('id');
+        $totalCatch = (float) CatchModel::whereIn('trip_id', $ownerTripIds)->sum('total_weight');
+        if ($totalCatch == 0.0) {
+            $catchIds = CatchModel::whereIn('trip_id', $ownerTripIds)->pluck('id');
+            $totalCatch = (float) CatchDetail::whereIn('catch_id', $catchIds)->sum('weight');
+        }
+
+        $soldWeight = (float) SaleDetail::whereIn('sale_id', $this->ownerSaleIds($ownerId))->sum('weight');
+        $averagePricePerKg = $soldWeight > 0 ? round($totalRevenue / $soldWeight, 2) : 0;
+
+        $activeBoats = Boat::where('owner_id', $ownerId)->where('status', 1)->count();
+        $completedTrips = Trip::where('owner_id', $ownerId)->where('status', TripStatus::Sold->value)->count();
+
+        $netRevenue = (float) $ownerSales()->sum('net_owner_amount') - $this->approvedReturns($ownerId);
+        $totalCosts = (float) Expense::where('owner_id', $ownerId)->sum('final_price');
+        $profit = round($netRevenue - $totalCosts, 2);
+        $currentMonthProfit = $this->currentMonthProfit($ownerId);
+
+        $profitMargin = $totalRevenue > 0 ? round(($profit / $totalRevenue) * 100, 2) : 0;
+
+        $topFive = $this->topFive($ownerId);
 
         return view('owner.dashboard.index', compact(
             'totalRevenue',
+            'currentMonthRevenue',
+            'currentMonthProfit',
             'percentageChange',
             'totalCatch',
             'averagePricePerKg',
             'profitMargin',
             'profit',
             'activeBoats',
-            'completedTrips'
+            'completedTrips',
+            'topFive'
         ));
+    }
+
+    /**
+     * The client's "أهم 5" landing data for the current month (plan §4.3):
+     * month profit (vs last month), crew dues, boat & trip profitability,
+     * production by species. All money via the canonical services.
+     *
+     * @return array<string, mixed>
+     */
+    private function topFive(int $ownerId): array
+    {
+        $from = now()->startOfMonth()->toDateString();
+        $to = now()->endOfMonth()->toDateString();
+        $prevFrom = now()->subMonth()->startOfMonth()->toDateString();
+        $prevTo = now()->subMonth()->endOfMonth()->toDateString();
+
+        $current = $this->financials->compute($ownerId, $from, $to);
+        $previous = $this->financials->compute($ownerId, $prevFrom, $prevTo);
+
+        $profitChange = $previous['net_profit'] != 0.0
+            ? round((($current['net_profit'] - $previous['net_profit']) / abs($previous['net_profit'])) * 100, 1)
+            : 0.0;
+
+        $closing = MonthClosing::where('owner_id', $ownerId)
+            ->where('year', now()->year)
+            ->where('month', now()->month)
+            ->first();
+
+        $unpaidDues = $closing
+            ? (float) $closing->dues()->sum(DB::raw('due_amount - paid_amount'))
+            : 0.0;
+
+        $boats = $this->reports->boatProfitability($ownerId, $from, $to);
+        $trips = $this->reports->tripProfitability($ownerId, $from, $to);
+        $species = $this->reports->productionBySpecies($ownerId, $from, $to);
+
+        return [
+            'net_profit' => $current['net_profit'],
+            'profit_change' => $profitChange,
+            'crew_pool' => $current['crew_share'],
+            'unpaid_dues' => round($unpaidDues, 2),
+            'is_closed' => (bool) $closing,
+            'boats' => array_slice($boats, 0, 5),
+            'boats_max' => ! empty($boats) ? max(array_map(fn ($b) => abs($b['net_profit']), $boats)) : 0.0,
+            'trips' => array_slice($trips, 0, 5),
+            'species' => array_slice($species, 0, 5),
+        ];
+    }
+
+    private function currentMonthProfit(int $ownerId): float
+    {
+        $from = now()->startOfMonth()->toDateString();
+        $to = now()->endOfMonth()->toDateString();
+
+        $netRevenue = (float) Sale::where('seller_type', 'owner')
+            ->where('seller_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to])
+            ->sum('net_owner_amount') - $this->approvedReturns($ownerId, $from, $to);
+
+        $expenses = (float) Expense::where('owner_id', $ownerId)
+            ->whereBetween('date', [$from, $to])
+            ->sum('final_price');
+
+        return round($netRevenue - $expenses, 2);
     }
 
     public function overviewData()
     {
+        $ownerId = $this->ownerId();
         $year = now()->year;
-        $isMySQL = DB::connection()->getDriverName() === 'mysql';
-        $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
+        $saleIds = $this->ownerSaleIds($ownerId);
 
-        $monthlySales = Sale::selectRaw("$monthExpr as month, SUM(net_owner_amount) as revenue")
-            ->whereYear('created_at', $year)
-            ->groupBy(DB::raw($monthExpr))
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
+        $monthly = $this->monthlySeries(
+            $this->sumByMonth(
+                Sale::where('seller_type', 'owner')->where('seller_id', $ownerId),
+                'sale_datetime',
+                'net_owner_amount',
+                $year
+            ),
+            $this->sumByMonth(
+                Expense::where('owner_id', $ownerId),
+                'date',
+                'final_price',
+                $year
+            )
+        );
 
-        $monthlyExpenses = Expense::selectRaw("$monthExpr as month, SUM(final_price) as expenses")
-            ->whereYear('created_at', $year)
-            ->groupBy(DB::raw($monthExpr))
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $arabicMonths = [
-            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
-            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
-            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
-        ];
-
-        $monthly = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $revenue = (float) ($monthlySales->get($m)?->revenue ?? 0);
-            $expenses = (float) ($monthlyExpenses->get($m)?->expenses ?? 0);
-            $monthly[] = [
-                'month' => $m,
-                'month_name' => $arabicMonths[$m],
-                'revenue' => round($revenue, 2),
-                'profit' => round($revenue - $expenses, 2),
-            ];
-        }
-
-        $catchComposition = DB::table('sale_details')
+        $catchComposition = SaleDetail::whereIn('sale_id', $saleIds)
             ->selectRaw('fish_name, SUM(weight * price_per_kilo) as total_value')
             ->groupBy('fish_name')
             ->get();
 
-        $totalValue = $catchComposition->sum('total_value');
-        $catchComposition->map(function ($item) use ($totalValue) {
+        $totalValue = (float) $catchComposition->sum('total_value');
+        $catchComposition->each(function ($item) use ($totalValue) {
             $item->percentage = $totalValue > 0 ? round(($item->total_value / $totalValue) * 100, 1) : 0;
-
-            return $item;
         });
 
-        $totalCatchKg = DB::table('sale_details')->sum('weight');
-        $totalRevenue = Sale::sum('net_owner_amount');
-        $totalExpenses = Expense::sum('final_price');
-
-        // الأنشطة الأخيرة (آخر 5 أحداث)
-        $activities = Trip::latest()->take(5)->get();
+        $totalCatchKg = (float) SaleDetail::whereIn('sale_id', $saleIds)->sum('weight');
+        $totalRevenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->sum('net_owner_amount');
+        $totalExpenses = (float) Expense::where('owner_id', $ownerId)->sum('final_price');
+        $returns = $this->approvedReturns($ownerId);
 
         return response()->json([
             'monthly' => $monthly,
             'catchComposition' => $catchComposition,
-            'activities' => $activities,
-            'totalCatchKg' => (float) $totalCatchKg,
+            'totalCatchKg' => $totalCatchKg,
             'summary' => [
-                'revenue' => round((float) $totalRevenue, 2),
-                'profit' => round((float) ($totalRevenue - $totalExpenses), 2),
-                'avgPricePerKg' => $totalCatchKg > 0 ? round((float) $totalRevenue / (float) $totalCatchKg, 2) : 0,
+                'revenue' => round($totalRevenue - $returns, 2),
+                'profit' => round($totalRevenue - $returns - $totalExpenses, 2),
+                'avgPricePerKg' => $totalCatchKg > 0 ? round($totalRevenue / $totalCatchKg, 2) : 0,
             ],
         ]);
     }
 
     public function getRecentActivities()
     {
+        $ownerId = $this->ownerId();
         $activities = [];
 
-        // Example: Trips
-        $trips = Trip::latest()->take(5)->get();
+        $trips = Trip::where('owner_id', $ownerId)->latest('updated_at')->take(5)->get();
         foreach ($trips as $trip) {
             $activities[] = [
-                'icon' => 'bi-clipboard-check text-success',
-                'message' => "اكتمال رحلة البحار {$trip->boat_name} - {$trip->trip_number}",
-                'time' => $trip->updated_at->diffForHumans(),
-                'badge_class' => 'bg-success',
+                'icon' => 'bi-clipboard-check text-info',
+                'message' => "{$trip->status->label()} - {$trip->boat_name} - {$trip->number}",
+                'timestamp' => $trip->updated_at,
+                'badge_class' => 'bg-'.$trip->status->color(),
             ];
         }
 
-        // Example: Sales
-        $sales = Sale::latest()->take(5)->get();
+        $sales = Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->latest('sale_datetime')->take(5)->get();
         foreach ($sales as $sale) {
             $activities[] = [
                 'icon' => 'bi-cash-coin text-success',
-                'message' => "بيع لمطعم {$sale->customer_name} - ر.س".number_format($sale->total_price),
-                'time' => $sale->updated_at->diffForHumans(),
+                'message' => 'بيع - '.($sale->customer_name ?? '').' - ر.س'.number_format((float) $sale->total_price),
+                'timestamp' => $sale->sale_datetime ?? $sale->updated_at,
                 'badge_class' => 'bg-success',
             ];
         }
 
-        // Stock alerts
-        $stocks = FishQuantityStock::where('quantity', '<', 10)->latest()->take(5)->get();
-        foreach ($stocks as $stock) {
-            $activities[] = [
-                'icon' => 'bi-thermometer-low text-warning',
-                'message' => "مخزون {$stock->item_name} منخفض (متبقي {$stock->quantity})",
-                'time' => $stock->updated_at->diffForHumans(),
-                'badge_class' => 'bg-warning text-dark',
-            ];
-        }
+        $activities = collect($activities)
+            ->sortByDesc('timestamp')
+            ->take(5)
+            ->map(function ($activity) {
+                $activity['time'] = optional($activity['timestamp'])->diffForHumans();
+                unset($activity['timestamp']);
 
-        // Sort by latest time
-        $activities = collect($activities)->sortByDesc('time')->take(5);
+                return $activity;
+            })
+            ->values();
 
         return response()->json($activities);
     }
 
     public function summary()
     {
-        // Get total revenue (example)
-        $revenue = Sale::sum('total_price'); // adjust according to your table
+        $ownerId = $this->ownerId();
 
-        // Get total expenses
-        $expenses = Expense::sum('final_price');
+        $revenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->sum('total_price');
+        $returns = $this->approvedReturns($ownerId);
+        $expenses = (float) Expense::where('owner_id', $ownerId)->sum('final_price');
 
-        // Get dynamic categories and sum by each
-        $categories = Category::withSum('expenses', 'final_price')->get();
-        // This assumes you have `expenses()` relationship in Category model:
-        // public function expenses() { return $this->hasMany(Expense::class); }
+        $categories = Category::withSum(['expenses' => function ($q) use ($ownerId) {
+            $q->where('owner_id', $ownerId);
+        }], 'final_price')->get();
 
-        // Calculate profit and margin
-        $profit = $revenue - $expenses;
-        $margin = $revenue > 0 ? round(($profit / $revenue) * 100, 2) : 0;
+        $netRevenue = $revenue - $returns;
+        $profit = $netRevenue - $expenses;
+        $margin = $netRevenue > 0 ? round(($profit / $netRevenue) * 100, 2) : 0;
 
         return response()->json([
-            'revenue' => $revenue,
-            'expenses' => $expenses,
-            'profit' => $profit,
+            'revenue' => round($netRevenue, 2),
+            'expenses' => round($expenses, 2),
+            'profit' => round($profit, 2),
             'margin' => $margin,
-            'categories' => $categories, // return category names and sums
+            'categories' => $categories,
             'monthly' => $this->getMonthlyFinancials(),
         ]);
     }
@@ -218,37 +301,29 @@ class DashboardController extends Controller
      */
     private function getMonthlyFinancials(): array
     {
+        $ownerId = $this->ownerId();
         $year = now()->year;
-        $isMySQL = DB::connection()->getDriverName() === 'mysql';
-        $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
 
-        $monthlySales = Sale::selectRaw("$monthExpr as month, SUM(net_owner_amount) as revenue")
-            ->whereYear('created_at', $year)
-            ->groupBy(DB::raw($monthExpr))
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $monthlyExpenses = Expense::selectRaw("$monthExpr as month, SUM(final_price) as expenses")
-            ->whereYear('created_at', $year)
-            ->groupBy(DB::raw($monthExpr))
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $arabicMonths = [
-            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
-            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
-            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
-        ];
+        $sales = $this->sumByMonth(
+            Sale::where('seller_type', 'owner')->where('seller_id', $ownerId),
+            'sale_datetime',
+            'net_owner_amount',
+            $year
+        );
+        $expenses = $this->sumByMonth(
+            Expense::where('owner_id', $ownerId),
+            'date',
+            'final_price',
+            $year
+        );
 
         $monthly = [];
         for ($m = 1; $m <= 12; $m++) {
             $monthly[] = [
                 'month' => $m,
-                'month_name' => $arabicMonths[$m],
-                'revenue' => round((float) ($monthlySales->get($m)?->revenue ?? 0), 2),
-                'expenses' => round((float) ($monthlyExpenses->get($m)?->expenses ?? 0), 2),
+                'month_name' => self::ARABIC_MONTHS[$m],
+                'revenue' => round((float) ($sales[$m] ?? 0), 2),
+                'expenses' => round((float) ($expenses[$m] ?? 0), 2),
             ];
         }
 
@@ -257,96 +332,104 @@ class DashboardController extends Controller
 
     public function getOperationsData()
     {
-        // جلب كل الكباتن
-        $captains = User::where('role', 'captain')->get();
+        $ownerId = $this->ownerId();
 
-        $sailorsData = [];
+        $captains = User::where('owner_id', $ownerId)->where('role', 'captain')->get();
 
-        foreach ($captains as $captain) {
-            $trips = Trip::where('captain_id', $captain->id)->get();
+        $tripsByCaptain = Trip::where('owner_id', $ownerId)
+            ->selectRaw('captain_id, COUNT(*) as trips_count')
+            ->groupBy('captain_id')
+            ->pluck('trips_count', 'captain_id');
 
-            $totalTrips = $trips->count();
+        $revenueByCaptain = Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)
+            ->join('trips', 'sales.trip_id', '=', 'trips.id')
+            ->selectRaw('trips.captain_id as captain_id, SUM(sales.total_price) as revenue')
+            ->groupBy('trips.captain_id')
+            ->pluck('revenue', 'captain_id');
 
-            // Sum total weight from trip_details
-            $totalCatch = 0;
+        $catchByCaptain = CatchModel::join('trips', 'catch_models.trip_id', '=', 'trips.id')
+            ->where('trips.owner_id', $ownerId)
+            ->selectRaw('trips.captain_id as captain_id, SUM(catch_models.total_weight) as catch_weight')
+            ->groupBy('trips.captain_id')
+            ->pluck('catch_weight', 'captain_id');
 
-            // Sum total revenue from sales table
-            $totalRevenue = Sale::whereIn('trip_id', $trips->pluck('id'))->sum('total_price');
+        $maxRevenue = (float) ($revenueByCaptain->max() ?: 0);
 
-            // Example efficiency calculation
-            $efficiency = $totalTrips > 0 ? round(($totalRevenue / ($totalTrips * 1000)) * 100, 2) : 0;
+        $sailorsData = $captains->map(function ($captain) use ($tripsByCaptain, $revenueByCaptain, $catchByCaptain, $maxRevenue) {
+            $revenue = (float) ($revenueByCaptain[$captain->id] ?? 0);
 
-            $sailorsData[] = [
+            return [
                 'name' => $captain->name,
-                'trips' => $totalTrips,
-                'catch' => $totalCatch,
-                'revenue' => $totalRevenue,
-                'efficiency' => $efficiency,
+                'boat_name' => $captain->boat_name,
+                'trips' => (int) ($tripsByCaptain[$captain->id] ?? 0),
+                'catch' => round((float) ($catchByCaptain[$captain->id] ?? 0), 2),
+                'revenue' => round($revenue, 2),
+                // Efficiency = revenue relative to the top captain (0-100).
+                'efficiency' => $maxRevenue > 0 ? round(($revenue / $maxRevenue) * 100, 2) : 0,
             ];
-        }
+        });
 
-        // Sort by revenue descending and take top 5
-        $topCaptains = collect($sailorsData)
-            ->sortByDesc('revenue')
-            ->take(5)
-            ->values(); // reset array keys
+        $topCaptains = $sailorsData->sortByDesc('revenue')->take(5)->values();
 
-        // Example daily operations
-        $dailyOperations = Trip::selectRaw('DATE(created_at) as date, COUNT(*) as trips_count')
+        $dailyOperations = Trip::where('owner_id', $ownerId)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as trips_count')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
+        $dailyCatch = CatchModel::join('trips', 'catch_models.trip_id', '=', 'trips.id')
+            ->where('trips.owner_id', $ownerId)
+            ->selectRaw('DATE(catch_models.catch_date) as date, SUM(catch_models.total_weight) as total_catch')
+            ->groupBy('date')
+            ->pluck('total_catch', 'date');
+
+        $dailyOperations->each(function ($row) use ($dailyCatch) {
+            $row->total_catch = round((float) ($dailyCatch[$row->date] ?? 0), 2);
+        });
+
         return response()->json([
             'sailors' => $topCaptains,
             'dailyOperations' => $dailyOperations,
+            'fleetStatus' => [
+                'total' => Boat::where('owner_id', $ownerId)->count(),
+                'active' => Boat::where('owner_id', $ownerId)->where('status', 1)->count(),
+                'maintenance' => Boat::where('owner_id', $ownerId)->where('status', '!=', 1)->count(),
+                'crew' => User::where('owner_id', $ownerId)->whereIn('role', ['crew', 'captain'])->count(),
+            ],
         ]);
     }
 
     public function getAnalyticsData()
     {
-        // إجمالي الوزن لجميع الأنواع
-        $totalWeight = SaleDetail::sum('weight');
+        $ownerId = $this->ownerId();
+        $saleIds = $this->ownerSaleIds($ownerId);
 
-        // تحليل الأنواع: إجمالي السعر والوزن لكل نوع سمك
-        $fishAnalysis = SaleDetail::selectRaw('fish_name, SUM(weight) as total_weight, SUM(total_price) as total_value')
+        $totalWeight = (float) SaleDetail::whereIn('sale_id', $saleIds)->sum('weight');
+
+        $fishAnalysis = SaleDetail::whereIn('sale_id', $saleIds)
+            ->selectRaw('fish_name, SUM(weight) as total_weight, SUM(total_price) as total_value')
             ->groupBy('fish_name')
             ->get()
             ->map(function ($item) use ($totalWeight) {
-                $percentage = $totalWeight > 0 ? round(($item->total_weight / $totalWeight) * 100, 2) : 0;
-
                 return [
                     'fish_name' => $item->fish_name,
-                    'total_value' => $item->total_value,
-                    'total_weight' => $item->total_weight,
-                    'percentage' => $percentage,
+                    'total_value' => round((float) $item->total_value, 2),
+                    'total_weight' => round((float) $item->total_weight, 2),
+                    'percentage' => $totalWeight > 0 ? round(($item->total_weight / $totalWeight) * 100, 2) : 0,
                 ];
             });
 
-        // المؤشرات الرئيسية
-        $totalTrips = Trip::count();
-        $totalRevenue = Sale::sum('total_price');
-        $avgCatchPerTrip = 0;
-        $avgRevenuePerTrip = 0;
-        if ($totalTrips > 0) {
-            $avgCatch = $totalWeight / $totalTrips;
-            $avgRevenue = $totalRevenue / $totalTrips;
-            $avgCatchPerTrip = floor($avgCatch);
-            $avgRevenuePerTrip = floor($avgRevenue);
-        }
-
-        $avgTripsPerCaptain = User::where('role', 'captain')->count() > 0
-            ? floor($totalTrips / User::where('role', 'captain')->count())
-            : 0;
-        $avgPricePerKg = $totalWeight > 0 ? floor($totalRevenue / $totalWeight) : 0;
+        $totalTrips = Trip::where('owner_id', $ownerId)->count();
+        $totalRevenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->sum('total_price');
+        $captainCount = User::where('owner_id', $ownerId)->where('role', 'captain')->count();
 
         return response()->json([
             'fishAnalysis' => $fishAnalysis,
             'metrics' => [
-                'avgCatchPerTrip' => $avgCatchPerTrip,
-                'avgRevenuePerTrip' => $avgRevenuePerTrip,
-                'avgTripsPerCaptain' => $avgTripsPerCaptain,
-                'avgPricePerKg' => $avgPricePerKg,
+                'avgCatchPerTrip' => $totalTrips > 0 ? round($totalWeight / $totalTrips, 2) : 0,
+                'avgRevenuePerTrip' => $totalTrips > 0 ? round($totalRevenue / $totalTrips, 2) : 0,
+                'avgTripsPerCaptain' => $captainCount > 0 ? round($totalTrips / $captainCount, 2) : 0,
+                'avgPricePerKg' => $totalWeight > 0 ? round($totalRevenue / $totalWeight, 2) : 0,
             ],
             'comparison' => $this->getMonthlyComparison(),
         ]);
@@ -357,40 +440,75 @@ class DashboardController extends Controller
      */
     private function getMonthlyComparison(): array
     {
+        $ownerId = $this->ownerId();
         $year = now()->year;
-        $isMySQL = DB::connection()->getDriverName() === 'mysql';
-        $monthExpr = $isMySQL ? 'MONTH(created_at)' : "CAST(strftime('%m', created_at) AS INTEGER)";
+        $saleIds = $this->ownerSaleIds($ownerId);
 
-        $monthlyCatch = SaleDetail::selectRaw("$monthExpr as month, SUM(weight) as total_weight")
-            ->whereYear('created_at', $year)
-            ->groupBy(DB::raw($monthExpr))
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $monthlyRevenue = Sale::selectRaw("$monthExpr as month, SUM(total_price) as revenue")
-            ->whereYear('created_at', $year)
-            ->groupBy(DB::raw($monthExpr))
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $arabicMonths = [
-            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
-            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
-            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
-        ];
+        $monthlyCatch = $this->sumByMonth(
+            SaleDetail::whereIn('sale_id', $saleIds),
+            'created_at',
+            'weight',
+            $year
+        );
+        $monthlyRevenue = $this->sumByMonth(
+            Sale::where('seller_type', 'owner')->where('seller_id', $ownerId),
+            'sale_datetime',
+            'total_price',
+            $year
+        );
 
         $comparison = [];
         for ($m = 1; $m <= 12; $m++) {
             $comparison[] = [
                 'month' => $m,
-                'label' => $arabicMonths[$m],
-                'catch' => round((float) ($monthlyCatch->get($m)?->total_weight ?? 0), 2),
-                'revenue' => round((float) ($monthlyRevenue->get($m)?->revenue ?? 0), 2),
+                'label' => self::ARABIC_MONTHS[$m],
+                'catch' => round((float) ($monthlyCatch[$m] ?? 0), 2),
+                'revenue' => round((float) ($monthlyRevenue[$m] ?? 0), 2),
             ];
         }
 
         return $comparison;
+    }
+
+    /**
+     * Sum a column grouped by month of a date column for a given year.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<*>  $query
+     * @return \Illuminate\Support\Collection<int, float>
+     */
+    private function sumByMonth($query, string $dateColumn, string $sumColumn, int $year)
+    {
+        $isMySQL = DB::connection()->getDriverName() === 'mysql';
+        $monthExpr = $isMySQL
+            ? "MONTH($dateColumn)"
+            : "CAST(strftime('%m', $dateColumn) AS INTEGER)";
+
+        return $query
+            ->selectRaw("$monthExpr as month, SUM($sumColumn) as total")
+            ->whereYear($dateColumn, $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->pluck('total', 'month');
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, float>  $sales
+     * @param  \Illuminate\Support\Collection<int, float>  $expenses
+     * @return array<int, array{month: int, month_name: string, revenue: float, profit: float}>
+     */
+    private function monthlySeries($sales, $expenses): array
+    {
+        $monthly = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $revenue = (float) ($sales[$m] ?? 0);
+            $expense = (float) ($expenses[$m] ?? 0);
+            $monthly[] = [
+                'month' => $m,
+                'month_name' => self::ARABIC_MONTHS[$m],
+                'revenue' => round($revenue, 2),
+                'profit' => round($revenue - $expense, 2),
+            ];
+        }
+
+        return $monthly;
     }
 }

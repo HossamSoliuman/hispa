@@ -43,11 +43,12 @@
     </x-report-info>
 
     {{-- Summary Cards --}}
+    @php $netProfit = (float) $f['net_profit']; @endphp
     <div class="summary-grid">
         <div class="summary-card revenue">
-            <div class="label">{{ __('owner.profit_loss.total_sales') }}</div>
+            <div class="label">{{ __('owner.profit_loss.net_sales') }}</div>
             <div class="amount" style="color: #16a34a;">
-                {{ number_format($sales ?? 0, 2) }}
+                {{ number_format($f['net_sales'], 2) }}
                 <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
             </div>
         </div>
@@ -55,20 +56,19 @@
         <div class="summary-card expense">
             <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
             <div class="amount" style="color: #dc2626;">
-                {{ number_format($expenses ?? 0, 2) }}
+                {{ number_format($f['total_expenses'], 2) }}
                 <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
             </div>
         </div>
 
         <div class="summary-card payroll">
-            <div class="label">{{ __('owner.profit_loss.total_payrolls') }}</div>
+            <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
             <div class="amount" style="color: #d97706;">
-                {{ number_format($payrolls ?? 0, 2) }}
+                {{ number_format($f['crew_share'], 2) }}
                 <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
             </div>
         </div>
 
-        @php $netProfit = (float)($net ?? 0); @endphp
         <div class="summary-card {{ $netProfit >= 0 ? 'profit' : 'loss' }}">
             <div class="label">{{ __('owner.profit_loss.net_profit_loss') }}</div>
             <div class="amount" style="color: {{ $netProfit >= 0 ? '#16a34a' : '#dc2626' }};">
@@ -82,30 +82,69 @@
     <x-report-summary :qr-code="$settings['qr_code'] ?? null">
         <x-report-summary-row
             :label="__('owner.profit_loss.total_sales')"
-            :value="$sales ?? 0"
+            :value="$f['gross_sales']"
             valueClass="text-success"
             :showCurrency="true"
         />
         <x-report-summary-row
-            :label="__('owner.profit_loss.total_expenses')"
-            :value="($expenses ?? 0) * -1"
+            :label="__('owner.profit_loss.return')"
+            :value="$f['returns'] * -1"
             valueClass="text-danger"
             :showMinus="true"
             :showCurrency="true"
         />
         <x-report-summary-row
-            :label="__('owner.profit_loss.total_payrolls')"
-            :value="($payrolls ?? 0) * -1"
+            :label="__('owner.profit_loss.net_owner_revenue')"
+            :value="$f['net_owner_revenue']"
+            valueClass="text-success"
+            :showCurrency="true"
+        />
+        <x-report-summary-row
+            :label="__('owner.profit_loss.trip_expenses')"
+            :value="$f['trip_expenses'] * -1"
+            valueClass="text-danger"
+            :showMinus="true"
+            :showCurrency="true"
+        />
+        <x-report-summary-row
+            :label="__('owner.profit_loss.general_expenses')"
+            :value="$f['general_expenses'] * -1"
+            valueClass="text-danger"
+            :showMinus="true"
+            :showCurrency="true"
+        />
+        <x-report-summary-row
+            :label="__('owner.profit_loss.fixed_salaries')"
+            :value="$f['fixed_salaries'] * -1"
             valueClass="text-warning"
             :showMinus="true"
             :showCurrency="true"
         />
         <x-report-summary-row
+            :label="__('owner.profit_loss.depreciation')"
+            :value="$f['depreciation'] * -1"
+            valueClass="text-danger"
+            :showMinus="true"
+            :showCurrency="true"
+        />
+        <x-report-summary-row
             :label="__('owner.profit_loss.net_profit_loss')"
-            :value="$net ?? 0"
+            :value="$netProfit"
             :valueClass="$netProfit >= 0 ? 'text-success' : 'text-danger'"
             :showCurrency="true"
             isBold
+        />
+        <x-report-summary-row
+            :label="__('owner.generated.owner_ratio')"
+            :value="$f['owner_share']"
+            valueClass="text-success"
+            :showCurrency="true"
+        />
+        <x-report-summary-row
+            :label="__('owner.profit_loss.crew_share')"
+            :value="$f['crew_share']"
+            valueClass="text-warning"
+            :showCurrency="true"
         />
     </x-report-summary>
 

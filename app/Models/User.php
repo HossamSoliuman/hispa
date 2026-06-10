@@ -5,8 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\CheckRelationShip;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -76,6 +76,7 @@ class User extends Authenticatable
         'id_attachment',
         'salary_type',
         'salary_amount',
+        'profit_shares',
         'bank_name',
         'account_number',
         'IBAN',
@@ -120,7 +121,6 @@ class User extends Authenticatable
         'is_vat_applicable' => 'integer',
     ];
 
-
     public function captainCount()
     {
         return User::where('role', 'captain')
@@ -135,7 +135,7 @@ class User extends Authenticatable
         if ($key == '' || is_null($key)) {
             $firstLetter = strtoupper(mb_substr($this->name ?? 'U', 0, 1));
 
-            return 'https://ui-avatars.com/api/?name=' . $firstLetter . '&background=random&color=fff';
+            return 'https://ui-avatars.com/api/?name='.$firstLetter.'&background=random&color=fff';
         }
 
         return Storage::url($key);
@@ -243,7 +243,6 @@ class User extends Authenticatable
         return $this->belongsTo(Governorate::class)->withDefault();
     }
 
-
     public function port()
     {
         return $this->belongsTo(Port::class)->withDefault();
@@ -253,7 +252,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Contact::class);
     }
-
 
     public function getRelationNames(): array
     {
@@ -278,7 +276,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Expense::class, 'vendor_id');
     }
-
 
     public function maintenances()
     { // owner

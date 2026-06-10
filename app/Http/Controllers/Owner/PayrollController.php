@@ -9,10 +9,8 @@ use App\Models\Boat;
 use App\Models\Payroll;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
-use App\Models\Trip;
 use App\Repository\Owner\PayrollRepository;
 use App\Service\Owner\PayrollService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -50,12 +48,15 @@ class PayrollController extends Controller
         return $this->datatable->getData($request);
     }
 
-    // Fetch paid periods for a boat (to disable in datepicker)
+    // Fetch already-paid monthly periods (to disable them in the datepicker)
     public function paidPeriods(Boat $boat)
     {
-        $periods = Trip::where('boat_id', $boat->id)
-            ->whereHas('payrolls') // assuming you have a payrolls table linked to trip
-            ->pluck('date');
+        $periods = PayrollModel::where('is_paid', 1)
+            ->select('year', 'month')
+            ->distinct()
+            ->get()
+            ->map(fn ($p) => sprintf('%04d-%02d', $p->year, $p->month))
+            ->values();
 
         return response()->json($periods);
     }
@@ -173,7 +174,12 @@ class PayrollController extends Controller
                     if ($detail->user->salary_type == 'salary') {
                         $salary = $detail->base_salary;
                     } else {
-                        $salary = $detail->sales_amount;
+                        // Percentage payroll stores final_salary as the per-head amount
+                        // (captins_amount / captins_count) at creation; recompute the
+                        // update on the same per-head basis, not the full sales amount.
+                        $salary = $detail->captins_count > 0
+                            ? $detail->captins_amount / $detail->captins_count
+                            : 0;
                     }
                     if ($detail) {
                         $detail->update([
@@ -231,7 +237,8 @@ class PayrollController extends Controller
     {
         // Load company settings and generate QR code (link to the printable payroll URL)
         $settings = $this->getCompanySettings();
-        $qrCode = $this->generateQRCodeImage(route('owner.payrolls.print', $payroll->id));
+        $qrCode = app(\App\Service\Owner\ReportQrService::class)
+            ->dataUri(route('owner.payrolls.print', $payroll->id));
 
         if (view()->exists('owner.payroll.print')) {
             return view('owner.payroll.print', compact('payroll', 'settings', 'qrCode'));
@@ -255,21 +262,5 @@ class PayrollController extends Controller
             'email' => $user->email ?? '',
             'address' => $user->address ?? '',
         ];
-    }
-
-    private function generateQRCodeImage($url)
-    {
-        try {
-            $size = '200';
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=' . $size . 'x' . $size . '&data=' . urlencode($url);
-            $context = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0']]);
-            $imageData = @file_get_contents($qrUrl, false, $context);
-            if ($imageData !== false && strlen($imageData) > 100) {
-                return 'data:image/png;base64,' . base64_encode($imageData);
-            }
-        } catch (\Throwable $e) {
-        }
-
-        return '';
     }
 }
