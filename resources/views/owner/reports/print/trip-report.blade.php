@@ -97,6 +97,7 @@
             __('owner.trips.departure_date'),
             __('owner.trips.status'),
             __('owner.trips.total_catch'),
+            __('owner.reports.total_revenue'),
         ]"
         :data="$trips">
 
@@ -113,10 +114,13 @@
                 <span class="meta-label">{{ __('owner.reports.total_catch') }}:</span>
                 <span class="meta-value">{{ number_format(round($statistics['total_catch']), 0) }} {{ __('owner.units.kg') }}</span>
             </div>
-
             <div class="meta-item">
-                <span class="meta-label">{{ __('owner.reports.fish_types') }}:</span>
-                <span class="meta-value">{{ $statistics['fish_types'] }}</span>
+                <span class="meta-label">{{ __('owner.reports.total_revenue') }}:</span>
+                <span class="meta-value">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">{{ __('owner.reports.net_profit') }}:</span>
+                <span class="meta-value">{{ number_format($statistics['net_profit'], 2) }} <x-riyal-icon /></span>
             </div>
         </x-slot:metadata>
 
@@ -126,10 +130,7 @@
         @foreach($trips as $tripItem)
             @php
                 $rowNumber++;
-                $totalCatch = $tripItem->fishStocks->sum('weight');
-                $totalRevenue = $tripItem->fishStocks->sum(function($stock) {
-                    return $stock->fish ? ($stock->weight * ($stock->fish->price ?? 0)) : 0;
-                });
+                $tripFinancials = $financials[$tripItem->id];
             @endphp
             <tr>
                 <td>{{ $rowNumber }}</td>
@@ -137,46 +138,214 @@
                 <td>{{ $tripItem->boat->name ?? __('owner.trips.no_boat') }}</td>
                 <td>{{ $tripItem->captain->name ?? __('owner.trips.no_captain') }}</td>
                 <td>{{ $tripItem->start_date ? $tripItem->start_date->format('Y-m-d') : '-' }}</td>
-                <td>
-                    <span class="badge bg-{{ $tripItem->status->color() }}">{{ $tripItem->status->label() }}</span>
-                </td>
-                <td>{{ number_format(round($totalCatch), 0) }} {{ __('owner.units.kg') }}</td>
-
+                <td>{{ $tripItem->status->label() }}</td>
+                <td>{{ number_format(round($tripFinancials['catch_weight']), 0) }} {{ __('owner.units.kg') }}</td>
+                <td>{{ number_format($tripFinancials['gross_revenue'], 2) }} <x-riyal-icon /></td>
             </tr>
         @endforeach
     </x-report-table>
 
     @if($trip)
-        {{-- Single trip detailed breakdown --}}
+        @php
+            $f = $financials[$trip->id];
+            $catchDetails = $trip->catches?->details ?? collect();
+            $depart = $trip->start_date ? $trip->start_date->format('Y-m-d') : '-';
+            $departTime = $trip->departure_time ? $trip->departure_time->format('H:i') : null;
+            $returnDate = $trip->end_date ? $trip->end_date->format('Y-m-d') : '-';
+            $returnTime = $trip->return_time ? $trip->return_time->format('H:i') : null;
+        @endphp
+
+        {{-- Financial summary cards --}}
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span class="summary-icon weight"><i class="fas fa-weight-hanging"></i></span>
+                <div class="summary-content">
+                    <div class="summary-label">{{ __('owner.reports.catch_weight') }}</div>
+                    <div class="summary-value">{{ number_format(round($f['catch_weight']), 0) }} {{ __('owner.units.kg') }}</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon catch"><i class="fas fa-coins"></i></span>
+                <div class="summary-content">
+                    <div class="summary-label">{{ __('owner.reports.gross_revenue') }}</div>
+                    <div class="summary-value">{{ number_format($f['gross_revenue'], 2) }} <x-riyal-icon /></div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon list"><i class="fas fa-receipt"></i></span>
+                <div class="summary-content">
+                    <div class="summary-label">{{ __('owner.reports.total_costs') }}</div>
+                    <div class="summary-value">{{ number_format($f['total_costs'], 2) }} <x-riyal-icon /></div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon fish"><i class="fas fa-chart-line"></i></span>
+                <div class="summary-content">
+                    <div class="summary-label">{{ __('owner.reports.net_profit') }}</div>
+                    <div class="summary-value">{{ number_format($f['net_profit'], 2) }} <x-riyal-icon /></div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Trip information & schedule --}}
+        <div class="info-section">
+            <div class="info-col">
+                <div class="info-label">{{ __('owner.reports.trip_info') }}</div>
+                <p><strong>{{ __('owner.trips.trip_number') }}:</strong> #{{ $trip->number }}</p>
+                @if($trip->name)
+                    <p><strong>{{ __('owner.trips.show.name') }}:</strong> {{ $trip->name }}</p>
+                @endif
+                @if($trip->license_number)
+                    <p><strong>{{ __('owner.trips.show.license_number') }}:</strong> {{ $trip->license_number }}</p>
+                @endif
+                <p><strong>{{ __('owner.reports.permit_type') }}:</strong> {{ $trip->permit_type ?? __('owner.reports.not_available') }}</p>
+                <p><strong>{{ __('owner.trips.status') }}:</strong> {{ $trip->status->label() }}</p>
+            </div>
+            <div class="info-col">
+                <div class="info-label">{{ __('owner.reports.schedule') }}</div>
+                @if($trip->duration_text)
+                    <p><strong>{{ __('owner.reports.duration') }}:</strong> {{ $trip->duration_text }}</p>
+                @endif
+                <p><strong>{{ __('owner.reports.departure') }}:</strong> {{ $depart }}@if($departTime) — {{ $departTime }}@endif</p>
+                <p><strong>{{ __('owner.reports.return') }}:</strong> {{ $returnDate }}@if($returnTime) — {{ $returnTime }}@endif</p>
+            </div>
+            <div class="info-col">
+                <div class="info-label">{{ __('owner.reports.crew') }} &amp; {{ __('owner.reports.location') }}</div>
+                <p><strong>{{ __('owner.trips.show.captain') }}:</strong> {{ $trip->captain?->name ?? __('owner.trips.no_captain') }}</p>
+                @if($trip->captain?->phone)
+                    <p>{{ $trip->captain->phone }}</p>
+                @endif
+                <p><strong>{{ __('owner.reports.crew_count') }}:</strong> {{ $trip->crew_count ?? '-' }}</p>
+                @if($trip->port)
+                    <p><strong>{{ __('owner.reports.port') }}:</strong> {{ $trip->port->name }}</p>
+                @endif
+                @if($trip->governorate)
+                    <p><strong>{{ __('owner.reports.governorate') }}:</strong> {{ $trip->governorate->name }}</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Boat information --}}
         <div class="summary-section mt-4">
-            <h5 class="fw-bold mb-3">{{ __('owner.reports.catch_breakdown') }}</h5>
+            <h5 class="info-label">{{ __('owner.trips.show.boat_info') }}</h5>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>{{ __('owner.trips.boat_name') }}</th>
+                        <th>{{ __('owner.trips.show.boat_number') }}</th>
+                        <th>{{ __('owner.trips.show.boat_color') }}</th>
+                        <th>{{ __('owner.trips.show.boat_length') }}</th>
+                        <th>{{ __('owner.trips.show.boat_width') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ $trip->boat_name ?? ($trip->boat->name ?? '-') }}</td>
+                        <td>{{ $trip->boat_number ?? '-' }}</td>
+                        <td>{{ $trip->boat_color ?? '-' }}</td>
+                        <td>{{ $trip->boat_length ?? '-' }}</td>
+                        <td>{{ $trip->boat_width ?? '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Catch breakdown --}}
+        <div class="summary-section mt-4">
+            <h5 class="info-label">{{ __('owner.reports.catch_breakdown') }}</h5>
             <table class="report-table">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>{{ __('owner.reports.fish_name') }}</th>
                         <th>{{ __('owner.reports.weight') }}</th>
-                        <!-- Price per KG and Total Value removed as requested -->
+                        <th>{{ __('owner.reports.price_per_kg') }}</th>
+                        <th>{{ __('owner.reports.total_value') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @php $detailNum = 0; @endphp
-                    @foreach($trip->fishStocks as $stock)
-                        @php
-                            $detailNum++;
-                            $pricePerKg = $stock->fish->price ?? 0;
-                            $totalValue = $stock->weight * $pricePerKg;
-                        @endphp
+                    @forelse($catchDetails as $i => $detail)
                         <tr>
-                            <td>{{ $detailNum }}</td>
-                            <td>{{ $stock->fish->name ?? __('owner.reports.unknown_fish') }}</td>
-                            <td>{{ number_format(round($stock->weight), 0) }} {{ __('owner.units.kg') }}</td>
-                            <!-- Price per KG and Total Value removed as requested -->
+                            <td>{{ $i + 1 }}</td>
+                            <td>{{ $detail->fish->name ?? ($detail->fish_name ?? __('owner.reports.unknown_fish')) }}</td>
+                            <td>{{ number_format(round($detail->weight), 0) }} {{ __('owner.units.kg') }}</td>
+                            <td>{{ number_format($detail->price_per_kg, 2) }} <x-riyal-icon /></td>
+                            <td>{{ number_format($detail->total_price, 2) }} <x-riyal-icon /></td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:#95a5a6;">{{ __('owner.trips.show.no_catch_data') }}</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+
+        {{-- Sales breakdown --}}
+        <div class="summary-section mt-4">
+            <h5 class="info-label">{{ __('owner.reports.sales_breakdown') }}</h5>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ __('owner.reports.sale_number') }}</th>
+                        <th>{{ __('owner.reports.customer') }}</th>
+                        <th>{{ __('owner.reports.sale_date') }}</th>
+                        <th>{{ __('owner.reports.amount') }}</th>
+                        <th>{{ __('owner.reports.payment_status') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($trip->sales as $i => $sale)
+                        <tr>
+                            <td>{{ $i + 1 }}</td>
+                            <td>{{ $sale->number }}</td>
+                            <td>{{ $sale->customer_name ?? ($sale->customer->name ?? '-') }}</td>
+                            <td>{{ $sale->sale_datetime ? $sale->sale_datetime->format('Y-m-d') : '-' }}</td>
+                            <td>{{ number_format($sale->total_price, 2) }} <x-riyal-icon /></td>
+                            <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="text-align:center; color:#95a5a6;">{{ __('owner.reports.no_sales') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Financial summary --}}
+        <div class="bottom-section">
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>{{ __('owner.reports.gross_revenue') }}</span>
+                    <span class="summary-value">{{ number_format($f['gross_revenue'], 2) }} <x-riyal-icon /></span>
+                </div>
+                <div class="summary-row">
+                    <span>{{ __('owner.reports.commission') }}</span>
+                    <span class="summary-value">{{ number_format($f['commission'], 2) }} <x-riyal-icon /></span>
+                </div>
+                <div class="summary-row">
+                    <span>{{ __('owner.reports.labor') }}</span>
+                    <span class="summary-value">{{ number_format($f['labor'], 2) }} <x-riyal-icon /></span>
+                </div>
+                <div class="summary-row">
+                    <span>{{ __('owner.reports.outstanding') }}</span>
+                    <span class="summary-value">{{ number_format($f['outstanding'], 2) }} <x-riyal-icon /></span>
+                </div>
+                <div class="summary-row">
+                    <span>{{ __('owner.reports.net_profit') }}</span>
+                    <span class="summary-value">{{ number_format($f['net_profit'], 2) }} <x-riyal-icon /></span>
+                </div>
+            </div>
+        </div>
+
+        @if($trip->notes)
+            <div class="summary-section mt-4">
+                <h5 class="info-label">{{ __('owner.reports.notes') }}</h5>
+                <p style="color:#5a6c7d;">{!! nl2br(e($trip->notes)) !!}</p>
+            </div>
+        @endif
     @endif
 
     <div class="qr-box" style="text-align:center; margin:18px 0;">
