@@ -32,8 +32,8 @@
         </a>
     @endif
 
-    {{-- Edit Catch (catch exists, before counting is finished) --}}
-    @if ($trip->catches && $trip->status !== TripStatus::Counted)
+    {{-- Edit Catch (catch exists, before counting is finished; never once the trip is sold/cancelled) --}}
+    @if ($trip->catches && $trip->status !== TripStatus::Counted && ! $trip->status->isTerminal())
         <a href="{{ route('owner.catch.edit', $trip->catches->id) }}"
            class="btn btn-sm btn-outline-info" title="{{ __('owner.catch.edit_catch') }}">
             <i class="bi bi-pencil"></i>
