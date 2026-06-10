@@ -24,7 +24,6 @@ class Sale extends Model
         'customer_name',
         'payment_method_id',
         'payment_method',
-        'commission_setting_id',
         'commission_rate',
         'commission_amount',
         'labor_rate',
@@ -90,8 +89,6 @@ class Sale extends Model
     {
         return $this->belongsTo(PaymentMethod::class)->withDefault();
     }
-
-
 
     public function returns()
     {

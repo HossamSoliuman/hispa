@@ -172,6 +172,7 @@
                 <div class="col-md-3">
                     <input type="number" step="0.01" min="0" max="${detail.quantity}"
                            name="weight[]" class="form-control weight"
+                           value="${detail.quantity}"
                            placeholder="≤ ${detail.quantity}">
                 </div>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\DataTable\Owner\SalesDataTable;
+use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\SalesRequest;
 use App\Models\Boat;
@@ -154,6 +155,8 @@ class SalesController extends Controller
                 'remaining_total' => ($totalPrice - $paidAmount),
             ]);
 
+            $this->markTripSoldIfCatchDepleted($trip, $catch);
+
             DB::commit();
 
             return redirect()
@@ -164,6 +167,22 @@ class SalesController extends Controller
             DB::rollBack();
 
             return back()->with('error', $e->getMessage());
+        }
+    }
+
+    private function markTripSoldIfCatchDepleted(?Trip $trip, ?CatchModel $catch): void
+    {
+        if (! $trip || ! in_array($trip->status, [TripStatus::Counted, TripStatus::ReadyToSell], true)) {
+            return;
+        }
+
+        $hasRemainingStock = FishQuantityStock::where('trip_id', $trip->id)
+            ->where('catch_id', $catch->id ?? 0)
+            ->where('quantity', '>', 0)
+            ->exists();
+
+        if (! $hasRemainingStock) {
+            $trip->update(['status' => TripStatus::Sold]);
         }
     }
 

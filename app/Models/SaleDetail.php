@@ -16,7 +16,6 @@ class SaleDetail extends Model
         'fish_name',
         'quantity',
         'weight',
-        'dalal_stock_detail_id',
         'price_per_kilo',
         'total_price',
     ];

@@ -23,7 +23,6 @@ class Violation extends Model
         'trip_id',
         'trip_id',
         'governorate_id',
-        'city_id',
         'port_id',
     ];
 
@@ -46,7 +45,6 @@ class Violation extends Model
     {
         return $this->belongsTo(Governorate::class);
     }
-
 
     public function port()
     {
