@@ -178,7 +178,7 @@
                                             <td>{{ $trip->captain?->name ?? '—' }}</td>
                                             <td>{{ $trip->start_date?->format('Y-m-d') ?? '—' }}</td>
                                             <td>
-                                                <span class="badge bg-{{ $trip->status_badge_color }}">{{ $trip->status_name }}</span>
+                                                <span class="badge bg-{{ $trip->status->color() }}">{{ $trip->status->label() }}</span>
                                             </td>
                                             <td>
                                                 <a href="{{ route('admin.trips.show', $trip->id) }}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>

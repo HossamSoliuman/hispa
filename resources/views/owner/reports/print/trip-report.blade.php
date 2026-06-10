@@ -138,15 +138,7 @@
                 <td>{{ $tripItem->captain->name ?? __('owner.trips.no_captain') }}</td>
                 <td>{{ $tripItem->start_date ? $tripItem->start_date->format('Y-m-d') : '-' }}</td>
                 <td>
-                    @if($tripItem->status == 'completed')
-                        <span class="badge bg-success">{{ __('owner.trips.status_completed') }}</span>
-                    @elseif($tripItem->status == 'in_progress')
-                        <span class="badge bg-warning">{{ __('owner.trips.status_in_progress') }}</span>
-                    @elseif($tripItem->status == 'cancelled')
-                        <span class="badge bg-danger">{{ __('owner.trips.status_cancelled') }}</span>
-                    @else
-                        <span class="badge bg-secondary">{{ __('owner.trips.status_pending') }}</span>
-                    @endif
+                    <span class="badge bg-{{ $tripItem->status->color() }}">{{ $tripItem->status->label() }}</span>
                 </td>
                 <td>{{ number_format(round($totalCatch), 0) }} {{ __('owner.units.kg') }}</td>
 

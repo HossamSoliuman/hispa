@@ -17,8 +17,24 @@
             vertical-align: middle;
         }
 
-        /* {{ __('owner.generated.item_ed06b0') }} */
+        /* Keep the row-index (#) column on a single line and tight */
+        #datatableDefault th:first-child,
+        #datatableDefault td:first-child {
+            white-space: nowrap;
+            width: 56px;
+        }
 
+        /* Status badge should never wrap */
+        #datatableDefault td .badge {
+            white-space: nowrap;
+        }
+
+        /* Action buttons: consistent sizing and centered alignment */
+        #datatableDefault td .trip-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+        }
 
         label.error {
             color: red;
@@ -84,7 +100,7 @@
         ])
 
         @include('owner.components.stat-card', [
-            'title' => __('owner.generated.item_1693a3'),
+            'title' => __('owner.trips.has_catch_trips'),
             'value' => new \Illuminate\Support\HtmlString('<div id="trip_has_catches">0 </div>'),
             'icon' => 'bi bi-currency-dollar',
             'gradient' => 'linear-gradient(135deg, #f39c12, #f1c40f)',
@@ -206,185 +222,6 @@
         </div>
     </div>
 
-    <!-- Modal: Create/Edit Trip with Tabs -->
-    <div class="modal fade" id="tripModal" tabindex="-1" aria-labelledby="tripModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div>
-                        <h5 class="modal-title mb-0" id="tripModalLabel">{{ __('owner.trips.create.title') }}</h5>
-                        <small class="text-muted">{{ __('owner.generated.item_d341fc') }}</small>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="{{ __('owner.generated.btn_close_modal') }}"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="nav nav-tabs mb-3" id="tripTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic"
-                                type="button" role="tab">{{ __('owner.dalal.modal.basic_info') }}</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="crew-tab" data-bs-toggle="tab" data-bs-target="#crew"
-                                type="button" role="tab">{{ __('owner.generated.item_00bbf8') }}</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="planning-tab" data-bs-toggle="tab" data-bs-target="#planning"
-                                type="button" role="tab">{{ __('owner.generated.item_9d6df1') }}</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="costs-tab" data-bs-toggle="tab" data-bs-target="#costs"
-                                type="button" role="tab">{{ __('owner.generated.item_742221') }}</button>
-                        </li>
-                    </ul>
-
-                    <form>
-                        <div class="tab-content" id="tripTabContent">
-                            <!-- Tab: Basic Info -->
-                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">{{ __('owner.generated.item_dcb5f6') }}</label>
-                                        <input type="date" class="form-control">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">{{ __('owner.generated.item_fad515') }}</label>
-                                        <input type="date" class="form-control">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('owner.assets.status') }}</label>
-                                    <select class="form-select">
-                                        <option selected>{{ __('owner.generated.item_9b0f39') }}</option>
-                                        <option>{{ __('owner.trips.status_in_progress') }}</option>
-                                        <option>{{ __('owner.sales_report.status_completed') }}</option>
-                                        <option>{{ __('owner.trips.status_cancelled') }}</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('owner.expenses.show.notes') }}</label>
-                                    <textarea class="form-control" rows="3" placeholder="{{ __('owner.generated.item_19b51f') }}"></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Tab: Crew & Vessel -->
-                            <div class="tab-pane fade" id="crew" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">{{ __('owner.catch.filters.boat') }}</label>
-                                        <select class="form-select">
-                                            <option selected disabled>{{ __('owner.payrolls.create.choose_boat') }}
-                                            </option>
-                                            <option value="1">Al Bahar 1</option>
-                                            <option value="2">Al Bahar 2</option>
-                                            <option value="3">Support Vessel 1</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">{{ __('owner.boats.captain') }}</label>
-                                        <select class="form-select">
-                                            <option selected disabled>{{ __('owner.generated.item_097dcd') }}</option>
-                                            <option value="1">Ahmed Al-Rashid</option>
-                                            <option value="2">Mohammed Al-Zahra</option>
-                                            <option value="3">Aisha Al-Harith</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('owner.generated.item_deb0e0') }}</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="Ahmed Al-Rashid"
-                                            id="crew1">
-                                        <label class="form-check-label d-flex justify-content-between w-100"
-                                            for="crew1">
-                                            <span>Ahmed Al-Rashid</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="Fatima Al-Zahra"
-                                            id="crew2">
-                                        <label class="form-check-label d-flex justify-content-between w-100"
-                                            for="crew2">
-                                            <span>Fatima Al-Zahra</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tab: Planning -->
-                            <div class="tab-pane fade" id="planning" role="tabpanel">
-                                <div class="mb-3">
-                                    <label
-                                        class="form-label">{{ __('owner.generated.fishing_areas') }}({{ __('owner.generated.item_b60be1') }})</label>
-                                    <textarea class="form-control" rows="2" placeholder="{{ __('owner.generated.item_2fabb9') }}"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label
-                                        class="form-label">{{ __('owner.generated.item_d9279c') }}({{ __('owner.generated.item_1a20b5') }})</label>
-                                    <textarea class="form-control" rows="2" placeholder="{{ __('owner.generated.item_e5ff57') }}"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('owner.generated.item_7e1317') }}</label>
-                                    <textarea class="form-control" rows="2" placeholder="{{ __('owner.generated.item_25111c') }}"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('owner.generated.item_485868') }}</label>
-                                    <textarea class="form-control" rows="2" placeholder="{{ __('owner.generated.item_5961ca') }}"></textarea>
-                                </div>
-                            </div>
-
-
-                            <!-- Tab: Costs & Revenue -->
-                            <div class="tab-pane fade" id="costs" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3">{{ __('owner.generated.item_48d1e5') }}</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label">{{ __('owner.generated.fuel') }}</label>
-                                            <input type="number" class="form-control" placeholder="0">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">{{ __('owner.generated.requisites') }}</label>
-                                            <input type="number" class="form-control" placeholder="0">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">{{ __('owner.menu.crew') }}</label>
-                                            <input type="number" class="form-control" placeholder="0">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">{{ __('owner.generated.others') }}</label>
-                                            <input type="number" class="form-control" placeholder="0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3">{{ __('owner.generated.item_d752f5') }}</h6>
-                                        <div class="mb-3">
-                                            <label
-                                                class="form-label">{{ __('owner.generated.item_00276c') }}({{ __('owner.generated.item_d7ec95') }})</label>
-                                            <input type="number" class="form-control" placeholder="0">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">{{ __('owner.generated.item_362aa6') }}($)</label>
-                                            <input type="number" class="form-control" placeholder="0">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">{{ __('owner.payrolls.create.confirm_save_cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('owner.generated.item_4151e4') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection
 @section('script')
     <script src="{{ asset('dashboard/assets/plugins/@highlightjs/cdn-assets/highlight.min.js') }}"></script>
@@ -517,7 +354,7 @@
     </script>
 
     <script>
-        $("#createForm").validate();
+        $("#addTripForm").validate();
     </script>
     <script>
         $(document).ready(function () {
@@ -551,7 +388,7 @@
                     type: 'POST',
                     data: postData,
                     success: function(response) {
-                        Swal.fire('{{ __('owner.swal.success_title') ?? __('owner.swal.success') }}', response.message, 'success');
+                        Swal.fire('{{ __('owner.swal.success_title') }}', response.message, 'success');
                         $('#datatableDefault').DataTable().ajax.reload();
                     },
                     error: function(xhr) {
@@ -592,64 +429,12 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                    confirmButtonText: '{{ __('owner.swal.confirm_proceed') }}',
                     cancelButtonText: '{{ __('owner.swal.cancel') }}'
                 }).then((result) => {
                     if (result.isConfirmed) { doTransition(); }
                 });
             }
         }
-    </script>
-    <script>
-        function deleteRecord(recordId) {
-            Swal.fire({
-                title: '{{ __('owner.swal.confirm_title') }}',
-                text: '{{ __('owner.swal.confirm_text') }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
-                cancelButtonText: '{{ __('owner.swal.cancel') }}'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ url('admin/trips') }}/" + recordId,
-                        type: 'DELETE',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success');
-                            $('#datatableDefault').DataTable().ajax.reload();
-                        },
-                        error: function(xhr) {
-                            let message = xhr.responseJSON?.message ||
-                                '{{ __('owner.swal.unexpected_error') }}';
-                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
-                        }
-
-                    });
-                }
-            });
-        }
-
-        // Model Edit
-        $('#modelEdit').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget)
-            var id = button.data('id')
-            var name = button.data('name')
-            var email = button.data('email')
-            var phone = button.data('phone')
-            var notes = button.data('notes')
-
-            var modal = $(this)
-            modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #name').val(name);
-            modal.find('.modal-body #email').val(email);
-            modal.find('.modal-body #phone').val(phone);
-            modal.find('.modal-body #notes').val(notes);
-
-        });
     </script>
 @endsection

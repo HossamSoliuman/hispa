@@ -88,7 +88,7 @@
                             <tr>
                                 <th class="text-muted">{{ display_string(__('admin.trips.status'), 'الحالة') }}</th>
                                 <td>
-                                    <span class="badge bg-{{ $data->status_badge_color }}">{{ $data->status_name }}</span>
+                                    <span class="badge bg-{{ $data->status->color() }}">{{ $data->status->label() }}</span>
                                 </td>
                             </tr>
                             <tr>

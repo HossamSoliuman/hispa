@@ -93,31 +93,8 @@ class TripReportDataTable extends DataTables
                     return '--';
                 })
                 ->addColumn('status', function (Trip $trip) {
-                    $statusLabels = [
-                        1 => 'رحلة جديدة',
-                        2 => 'الرحلة جارية',
-                        3 => 'ملغاة',
-                        4 => 'مكتملة - بانتظار العد',
-                        5 => 'جارية للعد',
-                        6 => 'مكتملة العد بانتظار البيع',
-                        7 => 'جاهزة للبيع',
-                        8 => 'مكتملة',
-                    ];
-
-                    $colors = [
-                        1 => 'info',
-                        2 => 'primary',
-                        3 => 'danger',
-                        4 => 'warning',
-                        5 => 'secondary',
-                        6 => 'dark',
-                        7 => 'success',
-                        8 => 'success',
-                    ];
-
-                    $status = $trip->status;
-                    $label = $statusLabels[$status] ?? 'غير معروف';
-                    $color = $colors[$status] ?? 'secondary';
+                    $label = e($trip->status->label());
+                    $color = $trip->status->color();
 
                     return '<span class="badge bg-'.$color.' px-2 py-1 rounded">'.$label.'</span>';
                 })

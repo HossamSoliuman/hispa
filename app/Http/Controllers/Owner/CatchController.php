@@ -83,6 +83,76 @@ class CatchController extends Controller
         return view('owner.catch.create', compact('trips', 'fish', 'selectedTrip'));
     }
 
+    public function edit($id)
+    {
+        $catch = CatchModel::with(['trip.boat', 'details.fish'])->findOrFail($id);
+        $trips = Trip::where('owner_id', auth()->id())->orderByDesc('id')->get();
+        $fish = Fish::Active()->get();
+        $selectedTrip = $catch->trip;
+
+        return view('owner.catch.edit', compact('catch', 'trips', 'fish', 'selectedTrip'));
+    }
+
+    public function update(CatchRequest $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $catch = CatchModel::findOrFail($id);
+
+            CatchDetail::where('catch_id', $catch->id)->delete();
+            FishQuantityStock::where('catch_id', $catch->id)->delete();
+
+            $catch->update([
+                'trip_id' => $request->trip_id,
+            ]);
+
+            $totalWeight = 0;
+
+            foreach ($request->fish_id as $index => $fishId) {
+
+                $weight = $request->weight[$index];
+
+                CatchDetail::create([
+                    'catch_id' => $catch->id,
+                    'fish_id' => $fishId,
+                    'fish_name' => optional(Fish::find($fishId))->scientific_name,
+                    'weight' => $weight,
+                ]);
+
+                $stock = FishQuantityStock::firstOrCreate(
+                    [
+                        'fish_id' => $fishId,
+                        'catch_id' => $catch->id,
+                        'trip_id' => $request->trip_id,
+                        'boat_id' => $request->boat_id,
+                    ],
+                    [
+                        'quantity' => 0,
+                    ]
+                );
+                $stock->increment('quantity', $weight);
+
+                $totalWeight += $weight;
+            }
+
+            $catch->update([
+                'total_weight' => $totalWeight,
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('owner.catch.index')
+                ->with('success', 'تم تعديل المصيد بنجاح');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
     public function store(CatchRequest $request)
     {
         try {

@@ -376,69 +376,6 @@ class DemoDataSeeder extends Seeder
         $now = Carbon::now();
 
         $tripsData = [
-            'completed_1' => [
-                'name' => 'رحلة أمواج البحر - مارس',
-                'number' => 'TRIP-DEMO-001',
-                'status' => 8,
-                'boat' => $boat1,
-                'captain' => $captain1,
-                'start_date' => $now->copy()->subMonths(3)->startOfWeek(),
-                'days' => 5,
-            ],
-            'completed_2' => [
-                'name' => 'رحلة نجمة الشرق - أبريل',
-                'number' => 'TRIP-DEMO-002',
-                'status' => 8,
-                'boat' => $boat2,
-                'captain' => $captain2,
-                'start_date' => $now->copy()->subMonths(2)->startOfWeek(),
-                'days' => 4,
-            ],
-            'completed_3' => [
-                'name' => 'رحلة فجر الخليج - مايو',
-                'number' => 'TRIP-DEMO-003',
-                'status' => 8,
-                'boat' => $boat3,
-                'captain' => $captain1,
-                'start_date' => $now->copy()->subWeeks(6)->startOfWeek(),
-                'days' => 6,
-            ],
-            'ready_to_sell' => [
-                'name' => 'رحلة أمواج البحر - يونيو',
-                'number' => 'TRIP-DEMO-004',
-                'status' => 7,
-                'boat' => $boat1,
-                'captain' => $captain2,
-                'start_date' => $now->copy()->subWeeks(4)->startOfWeek(),
-                'days' => 3,
-            ],
-            'count_done' => [
-                'name' => 'رحلة نجمة الشرق - يونيو',
-                'number' => 'TRIP-DEMO-005',
-                'status' => 6,
-                'boat' => $boat2,
-                'captain' => $captain1,
-                'start_date' => $now->copy()->subWeeks(3)->startOfWeek(),
-                'days' => 4,
-            ],
-            'captain_done' => [
-                'name' => 'رحلة فجر الخليج - يونيو',
-                'number' => 'TRIP-DEMO-006',
-                'status' => 4,
-                'boat' => $boat3,
-                'captain' => $captain2,
-                'start_date' => $now->copy()->subWeeks(2)->startOfWeek(),
-                'days' => 5,
-            ],
-            'in_progress' => [
-                'name' => 'رحلة أمواج البحر - جولة الصيف',
-                'number' => 'TRIP-DEMO-007',
-                'status' => 2,
-                'boat' => $boat1,
-                'captain' => $captain1,
-                'start_date' => $now->copy()->subDays(2),
-                'days' => 7,
-            ],
             'new_trip' => [
                 'name' => 'رحلة نجمة الشرق - المقبلة',
                 'number' => 'TRIP-DEMO-008',
@@ -455,9 +392,15 @@ class DemoDataSeeder extends Seeder
         foreach ($tripsData as $key => $data) {
             $existing = Trip::withTrashed()->where('number', $data['number'])->first();
             if ($existing) {
-                $trips[$key] = $existing;
-
-                continue;
+                Schema::disableForeignKeyConstraints();
+                foreach ($existing->sales as $sale) {
+                    $sale->details()->delete();
+                    $sale->forceDelete();
+                }
+                $existing->fishQuantityStocks()->delete();
+                $existing->catches()->delete();
+                $existing->forceDelete();
+                Schema::enableForeignKeyConstraints();
             }
 
             /** @var Boat $boat */
