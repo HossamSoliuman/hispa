@@ -69,11 +69,18 @@
                         </div>
                     </div>
 
+                    <div class="row mb-2 fw-bold">
+                        <div class="col-md-5">{{ __('owner.catch.fish') }}</div>
+                        <div class="col-md-3">{{ __('owner.catch.weight') }}</div>
+                        <div class="col-md-3">{{ __('owner.catch.unit') }}</div>
+                        <div class="col-md-1"></div>
+                    </div>
+
                     <div id="fish-wrapper">
-                        @php($details = old('fish_id') ? collect(old('fish_id'))->map(fn ($id, $i) => ['fish_id' => $id, 'weight' => old('weight')[$i] ?? '']) : $catch->details->map(fn ($d) => ['fish_id' => $d->fish_id, 'weight' => $d->weight]))
+                        @php($details = old('fish_id') ? collect(old('fish_id'))->map(fn ($id, $i) => ['fish_id' => $id, 'weight' => old('weight')[$i] ?? '', 'unit_id' => old('unit_id')[$i] ?? null]) : $catch->details->map(fn ($d) => ['fish_id' => $d->fish_id, 'weight' => $d->weight, 'unit_id' => $d->unit_id]))
                         @forelse ($details as $detail)
                             <div class="row fish-row mb-2">
-                                <div class="col-md-6">
+                                <div class="col-md-5">
                                     <select name="fish_id[]" class="form-select" required>
                                         <option value="">{{ __('owner.catch.choose_fish') }}</option>
                                         @foreach ($fish as $f)
@@ -84,10 +91,20 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-5">
+                                <div class="col-md-3">
                                     <input type="number" step="0.01" name="weight[]" class="form-control weight"
                                         placeholder="{{ __('owner.catch.weight') }}" value="{{ $detail['weight'] }}"
                                         required>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <select name="unit_id[]" class="form-select" required>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}"
+                                                {{ $detail['unit_id'] == $unit->id ? 'selected' : '' }}>
+                                                {{ $unit->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="col-md-1 text-center">
@@ -96,7 +113,7 @@
                             </div>
                         @empty
                             <div class="row fish-row mb-2">
-                                <div class="col-md-6">
+                                <div class="col-md-5">
                                     <select name="fish_id[]" class="form-select" required>
                                         <option value="">{{ __('owner.catch.choose_fish') }}</option>
                                         @foreach ($fish as $f)
@@ -105,9 +122,17 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-5">
+                                <div class="col-md-3">
                                     <input type="number" step="0.01" name="weight[]" class="form-control weight"
                                         placeholder="{{ __('owner.catch.weight') }}" required>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <select name="unit_id[]" class="form-select" required>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="col-md-1 text-center">

@@ -103,11 +103,13 @@
                 }
 
                 data.details.forEach(detail => {
+                    const unitName = (detail.unit && detail.unit.name) ? detail.unit.name : '';
                     wrapper.insertAdjacentHTML('beforeend', `
                     <div class="row mb-2">
                         <div class="col-md-4">
                             <input type="hidden" name="fish_id[]" value="${detail.fish_id}">
                             <input type="hidden" name="sale_detail_id[]" value="${detail.id}">
+                            <input type="hidden" name="unit_id[]" value="${detail.unit_id || ''}">
                             <input type="hidden" name="price_per_kilo[]" value="${detail.price_per_kilo}">
                             <input type="text" class="form-control" value="${detail.fish.name}" disabled>
                         </div>
@@ -118,8 +120,12 @@
                                    name="weight[]"
                                    max="${detail.weight}"
                                    class="form-control"
-                                   placeholder="{{ __('owner.generated.return_weight') }}"
+                                   placeholder="{{ __('owner.generated.return_weight') }} (${unitName})"
                                    required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" value="${unitName}" disabled>
                         </div>
                     </div>
                 `);

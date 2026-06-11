@@ -15,7 +15,7 @@ class SalesDataTable extends DataTables
         if ($request->ajax()) {
             $query = Sale::where('seller_type', 'owner')
                 ->where('seller_id', auth()->user()->getAuthIdentifier())
-                ->with(['details', 'paymentMethod']);
+                ->with(['details', 'details.unit', 'paymentMethod']);
 
             $countQuery = clone $query;
 
@@ -89,7 +89,10 @@ class SalesDataTable extends DataTables
                 ->addColumn('payment_method', fn ($row) => optional($row->paymentMethod)->name)
 
                 ->addColumn('total_weight', function ($row) {
-                    return $row->details->sum('weight').' كغم';
+                    return $row->details
+                        ->groupBy(fn ($d) => $d->unit->name ?: 'كغم')
+                        ->map(fn ($group, $unitName) => number_format($group->sum('weight'), 2).' '.$unitName)
+                        ->implode('، ');
                 })
 
                 ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')

@@ -41,6 +41,7 @@
                             <th>#</th>
                             <th>{{ __('owner.returns.fish') }}</th>
                             <th>{{ __('owner.returns.weight') }}</th>
+                            <th>{{ __('owner.returns.unit') }}</th>
                             <th>{{ __('owner.returns.total_price') }}</th>
                         </tr>
                         </thead>
@@ -50,6 +51,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $detail->fish->scientific_name }}</td>
                                 <td>{{ number_format($detail->weight, 2) }}</td>
+                                <td>{{ $detail->unit->name ?? '—' }}</td>
                                 <td>{{ number_format($detail->total_price, 2) }}</td>
                             </tr>
                         @endforeach
@@ -58,6 +60,7 @@
                         <tr>
                             <th colspan="2">{{ __('owner.returns.total') }}</th>
                             <th>{{ number_format($return->total_weight, 2) }}</th>
+                            <th></th>
                             <th>{{ number_format($return->details->sum('total_price'), 2) }}</th>
                         </tr>
                         </tfoot>

@@ -15,6 +15,7 @@ use App\Models\PaymentMethod;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use App\Models\Trip;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -62,7 +63,7 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $sales = Sale::with(['customer', 'paymentMethod', 'details', 'details.fish'])
+        $sales = Sale::with(['customer', 'paymentMethod', 'details', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
         return view('owner.sales.show', compact('sales'));
@@ -103,12 +104,14 @@ class SalesController extends Controller
                 'boat_id' => $trip->boat_id ?? 0,
             ]);
 
+            $defaultUnitId = Unit::defaultId();
             $totalPrice = 0;
             $soldRows = 0;
 
             foreach ($request->fish_id as $index => $fishId) {
                 $weight = (float) ($request->weight[$index] ?? 0);
                 $price = (float) ($request->price_per_kilo[$index] ?? 0);
+                $unitId = $request->unit_id[$index] ?? $defaultUnitId;
 
                 if ($weight <= 0) {
                     continue;
@@ -119,6 +122,7 @@ class SalesController extends Controller
                 }
 
                 $fishStock = FishQuantityStock::where('fish_id', $fishId)
+                    ->where('unit_id', $unitId)
                     ->where('catch_id', ($catch->id ?? 0))
                     ->where('trip_id', $request->trip_id)
                     ->first();
@@ -130,6 +134,7 @@ class SalesController extends Controller
                 SaleDetail::create([
                     'sale_id' => $sale->id,
                     'fish_id' => $fishId,
+                    'unit_id' => $unitId,
                     'fish_name' => optional(Fish::find($fishId))->scientific_name,
                     'weight' => $weight,
                     'price_per_kilo' => $price,
@@ -201,9 +206,11 @@ class SalesController extends Controller
     {
         $catch = CatchModel::where('trip_id', $tripId)->with('details', 'details.fish')->first();
         if ($catch) {
-            $fishQuntity = FishQuantityStock::with('fish')
+            $fishQuntity = FishQuantityStock::with('fish', 'unit')
                 ->where('catch_id', $catch->id)
-                ->where('trip_id', $tripId)->get();
+                ->where('trip_id', $tripId)
+                ->where('quantity', '>', 0)
+                ->get();
 
             return response()->json($fishQuntity);
         }

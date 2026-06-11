@@ -43,6 +43,10 @@
             <a class="nav-link {{ request('tab') == 'categories' ? 'active' : '' }}"  href="?tab=categories"  id="categories-tab" aria-controls="categories" aria-selected="{{ request('tab') == 'categories' ? 'true' : 'false' }}">
                 <i class="fas fa-database me-1"></i> {{ __('owner.categories.page_header') }}</a>
         </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ request('tab') == 'units' ? 'active' : '' }}"  href="?tab=units"  id="units-tab" aria-controls="units" aria-selected="{{ request('tab') == 'units' ? 'true' : 'false' }}">
+                <i class="bi bi-rulers me-1"></i> {{ __('owner.units.title') }}</a>
+        </li>
     </ul>
 
     <div class="tab-content" id="settingsTabsContent">
@@ -73,8 +77,12 @@
 
         <div class="tab-pane fade {{ request('tab') == 'categories' ? 'show active' : '' }}" id="categories" role="tabpanel" aria-labelledby="categories-tab">
             @include('owner.settings.tabs.categories')
-        </div>        
-        
+        </div>
+
+        <div class="tab-pane fade {{ request('tab') == 'units' ? 'show active' : '' }}" id="units" role="tabpanel" aria-labelledby="units-tab">
+            @include('owner.settings.tabs.units')
+        </div>
+
     </div>
 </div>
 
@@ -937,6 +945,143 @@
 </script>
 {{-- end boat wizard --}}
 
+
+{{-- units --}}
+<script>
+    window.unitsRoutes = {
+        unitsData: "{{ route('owner.getUnitsData') }}",
+        unitsStore: "{{ route('owner.units.store') }}",
+        unitsUpdate: "{{ route('owner.units.update', ':id') }}",
+        unitsDestroy: "{{ route('owner.units.destroy', ':id') }}",
+    };
+</script>
+<script>
+    $(document).ready(function() {
+        let unitsTable;
+        let unitIsEditMode = false;
+        let unitCurrentEditId = null;
+        let appLocale = '{{ app()->getLocale() }}';
+        let unitsLanguageOptions = {};
+        if (appLocale === 'ar') {
+            unitsLanguageOptions = {
+                url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json"
+            };
+        }
+        unitsTable = $('#unitsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: window.unitsRoutes.unitsData,
+            language: unitsLanguageOptions,
+            columns: [
+                { data: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'name' },
+                { data: 'name_en' },
+                { data: 'is_default' },
+                { data: 'status' },
+                { data: 'action', orderable: false, searchable: false },
+            ],
+            responsive: true
+        });
+
+        $(document).on('click', '.addUnitBtn', function() {
+            resetUnitForm();
+            $('#unitModalTitle').text('{{ __('owner.units.add_new_title') }}');
+            $('#addUnitModal').modal('show');
+        });
+
+        $('#unitForm').on('submit', function(e) {
+            e.preventDefault();
+            let form = $(this);
+            const url = unitIsEditMode ? window.unitsRoutes.unitsUpdate.replace(':id', unitCurrentEditId) :
+                window.unitsRoutes.unitsStore;
+            $('#unitFormMethod').val(unitIsEditMode ? 'PUT' : 'POST');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: form.serialize(),
+                success: function() {
+                    $('#addUnitModal').modal('hide');
+                    unitsTable.ajax.reload();
+                    toastr.success(unitIsEditMode ? '{{ __('owner.generated.item_fe2368') }}' :
+                        '{{ __('owner.generated.item_26a187') }}');
+                    resetUnitForm();
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors || {};
+                        $.each(errors, function(field, messages) {
+                            let input = form.find('[name="' + field + '"]');
+                            input.addClass('is-invalid');
+                            input.after('<span class="text-danger">' + messages[0] + '</span>');
+                        });
+                    } else {
+                        Swal.fire('{{ __('owner.generated.item_e4c800') }}');
+                    }
+                }
+            });
+        });
+
+        $(document).on('click', '.unitEditBtn', function() {
+            const data = $(this).data();
+            unitIsEditMode = true;
+            unitCurrentEditId = data.id;
+            $('#unitModalTitle').text('{{ __('owner.units.edit_title') }}');
+            $('#unitId').val(data.id);
+            $('#unitNameAr').val(data.name_ar);
+            $('#unitNameEn').val(data.name_en);
+            $('#unitStatus').val(data.status);
+            $('#unitIsDefault').prop('checked', data.is_default == 1);
+
+            $('#addUnitModal').modal('show');
+        });
+
+        $(document).on('click', '.unitDeleteBtn', function() {
+            const id = $(this).data('id');
+            Swal.fire({
+                title: '{{ __('owner.swal.confirm_title') }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                cancelButtonText: '{{ __('owner.swal.cancel') }}'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: window.unitsRoutes.unitsDestroy.replace(':id', id),
+                        type: 'DELETE',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function() {
+                            unitsTable.ajax.reload();
+                            toastr.success('{{ __('owner.units.deleted') }}');
+                        },
+                        error: function(xhr) {
+                            let msg = (xhr.responseJSON && xhr.responseJSON.error) ?
+                                xhr.responseJSON.error : '{{ __('owner.swal.error') }}';
+                            toastr.error(msg);
+                        }
+                    });
+                }
+            });
+        });
+
+        function resetUnitForm() {
+            $('#unitForm').find('.is-invalid').removeClass('is-invalid');
+            $('#unitForm').find('.text-danger').remove();
+            $('#unitForm')[0].reset();
+            $('#unitId').val('');
+            $('#unitFormMethod').val('POST');
+            $('#unitIsDefault').prop('checked', false);
+            $('#unitModalTitle').text('{{ __('owner.units.add_new_title') }}');
+            unitIsEditMode = false;
+            unitCurrentEditId = null;
+        }
+    });
+</script>
+{{-- end units --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

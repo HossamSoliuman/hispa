@@ -43,6 +43,7 @@
                             <th>#</th>
                             <th>{{ __('owner.sales.fish') }}</th>
                             <th>{{ __('owner.sales.weight') }}</th>
+                            <th>{{ __('owner.sales.unit') }}</th>
                             <th>{{ __('owner.sales.total_price') }}</th>
                         </tr>
                         </thead>
@@ -52,6 +53,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $detail->fish->scientific_name }}</td>
                                 <td>{{ number_format($detail->weight, 2) }}</td>
+                                <td>{{ $detail->unit->name ?? '—' }}</td>
                                 <td>{{ number_format($detail->total_price, 2) }}</td>
                             </tr>
                         @endforeach
@@ -60,15 +62,16 @@
                         <tr>
                             <th colspan="2">{{ __('owner.sales.total') }}</th>
                             <th>{{ number_format($sales->details->sum('weight'), 2) }}</th>
+                            <th></th>
                             <th>{{ number_format($sales->details->sum('total_price'), 2) }}</th>
                         </tr>
                         @if ($sales->payment_status == 'partially_paid')
                             <tr>
-                                <th colspan="3">{{ __('owner.status.paid') }}</th>                                
+                                <th colspan="4">{{ __('owner.status.paid') }}</th>
                                 <th>{{ number_format($sales->details->sum('total_price')-$sales->remaining_total, 2) }}</th>
                             </tr>
                             <tr>
-                                <th colspan="3">{{ __('owner.generated.remaining_val') }}</th>                                
+                                <th colspan="4">{{ __('owner.generated.remaining_val') }}</th>
                                 <th>{{ number_format($sales->remaining_total, 2) }}</th>
                             </tr>
                         @endif

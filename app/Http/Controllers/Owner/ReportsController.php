@@ -34,6 +34,7 @@ class ReportsController extends Controller
         $ownerTripIds = $trips->pluck('id');
 
         $stock = FishQuantityStock::query()
+            ->with(['fish', 'unit'])
             ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
             ->where(function ($q) use ($ownerBoatIds, $ownerTripIds) {
                 $q->whereIn('boat_id', $ownerBoatIds)

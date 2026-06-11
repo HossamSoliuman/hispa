@@ -68,9 +68,16 @@
                         </div>
                     </div>
 
+                    <div class="row mb-2 fw-bold">
+                        <div class="col-md-5">{{ __('owner.catch.fish') }}</div>
+                        <div class="col-md-3">{{ __('owner.catch.weight') }}</div>
+                        <div class="col-md-3">{{ __('owner.catch.unit') }}</div>
+                        <div class="col-md-1"></div>
+                    </div>
+
                     <div id="fish-wrapper">
                         <div class="row fish-row mb-2">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <select name="fish_id[]" class="form-select" required>
                                     <option value="">{{ __('owner.catch.choose_fish') }}</option>
                                     @foreach ($fish as $f)
@@ -79,9 +86,17 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-5">
+                            <div class="col-md-3">
                                 <input type="number" step="0.01" name="weight[]" class="form-control weight"
                                     placeholder="{{ __('owner.catch.weight') }}" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <select name="unit_id[]" class="form-select" required>
+                                    @foreach ($units as $unit)
+                                        <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="col-md-1 text-center">

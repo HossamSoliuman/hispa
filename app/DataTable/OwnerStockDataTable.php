@@ -73,7 +73,8 @@ class OwnerStockDataTable extends DataTables
                 $owner = $owners->get($row->owner_id);
                 $name = $owner ? $owner->name : '---';
                 $url = route('admin.owner-stock.show', $row->owner_id);
-                return '<a href="' . e($url) . '" class="text-decoration-none fw-medium">' . e($name) . '</a>';
+
+                return '<a href="'.e($url).'" class="text-decoration-none fw-medium">'.e($name).'</a>';
             })
             ->addColumn('total_quantity', function ($row) {
                 return number_format((float) $row->total_quantity, 2);
@@ -84,7 +85,8 @@ class OwnerStockDataTable extends DataTables
             ->addColumn('details', function ($row) {
                 $url = route('admin.owner-stock.show', $row->owner_id);
                 $label = __('admin.owner_stocks.table.details');
-                return '<a href="' . e($url) . '" class="btn btn-sm btn-info">' . e($label) . '</a>';
+
+                return '<a href="'.e($url).'" class="btn btn-sm btn-info">'.e($label).'</a>';
             })
             ->with([
                 'total_owners' => $rows->count(),
@@ -107,7 +109,7 @@ class OwnerStockDataTable extends DataTables
         $query = $this->ownerStockService->baseQuery($ownerId);
         $this->ownerStockService->applyFilters($query, $request);
 
-        $data = $query->with('fish')->orderByDesc('created_at')->get();
+        $data = $query->with(['fish', 'unit'])->orderByDesc('created_at')->get();
 
         $totalQuantity = (float) $data->sum('quantity');
         $totalValue = (float) $data->sum(fn ($row) => (float) $row->quantity * (float) $row->price_per_kg);
@@ -121,14 +123,17 @@ class OwnerStockDataTable extends DataTables
                 if (! $row->trip) {
                     return '---';
                 }
+
                 return $row->trip->name ?? $row->trip->number ?? '---';
             })
             ->addColumn('stock_date', fn ($row) => $row->created_at ? $row->created_at->format('Y-m-d H:i') : '---')
             ->addColumn('fish_name', fn ($row) => $row->fish ? ($row->fish->name ?? $row->fish->scientific_name ?? '---') : '---')
+            ->addColumn('unit_name', fn ($row) => $row->unit_id ? $row->unit->name : $unit)
             ->addColumn('quantity', fn ($row) => number_format((float) $row->quantity, 2))
             ->addColumn('price_per_kg', fn ($row) => number_format((float) $row->price_per_kg, 2))
             ->addColumn('total_price', function ($row) {
                 $total = (float) $row->quantity * (float) $row->price_per_kg;
+
                 return number_format($total, 2);
             })
             ->with([

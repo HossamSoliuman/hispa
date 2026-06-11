@@ -17,4 +17,9 @@ class CatchDetail extends Model
     {
         return $this->belongsTo(Fish::class, 'fish_id');
     }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class)->withDefault();
+    }
 }

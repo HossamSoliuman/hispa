@@ -108,6 +108,7 @@
                             <th>{{ __('admin.owner_stock_fish_quantity.trip') }}</th>
                             <th>{{ __('admin.owner_stock_fish_quantity.date') }}</th>
                             <th>{{ __('admin.owner_stocks.table.fish_name') }}</th>
+                            <th>{{ __('owner.catch.unit') }}</th>
                             <th>{{ __('admin.owner_stock_fish_quantity.quantity') }}</th>
                             <th>{{ __('admin.owner_stock_fish_quantity.price_per_kg') }}</th>
                             <th>{{ __('admin.owner_stock_fish_quantity.total_price') }}</th>
@@ -162,6 +163,7 @@
                     { data: 'trip_name', name: 'trip_name' },
                     { data: 'stock_date', name: 'stock_date' },
                     { data: 'fish_name', name: 'fish_name' },
+                    { data: 'unit_name', name: 'unit_name' },
                     { data: 'quantity', name: 'quantity' },
                     { data: 'price_per_kg', name: 'price_per_kg' },
                     { data: 'total_price', name: 'total_price' }

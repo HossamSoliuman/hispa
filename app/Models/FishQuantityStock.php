@@ -22,4 +22,9 @@ class FishQuantityStock extends Model
     {
         return $this->belongsTo(Boat::class);
     }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class)->withDefault();
+    }
 }

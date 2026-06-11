@@ -89,6 +89,7 @@
                         <th>#</th>
                         <th>{{ __('owner.catch.fish') }}</th>
                         <th>{{ __('owner.catch.weight') }}</th>
+                        <th>{{ __('owner.catch.unit') }}</th>
                         <th>{{ __('owner.sales.price_per_kilo') }}</th>
                         <th>{{ __('owner.catch.total_price') }}</th>
                     </tr>
@@ -100,19 +101,25 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $stock->fish->scientific_name }}</td>
                             <td>{{ number_format($stock->quantity, 2) }}</td>
+                            <td>{{ $stock->unit->name ?? '—' }}</td>
                             <td>{{ number_format($stock->price_per_kg, 2) }}</td>
-                            @php $fish_total_price = (number_format($stock->quantity, 2) * number_format($stock->price_per_kg, 2)); @endphp
+                            @php $fish_total_price = ($stock->quantity * $stock->price_per_kg); @endphp
                             @php $total_price += $fish_total_price; @endphp
-                            <td>{{ (number_format($stock->quantity, 2) * number_format($stock->price_per_kg, 2)) }}</td>
+                            <td>{{ number_format($fish_total_price, 2) }}</td>
                         </tr>
                     @endforeach
                     </tbody>
                     <tfoot>
+                    @foreach($stocks->groupBy(fn ($s) => $s->unit->name ?? '—') as $unitName => $group)
+                        <tr>
+                            <th colspan="2">{{ __('owner.catch.total') }} ({{ $unitName }})</th>
+                            <th>{{ number_format($group->sum('quantity'), 2) }}</th>
+                            <th colspan="3">{{ $unitName }}</th>
+                        </tr>
+                    @endforeach
                     <tr>
-                        <th colspan="2">{{ __('owner.catch.total') }}</th>
-                        <th>{{ number_format($stocks->sum('quantity'), 2) }}</th>
-                        <th></th>
-                        <th>{{ $total_price }}</th>
+                        <th colspan="2">{{ __('owner.catch.total_price') }}</th>
+                        <th colspan="4">{{ number_format($total_price, 2) }}</th>
                     </tr>
                     </tfoot>
                 </table>

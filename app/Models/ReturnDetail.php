@@ -15,6 +15,11 @@ class ReturnDetail extends Model
         return $this->belongsTo(Fish::class);
     }
 
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class)->withDefault();
+    }
+
     public function return()
     {
         return $this->belongsTo(ReturnModel::class, 'return_id');

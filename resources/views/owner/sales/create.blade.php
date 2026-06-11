@@ -76,8 +76,9 @@
                     <h4 class="mt-5">{{ __('owner.sales.sales_details') }}</h4>
                    <div class="row mb-2 fw-bold">
                         <div class="col-md-3">{{ __('owner.sales.fish') }}</div>
-                        <div class="col-md-3">{{ __('owner.sales.weight') }}</div>
-                        <div class="col-md-3">{{ __('owner.sales.price_per_kilo') }}</div>
+                        <div class="col-md-2">{{ __('owner.sales.weight') }}</div>
+                        <div class="col-md-2">{{ __('owner.sales.unit') }}</div>
+                        <div class="col-md-2">{{ __('owner.sales.price_per_unit') }}</div>
                         <div class="col-md-3">{{ __('owner.sales.total_price') }}</div>
                     </div>
                     <div class="row mb-3">            
@@ -162,25 +163,32 @@
 
     function buildFishRow(detail) {
         const price = detail.price_per_kg > 0 ? detail.price_per_kg : '';
+        const unitId = detail.unit_id || '';
+        const unitName = (detail.unit && detail.unit.name) ? detail.unit.name : '';
         return `
             <div class="row mb-2 fish-row align-items-center">
                 <div class="col-md-3">
                     <input type="hidden" name="fish_id[]" value="${detail.fish_id}">
+                    <input type="hidden" name="unit_id[]" value="${unitId}">
                     <input type="text" class="form-control" value="${detail.fish.name}" disabled>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <input type="number" step="0.01" min="0" max="${detail.quantity}"
                            name="weight[]" class="form-control weight"
                            value="${detail.quantity}"
                            placeholder="≤ ${detail.quantity}">
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <input type="text" class="form-control" value="${unitName}" disabled>
+                </div>
+
+                <div class="col-md-2">
                     <input type="number" step="0.01" min="0"
                            name="price_per_kilo[]" class="form-control price-per-kg"
                            value="${price}"
-                           placeholder="{{ __('owner.sales.price_per_kilo') }}">
+                           placeholder="{{ __('owner.sales.price_per_unit') }}">
                 </div>
 
                 <div class="col-md-3">

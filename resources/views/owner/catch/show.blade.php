@@ -40,6 +40,7 @@
                             <th>#</th>
                             <th>{{ __('owner.catch.fish') }}</th>
                             <th>{{ __('owner.catch.weight') }}</th>
+                            <th>{{ __('owner.catch.unit') }}</th>
                             <th>{{ __('owner.sales.price_per_kilo') }}</th>
                             <th>{{ __('owner.catch.total_price') }}</th>
                         </tr>
@@ -50,6 +51,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $detail->fish->scientific_name }}</td>
                                 <td>{{ number_format($detail->weight, 2) }}</td>
+                                <td>{{ $detail->unit->name ?? '—' }}</td>
                                 <td>{{ number_format($detail->price_per_kg, 2) }}</td>
                                 <td>{{ number_format($detail->total_price, 2) }}</td>
                             </tr>
@@ -59,6 +61,7 @@
                         <tr>
                             <th colspan="2">{{ __('owner.catch.total') }}</th>
                             <th>{{ number_format($catch->total_weight, 2) }}</th>
+                            <th></th>
                             <td></td>
                             <th>{{ number_format($catch->details->sum('total_price'), 2) }}</th>
                         </tr>

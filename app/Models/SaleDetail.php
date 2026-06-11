@@ -13,6 +13,7 @@ class SaleDetail extends Model
     protected $fillable = [
         'sale_id',
         'fish_id',
+        'unit_id',
         'fish_name',
         'quantity',
         'weight',
@@ -33,6 +34,11 @@ class SaleDetail extends Model
     public function fish()
     {
         return $this->belongsTo(Fish::class)->withDefault();
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class)->withDefault();
     }
 
     public function returns()

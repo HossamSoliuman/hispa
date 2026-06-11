@@ -49,6 +49,7 @@ use App\Http\Controllers\Owner\SalesController;
 use App\Http\Controllers\Owner\SettingsController;
 use App\Http\Controllers\Owner\StockController;
 use App\Http\Controllers\Owner\TripController;
+use App\Http\Controllers\Owner\UnitController;
 use App\Http\Controllers\Owner\UserRequestController;
 use App\Http\Controllers\Owner\VendorsController;
 use App\Http\Controllers\SupportTicketController;
@@ -141,6 +142,10 @@ Route::group([
         Route::resource('/fish', FishController::class);
         Route::get('/getFishData', [FishController::class, 'getFishData'])->name('getFishData');
         Route::get('/fishStock', [FishController::class, 'getFishStock'])->name('fishStock');
+
+        // weight units (وحدات الوزن)
+        Route::get('/getUnitsData', [UnitController::class, 'getData'])->name('getUnitsData');
+        Route::resource('/units', UnitController::class)->only(['index', 'store', 'update', 'destroy']);
 
         // captains
         Route::resource('/captain', CaptainController::class);

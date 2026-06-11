@@ -12,6 +12,7 @@ use App\Models\CatchModel;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
 use App\Models\Trip;
+use App\Models\Unit;
 use App\Services\TripTransitionService;
 use App\Traits\CatchStatistics;
 use Illuminate\Http\Request;
@@ -65,7 +66,7 @@ class CatchController extends Controller
 
     public function show($id)
     {
-        $catch = CatchModel::with(['trip', 'trip.boat', 'details.fish'])
+        $catch = CatchModel::with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
         return view('owner.catch.show', compact('catch'));
@@ -75,6 +76,7 @@ class CatchController extends Controller
     {
         $trips = Trip::where('owner_id', auth()->id())->orderByDesc('id')->get();
         $fish = Fish::Active()->get();
+        $units = Unit::active()->orderByDesc('is_default')->get();
         $tripId = $request->query('trip_id');
 
         $selectedTrip = null;
@@ -82,7 +84,7 @@ class CatchController extends Controller
             $selectedTrip = Trip::with('boat')->find($tripId);
         }
 
-        return view('owner.catch.create', compact('trips', 'fish', 'selectedTrip'));
+        return view('owner.catch.create', compact('trips', 'fish', 'units', 'selectedTrip'));
     }
 
     public function edit($id)
@@ -90,9 +92,10 @@ class CatchController extends Controller
         $catch = CatchModel::with(['trip.boat', 'details.fish'])->findOrFail($id);
         $trips = Trip::where('owner_id', auth()->id())->orderByDesc('id')->get();
         $fish = Fish::Active()->get();
+        $units = Unit::active()->orderByDesc('is_default')->get();
         $selectedTrip = $catch->trip;
 
-        return view('owner.catch.edit', compact('catch', 'trips', 'fish', 'selectedTrip'));
+        return view('owner.catch.edit', compact('catch', 'trips', 'fish', 'units', 'selectedTrip'));
     }
 
     public function update(CatchRequest $request, $id)
@@ -111,15 +114,18 @@ class CatchController extends Controller
                 'trip_id' => $request->trip_id,
             ]);
 
+            $defaultUnitId = Unit::defaultId();
             $totalWeight = 0;
 
             foreach ($request->fish_id as $index => $fishId) {
 
                 $weight = $request->weight[$index];
+                $unitId = $request->unit_id[$index] ?? $defaultUnitId;
 
                 CatchDetail::create([
                     'catch_id' => $catch->id,
                     'fish_id' => $fishId,
+                    'unit_id' => $unitId,
                     'fish_name' => optional(Fish::find($fishId))->scientific_name,
                     'weight' => $weight,
                 ]);
@@ -127,6 +133,7 @@ class CatchController extends Controller
                 $stock = FishQuantityStock::firstOrCreate(
                     [
                         'fish_id' => $fishId,
+                        'unit_id' => $unitId,
                         'catch_id' => $catch->id,
                         'trip_id' => $request->trip_id,
                         'boat_id' => $boatId,
@@ -173,15 +180,18 @@ class CatchController extends Controller
                 'total_amount' => 0,
             ]);
 
+            $defaultUnitId = Unit::defaultId();
             $totalWeight = 0;
 
             foreach ($request->fish_id as $index => $fishId) {
 
                 $weight = $request->weight[$index];
+                $unitId = $request->unit_id[$index] ?? $defaultUnitId;
 
                 CatchDetail::create([
                     'catch_id' => $catch->id,
                     'fish_id' => $fishId,
+                    'unit_id' => $unitId,
                     'fish_name' => optional(Fish::find($fishId))->scientific_name,
                     'weight' => $weight,
                 ]);
@@ -189,6 +199,7 @@ class CatchController extends Controller
                 $stock = FishQuantityStock::firstOrCreate(
                     [
                         'fish_id' => $fishId,
+                        'unit_id' => $unitId,
                         'catch_id' => $catch->id,
                         'trip_id' => $request->trip_id,
                         'boat_id' => $boatId,
@@ -225,7 +236,7 @@ class CatchController extends Controller
 
     public function printCatchReport(Request $request, $id = null)
     {
-        $catch = CatchModel::with(['trip', 'trip.boat', 'details.fish'])
+        $catch = CatchModel::with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
         return view('owner.reports.print.catch-report', compact('catch'));

@@ -31,6 +31,9 @@ class SalesRequest extends FormRequest
             'fish_id' => 'required|array|min:1',
             'fish_id.*' => 'required|exists:fish,id',
 
+            'unit_id' => 'nullable|array',
+            'unit_id.*' => 'nullable|exists:units,id',
+
             'weight' => 'required|array|min:1',
             'weight.*' => 'nullable|numeric|min:0',
 

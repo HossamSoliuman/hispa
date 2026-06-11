@@ -70,6 +70,9 @@ class ReturnsController extends Controller
                     $returnedSale_DetailID = $request->sale_detail_id[$index];
                     $returnedPricePerKilo = (float) $request->price_per_kilo[$index];
 
+                    $saleDetail = $sale->details->firstWhere('id', $returnedSale_DetailID);
+                    $unitId = $saleDetail?->unit_id;
+
                     $soldWeight = $sale->details
                         ->where('fish_id', $fishId)
                         ->sum('weight');
@@ -87,6 +90,7 @@ class ReturnsController extends Controller
                     ReturnDetail::create([
                         'return_id' => $return->id,
                         'fish_id' => $fishId,
+                        'unit_id' => $unitId,
                         'sale_detail_id' => $returnedSale_DetailID,
                         'price_per_kilo' => $returnedPricePerKilo,
                         'total_price' => ($returnedWeight * $returnedPricePerKilo),
@@ -101,6 +105,7 @@ class ReturnsController extends Controller
                     FishQuantityStock::where('fish_id', $fishId)
                         ->where('catch_id', $sale->catch_id)
                         ->where('trip_id', $sale->trip_id)
+                        ->when($unitId, fn ($q) => $q->where('unit_id', $unitId))
                         ->increment('quantity', $returnedWeight);
                 }
             }
@@ -158,21 +163,21 @@ class ReturnsController extends Controller
             return response()->json(['message' => trans('boat_deleted')], 200);
         } catch (\Exception $ex) {
             if (App::environment('local')) {
-                return response()->json(['message' => trans('error_deleting') . $ex->getMessage()], 403);
+                return response()->json(['message' => trans('error_deleting').$ex->getMessage()], 403);
             }
         }
     }
 
     public function saleDetails($saleId)
     {
-        $sale = Sale::with('details', 'details.fish')->findOrFail($saleId);
+        $sale = Sale::with('details', 'details.fish', 'details.unit')->findOrFail($saleId);
 
         return response()->json($sale);
     }
 
     public function show($id)
     {
-        $return = ReturnModel::where('id', $id)->with(['sale', 'details'])->first();
+        $return = ReturnModel::where('id', $id)->with(['sale', 'details', 'details.fish', 'details.unit'])->first();
 
         return view('owner.returns.show', compact('return'));
     }
