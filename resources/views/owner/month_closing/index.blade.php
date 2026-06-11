@@ -54,8 +54,8 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
+                <table class="table table-bordered table-hover text-center align-middle">
+                    <thead class="table-light">
                         <tr>
                             <th>{{ __('owner.month_closing.columns.period') }}</th>
                             <th>{{ __('owner.month_closing.columns.net_profit') }}</th>
@@ -71,20 +71,22 @@
                                 <td>{{ number_format($closing->net_profit, 2) }}</td>
                                 <td>{{ number_format($closing->crew_share, 2) }}</td>
                                 <td>{{ optional($closing->closed_at)->format('Y-m-d H:i') }}</td>
-                                <td class="d-flex gap-1">
-                                    <a href="{{ route('owner.month-closing.show', $closing) }}" class="btn btn-sm btn-info">
-                                        <i class="fa fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('owner.month-closing.print', $closing) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fa fa-print"></i>
-                                    </a>
-                                    <form method="POST" action="{{ route('owner.month-closing.reopen', $closing) }}"
-                                        onsubmit="return confirm('{{ __('owner.month_closing.confirm_reopen') }}')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            {{ __('owner.month_closing.reopen_btn') }}
-                                        </button>
-                                    </form>
+                                <td>
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <a href="{{ route('owner.month-closing.show', $closing) }}" class="btn btn-sm btn-info">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('owner.month-closing.print', $closing) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fa fa-print"></i>
+                                        </a>
+                                        <form method="POST" action="{{ route('owner.month-closing.reopen', $closing) }}"
+                                            onsubmit="return confirm('{{ __('owner.month_closing.confirm_reopen') }}')" class="m-0">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                {{ __('owner.month_closing.reopen_btn') }}
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
