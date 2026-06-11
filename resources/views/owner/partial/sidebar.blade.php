@@ -102,7 +102,6 @@
                 request()->routeIs('owner.sales.show') ||
                 request()->routeIs('owner.returns.index') ||
                 request()->routeIs('owner.returns.create') ||
-                request()->routeIs('owner.returns.edit') ||
                 request()->routeIs('owner.returns.show')
                     ? 'active'
                     : '' }}">
@@ -125,7 +124,7 @@
                         </a>
                     </div>
                     <div
-                        class="menu-item {{ request()->routeIs('owner.returns.index') || request()->routeIs('owner.returns.create') || request()->routeIs('owner.returns.edit') || request()->routeIs('owner.returns.show') ? 'active' : '' }}">
+                        class="menu-item {{ request()->routeIs('owner.returns.index') || request()->routeIs('owner.returns.create') || request()->routeIs('owner.returns.show') ? 'active' : '' }}">
                         <a href="{{ route('owner.returns.index') }}" class="menu-link">
                             <span class="menu-text">{{ __('owner.menu.returns') }}</span>
                         </a>

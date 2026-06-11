@@ -13,6 +13,7 @@ use App\Repository\Owner\PayrollRepository;
 use App\Service\Owner\PayrollService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use function Symfony\Component\Clock\now;
@@ -51,7 +52,8 @@ class PayrollController extends Controller
     // Fetch already-paid monthly periods (to disable them in the datepicker)
     public function paidPeriods(Boat $boat)
     {
-        $periods = PayrollModel::where('is_paid', 1)
+        $periods = PayrollModel::where('owner_id', $this->ownerId())
+            ->where('is_paid', 1)
             ->select('year', 'month')
             ->distinct()
             ->get()
@@ -59,6 +61,22 @@ class PayrollController extends Controller
             ->values();
 
         return response()->json($periods);
+    }
+
+    private function ownerId(): int
+    {
+        $ownerId = Auth::guard('owner')->id();
+        abort_if(! $ownerId, 403, 'غير مصرح');
+
+        return (int) $ownerId;
+    }
+
+    /**
+     * Find an owner-scoped payroll or fail with 404 (never leak other tenants' payrolls).
+     */
+    private function findOwnerPayroll(int|string $id): PayrollModel
+    {
+        return PayrollModel::where('owner_id', $this->ownerId())->findOrFail($id);
     }
 
     /**
@@ -81,7 +99,10 @@ class PayrollController extends Controller
             'month' => 'required|integer|between:1,12',
         ]);
 
-        $payroll = PayrollModel::where('year', $request->year)
+        $ownerId = $this->ownerId();
+
+        $payroll = PayrollModel::where('owner_id', $ownerId)
+            ->where('year', $request->year)
             ->where('month', $request->month)
             ->where('type', 'salary')
             ->with('details')
@@ -92,10 +113,7 @@ class PayrollController extends Controller
         }
 
         $payroll = app(PayrollService::class)
-            ->calculateMonthlyPayroll($request->year, $request->month);
-
-        $year = $request->year;
-        $month = $request->month;
+            ->calculateMonthlyPayroll($ownerId, $request->year, $request->month);
 
         return redirect()->route('owner.payrolls.edit', $payroll);
     }
@@ -107,14 +125,18 @@ class PayrollController extends Controller
             'month' => 'required|integer|between:1,12',
         ]);
 
-        $salaryPayroll = PayrollModel::where('year', $request->year)
+        $ownerId = $this->ownerId();
+
+        $salaryPayroll = PayrollModel::where('owner_id', $ownerId)
+            ->where('year', $request->year)
             ->where('month', $request->month)
             ->where('type', 'salary')
             ->where('status', 'approved')
             ->where('is_paid', 1)
             ->first();
         if ($salaryPayroll) {
-            $payroll = PayrollModel::where('year', $request->year)
+            $payroll = PayrollModel::where('owner_id', $ownerId)
+                ->where('year', $request->year)
                 ->where('month', $request->month)
                 ->where('type', 'percentage')
                 ->with('details')
@@ -125,10 +147,7 @@ class PayrollController extends Controller
             }
 
             $payroll = app(PayrollService::class)
-                ->calculateMonthlyPayrollPercentage($request->year, $request->month);
-
-            $year = $request->year;
-            $month = $request->month;
+                ->calculateMonthlyPayrollPercentage($ownerId, $request->year, $request->month);
 
             return redirect()->route('owner.payrolls.edit', $payroll);
         }
@@ -138,12 +157,14 @@ class PayrollController extends Controller
 
     public function store(PayrollRequest $request)
     {
+        Boat::where('owner_id', $this->ownerId())->findOrFail($request->boat_id);
+
         return $this->repository->saveData($request);
     }
 
     public function edit($id)
     {
-        $payroll = PayrollModel::find($id);
+        $payroll = $this->findOwnerPayroll($id);
 
         return view('owner.payroll.edit', compact('payroll'));
     }
@@ -154,7 +175,7 @@ class PayrollController extends Controller
     public function update(PayrollRequest $request)
     {
 
-        $payroll = PayrollModel::find($request->id);
+        $payroll = $this->findOwnerPayroll($request->id);
 
         if ($payroll) {
             if ($payroll->status == 'approved' && $payroll->is_paid) {
@@ -215,9 +236,9 @@ class PayrollController extends Controller
         DB::beginTransaction();
         try {
 
-            $payroll = PayrollModel::where('id', $id)->first();
+            $payroll = $this->findOwnerPayroll($id);
             $payroll->delete();
-            PayrollDetailsModel::where('payroll_id', $id)->delete();
+            PayrollDetailsModel::where('payroll_id', $payroll->id)->delete();
             DB::commit();
 
             return response()->json(['message' => 'Data saved successfully'], 200);
@@ -235,6 +256,8 @@ class PayrollController extends Controller
      */
     public function print(PayrollModel $payroll)
     {
+        abort_if($payroll->owner_id !== $this->ownerId(), 403);
+
         // Load company settings and generate QR code (link to the printable payroll URL)
         $settings = $this->getCompanySettings();
         $qrCode = app(\App\Service\Owner\ReportQrService::class)

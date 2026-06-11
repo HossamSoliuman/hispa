@@ -71,7 +71,7 @@ class ReportsController extends Controller
         $status = $request->input('status');
 
         $assets = Asset::with('latestDepreciation')
-            ->whereIn('boat_id', Boat::where('owner_id', $ownerId)->pluck('id'))
+            ->where('owner_id', $ownerId)
             ->whereHas('latestDepreciation', function ($q) use ($from, $to) {
                 $q->whereBetween(DB::raw('DATE(created_at)'), [$from, $to]);
             });

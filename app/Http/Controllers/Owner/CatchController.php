@@ -38,7 +38,7 @@ class CatchController extends Controller
     public function index()
     {
         $fish = Fish::Active()->get();
-        $boats = Boat::Active()->get();
+        $boats = Boat::Active()->where('owner_id', auth()->id())->get();
 
         return view('owner.catch.index', compact('fish', 'boats'));
     }
@@ -66,10 +66,23 @@ class CatchController extends Controller
 
     public function show($id)
     {
-        $catch = CatchModel::with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
+        $catch = $this->ownerCatchQuery()
+            ->with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
         return view('owner.catch.show', compact('catch'));
+    }
+
+    /**
+     * Catches limited to the logged-in owner's trips.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<CatchModel>
+     */
+    private function ownerCatchQuery()
+    {
+        return CatchModel::whereHas('trip', function ($trip) {
+            $trip->where('owner_id', auth()->id());
+        });
     }
 
     public function create(Request $request)
@@ -81,7 +94,7 @@ class CatchController extends Controller
 
         $selectedTrip = null;
         if ($tripId) {
-            $selectedTrip = Trip::with('boat')->find($tripId);
+            $selectedTrip = Trip::where('owner_id', auth()->id())->with('boat')->find($tripId);
         }
 
         return view('owner.catch.create', compact('trips', 'fish', 'units', 'selectedTrip'));
@@ -89,7 +102,7 @@ class CatchController extends Controller
 
     public function edit($id)
     {
-        $catch = CatchModel::with(['trip.boat', 'details.fish'])->findOrFail($id);
+        $catch = $this->ownerCatchQuery()->with(['trip.boat', 'details.fish'])->findOrFail($id);
         $trips = Trip::where('owner_id', auth()->id())->orderByDesc('id')->get();
         $fish = Fish::Active()->get();
         $units = Unit::active()->orderByDesc('is_default')->get();
@@ -103,8 +116,8 @@ class CatchController extends Controller
         try {
             DB::beginTransaction();
 
-            $catch = CatchModel::findOrFail($id);
-            $trip = Trip::findOrFail($request->trip_id);
+            $catch = $this->ownerCatchQuery()->findOrFail($id);
+            $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
             $boatId = $trip->boat_id;
 
             CatchDetail::where('catch_id', $catch->id)->delete();
@@ -169,7 +182,7 @@ class CatchController extends Controller
         try {
             DB::beginTransaction();
 
-            $trip = Trip::findOrFail($request->trip_id);
+            $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
             $boatId = $trip->boat_id;
 
             $catch = CatchModel::create([
@@ -236,7 +249,8 @@ class CatchController extends Controller
 
     public function printCatchReport(Request $request, $id = null)
     {
-        $catch = CatchModel::with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
+        $catch = $this->ownerCatchQuery()
+            ->with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
         return view('owner.reports.print.catch-report', compact('catch'));

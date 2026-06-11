@@ -8,9 +8,11 @@ use App\Models\Payroll;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use App\Models\Sale;
+use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PayrollService
@@ -24,6 +26,7 @@ class PayrollService
 
         // 2. إيرادات المالك من مبيعات رحلات القارب (التدفق القديم للدلال أُلغي)
         $totalRevenues = Sale::whereIn('trip_id', $trips)
+            ->where('seller_type', 'owner')
             ->where('seller_id', $boat->owner_id)
             ->sum('net_owner_amount');
 
@@ -94,15 +97,18 @@ class PayrollService
         ];
     }
 
-    public function calculateMonthlyPayroll(int $year, int $month)
+    public function calculateMonthlyPayroll(int $ownerId, int $year, int $month)
     {
         $payroll = PayrollModel::create([
+            'owner_id' => $ownerId,
             'year' => $year,
             'month' => $month,
             'status' => 'draft',
             'type' => 'salary',
         ]);
-        $users = User::whereIn('role', ['employee', 'crew', 'captain'])->get();
+        $users = User::where('owner_id', $ownerId)
+            ->whereIn('role', ['employee', 'crew', 'captain'])
+            ->get();
 
         foreach ($users as $user) {
             if ($user->salary_type === 'salary') {
@@ -124,15 +130,18 @@ class PayrollService
         return PayrollModel::with('details', 'details.user')->find($payroll->id);
     }
 
-    public function calculateMonthlyPayrollPercentage(int $year, int $month)
+    public function calculateMonthlyPayrollPercentage(int $ownerId, int $year, int $month)
     {
         $payroll = PayrollModel::create([
+            'owner_id' => $ownerId,
             'year' => $year,
             'month' => $month,
             'status' => 'draft',
             'type' => 'percentage',
         ]);
-        $users = User::whereIn('role', ['employee', 'crew', 'captain'])->get();
+        $users = User::where('owner_id', $ownerId)
+            ->whereIn('role', ['employee', 'crew', 'captain'])
+            ->get();
 
         foreach ($users as $user) {
             if ($user->salary_type === 'percentage') {
@@ -141,8 +150,12 @@ class PayrollService
                 $sales_amount = 0;
                 $percentage = $user->salary_amount;
                 $total_captins_salary = $sales_amount = $this->calculatePercentageSalary($user, $year, $month);
-                $total_captins = User::whereIn('role', ['crew', 'captain'])->where('salary_type', 'percentage')->where('boat_id', $user->boat_id)->count();
-                $final_salary = ($total_captins_salary / $total_captins);
+                $total_captins = User::where('owner_id', $ownerId)
+                    ->whereIn('role', ['crew', 'captain'])
+                    ->where('salary_type', 'percentage')
+                    ->where('boat_id', $user->boat_id)
+                    ->count();
+                $final_salary = $total_captins > 0 ? ($total_captins_salary / $total_captins) : 0;
                 $payrollDetail = PayrollDetailsModel::create([
                     'payroll_id' => $payroll->id,
                     'user_id' => $user->id,
@@ -166,19 +179,22 @@ class PayrollService
             $startDate = Carbon::create($year, $month, 1)->startOfDay();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
 
-            $ownerId = $user->owner_id ?? auth()->id();
+            $ownerId = $user->owner_id ?? Auth::guard('owner')->id();
 
             $trips = Trip::where('boat_id', $user->boat_id)->pluck('id');
             $sales = (float) Sale::whereIn('trip_id', $trips)
+                ->where('seller_type', 'owner')
+                ->where('seller_id', $ownerId)
                 ->whereBetween(DB::raw('DATE(sale_datetime)'), [$startDate->toDateString(), $endDate->toDateString()])
                 ->sum('total_price');
 
-            $salaries = PayrollModel::where('year', $year)
+            $salaries = PayrollModel::where('owner_id', $ownerId)
+                ->where('year', $year)
                 ->where('month', $month)
                 ->where('type', 'salary')
                 ->first();
 
-            $captins = User::whereIn('role', ['crew', 'captain'])->where('salary_type', 'salary')->where('boat_id', $user->boat_id)->pluck('id');
+            $captins = User::where('owner_id', $ownerId)->whereIn('role', ['crew', 'captain'])->where('salary_type', 'salary')->where('boat_id', $user->boat_id)->pluck('id');
             $employees = User::whereIn('role', ['employee'])->where('salary_type', 'salary')->where('owner_id', $ownerId)->pluck('id');
             $boats = max(Boat::active()->where('owner_id', $ownerId)->count(), 1);
 
@@ -189,13 +205,17 @@ class PayrollService
                 ? (float) $salaries->details()->whereIn('user_id', $employees)->sum('final_salary')
                 : 0.0;
 
-            $expenses = (float) Expense::where('boat_id', $user->boat_id)
+            $expenses = (float) Expense::where('owner_id', $ownerId)
+                ->where('boat_id', $user->boat_id)
                 ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->sum('final_price');
 
             $totalIncome = $sales - ($expenses + $captinsTotalSalaries + ($employeesTotalSalaries / $boats));
 
-            return $totalIncome / 2;
+            $ownerPercent = (float) (Setting::where('key', MonthlyFinancialsService::SETTING_OWNER_PERCENT)->value('value')
+                ?? MonthlyFinancialsService::DEFAULT_OWNER_PERCENT);
+
+            return $totalIncome * ((100 - $ownerPercent) / 100);
         }
 
         return 0;

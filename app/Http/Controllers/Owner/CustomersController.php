@@ -224,27 +224,6 @@ class CustomersController extends Controller
      */
     private function generateQRCodeImage($url)
     {
-        try {
-            $size = '200';
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size='.$size.'x'.$size.'&data='.urlencode($url);
-
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 5,
-                    'ignore_errors' => true,
-                    'user_agent' => 'Mozilla/5.0',
-                ],
-            ]);
-
-            $imageData = @file_get_contents($qrUrl, false, $context);
-
-            if ($imageData !== false && strlen($imageData) > 100) {
-                return 'data:image/png;base64,'.base64_encode($imageData);
-            }
-        } catch (\Throwable $e) {
-            // Fail silently
-        }
-
-        return '';
+        return app(\App\Service\Owner\ReportQrService::class)->dataUri($url) ?? '';
     }
 }

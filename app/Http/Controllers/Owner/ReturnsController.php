@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Owner;
 
 use App\DataTable\ReturnDatatable;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Owner\BoatTypeRequest;
-use App\Models\BoatType;
 use App\Models\FishQuantityStock;
 use App\Models\ReturnDetail;
 use App\Models\ReturnModel;
 use App\Models\Sale;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ReturnsController extends Controller
@@ -35,8 +33,8 @@ class ReturnsController extends Controller
 
     public function create()
     {
-        $sales = Sale::with('details')
-            ->where('seller_id', auth()->id())
+        $sales = $this->ownerSalesQuery()
+            ->with('details')
             ->latest()
             ->get();
 
@@ -53,7 +51,7 @@ class ReturnsController extends Controller
 
         DB::transaction(function () use ($request) {
 
-            $sale = Sale::with('details')->findOrFail($request->sale_id);
+            $sale = $this->ownerSalesQuery()->with('details')->findOrFail($request->sale_id);
 
             $return = ReturnModel::create([
                 'sale_id' => $sale->id,
@@ -116,69 +114,42 @@ class ReturnsController extends Controller
             ->with('success', 'تم تسجيل الإرجاع بنجاح');
     }
 
-    public function edit($id)
-    {
-        $data = BoatType::find($id);
-
-        return view('owner.returns.edit', compact('data'));
-    }
-
-    public function update(BoatTypeRequest $request, $id)
-    {
-
-        try {
-            $returns = BoatType::where('id', $id)->first();
-            $data['name_ar'] = $request->name_ar;
-            $data['name_en'] = $request->name_en;
-            $data['status'] = $request->status ? 1 : 0;
-            $returns->update($data);
-            DB::commit();
-            session()->flash('success', 'تم تحديث البيانات بنجاح');
-
-            return redirect()->route('owner.returns.index');
-        } catch (\Exception $ex) {
-            if (App::environment('local')) {
-                return redirect()->back()->with(['error' => $ex->getmessage()]);
-            }
-
-            return redirect()->back()->with(['error' => 'حدث خطأ ما']);
-        }
-    }
-
-    public function destroy($id)
-    {
-
-        try {
-
-            $returns = BoatType::find($id);
-
-            if (! $returns) {
-                return response()->json(['message' => 'not found page !!!'], 404);
-            }
-            $returns->delete();
-
-            DB::commit();
-            session()->flash('success', trans('boat_deleted'));
-
-            return response()->json(['message' => trans('boat_deleted')], 200);
-        } catch (\Exception $ex) {
-            if (App::environment('local')) {
-                return response()->json(['message' => trans('error_deleting').$ex->getMessage()], 403);
-            }
-        }
-    }
-
     public function saleDetails($saleId)
     {
-        $sale = Sale::with('details', 'details.fish', 'details.unit')->findOrFail($saleId);
+        $sale = $this->ownerSalesQuery()
+            ->with('details', 'details.fish', 'details.unit')
+            ->findOrFail($saleId);
 
         return response()->json($sale);
     }
 
     public function show($id)
     {
-        $return = ReturnModel::where('id', $id)->with(['sale', 'details', 'details.fish', 'details.unit'])->first();
+        $return = ReturnModel::where('id', $id)
+            ->whereHas('sale', function ($sale) {
+                $sale->where('seller_type', 'owner')->where('seller_id', $this->ownerId());
+            })
+            ->with(['sale', 'details', 'details.fish', 'details.unit'])
+            ->firstOrFail();
 
         return view('owner.returns.show', compact('return'));
+    }
+
+    private function ownerId(): int
+    {
+        $ownerId = Auth::guard('owner')->id();
+        abort_if(! $ownerId, 403, 'غير مصرح');
+
+        return (int) $ownerId;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<Sale>
+     */
+    private function ownerSalesQuery()
+    {
+        return Sale::query()
+            ->where('seller_type', 'owner')
+            ->where('seller_id', $this->ownerId());
     }
 }

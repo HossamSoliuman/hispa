@@ -6,17 +6,22 @@ use App\Models\PayrollDetail;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class PayrollDataTable extends DataTables
 {
     public function getData(Request $request)
     {
+        $ownerId = Auth::guard('owner')->id();
 
-        $payrolls = PayrollModel::with('details')->where('type', $request->type)->get();
+        $payrolls = PayrollModel::with('details')
+            ->where('owner_id', $ownerId)
+            ->where('type', $request->type)
+            ->get();
         $totalPayrolls = $payrolls->count();
         $paidPayrolls = $payrolls->where('is_paid', 1)->count();
-        $paidPayroll = PayrollModel::where('is_paid', 1)->where('type', $request->type)->pluck('id');
+        $paidPayroll = $payrolls->where('is_paid', 1)->pluck('id');
         $paidAmount = PayrollDetailsModel::whereIn('payroll_id', $paidPayroll)->sum('final_salary');
         $pendingApproval = $payrolls->where('is_paid', 0)->count();
         $avgPerCrew = 0;

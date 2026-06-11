@@ -6,20 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Boat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 
 class AssetController extends Controller
 {
     public function index()
     {
-        $assets = Asset::with('boat')->latest()->paginate(20);
+        $assets = Asset::where('owner_id', $this->ownerId())
+            ->with('boat')
+            ->latest()
+            ->paginate(20);
 
         return view('owner.assets.index', compact('assets'));
     }
 
     public function create()
     {
-        $boats = Boat::whereDoesntHave('asset')->get();
+        $boats = $this->ownerBoatsWithoutAsset()->get();
 
         return view('owner.assets.create', compact('boats'));
     }
@@ -27,6 +32,7 @@ class AssetController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateData($request);
+        $data['owner_id'] = $this->ownerId();
         Asset::create($data);
 
         return redirect()->route('owner.assets.index')
@@ -35,8 +41,12 @@ class AssetController extends Controller
 
     public function edit(Asset $asset)
     {
-        $boats = Boat::whereDoesntHave('asset')
-            ->orWhere('id', $asset->boat_id)
+        $this->authorizeOwner($asset);
+
+        $boats = $this->ownerBoatsWithoutAsset()
+            ->orWhere(function ($query) use ($asset) {
+                $query->where('owner_id', $this->ownerId())->where('id', $asset->boat_id);
+            })
             ->get();
 
         return view('owner.assets.edit', compact('asset', 'boats'));
@@ -44,6 +54,8 @@ class AssetController extends Controller
 
     public function update(Request $request, Asset $asset)
     {
+        $this->authorizeOwner($asset);
+
         $data = $this->validateData($request);
         $asset->update($data);
 
@@ -53,16 +65,36 @@ class AssetController extends Controller
 
     public function show(Asset $asset)
     {
+        $this->authorizeOwner($asset);
+
         $asset->load('boat', 'depreciations');
 
         return view('owner.assets.show', compact('asset'));
     }
 
+    public function destroy($id)
+    {
+        $asset = Asset::where('owner_id', $this->ownerId())->find($id);
+
+        if (! $asset) {
+            return response()->json(['message' => 'not found'], 404);
+        }
+
+        $asset->delete();
+
+        return response()->json(['message' => 'تم حذف الأصل بنجاح'], 200);
+    }
+
     protected function validateData(Request $request)
     {
+        $ownerId = $this->ownerId();
+
         return $request->validate([
             'asset_type' => 'required|in:boat,fishing_equipment,other',
-            'boat_id' => 'nullable|exists:boats,id',
+            'boat_id' => [
+                'nullable',
+                Rule::exists('boats', 'id')->where('owner_id', $ownerId),
+            ],
             'name' => 'required|string|max:255',
             'purchase_date' => 'required|date',
             'purchase_cost' => 'required|numeric|min:0',
@@ -77,7 +109,7 @@ class AssetController extends Controller
 
     public function getAssetsData(Request $request)
     {
-        $query = Asset::orderBy('created_at', 'desc');
+        $query = Asset::where('owner_id', $this->ownerId())->orderBy('created_at', 'desc');
         if ($request->filled('asset_type')) {
             $query = $query->where('asset_type', $request->asset_type);
         }
@@ -128,5 +160,26 @@ class AssetController extends Controller
             ->rawColumns(['status', 'action', 'type']) // أضف 'action' هنا لأن به HTML
             ->with(['summary' => $summary])
             ->make(true);
+    }
+
+    private function ownerId(): int
+    {
+        $ownerId = Auth::guard('owner')->id();
+        abort_if(! $ownerId, 403, 'غير مصرح');
+
+        return (int) $ownerId;
+    }
+
+    private function authorizeOwner(Asset $asset): void
+    {
+        abort_if($asset->owner_id !== $this->ownerId(), 403);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<Boat>
+     */
+    private function ownerBoatsWithoutAsset()
+    {
+        return Boat::where('owner_id', $this->ownerId())->whereDoesntHave('asset');
     }
 }

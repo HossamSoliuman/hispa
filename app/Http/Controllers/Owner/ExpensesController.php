@@ -79,6 +79,8 @@ class ExpensesController extends Controller
 
     public function print(Expense $expense)
     {
+        abort_if($expense->owner_id !== (int) auth()->id(), 403);
+
         // Load company settings and generate QR code (link to the printable expense URL)
         $settings = $this->getCompanySettings();
         $qrCode = $this->generateQRCodeImage(route('owner.expenses.print', $expense->id));
@@ -151,6 +153,8 @@ class ExpensesController extends Controller
 
     public function changeStatus(Request $request, Expense $expense)
     {
+        abort_if($expense->owner_id !== (int) auth()->id(), 403);
+
         $request->validate([
             'status' => 'required|in:paid,pending',
         ]);
@@ -206,17 +210,6 @@ class ExpensesController extends Controller
 
     private function generateQRCodeImage($url)
     {
-        try {
-            $size = '200';
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=' . $size . 'x' . $size . '&data=' . urlencode($url);
-            $context = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0']]);
-            $imageData = @file_get_contents($qrUrl, false, $context);
-            if ($imageData !== false && strlen($imageData) > 100) {
-                return 'data:image/png;base64,' . base64_encode($imageData);
-            }
-        } catch (\Throwable $e) {
-        }
-
-        return '';
+        return app(\App\Service\Owner\ReportQrService::class)->dataUri($url) ?? '';
     }
 }

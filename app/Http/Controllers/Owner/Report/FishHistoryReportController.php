@@ -135,24 +135,7 @@ class FishHistoryReportController extends Controller
         $vatNumber = Setting::where('key', 'vat_number')->value('value') ?? '';
         $qrData = "Company: {$companyName}\nVAT: {$vatNumber}";
 
-        try {
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='.urlencode($qrData);
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 5,
-                    'ignore_errors' => true,
-                ],
-            ]);
-
-            $imageData = @file_get_contents($qrUrl, false, $context);
-
-            if ($imageData !== false && ! empty($imageData)) {
-                return 'data:image/png;base64,'.base64_encode($imageData);
-            }
-        } catch (\Throwable $e) {
-            // ignore and fallback
-        }
-
-        return 'data:image/svg+xml;base64,'.base64_encode('<svg width="200" height="200"><rect fill="#f0f0f0" width="200" height="200"/></svg>');
+        return app(\App\Service\Owner\ReportQrService::class)->dataUri($qrData)
+            ?? 'data:image/svg+xml;base64,'.base64_encode('<svg width="200" height="200"><rect fill="#f0f0f0" width="200" height="200"/></svg>');
     }
 }

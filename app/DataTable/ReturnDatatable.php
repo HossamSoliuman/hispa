@@ -4,6 +4,7 @@ namespace App\DataTable;
 
 use App\Models\ReturnModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class ReturnDatatable extends DataTables
@@ -12,7 +13,13 @@ class ReturnDatatable extends DataTables
     {
         if ($request->ajax()) {
 
-            $query = ReturnModel::with('sale')->orderBy('created_at', 'desc');
+            $ownerId = Auth::guard('owner')->id();
+
+            $query = ReturnModel::with('sale')
+                ->whereHas('sale', function ($sale) use ($ownerId) {
+                    $sale->where('seller_type', 'owner')->where('seller_id', $ownerId);
+                })
+                ->orderBy('created_at', 'desc');
 
             $data = $query->get();
 

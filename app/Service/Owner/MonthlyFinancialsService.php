@@ -189,6 +189,9 @@ class MonthlyFinancialsService
         $date = Carbon::parse($from);
 
         $payrollIds = PayrollModel::query()
+            ->where(function ($query) use ($ownerId) {
+                $query->where('owner_id', $ownerId)->orWhereNull('owner_id');
+            })
             ->where('type', 'salary')
             ->where('year', $date->year)
             ->where('month', $date->month)

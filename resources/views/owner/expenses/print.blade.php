@@ -12,9 +12,6 @@
         .meta-item { display: inline-block; width: 48%; margin-bottom: 10px; }
         .meta-label { font-weight: bold; color: #495057; }
         .meta-value { color: #212529; }
-        .badge { padding: 5px 12px; border-radius: 15px; font-size: 12px; }
-        .bg-success { background-color: #28a745; color: white; }
-        .bg-warning { background-color: #ffc107; color: #212529; }
         h5 { margin-top: 25px; margin-bottom: 15px; color: #2c3e50; font-weight: bold; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
     </x-slot>
 

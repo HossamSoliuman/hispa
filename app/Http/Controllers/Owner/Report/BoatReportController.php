@@ -63,21 +63,10 @@ class BoatReportController extends Controller
         return $this->printBoatReport($request, null);
     }
 
-    // --- QR helpers copied from Dalal ReportsController ---
     private function generateQRCodeImage($url)
     {
-        try {
-            $size = '200';
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size='.$size.'x'.$size.'&data='.urlencode($url);
-            $context = stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0 (compatible)']]);
-            $imageData = @file_get_contents($qrUrl, false, $context);
-            if ($imageData !== false && ! empty($imageData) && strlen($imageData) > 100) {
-                return 'data:image/png;base64,'.base64_encode($imageData);
-            }
-        } catch (\Throwable $e) {
-        }
-
-        return $this->generateQRPlaceholder($url);
+        return app(\App\Service\Owner\ReportQrService::class)->dataUri($url)
+            ?? $this->generateQRPlaceholder($url);
     }
 
     private function generateQRPlaceholder($url)

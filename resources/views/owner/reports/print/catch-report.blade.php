@@ -44,7 +44,7 @@
         }
     </style>
 
-    <x-report-header :document-number="'#' . str_pad(0, 8, '0', STR_PAD_LEFT)" :title="$catch ? $catch->trip->name : __('owner.reports.all_catchs_report')" :title-en="$catch ? '{{ __('owner.menu.catches') }}' : 'All catchs Report'" :settings="$settings" />
+    <x-report-header :document-number="'#' . str_pad(0, 8, '0', STR_PAD_LEFT)" :title="$catch ? $catch->trip->name : __('owner.reports.all_catchs_report')" :title-en="$catch ? __('owner.menu.catches') : 'All catchs Report'" :settings="$settings" />
 
     <x-report-info>
         <x-slot:additionalInfo>

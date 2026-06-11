@@ -110,9 +110,34 @@
         .print-btn { background: #3498db; color: #fff; border: none; padding: 12px 40px; font-size: 10pt; cursor: pointer; border-radius: 6px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s; }
         .print-btn:hover { background: #2980b9; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
+        /* App theme utility classes (Bootstrap 5 palette) so printable reports
+           keep the same badges/colors as the rest of the app. */
+        .badge { display: inline-block; padding: 4px 10px; font-size: 8.5pt; font-weight: 600; line-height: 1; color: #fff; text-align: center; white-space: nowrap; vertical-align: middle; border-radius: 4px; }
+        .bg-success { background-color: #198754 !important; color: #fff !important; }
+        .bg-danger { background-color: #dc3545 !important; color: #fff !important; }
+        .bg-warning { background-color: #ffc107 !important; color: #212529 !important; }
+        .bg-info { background-color: #0dcaf0 !important; color: #212529 !important; }
+        .bg-primary { background-color: #0d6efd !important; color: #fff !important; }
+        .bg-secondary { background-color: #6c757d !important; color: #fff !important; }
+        .text-success { color: #198754 !important; }
+        .text-danger { color: #dc3545 !important; }
+        .text-warning { color: #d97706 !important; }
+        .text-info { color: #0a99b5 !important; }
+        .text-primary { color: #0d6efd !important; }
+        .text-muted { color: #7f8c8d !important; }
+        .text-center { text-align: center !important; }
+        .fw-bold { font-weight: 700; }
+        .alert { padding: 12px 16px; border: 1px solid transparent; border-radius: 6px; margin: 15px 0; }
+        .alert-warning { background: #fff3cd; border-color: #ffecb5; color: #664d03; }
+        .alert-danger { background: #f8d7da; border-color: #f5c2c7; color: #842029; }
+        .alert-info { background: #cff4fc; border-color: #b6effb; color: #055160; }
+        table.table-bordered th, table.table-bordered td { border: 1px solid #e0e0e0; }
+
         @media print {
             body { padding: 0; }
             .no-print { display: none !important; }
+            /* Keep badge/summary colors when printing */
+            .badge, .summary-icon, .summary-row-highlight, .summary-row:last-child { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             /* Avoid breaking inside header/info/stats/bottom sections, but allow tables to span pages */
             .header, .info-section, .stats-section, .bottom-section { page-break-inside: avoid; }
             table { page-break-inside: auto; }

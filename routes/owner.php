@@ -132,7 +132,7 @@ Route::group([
         Route::resource('/assets', AssetController::class);
         Route::get('/getAssetsData', [AssetController::class, 'getAssetsData'])->name('getAssetsData');
 
-        Route::resource('/returns', ReturnsController::class);
+        Route::resource('/returns', ReturnsController::class)->only(['index', 'create', 'store', 'show']);
         Route::get('/getReturnsData', [ReturnsController::class, 'getReturnsData'])->name('getReturnsData');
         Route::get('/saleDetails/{id}', [ReturnsController::class, 'saleDetails'])->name('saleDetails');
 

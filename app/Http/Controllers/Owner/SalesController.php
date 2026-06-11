@@ -38,8 +38,8 @@ class SalesController extends Controller
     {
         $type = $request->get('type');
         $fish = Fish::Active()->get();
-        $boats = Boat::Active()->get();
-        $trips = Trip::all();
+        $boats = Boat::Active()->where('owner_id', auth()->id())->get();
+        $trips = Trip::where('owner_id', auth()->id())->get();
 
         return view('owner.sales.index', compact('type', 'fish', 'boats', 'trips'));
     }
@@ -63,7 +63,9 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $sales = Sale::with(['customer', 'paymentMethod', 'details', 'details.fish', 'details.unit'])
+        $sales = Sale::where('seller_type', 'owner')
+            ->where('seller_id', auth()->id())
+            ->with(['customer', 'paymentMethod', 'details', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
         return view('owner.sales.show', compact('sales'));
@@ -85,7 +87,7 @@ class SalesController extends Controller
             DB::beginTransaction();
 
             $customer = Customer::find($request->customer_id);
-            $trip = Trip::find($request->trip_id);
+            $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
             $catch = CatchModel::where('trip_id', $request->trip_id)->first();
 
             $sale = Sale::create([
@@ -204,6 +206,8 @@ class SalesController extends Controller
 
     public function catchDetails($tripId)
     {
+        Trip::where('owner_id', auth()->id())->findOrFail($tripId);
+
         $catch = CatchModel::where('trip_id', $tripId)->with('details', 'details.fish')->first();
         if ($catch) {
             $fishQuntity = FishQuantityStock::with('fish', 'unit')
