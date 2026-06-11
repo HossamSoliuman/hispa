@@ -39,13 +39,42 @@
                             <input type="text" name="name_en" class="form-control" required>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">{{ __('owner.boats.class') }} <span class="text-danger">*</span></label>
-                            <select name="boat_type_id" required class="form-control">
+                            <label class="form-label d-flex justify-content-between align-items-center">
+                                <span>{{ __('owner.boats.class') }} <span class="text-danger">*</span></span>
+                                <a href="#" class="small text-decoration-none" id="boatTypeQuickAddToggle">
+                                    <i class="fa fa-plus-circle me-1"></i>{{ __('owner.actions.add') }}
+                                </a>
+                            </label>
+                            <select name="boat_type_id" id="boat_type_id" required class="form-control">
                                 <option value="">{{ __('owner.actions.choose') }}</option>
                                 @foreach ($boatTypes as $boat_type)
                                     <option value="{{ $boat_type->id }}">{{ $boat_type->name }}</option>
                                 @endforeach
                             </select>
+
+                            {{-- Inline quick-add for boat type --}}
+                            <div id="boatTypeQuickAdd" class="border rounded p-2 mt-2 d-none"
+                                data-store-url="{{ route('owner.boat-types.store') }}">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control form-control-sm" id="quickBoatTypeNameAr"
+                                            placeholder="{{ __('owner.boats.name_ara') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control form-control-sm" id="quickBoatTypeNameEn"
+                                            placeholder="{{ __('owner.boats.name_eng') }}">
+                                    </div>
+                                </div>
+                                <div class="text-danger small mt-1 d-none" id="quickBoatTypeError"></div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-theme" id="quickBoatTypeSave">
+                                        {{ __('owner.actions.save') }}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-default" id="quickBoatTypeCancel">
+                                        {{ __('owner.actions.close') }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">{{ __('owner.boats.boat_number') }} <span class="text-danger">*</span></label>

@@ -101,6 +101,7 @@ return [
         'success_boat' => 'Boat saved successfully.',
         'success_done' => 'Boat added successfully.',
         'add_another' => 'Add another boat',
+        'quick_type_required' => 'Please enter the type name in both Arabic and English.',
     ],
     'statusLabels' => [
         1 => 'New Trip',

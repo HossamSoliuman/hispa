@@ -38,11 +38,24 @@ class Fish extends Model
         return $query->where('status', 1);
     }
 
-
-
     public function saleDetails(): HasMany
     {
         return $this->hasMany(SaleDetail::class);
+    }
+
+    public function fishQuantityStocks(): HasMany
+    {
+        return $this->hasMany(FishQuantityStock::class);
+    }
+
+    public function catchDetails(): HasMany
+    {
+        return $this->hasMany(CatchDetail::class, 'fish_id');
+    }
+
+    public function returnDetails(): HasMany
+    {
+        return $this->hasMany(ReturnDetail::class);
     }
 
     public function region(): BelongsTo
@@ -54,7 +67,6 @@ class Fish extends Model
     {
         return $this->belongsTo(Governorate::class);
     }
-
 
     public function getNameAttribute()
     {

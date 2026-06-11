@@ -945,6 +945,87 @@
 </script>
 {{-- end boat wizard --}}
 
+{{-- boat type inline quick add --}}
+<script>
+    $(function () {
+        const $wrap = $('#boatTypeQuickAdd');
+        if (!$wrap.length) {
+            return;
+        }
+
+        const $select = $('#boat_type_id');
+        const $nameAr = $('#quickBoatTypeNameAr');
+        const $nameEn = $('#quickBoatTypeNameEn');
+        const $error = $('#quickBoatTypeError');
+        const $save = $('#quickBoatTypeSave');
+
+        function resetQuickAdd() {
+            $nameAr.val('');
+            $nameEn.val('');
+            $error.addClass('d-none').text('');
+        }
+
+        $('#boatTypeQuickAddToggle').on('click', function (e) {
+            e.preventDefault();
+            $wrap.toggleClass('d-none');
+            if (!$wrap.hasClass('d-none')) {
+                $nameAr.trigger('focus');
+            }
+        });
+
+        $('#quickBoatTypeCancel').on('click', function () {
+            resetQuickAdd();
+            $wrap.addClass('d-none');
+        });
+
+        $save.on('click', function () {
+            const nameAr = $.trim($nameAr.val());
+            const nameEn = $.trim($nameEn.val());
+            $error.addClass('d-none').text('');
+
+            if (!nameAr || !nameEn) {
+                $error.removeClass('d-none').text('{{ __('owner.boat_wizard.quick_type_required') }}');
+                return;
+            }
+
+            $save.prop('disabled', true);
+            $.ajax({
+                url: $wrap.data('store-url'),
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    name_ar: nameAr,
+                    name_en: nameEn,
+                    status: 1
+                },
+                success: function (res) {
+                    $('<option></option>').val(res.id).text(res.name).prop('selected', true).appendTo($select);
+                    $select.trigger('change');
+                    resetQuickAdd();
+                    $wrap.addClass('d-none');
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(res.message);
+                    }
+                },
+                error: function (xhr) {
+                    let msg = '{{ __('owner.swal.error') }}';
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        msg = Object.values(xhr.responseJSON.errors)[0][0];
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    }
+                    $error.removeClass('d-none').text(msg);
+                },
+                complete: function () {
+                    $save.prop('disabled', false);
+                }
+            });
+        });
+    });
+</script>
+{{-- end boat type inline quick add --}}
+
 
 {{-- units --}}
 <script>

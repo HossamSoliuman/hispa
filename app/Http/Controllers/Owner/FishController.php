@@ -181,10 +181,10 @@ class FishController extends Controller
             $fish = Fish::findOrFail($id);
 
             $protectedRelations = [
-                'fish_stocks',
-                'tripFishPrices',
+                'fishQuantityStocks',
+                'catchDetails',
                 'saleDetails',
-                'dalalStockDetails',
+                'returnDetails',
             ];
 
             foreach ($protectedRelations as $relation) {
