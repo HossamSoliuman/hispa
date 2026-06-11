@@ -78,9 +78,7 @@ class DashboardController extends Controller
                 now()->subMonth()->endOfMonth()->toDateString(),
             ])->sum('total_price');
 
-        $percentageChange = $previousMonthRevenue > 0
-            ? round((($currentMonthRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100, 1)
-            : 0;
+        $percentageChange = $this->monthOverMonthChange($currentMonthRevenue, $previousMonthRevenue);
 
         $ownerTripIds = Trip::where('owner_id', $ownerId)->pluck('id');
         $totalCatch = (float) CatchModel::whereIn('trip_id', $ownerTripIds)->sum('total_weight');
@@ -136,9 +134,7 @@ class DashboardController extends Controller
         $current = $this->financials->compute($ownerId, $from, $to);
         $previous = $this->financials->compute($ownerId, $prevFrom, $prevTo);
 
-        $profitChange = $previous['net_profit'] != 0.0
-            ? round((($current['net_profit'] - $previous['net_profit']) / abs($previous['net_profit'])) * 100, 1)
-            : 0.0;
+        $profitChange = $this->monthOverMonthChange($current['net_profit'], $previous['net_profit']);
 
         $closing = MonthClosing::where('owner_id', $ownerId)
             ->where('year', now()->year)
@@ -164,6 +160,28 @@ class DashboardController extends Controller
             'trips' => array_slice($trips, 0, 5),
             'species' => array_slice($species, 0, 5),
         ];
+    }
+
+    /**
+     * Percentage change between this month and last month. When last month is
+     * zero, a non-zero current month is treated as a full ±100% swing rather
+     * than a misleading 0% (which would read as "no change").
+     */
+    private function monthOverMonthChange(float $current, float $previous): float
+    {
+        if ($previous != 0.0) {
+            return round((($current - $previous) / abs($previous)) * 100, 1);
+        }
+
+        if ($current > 0.0) {
+            return 100.0;
+        }
+
+        if ($current < 0.0) {
+            return -100.0;
+        }
+
+        return 0.0;
     }
 
     private function currentMonthProfit(int $ownerId): float

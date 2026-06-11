@@ -43,7 +43,7 @@ enum TripStatus: int
         return match ($this) {
             self::New => [self::InProgress, self::Cancelled],
             self::InProgress => [self::Finished, self::Cancelled],
-            self::Finished => [self::Counting],
+            self::Finished => [self::ReadyToSell],
             self::Counting => [self::Counted],
             self::Counted => [self::ReadyToSell],
             self::ReadyToSell => [self::Sold],
@@ -61,7 +61,7 @@ enum TripStatus: int
         $key = match ([$this, $to]) {
             [self::New, self::InProgress] => 'start_trip',
             [self::InProgress, self::Finished] => 'finish_trip',
-            [self::Finished, self::Counting] => 'start_counting',
+            [self::Finished, self::ReadyToSell] => 'mark_ready',
             [self::Counting, self::Counted] => 'finish_counting',
             [self::Counted, self::ReadyToSell] => 'mark_ready',
             [self::ReadyToSell, self::Sold] => 'mark_sold',

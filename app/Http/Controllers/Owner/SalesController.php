@@ -150,8 +150,19 @@ class SalesController extends Controller
                 default => 0,
             };
 
+            $commissionRate = (float) ($request->commission_rate ?? 0);
+            $laborRate = (float) ($request->labor_rate ?? 0);
+            $commissionAmount = round($totalPrice * $commissionRate / 100, 2);
+            $laborAmount = round($totalPrice * $laborRate / 100, 2);
+            $netOwnerAmount = round($totalPrice - $commissionAmount - $laborAmount, 2);
+
             $sale->update([
                 'total_price' => $totalPrice,
+                'commission_rate' => $commissionRate,
+                'commission_amount' => $commissionAmount,
+                'labor_rate' => $laborRate,
+                'labor_amount' => $laborAmount,
+                'net_owner_amount' => $netOwnerAmount,
                 'remaining_total' => ($totalPrice - $paidAmount),
             ]);
 

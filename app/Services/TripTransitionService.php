@@ -37,7 +37,7 @@ class TripTransitionService
                 $trip->actual_end_datetime = now();
             }
 
-            if ($to === TripStatus::Counting && ! $trip->catches()->exists()) {
+            if ($to === TripStatus::ReadyToSell && ! $trip->catches()->exists()) {
                 throw new \DomainException(__('trips.errors.catch_required'));
             }
 

@@ -53,18 +53,10 @@ class TripTransitionTest extends TestCase
         $this->postJson($this->transitionUrl($trip), ['to' => 4])->assertOk();
         $this->assertSame(TripStatus::Finished, $trip->fresh()->status);
 
-        // Create a catch so Counting is allowed
+        // Create a catch so the trip can move on to selling
         CatchModel::create(['trip_id' => $trip->id, 'owner_id' => $owner->id]);
 
-        // Finished → Counting
-        $this->postJson($this->transitionUrl($trip), ['to' => 5])->assertOk();
-        $this->assertSame(TripStatus::Counting, $trip->fresh()->status);
-
-        // Counting → Counted
-        $this->postJson($this->transitionUrl($trip), ['to' => 6])->assertOk();
-        $this->assertSame(TripStatus::Counted, $trip->fresh()->status);
-
-        // Counted → ReadyToSell
+        // Finished → ReadyToSell
         $this->postJson($this->transitionUrl($trip), ['to' => 7])->assertOk();
         $this->assertSame(TripStatus::ReadyToSell, $trip->fresh()->status);
 
@@ -73,12 +65,12 @@ class TripTransitionTest extends TestCase
         $this->assertSame(TripStatus::Sold, $trip->fresh()->status);
     }
 
-    public function test_finished_to_counting_fails_without_catch(): void
+    public function test_finished_to_ready_to_sell_fails_without_catch(): void
     {
         [$owner, $trip] = $this->makeOwnerWithTrip(TripStatus::Finished);
         $this->actingAs($owner, 'owner');
 
-        $this->postJson($this->transitionUrl($trip), ['to' => 5])
+        $this->postJson($this->transitionUrl($trip), ['to' => 7])
             ->assertStatus(422)
             ->assertJsonFragment(['message' => __('trips.errors.catch_required')]);
     }

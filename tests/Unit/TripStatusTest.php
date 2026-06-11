@@ -11,7 +11,7 @@ class TripStatusTest extends TestCase
     {
         $this->assertSame([TripStatus::InProgress, TripStatus::Cancelled], TripStatus::New->allowedNext());
         $this->assertSame([TripStatus::Finished, TripStatus::Cancelled], TripStatus::InProgress->allowedNext());
-        $this->assertSame([TripStatus::Counting], TripStatus::Finished->allowedNext());
+        $this->assertSame([TripStatus::ReadyToSell], TripStatus::Finished->allowedNext());
         $this->assertSame([TripStatus::Counted], TripStatus::Counting->allowedNext());
         $this->assertSame([TripStatus::ReadyToSell], TripStatus::Counted->allowedNext());
         $this->assertSame([TripStatus::Sold], TripStatus::ReadyToSell->allowedNext());

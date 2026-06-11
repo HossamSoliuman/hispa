@@ -40,39 +40,7 @@ class DefaultMasterSeeder extends Seeder
             ['name' => 'بطاقة ائتمان', 'icon' => null, 'status' => 1],
         ]);
 
-        // 🚤 رحلة تجريبية
-        DB::table('trips')->insert([
-            'name' => 'رحلة الصيف',
-            'number' => 'TRIP001',
-            'license_number' => 'LIC123',
-            'cancel_reason' => '',
-            'status' => 1,
-            'permit_type' => 'يومي',
-            'owner_id' => 1,
-            'captain_id' => 1,
-            'boat_name' => 'أمواج غزة',
-            'boat_number' => 'BO123',
-            'boat_color' => 'أزرق',
-            'boat_length' => 10.5,
-            'boat_width' => 3.2,
-            'departure_time' => '05:00',
-            'return_time' => '14:00',
-            'start_date' => '2025-04-09',
-            'end_date' => '2025-04-12',
-            'actual_start_datetime' => null,
-            'actual_end_datetime' => null,
-            'region_id' => 1,
-            'governorate_id' => 1,
-            'port_id' => 1,
-            'departure_port' => 'ميناء غزة',
-            'return_port' => 'ميناء غزة',
-            'dalal_id' => null,
-            'license_attachment' => null,
-            'notes' => 'رحلة تجريبية',
-            'created_by' => 'system',
-            'updated_by' => 'system',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // No demo trip inserted here — BasicWorkflowSeeder creates the boat and
+        // people so trips can be created properly through the owner workflow.
     }
 }

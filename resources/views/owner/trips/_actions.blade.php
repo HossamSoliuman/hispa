@@ -4,12 +4,13 @@
     @foreach ($trip->status->allowedNext() as $next)
         @php
             $isCancelAction = $next === TripStatus::Cancelled;
-            // A catch must be added before a finished trip can move on to counting.
-            $requiresCatch = $trip->status === TripStatus::Finished && $next === TripStatus::Counting;
-            // Once counting is finished the owner sells directly; hide the "ready for sell" step.
-            $hideReadyForSell = $trip->status === TripStatus::Counted;
+            // Moving a finished trip forward happens automatically once a catch is added,
+            // and selling is handled by the dedicated Sell button below; hide those manual steps.
+            $isAutoTransition =
+                ($trip->status === TripStatus::Finished && $next === TripStatus::ReadyToSell) ||
+                ($trip->status === TripStatus::ReadyToSell && $next === TripStatus::Sold);
         @endphp
-        @continue(($requiresCatch && ! $trip->catches) || $hideReadyForSell)
+        @continue($isAutoTransition)
         @php
             $label = $trip->status->transitionLabelTo($next);
             $btnClass = $isCancelAction ? 'btn-outline-danger' : 'btn-success';
@@ -32,8 +33,8 @@
         </a>
     @endif
 
-    {{-- Edit Catch (catch exists, before counting is finished; never once the trip is sold/cancelled) --}}
-    @if ($trip->catches && $trip->status !== TripStatus::Counted && ! $trip->status->isTerminal())
+    {{-- Edit Catch (catch exists, while the trip is still open; never once sold/cancelled) --}}
+    @if ($trip->catches && ! $trip->status->isTerminal())
         <a href="{{ route('owner.catch.edit', $trip->catches->id) }}"
            class="btn btn-sm btn-outline-info" title="{{ __('owner.catch.edit_catch') }}">
             <i class="bi bi-pencil"></i>
@@ -41,7 +42,7 @@
         </a>
     @endif
 
-    {{-- Sell (catch exists, only after counting is finished) --}}
+    {{-- Sell (catch exists, trip ready to sell) --}}
     @if ($trip->catches && in_array($trip->status, [TripStatus::Counted, TripStatus::ReadyToSell], true))
         <a href="{{ route('owner.sales.create') }}?trip_id={{ $trip->id }}"
            class="btn btn-sm btn-primary" title="{{ __('owner.catch.sell') }}">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\DataTable\Owner\CatchDataTable;
+use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\CatchRequest;
 use App\Models\Boat;
@@ -11,6 +12,7 @@ use App\Models\CatchModel;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
 use App\Models\Trip;
+use App\Services\TripTransitionService;
 use App\Traits\CatchStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -155,7 +157,7 @@ class CatchController extends Controller
         }
     }
 
-    public function store(CatchRequest $request)
+    public function store(CatchRequest $request, TripTransitionService $tripTransition)
     {
         try {
             DB::beginTransaction();
@@ -203,6 +205,10 @@ class CatchController extends Controller
             $catch->update([
                 'total_weight' => $totalWeight,
             ]);
+
+            if ($trip->status === TripStatus::Finished) {
+                $tripTransition->transition($trip, TripStatus::ReadyToSell);
+            }
 
             DB::commit();
 
