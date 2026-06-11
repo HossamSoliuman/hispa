@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
 
         // Minimal working setup (boat, vendor, crew people) with no financial
         // data — a clean starting point for testing the financial workflow.
-        $this->call(BasicWorkflowSeeder::class);
+        // $this->call(BasicWorkflowSeeder::class);
 
         // Demo finance & trip data — disabled so a fresh seed leaves only the
         // reference data (ports, cities, fish, categories, payment methods, users).

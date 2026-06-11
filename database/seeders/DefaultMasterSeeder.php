@@ -28,10 +28,10 @@ class DefaultMasterSeeder extends Seeder
         ]);
 
         // 👥 العملاء
-        DB::table('customers')->insert([
-            ['name' => 'شركة البحر الأبيض', 'phone' => '0599123456', 'email' => 'white@sea.com'],
-            ['name' => 'مطعم المرسى', 'phone' => '0599876543', 'email' => 'marssa@fish.ps'],
-        ]);
+        // DB::table('customers')->insert([
+        //     ['name' => 'شركة البحر الأبيض', 'phone' => '0599123456', 'email' => 'white@sea.com'],
+        //     ['name' => 'مطعم المرسى', 'phone' => '0599876543', 'email' => 'marssa@fish.ps'],
+        // ]);
 
         // 💳 طرق الدفع
         DB::table('payment_methods')->insert([
