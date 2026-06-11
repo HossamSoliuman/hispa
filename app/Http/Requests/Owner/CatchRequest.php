@@ -23,7 +23,6 @@ class CatchRequest extends FormRequest
     {
         return [
             'trip_id' => 'required|exists:trips,id',
-            'boat_id' => 'required|exists:boats,id',
 
             'fish_id' => 'required|array|min:1',
             'fish_id.*' => 'required|exists:fish,id',

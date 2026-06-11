@@ -99,6 +99,8 @@ class CatchController extends Controller
             DB::beginTransaction();
 
             $catch = CatchModel::findOrFail($id);
+            $trip = Trip::findOrFail($request->trip_id);
+            $boatId = $trip->boat_id;
 
             CatchDetail::where('catch_id', $catch->id)->delete();
             FishQuantityStock::where('catch_id', $catch->id)->delete();
@@ -125,7 +127,7 @@ class CatchController extends Controller
                         'fish_id' => $fishId,
                         'catch_id' => $catch->id,
                         'trip_id' => $request->trip_id,
-                        'boat_id' => $request->boat_id,
+                        'boat_id' => $boatId,
                     ],
                     [
                         'quantity' => 0,
@@ -158,6 +160,9 @@ class CatchController extends Controller
         try {
             DB::beginTransaction();
 
+            $trip = Trip::findOrFail($request->trip_id);
+            $boatId = $trip->boat_id;
+
             $catch = CatchModel::create([
                 'trip_id' => $request->trip_id,
                 'owner_id' => auth()->user()->getAuthIdentifier(),
@@ -184,7 +189,7 @@ class CatchController extends Controller
                         'fish_id' => $fishId,
                         'catch_id' => $catch->id,
                         'trip_id' => $request->trip_id,
-                        'boat_id' => $request->boat_id,
+                        'boat_id' => $boatId,
                     ],
                     [
                         'quantity' => 0,
