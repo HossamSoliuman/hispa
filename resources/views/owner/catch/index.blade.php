@@ -138,11 +138,11 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">{{ __('owner.catch.filters.from_date') }}</label>
-                    <input type="date" class="form-control">
+                    <input type="date" class="form-control" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">{{ __('owner.catch.filters.to_date') }}</label>
-                    <input type="date" class="form-control">
+                    <input type="date" class="form-control" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">{{ __('owner.catch.filters.has_catch') }}</label>

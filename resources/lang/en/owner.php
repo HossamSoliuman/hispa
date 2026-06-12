@@ -172,6 +172,7 @@ return [
         'profit' => 'Profit',
         'monthly_performance' => 'Monthly financial performance',
         'this_month' => 'This Month',
+        'this_year' => 'This Year',
         'revenue_label' => 'Revenue',
         'profit_label' => 'Profit',
         'avg_price_kg' => 'Avg Price/kg',

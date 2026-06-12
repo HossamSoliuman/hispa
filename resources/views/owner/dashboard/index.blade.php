@@ -203,7 +203,7 @@
                                             </p>
                                         </div>
                                         <div class="text-end">
-                                            <small class="text-muted d-block">{{ __('owner.dashboard.this_month') }}</small>
+                                            <small class="text-muted d-block">{{ __('owner.dashboard.this_year') }}</small>
                                             <div class="d-flex gap-3 align-items-baseline justify-content-end mt-1">
                                                 <div class="text-end">
                                                     <div class="h6 mb-0 text-success fw-bold" id="summaryRevenue">

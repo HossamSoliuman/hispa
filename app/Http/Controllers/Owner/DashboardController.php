@@ -40,9 +40,30 @@ class DashboardController extends Controller
     /**
      * @return \Illuminate\Support\Collection<int, int>
      */
-    private function ownerSaleIds(int $ownerId)
+    private function ownerSaleIds(int $ownerId, ?string $from = null, ?string $to = null)
     {
-        return Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->pluck('id');
+        return Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)
+            ->when($from && $to, fn ($q) => $q->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to]))
+            ->pluck('id');
+    }
+
+    /**
+     * The live current month window (plan: dashboard top numbers show the current
+     * month until it is closed).
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function currentMonthRange(): array
+    {
+        return [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()];
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function currentYearRange(): array
+    {
+        return [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()];
     }
 
     private function approvedReturns(int $ownerId, ?string $from = null, ?string $to = null): float
@@ -61,16 +82,14 @@ class DashboardController extends Controller
     public function index()
     {
         $ownerId = $this->ownerId();
+        [$from, $to] = $this->currentMonthRange();
 
         $ownerSales = fn () => Sale::where('seller_type', 'owner')->where('seller_id', $ownerId);
+        $currentMonthSales = fn () => $ownerSales()->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to]);
 
-        $totalRevenue = (float) $ownerSales()->sum('total_price');
-
-        $currentMonthRevenue = (float) $ownerSales()
-            ->whereBetween(DB::raw('DATE(sale_datetime)'), [
-                now()->startOfMonth()->toDateString(),
-                now()->endOfMonth()->toDateString(),
-            ])->sum('total_price');
+        // Top KPI cards reflect the live current month until it is closed.
+        $currentMonthRevenue = (float) $currentMonthSales()->sum('total_price');
+        $totalRevenue = $currentMonthRevenue;
 
         $previousMonthRevenue = (float) $ownerSales()
             ->whereBetween(DB::raw('DATE(sale_datetime)'), [
@@ -80,25 +99,17 @@ class DashboardController extends Controller
 
         $percentageChange = $this->monthOverMonthChange($currentMonthRevenue, $previousMonthRevenue);
 
-        $ownerTripIds = Trip::where('owner_id', $ownerId)->pluck('id');
-        $totalCatch = (float) CatchModel::whereIn('trip_id', $ownerTripIds)->sum('total_weight');
-        if ($totalCatch == 0.0) {
-            $catchIds = CatchModel::whereIn('trip_id', $ownerTripIds)->pluck('id');
-            $totalCatch = (float) CatchDetail::whereIn('catch_id', $catchIds)->sum('weight');
-        }
+        $totalCatch = $this->currentMonthCatch($ownerId, $from, $to);
 
-        $soldWeight = (float) SaleDetail::whereIn('sale_id', $this->ownerSaleIds($ownerId))->sum('weight');
-        $averagePricePerKg = $soldWeight > 0 ? round($totalRevenue / $soldWeight, 2) : 0;
+        $soldWeight = (float) SaleDetail::whereIn('sale_id', $this->ownerSaleIds($ownerId, $from, $to))->sum('weight');
+        $averagePricePerKg = $soldWeight > 0 ? round($currentMonthRevenue / $soldWeight, 2) : 0;
 
         $activeBoats = Boat::where('owner_id', $ownerId)->where('status', 1)->count();
         $completedTrips = Trip::where('owner_id', $ownerId)->where('status', TripStatus::Sold->value)->count();
 
-        $netRevenue = (float) $ownerSales()->sum('net_owner_amount') - $this->approvedReturns($ownerId);
-        $totalCosts = (float) Expense::where('owner_id', $ownerId)->sum('final_price');
-        $profit = round($netRevenue - $totalCosts, 2);
         $currentMonthProfit = $this->currentMonthProfit($ownerId);
-
-        $profitMargin = $totalRevenue > 0 ? round(($profit / $totalRevenue) * 100, 2) : 0;
+        $profit = $currentMonthProfit;
+        $profitMargin = $currentMonthRevenue > 0 ? round(($currentMonthProfit / $currentMonthRevenue) * 100, 2) : 0;
 
         $topFive = $this->topFive($ownerId);
 
@@ -214,6 +225,25 @@ class DashboardController extends Controller
         return 0.0;
     }
 
+    /**
+     * Total catch weight landed within the given window (falls back to catch
+     * detail rows when the header total has not been rolled up yet).
+     */
+    private function currentMonthCatch(int $ownerId, string $from, string $to): float
+    {
+        $tripIds = Trip::where('owner_id', $ownerId)->pluck('id');
+
+        $monthCatch = CatchModel::whereIn('trip_id', $tripIds)
+            ->whereBetween(DB::raw('DATE(catch_date)'), [$from, $to]);
+
+        $totalWeight = (float) $monthCatch->sum('total_weight');
+        if ($totalWeight == 0.0) {
+            $totalWeight = (float) CatchDetail::whereIn('catch_id', $monthCatch->pluck('id'))->sum('weight');
+        }
+
+        return $totalWeight;
+    }
+
     private function currentMonthProfit(int $ownerId): float
     {
         $from = now()->startOfMonth()->toDateString();
@@ -235,7 +265,8 @@ class DashboardController extends Controller
     {
         $ownerId = $this->ownerId();
         $year = now()->year;
-        $saleIds = $this->ownerSaleIds($ownerId);
+        [$yearFrom, $yearTo] = $this->currentYearRange();
+        $saleIds = $this->ownerSaleIds($ownerId, $yearFrom, $yearTo);
 
         $monthly = $this->monthlySeries(
             $this->sumByMonth(
@@ -263,9 +294,11 @@ class DashboardController extends Controller
         });
 
         $totalCatchKg = (float) SaleDetail::whereIn('sale_id', $saleIds)->sum('weight');
-        $totalRevenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->sum('net_owner_amount');
-        $totalExpenses = (float) Expense::where('owner_id', $ownerId)->sum('final_price');
-        $returns = $this->approvedReturns($ownerId);
+        $totalRevenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(sale_datetime)'), [$yearFrom, $yearTo])->sum('net_owner_amount');
+        $totalExpenses = (float) Expense::where('owner_id', $ownerId)
+            ->whereBetween('date', [$yearFrom, $yearTo])->sum('final_price');
+        $returns = $this->approvedReturns($ownerId, $yearFrom, $yearTo);
 
         return response()->json([
             'monthly' => $monthly,
@@ -321,13 +354,16 @@ class DashboardController extends Controller
     public function summary()
     {
         $ownerId = $this->ownerId();
+        [$yearFrom, $yearTo] = $this->currentYearRange();
 
-        $revenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->sum('total_price');
-        $returns = $this->approvedReturns($ownerId);
-        $expenses = (float) Expense::where('owner_id', $ownerId)->sum('final_price');
+        $revenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(sale_datetime)'), [$yearFrom, $yearTo])->sum('total_price');
+        $returns = $this->approvedReturns($ownerId, $yearFrom, $yearTo);
+        $expenses = (float) Expense::where('owner_id', $ownerId)
+            ->whereBetween('date', [$yearFrom, $yearTo])->sum('final_price');
 
-        $categories = Category::withSum(['expenses' => function ($q) use ($ownerId) {
-            $q->where('owner_id', $ownerId);
+        $categories = Category::withSum(['expenses' => function ($q) use ($ownerId, $yearFrom, $yearTo) {
+            $q->where('owner_id', $ownerId)->whereBetween('date', [$yearFrom, $yearTo]);
         }], 'final_price')->get();
 
         $netRevenue = $revenue - $returns;
@@ -450,7 +486,8 @@ class DashboardController extends Controller
     public function getAnalyticsData()
     {
         $ownerId = $this->ownerId();
-        $saleIds = $this->ownerSaleIds($ownerId);
+        [$yearFrom, $yearTo] = $this->currentYearRange();
+        $saleIds = $this->ownerSaleIds($ownerId, $yearFrom, $yearTo);
 
         $totalWeight = (float) SaleDetail::whereIn('sale_id', $saleIds)->sum('weight');
 
@@ -467,8 +504,10 @@ class DashboardController extends Controller
                 ];
             });
 
-        $totalTrips = Trip::where('owner_id', $ownerId)->count();
-        $totalRevenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)->sum('total_price');
+        $totalTrips = Trip::where('owner_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(created_at)'), [$yearFrom, $yearTo])->count();
+        $totalRevenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(sale_datetime)'), [$yearFrom, $yearTo])->sum('total_price');
         $captainCount = User::where('owner_id', $ownerId)->where('role', 'captain')->count();
 
         return response()->json([

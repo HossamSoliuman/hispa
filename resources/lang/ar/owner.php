@@ -172,6 +172,7 @@ return [
         'profit' => 'الأرباح',
         'monthly_performance' => 'الأداء المالي الشهري',
         'this_month' => 'هذا الشهر',
+        'this_year' => 'هذه السنة',
         'revenue_label' => 'الإيرادات',
         'profit_label' => 'الأرباح',
         'avg_price_kg' => 'متوسط السعر/كجم',
