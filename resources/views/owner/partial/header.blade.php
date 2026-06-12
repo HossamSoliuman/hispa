@@ -29,11 +29,12 @@
         <a href="{{ route('owner.dashboard') }}" class="brand-logo d-flex align-items-center">
             @php
                 $locale = app()->getLocale();
-                // Use same locale-specific logo approach as dalal cpanel
-                $logoPath = $locale === 'ar' ? asset('logo/arabic/main.png') : asset('logo/english/main.png');
+                $companyLogo = companyLogoUrl();
+                // Prefer the company logo uploaded in settings; fall back to the locale-specific default.
+                $logoPath = $companyLogo ?? ($locale === 'ar' ? asset('logo/arabic/main.png') : asset('logo/english/main.png'));
             @endphp
             <img src="{{ $logoPath }}" alt="{{ $settings['title'] ?? __('owner.generated.item_bc71f8') }}"
-                style="height: 120px; width: auto; object-fit: contain;">
+                style="height: 120px; width: auto; object-fit: contain;{{ $companyLogo ? ' filter: none;' : '' }}">
         </a>
     </div>
     <!-- END brand -->

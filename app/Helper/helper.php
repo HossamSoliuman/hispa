@@ -209,6 +209,25 @@ function getVatRate(): float
 }
 
 /**
+ * Public URL of the uploaded company logo, or null when none has been set.
+ * Used for the panel brand/header where an <img src> URL is needed.
+ */
+function companyLogoUrl(): ?string
+{
+    $path = Setting::where('key', 'logo')->value('value');
+
+    if (empty($path)) {
+        return null;
+    }
+
+    if (Str::startsWith($path, ['http://', 'https://', '/'])) {
+        return $path;
+    }
+
+    return Storage::disk('public')->url($path);
+}
+
+/**
  * Convert a value to a safe display string for use in Blade/HTML.
  * Handles null, arrays (imploded), and scalar values. Use for model attributes
  * that may be stored as JSON/array (e.g. translated fields) to avoid
@@ -216,7 +235,6 @@ function getVatRate(): float
  *
  * @param  mixed  $value  Raw value (string|array|null|int|float)
  * @param  string  $empty  String to return when value is null/empty
- * @return string
  */
 function display_string(mixed $value, string $empty = '—'): string
 {
@@ -226,5 +244,6 @@ function display_string(mixed $value, string $empty = '—'): string
     if (is_array($value)) {
         return implode(', ', array_filter($value, fn ($v) => $v !== null && $v !== ''));
     }
+
     return (string) $value;
 }

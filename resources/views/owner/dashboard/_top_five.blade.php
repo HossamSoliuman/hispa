@@ -119,4 +119,39 @@
             </div>
         </div>
     </div>
+
+    {{-- 6. Months closing status (current year) --}}
+    <div class="col-xl-9 col-md-6">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="small fw-bold">{{ __('owner.dashboard.top_five.months_status') }} {{ $tf['year'] }}</span>
+                    <a href="{{ route('owner.month-closing.index') }}" class="small">{{ __('owner.dashboard.top_five.view_all') }}</a>
+                </div>
+                <div class="row g-2">
+                    @foreach ($tf['months'] as $month)
+                        @php($closed = $month['is_closed'])
+                        @php($future = $month['is_future'])
+                        @php($cell = $closed
+                            ? 'border-success bg-success-subtle text-success'
+                            : ($future ? 'border-light bg-light text-muted' : 'border-warning bg-warning-subtle text-warning-emphasis'))
+                        @php($status = $closed
+                            ? __('owner.dashboard.top_five.closed')
+                            : ($future ? __('owner.dashboard.top_five.upcoming') : __('owner.dashboard.top_five.not_closed')))
+                        <div class="col-6 col-sm-4 col-xl-2">
+                            <{{ $closed ? 'a' : 'div' }}
+                                @if ($closed) href="{{ route('owner.month-closing.show', $month['closing_id']) }}" @endif
+                                class="d-block text-center text-decoration-none border rounded py-2 px-1 h-100 {{ $cell }}">
+                                <div class="small fw-semibold text-truncate">{{ $month['name'] }}</div>
+                                <div class="d-flex align-items-center justify-content-center gap-1 mt-1" style="font-size:.7rem;">
+                                    <i class="bi {{ $closed ? 'bi-lock-fill' : ($future ? 'bi-dash-circle' : 'bi-unlock') }}"></i>
+                                    <span>{{ $status }}</span>
+                                </div>
+                            </{{ $closed ? 'a' : 'div' }}>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

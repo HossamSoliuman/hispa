@@ -313,6 +313,7 @@ Route::group([
         Route::resource('/daily-report', DailyReportController::class);
         Route::get('vendors/data', [VendorsController::class, 'getVendors'])->name('vendors.data');
         Route::resource('/vendors', VendorsController::class);
+        Route::post('/settings/company', [SettingsController::class, 'updateCompany'])->name('settings.company');
         Route::resource('/settings', SettingsController::class);
 
         Route::get('/data/maintenances', [MaintenanceController::class, 'getMaintenanceData'])->name('maintenance.data');

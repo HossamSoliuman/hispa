@@ -136,10 +136,12 @@ class DashboardController extends Controller
 
         $profitChange = $this->monthOverMonthChange($current['net_profit'], $previous['net_profit']);
 
-        $closing = MonthClosing::where('owner_id', $ownerId)
+        $yearClosings = MonthClosing::where('owner_id', $ownerId)
             ->where('year', now()->year)
-            ->where('month', now()->month)
-            ->first();
+            ->get()
+            ->keyBy('month');
+
+        $closing = $yearClosings->get(now()->month);
 
         $unpaidDues = $closing
             ? (float) $closing->dues()->sum(DB::raw('due_amount - paid_amount'))
@@ -159,7 +161,35 @@ class DashboardController extends Controller
             'boats_max' => ! empty($boats) ? max(array_map(fn ($b) => abs($b['net_profit']), $boats)) : 0.0,
             'trips' => array_slice($trips, 0, 5),
             'species' => array_slice($species, 0, 5),
+            'year' => now()->year,
+            'months' => $this->monthsClosingStatus($yearClosings),
         ];
+    }
+
+    /**
+     * Closing status for every month of the current year, used by the dashboard
+     * month-closing overview card.
+     *
+     * @param  \Illuminate\Support\Collection<int, MonthClosing>  $yearClosings  closings keyed by month
+     * @return array<int, array{month: int, name: string, is_closed: bool, is_future: bool, closing_id: int|null}>
+     */
+    private function monthsClosingStatus($yearClosings): array
+    {
+        $currentMonth = now()->month;
+
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $closing = $yearClosings->get($m);
+            $months[] = [
+                'month' => $m,
+                'name' => self::ARABIC_MONTHS[$m],
+                'is_closed' => $closing !== null,
+                'is_future' => $m > $currentMonth,
+                'closing_id' => $closing?->id,
+            ];
+        }
+
+        return $months;
     }
 
     /**

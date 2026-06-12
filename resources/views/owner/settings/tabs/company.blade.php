@@ -9,7 +9,8 @@
 </div>
 
 <div class="card-body">
-    <form>
+    <form action="{{ route('owner.settings.company') }}" method="POST" enctype="multipart/form-data">
+        @csrf
         <div class="row g-3 mb-3">
             <div class="col-md-6">
                 <label
@@ -51,10 +52,20 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">{{ __('owner.generated.company_logo') }}</label>
-                <input type="file" class="form-control">
+                <input type="file" name="logo" accept="image/*" class="form-control @error('logo') is-invalid @enderror">
+                @error('logo')
+                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                @enderror
                 <small
                     class="text-muted">{{ __('owner.generated.recommended_size') }}x{{ __('owner.generated.pixels_200') }}-
                     PNG {{ __('owner.generated.or') }}JPG</small>
+                @if (companyLogoUrl())
+                    <div class="mt-2">
+                        <span class="d-block text-muted mb-1">{{ __('owner.generated.current_logo') }}</span>
+                        <img src="{{ companyLogoUrl() }}" alt="{{ __('owner.generated.company_logo') }}"
+                            style="max-height: 70px; width: auto; object-fit: contain;">
+                    </div>
+                @endif
             </div>
         </div>
 
