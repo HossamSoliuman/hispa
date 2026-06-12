@@ -8,17 +8,19 @@
     {{-- 1. Month profit --}}
     <div class="col-xl col-md-6">
         <div class="card shadow-sm h-100 border-0">
-            <div class="card-body">
-                <div class="text-muted small mb-1">{{ __('owner.dashboard.top_five.month_profit') }}</div>
-                <div class="h4 fw-bold mb-1 {{ $tf['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
+            <div class="card-body d-flex flex-column gap-2">
+                <div class="text-muted small">{{ __('owner.dashboard.top_five.month_profit') }}</div>
+                <div class="h4 fw-bold mb-0 {{ $tf['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                     {!! number_format($tf['net_profit'], 0) !!}
                     {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.85rem;height:auto;display:inline-block;'])->render() !!}
                 </div>
                 @php($up = $tf['profit_change'] >= 0)
-                <span class="badge {{ $up ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
-                    <i class="bi bi-arrow-{{ $up ? 'up' : 'down' }}"></i> {{ number_format(abs($tf['profit_change']), 1) }}%
-                </span>
-                <small class="text-muted">{{ __('owner.dashboard.top_five.vs_last_month') }}</small>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge {{ $up ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                        <i class="bi bi-arrow-{{ $up ? 'up' : 'down' }}"></i> {{ number_format(abs($tf['profit_change']), 1) }}%
+                    </span>
+                    <small class="text-muted">{{ __('owner.dashboard.top_five.vs_last_month') }}</small>
+                </div>
             </div>
         </div>
     </div>
@@ -26,21 +28,22 @@
     {{-- 2. Crew dues --}}
     <div class="col-xl col-md-6">
         <div class="card shadow-sm h-100 border-0">
-            <div class="card-body">
-                <div class="text-muted small mb-1">{{ __('owner.dashboard.top_five.crew_dues') }}</div>
-                <div class="h4 fw-bold mb-1 text-warning">
+            <div class="card-body d-flex flex-column gap-2">
+                <div class="text-muted small">{{ __('owner.dashboard.top_five.crew_dues') }}</div>
+                <div class="h4 fw-bold mb-0 text-warning">
                     {!! number_format($tf['crew_pool'], 0) !!}
                     {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.85rem;height:auto;display:inline-block;'])->render() !!}
                 </div>
                 @if ($tf['is_closed'])
-                    <div class="small text-muted">{{ __('owner.dashboard.top_five.unpaid_dues') }}:
+                    <div class="small text-muted">
+                        {{ __('owner.dashboard.top_five.unpaid_dues') }}:
                         <span class="fw-bold text-danger">{{ number_format($tf['unpaid_dues'], 0) }}</span>
                     </div>
-                    <span class="badge bg-success-subtle text-success">{{ __('owner.dashboard.top_five.closed_badge') }}</span>
+                    <div><span class="badge bg-success-subtle text-success">{{ __('owner.dashboard.top_five.closed_badge') }}</span></div>
                 @else
-                    <span class="badge bg-secondary-subtle text-secondary">{{ __('owner.dashboard.top_five.open_badge') }}</span>
+                    <div><span class="badge bg-secondary-subtle text-secondary">{{ __('owner.dashboard.top_five.open_badge') }}</span></div>
                 @endif
-                <a href="{{ route('owner.month-closing.index') }}" class="d-block small mt-2">{{ __('owner.dashboard.top_five.go_to_closing') }} <i class="bi bi-arrow-left-short"></i></a>
+                <a href="{{ route('owner.month-closing.index') }}" class="small mt-auto">{{ __('owner.dashboard.top_five.go_to_closing') }} <i class="bi bi-arrow-left-short"></i></a>
             </div>
         </div>
     </div>

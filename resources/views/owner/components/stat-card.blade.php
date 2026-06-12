@@ -76,7 +76,7 @@
 
 <style>
     .hud-stat-card {
-        border-left: 3px solid var(--hud-accent, #3675c2) !important;
+        border-radius: 0 !important;
     }
     .hud-sc-label {
         font-size: 12px;
