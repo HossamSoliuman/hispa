@@ -135,6 +135,54 @@ class CatchSaleUnitFlowTest extends TestCase
         ]);
     }
 
+    public function test_sale_stamps_price_onto_catch_details(): void
+    {
+        $owner = $this->owner();
+        $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-3']);
+        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boat->id]);
+        $fish = $this->fish();
+        $customer = Customer::create(['name' => 'عميل', 'status' => 1, 'owner_id' => $owner->id]);
+        $paymentMethod = PaymentMethod::create(['name' => 'كاش', 'status' => 1]);
+
+        $kg = Unit::where('is_default', 1)->firstOrFail();
+
+        $this->actingAs($owner, 'owner');
+
+        $this->post(route('owner.catch.store'), [
+            'trip_id' => $trip->id,
+            'fish_id' => [$fish->id],
+            'unit_id' => [$kg->id],
+            'weight' => [10],
+        ])->assertRedirect(route('owner.catch.index'));
+
+        $catch = CatchModel::where('trip_id', $trip->id)->firstOrFail();
+
+        // Catch detail starts with no price (the create form no longer collects it).
+        $this->assertEqualsWithDelta(0, (float) $catch->details()->value('price_per_kg'), 0.001);
+
+        $this->post(route('owner.sales.store'), [
+            'customer_id' => $customer->id,
+            'trip_id' => $trip->id,
+            'payment_method_id' => $paymentMethod->id,
+            'payment_status' => 'unpaid',
+            'sale_datetime' => now()->format('Y-m-d\TH:i'),
+            'fish_id' => [$fish->id],
+            'unit_id' => [$kg->id],
+            'weight' => [4],
+            'price_per_kilo' => [50],
+        ])->assertRedirect(route('owner.sales.index'));
+
+        // Selling stamps the catch detail: price per kg from the sale,
+        // total valued at the full caught weight (10 * 50).
+        $this->assertDatabaseHas('catch_details', [
+            'catch_id' => $catch->id,
+            'fish_id' => $fish->id,
+            'unit_id' => $kg->id,
+            'price_per_kg' => 50,
+            'total_price' => 500,
+        ]);
+    }
+
     public function test_units_index_redirects_to_settings_tab(): void
     {
         $owner = $this->owner();

@@ -7,6 +7,7 @@ use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\SalesRequest;
 use App\Models\Boat;
+use App\Models\CatchDetail;
 use App\Models\CatchModel;
 use App\Models\Customer;
 use App\Models\Fish;
@@ -143,6 +144,8 @@ class SalesController extends Controller
                     'total_price' => ($price * $weight),
                 ]);
 
+                $this->stampCatchDetailPrice($catch, $fishId, $unitId, $price);
+
                 $totalPrice += ($price * $weight);
                 $soldRows++;
             }
@@ -186,6 +189,29 @@ class SalesController extends Controller
 
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Mirror the selling price onto the catch details so the catch/trip
+     * reports show the realised price instead of zero. The catch detail's
+     * total reflects the full caught weight valued at the latest sale price.
+     */
+    private function stampCatchDetailPrice(?CatchModel $catch, int $fishId, int $unitId, float $price): void
+    {
+        if (! $catch) {
+            return;
+        }
+
+        CatchDetail::where('catch_id', $catch->id)
+            ->where('fish_id', $fishId)
+            ->where('unit_id', $unitId)
+            ->get()
+            ->each(function (CatchDetail $detail) use ($price): void {
+                $detail->update([
+                    'price_per_kg' => $price,
+                    'total_price' => $price * $detail->weight,
+                ]);
+            });
     }
 
     private function markTripSoldIfCatchDepleted(?Trip $trip, ?CatchModel $catch): void
