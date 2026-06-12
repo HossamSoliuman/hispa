@@ -79,13 +79,6 @@
                                         <a href="{{ route('owner.month-closing.print', $closing) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                             <i class="fa fa-print"></i>
                                         </a>
-                                        <form method="POST" action="{{ route('owner.month-closing.reopen', $closing) }}"
-                                            onsubmit="return confirm('{{ __('owner.month_closing.confirm_reopen') }}')" class="m-0">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                {{ __('owner.month_closing.reopen_btn') }}
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             </tr>
