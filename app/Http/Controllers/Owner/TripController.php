@@ -49,7 +49,18 @@ class TripController extends Controller
     {
         $regions = Region::Active()->select('id', 'name')->get();
         $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
-        $data = Trip::with(['fishQuantityStocks.fish', 'catches'])->find($id);
+        $data = Trip::with([
+            'fishQuantityStocks.fish',
+            'catches.details.fish',
+            'catches.details.unit',
+            'sales.details',
+            'boat',
+            'captain',
+            'owner',
+            'port',
+            'region',
+            'governorate',
+        ])->find($id);
 
         if (! $data) {
             return redirect()->back()->with(['error' => 'حدث خطأ ما']);
@@ -60,7 +71,34 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
-        return view('owner.trips.show', compact('regions', 'owners', 'data', 'captains'));
+        $financials = $this->calculateTripFinancials($data);
+
+        return view('owner.trips.show', compact('regions', 'owners', 'data', 'captains', 'financials'));
+    }
+
+    private function calculateTripFinancials(Trip $trip): array
+    {
+        $catchWeight = (float) ($trip->catches?->total_weight ?? 0);
+        if ($catchWeight <= 0 && $trip->catches) {
+            $catchWeight = (float) $trip->catches->details->sum('weight');
+        }
+
+        $grossRevenue = (float) $trip->sales->sum('total_price');
+        $commission = (float) $trip->sales->sum('commission_amount');
+        $labor = (float) $trip->sales->sum('labor_amount');
+        $netProfit = (float) $trip->sales->sum(function ($sale) {
+            return $sale->net_owner_amount ?? ($sale->total_price - ($sale->commission_amount ?? 0) - ($sale->labor_amount ?? 0));
+        });
+
+        return [
+            'catch_weight' => $catchWeight,
+            'gross_revenue' => $grossRevenue,
+            'commission' => $commission,
+            'labor' => $labor,
+            'total_costs' => $commission + $labor,
+            'net_profit' => $netProfit,
+            'outstanding' => (float) $trip->sales->sum('remaining_total'),
+        ];
     }
 
     public function create()
