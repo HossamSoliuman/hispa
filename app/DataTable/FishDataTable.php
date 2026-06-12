@@ -36,14 +36,8 @@ class FishDataTable extends DataTables
                     $btn .= '<a data-bs-effect="effect-scale" data-bs-toggle="modal" href="#modelEdit"
             data-id="'.$fish->id.'"
             data-code="'.$fish->code.'"
-            data-red_sea_name="'.$fish->red_sea_name.'"
-            data-arabian_gulf_name="'.$fish->arabian_gulf_name.'"
             data-scientific_name="'.$fish->scientific_name.'"
             data-english_name="'.$fish->english_name.'"
-            data-local_name_primary="'.$fish->local_name_primary.'"
-            data-local_name_secondary="'.$fish->local_name_secondary.'"
-            data-region_id ="'.$fish->region_id.'"
-            data-governorate_id  ="'.$fish->governorate_id.'"
             data-status="'.$fish->status.'"
             class="btn btn-sm btn-outline-success me-1 editBtn">
             <i class="bi bi-pencil"></i>

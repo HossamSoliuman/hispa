@@ -1647,10 +1647,8 @@ return [
         'parent' => 'التصنيف الأب',
         'edit_title' => 'تعديل نوع',
         'code' => 'الكود',
-        'scientific_name' => 'الاسم العلمي',
-        'english_name' => 'الاسم انجليزي',
-        'red_sea_name' => 'الاسم في البحر الأحمر',
-        'arabian_gulf_name' => 'الاسم في الخليج العربي',
+        'scientific_name' => 'الاسم بالعربي',
+        'english_name' => 'الاسم بالإنجليزي',
         'activate' => 'مفعل',
         'create' => [
             'title' => 'إضافة تصنيف قارب',

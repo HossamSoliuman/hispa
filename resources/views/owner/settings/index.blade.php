@@ -131,12 +131,7 @@
                     {data: 'code', name: 'code'},
                     {data: 'scientific_name', name: 'scientific_name'},
                     {data: 'english_name', name: 'english_name'},
-                    {data: 'red_sea_name', name: 'red_sea_name'},
-                    {data: 'arabian_gulf_name', name: 'arabian_gulf_name'},
-                    // {data: 'region', name: 'region'},
-                    // {data: 'governorate', name: 'governorate'},
                     {data: 'status', name: 'status'},
-
                     {data: 'action', name: 'action', orderable: true, searchable: false},
                 ],
 
@@ -205,12 +200,8 @@
 
             var id = button.data('id');
             var code = button.data('code');
-            var red_sea_name = button.data('red_sea_name');
             var scientific_name = button.data('scientific_name');
-            var arabian_gulf_name = button.data('arabian_gulf_name');
             var english_name = button.data('english_name');
-            var local_name_primary = button.data('local_name_primary');
-            var local_name_secondary = button.data('local_name_secondary');
             var status = button.data('status');
             var region_id = button.data('region_id');
             var governorate_id = button.data('governorate_id');
@@ -219,11 +210,7 @@
             modal.find('.modal-body #id').val(id);
             modal.find('.modal-body #code').val(code);
             modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #red_sea_name').val(red_sea_name);
-            modal.find('.modal-body #arabian_gulf_name').val(arabian_gulf_name);
             modal.find('.modal-body #english_name').val(english_name);
-            modal.find('.modal-body #local_name_primary').val(local_name_primary);
-            modal.find('.modal-body #local_name_secondary').val(local_name_secondary);
             modal.find('.modal-body #status').prop('checked', status == 1);
 
             // Set region

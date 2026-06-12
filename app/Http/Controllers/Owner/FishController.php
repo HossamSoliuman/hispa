@@ -95,13 +95,7 @@ class FishController extends Controller
 
             $data['code'] = $request->code;
             $data['scientific_name'] = $request->scientific_name;
-            $data['red_sea_name'] = $request->red_sea_name;
-            $data['arabian_gulf_name'] = $request->arabian_gulf_name;
             $data['english_name'] = $request->english_name;
-            $data['local_name_primary'] = $request->local_name_primary;
-            $data['local_name_secondary'] = $request->local_name_secondary;
-            $data['region_id'] = $request->region_id;
-            $data['governorate_id'] = $request->governorate_id;
             $data['status'] = $request->status == 1 ? 1 : 0;
 
             $fish = Fish::create($data);
@@ -142,13 +136,7 @@ class FishController extends Controller
             }
             $data['code'] = $request->code;
             $data['scientific_name'] = $request->scientific_name;
-            $data['red_sea_name'] = $request->red_sea_name;
-            $data['arabian_gulf_name'] = $request->arabian_gulf_name;
             $data['english_name'] = $request->english_name;
-            $data['scientific_name'] = $request->scientific_name;
-            $data['local_name_secondary'] = $request->local_name_secondary;
-            $data['region_id'] = $request->region_id;
-            $data['governorate_id'] = $request->governorate_id;
             $data['status'] = $request->status == 1 ? 1 : 0;
 
             $fish->update($data);

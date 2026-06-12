@@ -22,86 +22,40 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-4 ">
+                        <div class="col-4">
                             <input type="hidden" name="tab" value="{{ request('tab', 'fish') }}">
-                            <div class="form-group ">
+                            <div class="form-group">
                                 <label for="code" class="form-label">{{__('owner.fish.code')}}<span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="code" value="{{old('code')}}"
-                                    class="form-control  " required
+                                    class="form-control" required
                                     placeholder="{{__('owner.fish.code')}}">
-
-
-                                @error('code') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
+                                @error('code') <span class="text-danger error">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         <div class="col-4">
-
-                            <div class="form-group ">
+                            <div class="form-group">
                                 <label for="scientific_name" class="form-label">{{__('owner.fish.scientific_name')}}<span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="scientific_name" value="{{old('scientific_name')}}"
-                                    class="form-control  " required
+                                    class="form-control" required
                                     placeholder="{{__('owner.fish.scientific_name')}}">
-
-
-                                @error('scientific_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
+                                @error('scientific_name') <span class="text-danger error">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="form-group ">
+                            <div class="form-group">
                                 <label for="english_name" class="form-label">{{__('owner.fish.english_name')}}<span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="english_name" value="{{old('english_name')}}"
-                                    class="form-control  " required
+                                    class="form-control" required
                                     placeholder="{{__('owner.fish.english_name')}}">
-
-
-                                @error('english_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
+                                @error('english_name') <span class="text-danger error">{{ $message }}</span>@enderror
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-4">
-                            <div class="form-group ">
-                                <label for="red_sea_name" class="form-label">{{__('owner.fish.red_sea_name')}}<span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="red_sea_name" value="{{old('red_sea_name')}}"
-                                    class="form-control  " required
-                                    placeholder="{{__('owner.fish.red_sea_name')}}">
-
-
-                                @error('red_sea_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group ">
-                                <label for="arabian_gulf_name" class="form-label">{{__('owner.fish.arabian_gulf_name')}}<span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="arabian_gulf_name" required
-                                    value="{{old('arabian_gulf_name')}}"
-                                    class="form-control  "
-                                    placeholder="{{__('owner.fish.arabian_gulf_name')}}">
-
-
-                                @error('arabian_gulf_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
-                            </div>
-                        </div>
-                    
-                    </div>
-                    <div class="row">                                    
-                        <div class="col-4 ">
                             <div class="form-check form-switch " style="margin-top: 35px">
                                 <input type="checkbox" name="status" checked class="form-check-input" value="1">
                                 <label class="form-check-label" for="status">{{__('owner.fish.activate')}}</label>
@@ -135,84 +89,43 @@
                 <div class="modal-body">
                     <input type="hidden" name="tab" value="{{ request('tab', 'fish') }}">
                     <div class="row">
-                        <div class="col-4 ">
-                            <div class="form-group ">
+                        <div class="col-4">
+                            <input type="hidden" name="id" id="id">
+                            <div class="form-group">
                                 <label for="code" class="form-label">{{__('owner.fish.code')}}<span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="code" id="code"
                                     value="{{old('code')}}"
                                     class="form-control" required
                                     placeholder="{{__('owner.fish.code')}}">
-
-
-                                @error('code') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
+                                @error('code') <span class="text-danger error">{{ $message }}</span>@enderror
                             </div>
                         </div>
-                        <div class="col-4 ">
-                            <input type="hidden" name="id" id="id">
-                            <div class="form-group ">
+                        <div class="col-4">
+                            <div class="form-group">
                                 <label for="scientific_name" class="form-label">{{__('owner.fish.scientific_name')}}<span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="scientific_name" id="scientific_name"
                                     value="{{old('scientific_name')}}"
-                                    class="form-control  " required
+                                    class="form-control" required
                                     placeholder="{{__('owner.fish.scientific_name')}}">
-
-
-                                @error('scientific_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
+                                @error('scientific_name') <span class="text-danger error">{{ $message }}</span>@enderror
                             </div>
                         </div>
-                        <div class="col-4 ">
-                            <div class="form-group ">
+                        <div class="col-4">
+                            <div class="form-group">
                                 <label for="english_name" class="form-label">{{__('owner.fish.english_name')}}<span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="english_name" id="english_name"
                                     value="{{old('english_name')}}"
-                                    class="form-control  " required
+                                    class="form-control" required
                                     placeholder="{{__('owner.fish.english_name')}}">
-
-
-                                @error('english_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
+                                @error('english_name') <span class="text-danger error">{{ $message }}</span>@enderror
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-4">
-                            <div class="form-group ">
-                                <label for="red_sea_name" class="form-label">{{__('owner.fish.red_sea_name')}}<span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="red_sea_name" id="red_sea_name" value="{{old('red_sea_name')}}"
-                                    class="form-control  " required
-                                    placeholder="{{__('owner.fish.red_sea_name')}}">
-
-
-                                @error('red_sea_name') <span
-                                    class="text-danger error">{{ $message }}</span>@enderror
-
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group ">
-                                <label for="arabian_gulf_name" class="form-label">{{__('owner.fish.arabian_gulf_name')}}<span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="arabian_gulf_name" id="arabian_gulf_name" required
-                                    value="{{old('arabian_gulf_name')}}"
-                                    class="form-control  "
-                                    placeholder="{{__('owner.fish.arabian_gulf_name')}}">
-                                @error('arabian_gulf_name') <span
-                                    class="text-danger error">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>                                   
-                    </div>
-                    <div class="row">                                
-                        <div class="col-4 ">
                             <div class="form-check form-switch " style="margin-top: 35px">
                                 <input type="checkbox" name="status" checked class="form-check-input" value="1">
                                 <label class="form-check-label" for="status">{{__('owner.fish.activate')}}</label>
@@ -266,10 +179,6 @@
             <th>{{__('owner.fish.code')}}</th>
             <th>{{__('owner.fish.scientific_name')}}</th>
             <th>{{__('owner.fish.english_name')}}</th>
-            <th>{{__('owner.fish.red_sea_name')}}</th>
-            <th>{{__('owner.fish.arabian_gulf_name')}}</th>
-            <!-- <th>{{ __('owner.crew.edit.region') }}</th>
-            <th>{{ __('owner.crew.edit.governorate') }}</th> -->
             <th>{{__('owner.fish.status')}}</th>
             <th>{{__('owner.fish.actions')}}</th>
 
