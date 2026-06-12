@@ -79,6 +79,7 @@
                 <th>{{ __('owner.generated.deduction') }}</th>
                 <th>{{ __('owner.expenses.show.notes') }}</th>
                 <th>{{ __('owner.generated.net') }}</th>
+                <th>{{ __('owner.payrolls.payment_col') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -96,6 +97,14 @@
                     <td class="text-danger">{{ number_format($detail->deduction ?? 0, 2) }}</td>
                     <td>{{ $detail->note ?: '-' }}</td>
                     <td style="font-weight: bold;">{{ number_format($detail->final_salary ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
+                    <td>
+                        @if ($detail->is_paid)
+                            <span class="badge bg-success">{{ __('owner.status.paid') }}</span><br>
+                            <small>{{ optional($detail->paid_at)->format('Y-m-d') }}</small>
+                        @else
+                            <span class="badge bg-danger">{{ __('owner.status.unpaid') }}</span>
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>

@@ -284,6 +284,8 @@ Route::group([
         Route::get('/getPayrollsData', [PayrollController::class, 'getData'])->name('getPayrollsData');
         Route::post('/payrolls/check', [PayrollController::class, 'check'])->name('payrolls.check');
         Route::post('/payrolls/percentageCheck', [PayrollController::class, 'percentageCheck'])->name('payrolls.percentageCheck');
+        // per-person payment (crew/captain/employee)
+        Route::post('/payrolls/details/{detail}/pay', [PayrollController::class, 'payDetail'])->name('payrolls.payDetail');
         Route::any('/percentage', [PayrollController::class, 'getPercentage'])->name('percentage');
         Route::any('/percentageCreate', [PayrollController::class, 'percentageCreate'])->name('percentageCreate');
 

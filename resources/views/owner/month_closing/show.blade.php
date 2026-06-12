@@ -92,4 +92,43 @@
             </table>
         </div>
     </div>
+
+    @isset($payrollSummary)
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ __('owner.month_closing.payroll_summary.title') }}</h5>
+                <small class="text-muted">{{ __('owner.month_closing.payroll_summary.subtitle') }}</small>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ __('owner.month_closing.payroll_summary.type') }}</th>
+                            <th>{{ __('owner.month_closing.payroll_summary.people') }}</th>
+                            <th>{{ __('owner.month_closing.payroll_summary.net_total') }}</th>
+                            <th>{{ __('owner.month_closing.payroll_summary.paid') }}</th>
+                            <th>{{ __('owner.month_closing.payroll_summary.status') }}</th>
+                            <th>{{ __('owner.month_closing.payroll_summary.paid_at') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (['salary' => 'fixed', 'percentage' => 'percentage'] as $key => $label)
+                            @php
+                                $row = $payrollSummary[$key];
+                                $badge = ['fully_paid' => 'success', 'partially_paid' => 'info', 'unpaid' => 'warning', 'not_created' => 'secondary'][$row['status']] ?? 'secondary';
+                            @endphp
+                            <tr>
+                                <td>{{ __('owner.month_closing.payroll_summary.'.$label) }}</td>
+                                <td>{{ $row['paid_count'] }} / {{ $row['count'] }}</td>
+                                <td>{{ number_format($row['net_total'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="fw-bold">{{ number_format($row['paid_amount'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td><span class="badge bg-{{ $badge }}">{{ __('owner.month_closing.payroll_summary.'.$row['status']) }}</span></td>
+                                <td>{{ optional($row['paid_at'])->format('Y-m-d') ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endisset
 @endsection

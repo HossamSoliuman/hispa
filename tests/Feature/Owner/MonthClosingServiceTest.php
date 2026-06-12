@@ -4,6 +4,8 @@ namespace Tests\Feature\Owner;
 
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\PayrollDetailsModel;
+use App\Models\PayrollModel;
 use App\Models\Sale;
 use App\Models\User;
 use App\Service\Owner\MonthClosingService;
@@ -122,5 +124,35 @@ class MonthClosingServiceTest extends TestCase
 
         $this->assertDatabaseMissing('month_closings', ['id' => $closing->id]);
         $this->assertNull($this->service->find($owner->id, 2026, 6));
+    }
+
+    public function test_reopen_blocked_after_linked_percentage_payment(): void
+    {
+        $owner = $this->seedClientExample();
+        $closing = $this->service->close($owner->id, 2026, 6);
+        $captain = User::where('owner_id', $owner->id)->where('role', 'captain')->firstOrFail();
+
+        // No stored due payment, but the crew were paid via the percentage payroll.
+        $payroll = PayrollModel::create([
+            'owner_id' => $owner->id,
+            'year' => 2026,
+            'month' => 6,
+            'status' => 'approved',
+            'type' => 'percentage',
+        ]);
+        PayrollDetailsModel::create([
+            'payroll_id' => $payroll->id,
+            'user_id' => $captain->id,
+            'base_salary' => 0,
+            'percentage' => 0,
+            'sales_amount' => 0,
+            'final_salary' => 5000,
+            'is_paid' => true,
+            'paid_at' => now(),
+            'paid_amount' => 5000,
+        ]);
+
+        $this->expectException(\DomainException::class);
+        $this->service->reopen($closing);
     }
 }

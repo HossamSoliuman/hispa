@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\MonthClosing;
 use App\Service\Owner\MonthClosingService;
+use App\Service\Owner\PayrollService;
 use App\Service\Owner\ReportQrService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MonthClosingController extends Controller
 {
-    public function __construct(private MonthClosingService $service) {}
+    public function __construct(
+        private MonthClosingService $service,
+        private PayrollService $payrollService,
+    ) {}
 
     public function index(Request $request)
     {
@@ -67,17 +71,26 @@ class MonthClosingController extends Controller
     {
         $this->authorizeOwner($monthClosing);
         $monthClosing->load('dues');
+        $this->linkPayrollPayments($monthClosing);
 
-        return view('owner.month_closing.show', ['closing' => $monthClosing]);
+        return view('owner.month_closing.show', [
+            'closing' => $monthClosing,
+            'payrollSummary' => $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month),
+        ]);
     }
 
     public function print(MonthClosing $monthClosing)
     {
         $this->authorizeOwner($monthClosing);
         $monthClosing->load('dues');
+        $this->linkPayrollPayments($monthClosing);
         $settings = $this->companySettings();
 
-        return view('owner.month_closing.print', ['closing' => $monthClosing, 'settings' => $settings]);
+        return view('owner.month_closing.print', [
+            'closing' => $monthClosing,
+            'settings' => $settings,
+            'payrollSummary' => $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month),
+        ]);
     }
 
     public function reopen(MonthClosing $monthClosing)
@@ -92,6 +105,35 @@ class MonthClosingController extends Controller
 
         return redirect()->route('owner.month-closing.index')
             ->with('success', __('owner.month_closing.messages.reopened_success'));
+    }
+
+    /**
+     * Reflect the real percentage-payroll disbursements on the month-close dues
+     * so the report's "paid"/"remaining" columns match what crew were actually
+     * paid. Mutates the in-memory dues only; the frozen snapshot is untouched.
+     */
+    private function linkPayrollPayments(MonthClosing $monthClosing): void
+    {
+        $paidByUser = $this->payrollService->monthlyPercentagePaidByUser(
+            $monthClosing->owner_id,
+            $monthClosing->year,
+            $monthClosing->month,
+        );
+
+        if ($paidByUser === []) {
+            return;
+        }
+
+        foreach ($monthClosing->dues as $due) {
+            $paid = (float) ($paidByUser[$due->user_id] ?? 0);
+
+            if ($paid <= 0) {
+                continue;
+            }
+
+            $due->paid_amount = $paid;
+            $due->remaining = round((float) $due->due_amount - (float) $due->advances - $paid, 2);
+        }
     }
 
     private function ownerId(): int

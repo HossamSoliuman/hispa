@@ -174,7 +174,6 @@ class PayrollController extends Controller
      */
     public function update(PayrollRequest $request)
     {
-
         $payroll = $this->findOwnerPayroll($request->id);
 
         if ($payroll) {
@@ -182,42 +181,115 @@ class PayrollController extends Controller
                 return redirect()->back()->with('error', 'لا يمكن تعديل مسير مدفوع ومعتمد');
             }
 
-            $payroll->update([
-                'status' => $request->status,
-                'is_paid' => $request->is_paid ?? 0,
-                'paid_at' => $request->is_paid ? $request->payment_date ?? now()->format('Y-m-d H:i:s') : null,
-            ]);
+            $payroll->update(['status' => $request->status]);
 
             if ($request->details) {
                 foreach ($request->details as $d) {
                     $detail = $payroll->details()->find($d['id']);
-                    $salary = 0;
-                    if ($detail->user->salary_type == 'salary') {
-                        $salary = $detail->base_salary;
-                    } else {
-                        // Percentage payroll stores final_salary as the per-head amount
-                        // (captins_amount / captins_count) at creation; recompute the
-                        // update on the same per-head basis, not the full sales amount.
-                        $salary = $detail->captins_count > 0
-                            ? $detail->captins_amount / $detail->captins_count
-                            : 0;
+                    // Already-paid rows are frozen; payment is recorded per person.
+                    if (! $detail || $detail->is_paid) {
+                        continue;
                     }
-                    if ($detail) {
-                        $detail->update([
-                            'increase' => $d['increase'] ?? 0,
-                            'deduction' => $d['deduction'] ?? 0,
-                            'note' => $d['note'] ?? '',
-                            'final_salary' => $salary + ($d['increase'] ?? 0) - ($d['deduction'] ?? 0),
-                        ]);
-                    }
+
+                    $detail->update([
+                        'increase' => $d['increase'] ?? 0,
+                        'deduction' => $d['deduction'] ?? 0,
+                        'note' => $d['note'] ?? '',
+                        'final_salary' => $this->detailFinalSalary($detail, (float) ($d['increase'] ?? 0), (float) ($d['deduction'] ?? 0)),
+                    ]);
                 }
             }
+
+            $this->syncPayrollPaidState($payroll);
         }
+
         if ($payroll->type == 'salary') {
             return redirect()->route('owner.payrolls.index')->with('success', 'تم حفظ مسير الرواتب بنجاح');
-        } else {
-            return redirect()->route('owner.percentage')->with('success', 'تم حفظ مسير الرواتب بنجاح');
         }
+
+        return redirect()->route('owner.percentage')->with('success', 'تم حفظ مسير الرواتب بنجاح');
+    }
+
+    /**
+     * Record payment for a single crew/captain/employee row (per-person pay).
+     * Saves the row's latest increase/deduction first, then freezes the paid amount.
+     */
+    public function payDetail(Request $request, PayrollDetailsModel $detail)
+    {
+        $payroll = $detail->payroll;
+        abort_if(! $payroll || $payroll->owner_id !== $this->ownerId(), 403);
+
+        $data = $request->validate([
+            'increase' => 'nullable|numeric',
+            'deduction' => 'nullable|numeric',
+            'note' => 'nullable|string',
+        ]);
+
+        if ($detail->is_paid) {
+            return response()->json([
+                'message' => 'تم تسديد هذا الشخص مسبقاً',
+                'final_salary' => (float) $detail->final_salary,
+                'paid_at' => optional($detail->paid_at)->format('Y-m-d'),
+            ], 422);
+        }
+
+        $increase = (float) ($data['increase'] ?? $detail->increase ?? 0);
+        $deduction = (float) ($data['deduction'] ?? $detail->deduction ?? 0);
+        $finalSalary = $this->detailFinalSalary($detail, $increase, $deduction);
+
+        $detail->update([
+            'increase' => $increase,
+            'deduction' => $deduction,
+            'note' => $data['note'] ?? $detail->note,
+            'final_salary' => $finalSalary,
+            'is_paid' => true,
+            'paid_at' => now(),
+            'paid_amount' => $finalSalary,
+        ]);
+
+        $this->syncPayrollPaidState($payroll);
+
+        return response()->json([
+            'message' => __('owner.payrolls.pay_success'),
+            'final_salary' => $finalSalary,
+            'paid_amount' => $finalSalary,
+            'paid_at' => $detail->paid_at->format('Y-m-d'),
+            'payroll_fully_paid' => (bool) $payroll->fresh()->is_paid,
+        ]);
+    }
+
+    /**
+     * Net pay for a detail row: salaried staff use base_salary; percentage staff
+     * use the per-head share (captins_amount / captins_count). Increase/deduction
+     * are applied on top.
+     */
+    private function detailFinalSalary(PayrollDetailsModel $detail, float $increase, float $deduction): float
+    {
+        if ($detail->user && $detail->user->salary_type === 'salary') {
+            $base = (float) $detail->base_salary;
+        } else {
+            $base = (int) $detail->captins_count > 0
+                ? (float) $detail->captins_amount / (int) $detail->captins_count
+                : 0.0;
+        }
+
+        return round($base + $increase - $deduction, 2);
+    }
+
+    /**
+     * Keep the parent payroll's paid flag in sync with its rows: a payroll is
+     * "paid" only once every person on it has been paid.
+     */
+    private function syncPayrollPaidState(PayrollModel $payroll): void
+    {
+        $payroll->loadMissing('details');
+        $details = $payroll->details;
+        $allPaid = $details->isNotEmpty() && $details->every(fn ($d) => (bool) $d->is_paid);
+
+        $payroll->update([
+            'is_paid' => $allPaid ? 1 : 0,
+            'paid_at' => $allPaid ? ($details->max('paid_at') ?? now()) : null,
+        ]);
     }
 
     public function carryover(Request $request)

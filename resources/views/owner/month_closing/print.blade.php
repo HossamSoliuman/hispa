@@ -87,4 +87,33 @@
             </tr>
         </tfoot>
     </table>
+
+    @isset($payrollSummary)
+        <h3 style="margin-top:25px;">{{ __('owner.month_closing.payroll_summary.title') }}</h3>
+        <table class="dues-table">
+            <thead>
+                <tr>
+                    <th>{{ __('owner.month_closing.payroll_summary.type') }}</th>
+                    <th>{{ __('owner.month_closing.payroll_summary.people') }}</th>
+                    <th>{{ __('owner.month_closing.payroll_summary.net_total') }}</th>
+                    <th>{{ __('owner.month_closing.payroll_summary.paid') }}</th>
+                    <th>{{ __('owner.month_closing.payroll_summary.status') }}</th>
+                    <th>{{ __('owner.month_closing.payroll_summary.paid_at') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (['salary' => 'fixed', 'percentage' => 'percentage'] as $key => $label)
+                    @php $row = $payrollSummary[$key]; @endphp
+                    <tr>
+                        <td>{{ __('owner.month_closing.payroll_summary.'.$label) }}</td>
+                        <td>{{ $row['paid_count'] }} / {{ $row['count'] }}</td>
+                        <td>{{ number_format($row['net_total'], 2) }}</td>
+                        <td>{{ number_format($row['paid_amount'], 2) }}</td>
+                        <td>{{ __('owner.month_closing.payroll_summary.'.$row['status']) }}</td>
+                        <td>{{ optional($row['paid_at'])->format('Y-m-d') ?? '-' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endisset
 </x-report-layout>

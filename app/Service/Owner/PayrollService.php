@@ -220,4 +220,93 @@ class PayrollService
 
         return 0;
     }
+
+    /**
+     * Read-only payroll payment summary for a month (salary + percentage),
+     * used by the month-close report. Does not alter any financial totals.
+     *
+     * @return array{salary: array<string, mixed>, percentage: array<string, mixed>}
+     */
+    public function monthlyPayrollSummary(int $ownerId, int $year, int $month): array
+    {
+        return [
+            'salary' => $this->payrollTypeSummary($ownerId, $year, $month, 'salary'),
+            'percentage' => $this->payrollTypeSummary($ownerId, $year, $month, 'percentage'),
+        ];
+    }
+
+    /**
+     * Amount actually disbursed to each crew member through the month's
+     * percentage payroll, keyed by user id. Links the month-close crew dues to
+     * the real per-person payments recorded in {@see PayrollController::payDetail()}.
+     *
+     * @return array<int, float>
+     */
+    public function monthlyPercentagePaidByUser(int $ownerId, int $year, int $month): array
+    {
+        $payroll = PayrollModel::with('details')
+            ->where('owner_id', $ownerId)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->where('type', 'percentage')
+            ->first();
+
+        if (! $payroll) {
+            return [];
+        }
+
+        return $payroll->details
+            ->where('is_paid', true)
+            ->groupBy('user_id')
+            ->map(fn ($rows) => round((float) $rows->sum('paid_amount'), 2))
+            ->all();
+    }
+
+    /**
+     * @return array{exists: bool, payroll_id: int|null, net_total: float, paid_amount: float, count: int, paid_count: int, status: string, paid_at: \Carbon\Carbon|null}
+     */
+    private function payrollTypeSummary(int $ownerId, int $year, int $month, string $type): array
+    {
+        $payroll = PayrollModel::with('details')
+            ->where('owner_id', $ownerId)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->where('type', $type)
+            ->first();
+
+        if (! $payroll) {
+            return [
+                'exists' => false,
+                'payroll_id' => null,
+                'net_total' => 0.0,
+                'paid_amount' => 0.0,
+                'count' => 0,
+                'paid_count' => 0,
+                'status' => 'not_created',
+                'paid_at' => null,
+            ];
+        }
+
+        $details = $payroll->details;
+        $count = $details->count();
+        $paidCount = $details->where('is_paid', true)->count();
+
+        $status = 'unpaid';
+        if ($count > 0 && $paidCount === $count) {
+            $status = 'fully_paid';
+        } elseif ($paidCount > 0) {
+            $status = 'partially_paid';
+        }
+
+        return [
+            'exists' => true,
+            'payroll_id' => $payroll->id,
+            'net_total' => round((float) $details->sum('final_salary'), 2),
+            'paid_amount' => round((float) $details->where('is_paid', true)->sum('paid_amount'), 2),
+            'count' => $count,
+            'paid_count' => $paidCount,
+            'status' => $status,
+            'paid_at' => $details->where('is_paid', true)->max('paid_at'),
+        ];
+    }
 }

@@ -17,6 +17,11 @@
 
 @section('content')
 
+    @php
+        $totalDetails = $payroll->details->count();
+        $paidDetails = $payroll->details->where('is_paid', true)->count();
+    @endphp
+
     <div class="d-flex align-items-center mb-3">
         <div>
             <ul class="breadcrumb">
@@ -25,6 +30,11 @@
                 <li class="breadcrumb-item active">{{ __('owner.payrolls.edit.title') }}</li>
             </ul>
             <h1 class="page-header mb-0">{{ __('owner.payrolls.edit.page_header') }}</h1>
+        </div>
+        <div class="ms-auto">
+            <span class="badge {{ $totalDetails > 0 && $paidDetails === $totalDetails ? 'bg-success' : 'bg-warning' }} fs-6">
+                {{ __('owner.status.paid') }}: {{ $paidDetails }} / {{ $totalDetails }}
+            </span>
         </div>
     </div>
 
@@ -59,24 +69,6 @@
                                 {{ isset($payroll) && $payroll->status == 'approved' ? 'selected' : '' }}>
                                 {{ __('owner.generated.approved') }}</option>
                         </select>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <label>{{ __('owner.sales.payment_status') }}</label>
-                        <select name="is_paid" id="is_paid" class="form-control form-select"
-                            @if (isset($payroll) && $payroll->status == 'approved' && $payroll->is_paid) disabled @endif>
-                            <option value="0" {{ isset($payroll) && !$payroll->is_paid ? 'selected' : '' }}>
-                                {{ __('owner.sales.unpaid') }}</option>
-                            <option value="1" {{ isset($payroll) && $payroll->is_paid ? 'selected' : '' }}>
-                                {{ __('owner.status.paid') }}</option>
-                        </select>
-                    </div>
-                    <div class="col">
-                        <label>{{ __('owner.generated.payment_date') }}</label>
-                        <input type="date" name="payment_date" id="payment_date" class="form-control"
-                            value="{{ old('payment_date', $payroll->payment_date ?? '') }}"
-                            @if (isset($payroll) && $payroll->is_paid && $payroll->status == 'approved') readonly @endif>
                     </div>
                 </div>
 
@@ -116,12 +108,13 @@
                                         <th>{{ __('owner.generated.deduction') }}</th>
                                         <th>{{ __('owner.expenses.show.notes') }}</th>
                                         <th>{{ __('owner.generated.net') }}</th>
+                                        <th>{{ __('owner.payrolls.payment_col') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($payroll->details ?? [] as $i => $d)
                                         @if ($d->user->salary_type == 'salary')
-                                            <tr>
+                                            <tr data-detail-id="{{ $d->id }}">
                                                 <td>
                                                     {{ $d->user->name }}
                                                     <input type="hidden" name="details[{{ $looop }}][id]"
@@ -133,16 +126,21 @@
                                                     value="{{ $d->base_salary }}" readonly>
                                                 <td>{{ $d->base_salary }}</td>
                                                 <td><input type="number" name="details[{{ $looop }}][increase]"
-                                                        class="form-control increase" value="{{ $d->increase }}"></td>
+                                                        class="form-control increase" value="{{ $d->increase }}"
+                                                        @readonly($d->is_paid)></td>
                                                 <td><input type="number" name="details[{{ $looop }}][deduction]"
-                                                        class="form-control deduction" value="{{ $d->deduction }}"></td>
+                                                        class="form-control deduction" value="{{ $d->deduction }}"
+                                                        @readonly($d->is_paid)></td>
                                                 <td><input type="text" name="details[{{ $looop }}][note]"
-                                                        class="form-control" value="{{ $d->note }}"></td>
+                                                        class="form-control note" value="{{ $d->note }}"
+                                                        @readonly($d->is_paid)></td>
                                                 <td>
-                                                    {{-- <input type="text" class="form-control net_salary" value="{{ $d->final_salary }}" readonly> --}}
                                                     <span class="text-black fw-bold net_salary">
                                                         {{ $d->final_salary }}
                                                     </span>
+                                                </td>
+                                                <td class="payment-cell">
+                                                    @include('owner.payroll.partials.pay-cell', ['d' => $d])
                                                 </td>
                                             </tr>
                                             @php
@@ -170,12 +168,18 @@
                                         <th>{{ __('owner.generated.deduction') }}</th>
                                         <th>{{ __('owner.expenses.show.notes') }}</th>
                                         <th>{{ __('owner.generated.net') }}</th>
+                                        <th>{{ __('owner.payrolls.payment_col') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($payroll->details ?? [] as $i => $d)
                                         @if ($d->user->salary_type == 'percentage')
-                                            <tr>
+                                            @php
+                                                $perHead = (int) $d->captins_count > 0
+                                                    ? round((float) $d->captins_amount / (int) $d->captins_count, 2)
+                                                    : 0;
+                                            @endphp
+                                            <tr data-detail-id="{{ $d->id }}">
                                                 <td>
                                                     {{ $d->user->name }}
                                                     <input type="hidden" name="details[{{ $looop }}][id]"
@@ -185,23 +189,26 @@
                                                 </td>
                                                 <td>{{ $d->user->boat->name ?? '' }}</td>
                                                 <input type="hidden" class="form-control base"
-                                                    value="{{ $d->sales_amount }}" readonly>
+                                                    value="{{ $perHead }}" readonly>
                                                 <td>{{ (float) $d->captins_amount }}</td>
                                                 <td>{{ (int) $d->captins_count }}</td>
-                                                <td>{{ round((float) $d->captins_amount / (int) $d->captins_count, 2) }}
-                                                </td>
-                                                {{-- <td>{{ $d->percentage }}</td>                                   --}}
+                                                <td>{{ $perHead }}</td>
                                                 <td><input type="number" name="details[{{ $looop }}][increase]"
-                                                        class="form-control increase" value="{{ $d->increase }}"></td>
+                                                        class="form-control increase" value="{{ $d->increase }}"
+                                                        @readonly($d->is_paid)></td>
                                                 <td><input type="number" name="details[{{ $looop }}][deduction]"
-                                                        class="form-control deduction" value="{{ $d->deduction }}"></td>
+                                                        class="form-control deduction" value="{{ $d->deduction }}"
+                                                        @readonly($d->is_paid)></td>
                                                 <td><input type="text" name="details[{{ $looop }}][note]"
-                                                        class="form-control" value="{{ $d->note }}"></td>
+                                                        class="form-control note" value="{{ $d->note }}"
+                                                        @readonly($d->is_paid)></td>
                                                 <td>
-                                                    {{-- <input type="text" class="form-control net_salary" value="{{ $d->final_salary }}" readonly> --}}
                                                     <span class="text-black fw-bold net_salary">
                                                         {{ $d->final_salary }}
                                                     </span>
+                                                </td>
+                                                <td class="payment-cell">
+                                                    @include('owner.payroll.partials.pay-cell', ['d' => $d])
                                                 </td>
                                             </tr>
                                             @php
@@ -217,18 +224,11 @@
 
 
 
-
-
-
-
                 <button class="btn btn-success" @if (isset($payroll) && $payroll->is_paid && $payroll->status == 'approved') disabled @endif>
                     {{ __('owner.customers.modal.buttons.save') }}</button>
 
-                <button class="btn btn-danger" disabled>
-                    {{ __('owner.generated.pay') }}</button>
-
-                <button class="btn btn-info" disabled>
-                    {{ __('owner.generated.print') }}</button>
+                <a href="{{ route('owner.payrolls.print', $payroll->id) }}" target="_blank" class="btn btn-info">
+                    {{ __('owner.generated.print') }}</a>
 
 
             </form>
@@ -247,58 +247,109 @@
 
 @section('script')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            $('#editPayrollForm').on('submit', function(e) {
-                // Form validation handled server-side
-            });
-        });
+        const PAYROLL = {
+            payUrl: "{{ route('owner.payrolls.payDetail', ['detail' => '__ID__']) }}",
+            csrf: "{{ csrf_token() }}",
+            txt: {
+                confirmTitle: @json(__('owner.payrolls.pay_confirm_title')),
+                confirmText: @json(__('owner.payrolls.pay_confirm_text')),
+                confirmYes: @json(__('owner.payrolls.pay_confirm_yes')),
+                cancel: @json(__('owner.swal.cancel')),
+                paid: @json(__('owner.status.paid')),
+                paidOn: @json(__('owner.payrolls.paid_on')),
+                error: @json(__('owner.payrolls.pay_error')),
+            },
+        };
 
+        // Live net = base (+ increase - deduction) for editable rows.
         document.querySelectorAll('tbody tr').forEach(row => {
-            const base = parseFloat(row.querySelector('.base').value) || 0;
+            const baseInput = row.querySelector('.base');
             const increaseInput = row.querySelector('.increase');
             const deductionInput = row.querySelector('.deduction');
             const netSpan = row.querySelector('.net_salary');
+            if (!baseInput || !increaseInput || !deductionInput || !netSpan) return;
 
+            const base = parseFloat(baseInput.value) || 0;
             const updateNet = () => {
                 const increase = parseFloat(increaseInput.value) || 0;
                 const deduction = parseFloat(deductionInput.value) || 0;
-                netSpan.textContent = base + increase - deduction;
+                netSpan.textContent = (base + increase - deduction).toFixed(2);
             };
 
             increaseInput.addEventListener('input', updateNet);
             deductionInput.addEventListener('input', updateNet);
         });
-        document.addEventListener('DOMContentLoaded', function() {
-            const isPaidSelect = document.getElementById('is_paid');
-            const paymentDate = document.getElementById('payment_date');
 
-            const togglePaymentDate = () => {
-                if (isPaidSelect.value == '1') {
-                    paymentDate.removeAttribute('readonly');
-                    if (!paymentDate.value) {
-                        const today = new Date().toISOString().split('T')[0];
-                        paymentDate.value = today;
-                    }
-                } else {
-                    paymentDate.value = '';
-                    paymentDate.setAttribute('readonly', true);
-                }
-            };
+        // Per-person pay.
+        $(document).on('click', '.pay-btn', function() {
+            const btn = $(this);
+            const row = btn.closest('tr');
+            const detailId = btn.data('detail-id');
 
-            isPaidSelect.addEventListener('change', togglePaymentDate);
-            togglePaymentDate(); // initialize on load
+            Swal.fire({
+                title: PAYROLL.txt.confirmTitle,
+                text: PAYROLL.txt.confirmText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: PAYROLL.txt.confirmYes,
+                cancelButtonText: PAYROLL.txt.cancel,
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                btn.prop('disabled', true);
+                $.ajax({
+                    url: PAYROLL.payUrl.replace('__ID__', detailId),
+                    type: 'POST',
+                    data: {
+                        _token: PAYROLL.csrf,
+                        increase: row.find('.increase').val() || 0,
+                        deduction: row.find('.deduction').val() || 0,
+                        note: row.find('.note').val() || '',
+                    },
+                    success: function(res) {
+                        row.find('.increase, .deduction, .note').prop('readonly', true);
+                        row.find('.net_salary').text(res.final_salary);
+                        btn.closest('.payment-cell').html(
+                            '<span class="badge bg-success">' + PAYROLL.txt.paid + '</span>' +
+                            '<div class="small text-muted">' + res.paid_at + '</div>'
+                        );
+                        if (window.toastr) {
+                            toastr.success(res.message);
+                        }
+                        updatePaidCounter();
+                    },
+                    error: function(xhr) {
+                        btn.prop('disabled', false);
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) || PAYROLL.txt.error;
+                        if (window.toastr) {
+                            toastr.error(msg);
+                        } else {
+                            alert(msg);
+                        }
+                    },
+                });
+            });
         });
 
+        function updatePaidCounter() {
+            const total = document.querySelectorAll('tbody tr[data-detail-id]').length;
+            const paid = document.querySelectorAll('tbody tr[data-detail-id] .payment-cell .badge').length;
+            const badge = document.querySelector('.page-header').closest('.d-flex').querySelector('.badge');
+            if (badge) {
+                badge.textContent = PAYROLL.txt.paid + ': ' + paid + ' / ' + total;
+                badge.classList.toggle('bg-success', total > 0 && paid === total);
+                badge.classList.toggle('bg-warning', !(total > 0 && paid === total));
+            }
+        }
 
         const searchInput = document.getElementById('employeeSearch');
-
         searchInput.addEventListener('input', function() {
             const value = this.value.toLowerCase();
-
             document.querySelectorAll('tbody tr').forEach(row => {
                 const nameCell = row.querySelector('td');
                 if (!nameCell) return;
-
                 const name = nameCell.textContent.toLowerCase();
                 row.style.display = name.includes(value) ? '' : 'none';
             });
@@ -308,7 +359,6 @@
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.add('d-none'));
-
                 btn.classList.add('active');
                 document.getElementById(btn.dataset.tab).classList.remove('d-none');
             });

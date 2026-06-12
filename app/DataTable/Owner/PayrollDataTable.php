@@ -3,7 +3,6 @@
 namespace App\DataTable\Owner;
 
 use App\Models\PayrollDetail;
-use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +20,8 @@ class PayrollDataTable extends DataTables
             ->get();
         $totalPayrolls = $payrolls->count();
         $paidPayrolls = $payrolls->where('is_paid', 1)->count();
-        $paidPayroll = $payrolls->where('is_paid', 1)->pluck('id');
-        $paidAmount = PayrollDetailsModel::whereIn('payroll_id', $paidPayroll)->sum('final_salary');
+        // Per-person payments: sum the frozen paid_amount of every paid row.
+        $paidAmount = $payrolls->sum(fn ($p) => $p->details->where('is_paid', true)->sum('paid_amount'));
         $pendingApproval = $payrolls->where('is_paid', 0)->count();
         $avgPerCrew = 0;
 
@@ -30,10 +29,18 @@ class PayrollDataTable extends DataTables
             ->addIndexColumn()
             ->addColumn('year', fn ($row) => $row->year ?? '-')
             ->addColumn('month', fn ($row) => $row->month ?? '-')
-            ->addColumn('is_paid', fn ($row) => $row->is_paid == 1
-                ? '<span class="badge bg-success">مدفوعة</span>'
-                : '<span class="badge bg-warning">قيد التدقيق</span>'
-            )
+            ->addColumn('is_paid', function ($row) {
+                $total = $row->details->count();
+                $paid = $row->details->where('is_paid', true)->count();
+                if ($total > 0 && $paid === $total) {
+                    return '<span class="badge bg-success">مدفوعة</span>';
+                }
+                if ($paid > 0) {
+                    return '<span class="badge bg-info">مدفوعة جزئياً ('.$paid.'/'.$total.')</span>';
+                }
+
+                return '<span class="badge bg-warning">قيد التدقيق</span>';
+            })
             ->addColumn('status', fn ($row) => $row->status == 'approved'
                 ? '<span class="badge bg-success">معتمدة</span>'
                 : '<span class="badge bg-warning">مسودة</span>'

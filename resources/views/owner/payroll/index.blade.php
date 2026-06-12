@@ -269,13 +269,16 @@
                             if (!data) return '-';
                             var editUrl = '{{ url('owner/payrolls') }}/' + data + '/edit';
                             var printUrl = '{{ url('owner/payrolls') }}/' + data + '/print';
-                            var editTitle = {!! json_encode(__('actions.edit')) !!};
-                            var printTitle = {!! json_encode(__('actions.print')) !!};
-                            var deleteTitle = {!! json_encode(__('actions.delete')) !!};
+                            var editTitle = {!! json_encode(__('owner.actions.edit')) !!};
+                            var printTitle = {!! json_encode(__('owner.actions.print')) !!};
+                            var deleteTitle = {!! json_encode(__('owner.actions.delete')) !!};
                             var html = '';
                             html += '<a href="' + editUrl +
                                 '" class="btn btn-outline-primary btn-sm me-1" title="' +
                                 editTitle + '"><i class="bi bi-pencil"></i></a>';
+                            html += '<a href="' + printUrl +
+                                '" target="_blank" class="btn btn-outline-info btn-sm me-1" title="' +
+                                printTitle + '"><i class="bi bi-printer"></i></a>';
                             html += '<button type="button" onclick="deleteRecord(' + data +
                                 ')" class="btn btn-outline-danger btn-sm me-1" title="' +
                                 deleteTitle + '"><i class="bi bi-trash"></i></button>';

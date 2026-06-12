@@ -21,7 +21,10 @@ use Illuminate\Support\Facades\DB;
  */
 class MonthClosingService
 {
-    public function __construct(private MonthlyFinancialsService $financials) {}
+    public function __construct(
+        private MonthlyFinancialsService $financials,
+        private PayrollService $payroll,
+    ) {}
 
     /**
      * Build (but do not persist) the distribution for a month.
@@ -145,7 +148,11 @@ class MonthClosingService
      */
     public function reopen(MonthClosing $closing): void
     {
-        if ($closing->dues()->where('paid_amount', '>', 0)->exists()) {
+        $linkedPayments = array_sum(
+            $this->payroll->monthlyPercentagePaidByUser($closing->owner_id, $closing->year, $closing->month)
+        );
+
+        if ($linkedPayments > 0 || $closing->dues()->where('paid_amount', '>', 0)->exists()) {
             throw new \DomainException(__('owner.month_closing.errors.payments_exist'));
         }
 
