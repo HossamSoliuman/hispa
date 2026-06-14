@@ -95,7 +95,7 @@
             ]
         },
         options: {
-            responsive: true,
+            responsive: false, scrollX: true,
             interaction: {
                 mode: 'index',
                 intersect: false,

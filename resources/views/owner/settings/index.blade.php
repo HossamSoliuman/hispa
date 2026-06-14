@@ -345,7 +345,7 @@
                         searchable: false
                     },
                 ],
-                responsive: true
+                responsive: false, scrollX: true
             });
 
             $(document).on('click', '.addSubBtn', function() {
@@ -1048,7 +1048,7 @@
                 { data: 'status' },
                 { data: 'action', orderable: false, searchable: false },
             ],
-            responsive: true
+            responsive: false, scrollX: true
         });
 
         $(document).on('click', '.addUnitBtn', function() {

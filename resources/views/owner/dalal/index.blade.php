@@ -567,7 +567,7 @@
                     { data: 'payment_status', name: 'payment_status', orderable: false, searchable: false, defaultContent: '' },
                     { data: 'action', name: 'action', orderable: false, searchable: false, defaultContent: '' },
                 ],
-                responsive:true,
+                responsive: false, scrollX: true,
 
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'

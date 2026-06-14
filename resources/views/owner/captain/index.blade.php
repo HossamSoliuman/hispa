@@ -268,7 +268,7 @@
 
                     {data: 'action', name: 'action', orderable: true, searchable: false},
                 ],
-                responsive:true,
+                responsive: false, scrollX: true,
 
                 buttons: [
                     // 'copy', 'excel', 'pdf'

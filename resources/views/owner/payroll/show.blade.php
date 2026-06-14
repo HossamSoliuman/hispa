@@ -113,7 +113,7 @@
                         }]
                     },
                     options: {
-                        responsive: true,
+                        responsive: false, scrollX: true,
                         maintainAspectRatio: false, // fits smaller containers
                         plugins: {
                             legend: { display: false },

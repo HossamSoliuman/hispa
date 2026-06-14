@@ -278,7 +278,7 @@
                     //     className: 'btn btn-outline-primary btn-sm'
                     // }
                 ],
-                responsive: true
+                responsive: false, scrollX: true
             });
             $('#filterBtn').on('click', function () {
                 table.ajax.reload();

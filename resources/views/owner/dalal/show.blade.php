@@ -307,7 +307,7 @@
                     { data: 'payments', name: 'payments', orderable: false, searchable: false },
                     { data: 'actions', name: 'actions', orderable: false, searchable: false }
                 ],
-                responsive: true
+                responsive: false, scrollX: true
             });
         });
 

@@ -193,7 +193,7 @@
                     { data: 'actions', name: 'actions', orderable: false, searchable: false }
                 ],
                 order: [[10, 'desc']], // Sort by sent_date descending
-                responsive: true
+                responsive: false, scrollX: true
             });
 
             // Search button

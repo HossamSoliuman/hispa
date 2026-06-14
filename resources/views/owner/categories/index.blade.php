@@ -195,7 +195,7 @@
                         searchable: false
                     },
                 ],
-                responsive: true
+                responsive: false, scrollX: true
             });
 
             $(document).on('click', '.addSubBtn', function() {

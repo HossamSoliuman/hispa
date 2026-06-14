@@ -419,7 +419,7 @@
                         searchable: false
                     },
                 ],
-                responsive: true,
+                responsive: false, scrollX: true,
 
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
@@ -499,7 +499,7 @@
                         title: '{{ __('owner.generated.item_74b996') }}'
                     }
                 ],
-                responsive: true,
+                responsive: false, scrollX: true,
 
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
@@ -566,7 +566,7 @@
                         }]
                     },
                     options: {
-                        responsive: true,
+                        responsive: false, scrollX: true,
                         maintainAspectRatio: false,
                         scales: {
                             y: {
@@ -622,7 +622,7 @@
                         ]
                     },
                     options: {
-                        responsive: true,
+                        responsive: false, scrollX: true,
                         maintainAspectRatio: false,
                         interaction: {
                             mode: 'index',

@@ -151,7 +151,7 @@
                     className: 'text-center',
                 },
             ],
-            responsive: true,
+            responsive: false, scrollX: true,
 
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print'

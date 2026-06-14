@@ -455,7 +455,7 @@
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: false, scrollX: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
@@ -497,7 +497,7 @@
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: false, scrollX: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {

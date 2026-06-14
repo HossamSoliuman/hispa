@@ -337,7 +337,7 @@
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
-                responsive: true
+                responsive: false, scrollX: true
             });
 
         });

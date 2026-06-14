@@ -347,7 +347,7 @@
                         searchable: false,
                     }
                 ],
-                responsive: true,
+                responsive: false, scrollX: true,
 
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'

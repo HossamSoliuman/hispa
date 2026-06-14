@@ -285,15 +285,18 @@
             border-radius: 5px !important;
         }
 
-        /* ── Mobile: keep wide tables inside their own scroll area instead of
-              stretching the whole page horizontally ── */
-        @media (max-width: 767.98px) {
-            .table-responsive,
-            .dataTables_wrapper,
-            div.dt-container {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
+        /* ── Keep wide tables inside their own horizontal scroll area at every
+              screen size, instead of stretching/clipping the page ── */
+        .table-responsive,
+        .dataTables_wrapper,
+        div.dt-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* DataTables sometimes constrains its scroll body; let the wrapper own it */
+        .dataTables_wrapper .dataTables_scroll,
+        .dt-container .dt-scroll {
+            overflow-x: auto;
         }
     </style>
 
