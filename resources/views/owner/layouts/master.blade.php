@@ -284,6 +284,17 @@
         .btn-border-radius {
             border-radius: 5px !important;
         }
+
+        /* ── Mobile: keep wide tables inside their own scroll area instead of
+              stretching the whole page horizontally ── */
+        @media (max-width: 767.98px) {
+            .table-responsive,
+            .dataTables_wrapper,
+            div.dt-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
     </style>
 
     {{-- ── Global UI overrides: HUD card corner-brackets + slimmer sidebar ── --}}
@@ -335,17 +346,21 @@
         .app-sidebar {
             width: var(--app-sidebar-w) !important;
         }
-        .app-content {
-            margin-right: var(--app-sidebar-w);
-        }
-        .app-sidebar-toggled .app-content {
-            margin-right: var(--app-sidebar-w);
-        }
-        .app-footer {
-            margin-right: calc(var(--app-sidebar-w) + 2rem);
-        }
-        .app-sidebar-toggled .app-footer {
-            margin-right: calc(var(--app-sidebar-w) + 2rem);
+        /* Only offset content for the sidebar on desktop. On mobile (<768px) the
+           sidebar is off-canvas, so the theme's own margin reset must win. */
+        @media (min-width: 768px) {
+            .app-content {
+                margin-right: var(--app-sidebar-w);
+            }
+            .app-sidebar-toggled .app-content {
+                margin-right: var(--app-sidebar-w);
+            }
+            .app-footer {
+                margin-right: calc(var(--app-sidebar-w) + 2rem);
+            }
+            .app-sidebar-toggled .app-footer {
+                margin-right: calc(var(--app-sidebar-w) + 2rem);
+            }
         }
     </style>
 </head>
@@ -462,6 +477,23 @@
             });
         </script>
     @endif
+
+    <script>
+        /* Auto-wrap any table not already inside a scroll container so it scrolls
+           horizontally on small screens instead of overflowing the page. Runs on
+           'load' so DataTables (initialised on DOM-ready) are already wrapped. */
+        window.addEventListener('load', function() {
+            document.querySelectorAll('#content table').forEach(function(table) {
+                if (table.closest('.table-responsive, .dataTables_wrapper, .dt-container, .dataTables_scroll')) {
+                    return;
+                }
+                var wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            });
+        });
+    </script>
 
     <script>
         /* Auto-inject HUD corner brackets into every .card that doesn't have them */
