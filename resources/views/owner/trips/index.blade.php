@@ -180,12 +180,18 @@
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">{{ __('owner.trips.start_date') }} <span class="text-danger">*</span></label>
-                                <input type="datetime-local" name="start_date" value="{{ old('start_date', now()->format('Y-m-d\TH:i')) }}" class="form-control" required>
+                                <input type="datetime-local" name="start_date" id="trip_start_date" value="{{ old('start_date', now()->format('Y-m-d\TH:i')) }}" class="form-control" required>
                                 @error('start_date') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ __('owner.trips.duration_days') }}</label>
+                                <input type="number" name="duration" id="trip_duration" min="1" step="1" value="{{ old('duration', 1) }}" class="form-control" placeholder="{{ __('owner.trips.duration_days') }}">
+                                <small class="text-muted">{{ __('owner.trips.duration_hint') }}</small>
+                                @error('duration') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label">{{ __('owner.trips.captain_name') }} <span class="text-danger">*</span></label>
                                 <select name="captain_id" id="trip_captain_id" class="form-control" required>
                                     <option value="">{{ __('owner.actions.choose') }}</option>
@@ -195,7 +201,7 @@
                                 </select>
                                 @error('captain_id') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">{{ __('owner.trips.boat_name') }} <span class="text-danger">*</span></label>
                                 <input type="text" name="boat_name" id="trip_boat_name" class="form-control" readonly value="{{ old('boat_name') }}" placeholder="{{ __('owner.trips.boat_name') }}">
                                 <input type="hidden" name="boat_id" id="trip_boat_id" value="{{ old('boat_id') }}">
@@ -435,6 +441,89 @@
                     if (result.isConfirmed) { doTransition(); }
                 });
             }
+        }
+
+        // Finish a trip: prompt for the actual end date and show how it compares to the planned date.
+        function finishTrip(tripId, plannedEnd) {
+            const L = @json(__('owner.trips.finish'));
+
+            function toLocalInput(d) {
+                const pad = (n) => String(n).padStart(2, '0');
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+                    'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+
+            function humanizeDiff(ms) {
+                const totalMinutes = Math.round(ms / 60000);
+                const days = Math.floor(totalMinutes / 1440);
+                const hours = Math.floor((totalMinutes % 1440) / 60);
+                const parts = [];
+                if (days > 0) { parts.push(days + ' ' + (days === 1 ? L.day : L.days)); }
+                if (hours > 0) { parts.push(hours + ' ' + (hours === 1 ? L.hour : L.hours)); }
+                if (parts.length === 0) { return L.less_than_hour; }
+                return parts.join(' ' + L.and + ' ');
+            }
+
+            const nowVal = toLocalInput(new Date());
+            const plannedRow = plannedEnd ?
+                '<div class="mb-2"><strong>' + L.planned_end + ':</strong> ' + plannedEnd.replace('T', ' ') + '</div>' :
+                '<div class="mb-2 text-muted">' + L.no_planned + '</div>';
+
+            Swal.fire({
+                title: L.title,
+                html: '<div class="text-start">' + plannedRow +
+                    '<label class="form-label d-block">' + L.actual_end_label + '</label>' +
+                    '<input type="datetime-local" id="actual_end_input" class="form-control" value="' + nowVal + '">' +
+                    '<div id="finish_delay" class="mt-2 fw-bold"></div></div>',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                confirmButtonText: L.confirm,
+                cancelButtonText: '{{ __('owner.swal.cancel') }}',
+                didOpen: () => {
+                    const input = document.getElementById('actual_end_input');
+                    const indicator = document.getElementById('finish_delay');
+                    const update = () => {
+                        if (!plannedEnd || !input.value) { indicator.textContent = ''; return; }
+                        const diff = new Date(input.value) - new Date(plannedEnd);
+                        if (Math.abs(diff) < 60000) {
+                            indicator.style.color = '#198754';
+                            indicator.textContent = L.on_time;
+                        } else if (diff < 0) {
+                            indicator.style.color = '#198754';
+                            indicator.textContent = L.ahead.replace(':duration', humanizeDiff(-diff));
+                        } else {
+                            indicator.style.color = '#dc3545';
+                            indicator.textContent = L.delayed.replace(':duration', humanizeDiff(diff));
+                        }
+                    };
+                    input.addEventListener('input', update);
+                    update();
+                },
+                preConfirm: () => {
+                    const val = document.getElementById('actual_end_input').value;
+                    if (!val) { Swal.showValidationMessage(L.required); return false; }
+                    return val;
+                }
+            }).then((result) => {
+                if (!result.isConfirmed) { return; }
+                $.ajax({
+                    url: "{{ route('owner.trips.transition', ['trip' => '__ID__']) }}".replace('__ID__', tripId),
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        to: {{ \App\Enums\TripStatus::Finished->value }},
+                        actual_end_date: result.value
+                    },
+                    success: function(response) {
+                        Swal.fire('{{ __('owner.swal.success_title') }}', response.message, 'success');
+                        $('#datatableDefault').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        let message = xhr.responseJSON?.message || '{{ __('owner.swal.unexpected_error') }}';
+                        Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                    }
+                });
+            });
         }
     </script>
 @endsection

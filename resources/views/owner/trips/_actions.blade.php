@@ -15,13 +15,24 @@
             $label = $trip->status->transitionLabelTo($next);
             $btnClass = $isCancelAction ? 'btn-outline-danger' : 'btn-success';
             $btnIcon = $isCancelAction ? 'bi-x-circle' : 'bi-arrow-right-circle';
+            $isFinishAction = $next === TripStatus::Finished;
+            $plannedEnd = $trip->end_date ? \Illuminate\Support\Carbon::parse($trip->end_date)->format('Y-m-d\TH:i') : '';
         @endphp
-        <button type="button"
-                class="btn btn-sm {{ $btnClass }}"
-                onclick="tripTransition({{ $trip->id }}, {{ $next->value }}, {{ $isCancelAction ? 'true' : 'false' }})">
-            <i class="bi {{ $btnIcon }}"></i>
-            <span>{{ $label }}</span>
-        </button>
+        @if ($isFinishAction)
+            <button type="button"
+                    class="btn btn-sm btn-success"
+                    onclick="finishTrip({{ $trip->id }}, '{{ $plannedEnd }}')">
+                <i class="bi bi-flag-fill"></i>
+                <span>{{ $label }}</span>
+            </button>
+        @else
+            <button type="button"
+                    class="btn btn-sm {{ $btnClass }}"
+                    onclick="tripTransition({{ $trip->id }}, {{ $next->value }}, {{ $isCancelAction ? 'true' : 'false' }})">
+                <i class="bi {{ $btnIcon }}"></i>
+                <span>{{ $label }}</span>
+            </button>
+        @endif
     @endforeach
 
     {{-- Add Catch (Finished, no catch yet) --}}
@@ -51,10 +62,10 @@
         </a>
     @endif
 
-    {{-- Edit trip (only when New) --}}
-    @if ($trip->status === TripStatus::New)
+    {{-- Edit trip (any non-terminal trip; allows updating the end date and other details) --}}
+    @if (! $trip->status->isTerminal())
         <a href="{{ route('owner.trips.edit', $trip->id) }}"
-           class="btn btn-sm btn-outline-secondary" title="{{ __('owner.actions.edit') }}">
+           class="btn btn-sm btn-outline-secondary" title="{{ __('owner.trips.edit_trip') }}">
             <i class="bi bi-pencil"></i>
         </a>
     @endif

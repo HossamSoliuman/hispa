@@ -111,20 +111,19 @@ class PayrollService
             ->get();
 
         foreach ($users as $user) {
-            if ($user->salary_type === 'salary') {
-                $base_salary = 0;
-                $percentage = 0;
-                $sales_amount = 0;
-                $final_salary = $base_salary = $user->salary_amount;
-                $payrollDetail = PayrollDetailsModel::create([
-                    'payroll_id' => $payroll->id,
-                    'user_id' => $user->id,
-                    'base_salary' => $base_salary,
-                    'percentage' => $percentage,
-                    'sales_amount' => $sales_amount,
-                    'final_salary' => $final_salary,
-                ]);
+            if ($user->salary_type !== 'salary') {
+                continue;
             }
+
+            $base_salary = (float) $user->salary_amount;
+            PayrollDetailsModel::create([
+                'payroll_id' => $payroll->id,
+                'user_id' => $user->id,
+                'base_salary' => $base_salary,
+                'percentage' => 0,
+                'sales_amount' => 0,
+                'final_salary' => $base_salary,
+            ]);
         }
 
         return PayrollModel::with('details', 'details.user')->find($payroll->id);

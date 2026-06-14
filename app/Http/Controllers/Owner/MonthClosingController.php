@@ -73,6 +73,7 @@ class MonthClosingController extends Controller
         $monthClosing->load('dues');
         $this->linkPayrollPayments($monthClosing);
 
+        // return $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month);
         return view('owner.month_closing.show', [
             'closing' => $monthClosing,
             'payrollSummary' => $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month),
@@ -105,6 +106,17 @@ class MonthClosingController extends Controller
 
         return redirect()->route('owner.month-closing.index')
             ->with('success', __('owner.month_closing.messages.reopened_success'));
+    }
+
+    public function destroy(MonthClosing $monthClosing)
+    {
+        $this->authorizeOwner($monthClosing);
+
+        $monthClosing->dues()->delete();
+        $monthClosing->delete();
+
+        return redirect()->route('owner.month-closing.index')
+            ->with('success', __('owner.month_closing.messages.deleted_success'));
     }
 
     /**

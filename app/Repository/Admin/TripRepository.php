@@ -71,6 +71,12 @@ class TripRepository implements CRUD
             $data['status'] = 1;
             $data['license_number'] = $request->license_number;
             $data['start_date'] = $request->start_date;
+            if ($request->filled('duration')) {
+                $data['end_date'] = \Illuminate\Support\Carbon::parse($request->start_date)
+                    ->addDays((int) $request->duration - 1);
+            } elseif ($request->filled('end_date')) {
+                $data['end_date'] = $request->end_date;
+            }
             $data['owner_id'] = $request->owner_id;
             $data['captain_id'] = $request->captain_id;
             $data['notes'] = $request->notes;

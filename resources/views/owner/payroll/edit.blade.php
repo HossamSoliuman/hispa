@@ -97,7 +97,12 @@
                 </ul>
                 @if ($payroll->type == 'salary')
                     <div id="fixed" class="tab-content">
-                        <div class="row mb-3 mt-3  px-2">
+                        @php
+                            $salaryRows = ($payroll->details ?? collect())->filter(fn($d) => $d->user->salary_type === 'salary' && $d->user->role !== 'captain');
+                            $captainRows = ($payroll->details ?? collect())->filter(fn($d) => $d->user->role === 'captain' && $d->user->salary_type === 'salary');
+                        @endphp
+
+                        <div class="row mb-3 mt-3 px-2">
                             <h5>{{ __('owner.generated.fixed_salary_employees') }}</h5>
                             <table class="table table-bordered mt-3">
                                 <thead>
@@ -112,48 +117,81 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($payroll->details ?? [] as $i => $d)
-                                        @if ($d->user->salary_type == 'salary')
-                                            <tr data-detail-id="{{ $d->id }}">
-                                                <td>
-                                                    {{ $d->user->name }}
-                                                    <input type="hidden" name="details[{{ $looop }}][id]"
-                                                        value="{{ $d->id }}">
-                                                    <input type="hidden" name="details[{{ $looop }}][user_id]"
-                                                        value="{{ $d->user_id }}">
-                                                </td>
-                                                <input type="hidden" class="form-control base"
-                                                    value="{{ $d->base_salary }}" readonly>
-                                                <td>{{ $d->base_salary }}</td>
-                                                <td><input type="number" name="details[{{ $looop }}][increase]"
-                                                        class="form-control increase" value="{{ $d->increase }}"
-                                                        @readonly($d->is_paid)></td>
-                                                <td><input type="number" name="details[{{ $looop }}][deduction]"
-                                                        class="form-control deduction" value="{{ $d->deduction }}"
-                                                        @readonly($d->is_paid)></td>
-                                                <td><input type="text" name="details[{{ $looop }}][note]"
-                                                        class="form-control note" value="{{ $d->note }}"
-                                                        @readonly($d->is_paid)></td>
-                                                <td>
-                                                    <span class="text-black fw-bold net_salary">
-                                                        {{ $d->final_salary }}
-                                                    </span>
-                                                </td>
-                                                <td class="payment-cell">
-                                                    @include('owner.payroll.partials.pay-cell', ['d' => $d])
-                                                </td>
-                                            </tr>
-                                            @php
-                                                $looop++;
-                                            @endphp
-                                        @endif
+                                    @foreach ($salaryRows as $d)
+                                        <tr data-detail-id="{{ $d->id }}">
+                                            <td>
+                                                {{ $d->user->name }}
+                                                <input type="hidden" name="details[{{ $looop }}][id]" value="{{ $d->id }}">
+                                                <input type="hidden" name="details[{{ $looop }}][user_id]" value="{{ $d->user_id }}">
+                                            </td>
+                                            <input type="hidden" class="form-control base" value="{{ $d->base_salary }}" readonly>
+                                            <td>{{ $d->base_salary }}</td>
+                                            <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
+                                            <td><input type="number" name="details[{{ $looop }}][deduction]" class="form-control deduction" value="{{ $d->deduction }}" @readonly($d->is_paid)></td>
+                                            <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
+                                            <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
+                                            <td class="payment-cell">
+                                                @include('owner.payroll.partials.pay-cell', ['d' => $d])
+                                            </td>
+                                        </tr>
+                                        @php $looop++; @endphp
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
+
+                        @if ($captainRows->isNotEmpty())
+                            <div class="row mb-3 mt-3 px-2">
+                                <h5>{{ __('owner.captain.title') }}</h5>
+                                <table class="table table-bordered mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('owner.payrolls.show.employee') }}</th>
+                                            <th>{{ __('owner.generated.basic_salary') }}</th>
+                                            <th>{{ __('owner.generated.increase') }}</th>
+                                            <th>{{ __('owner.generated.deduction') }}</th>
+                                            <th>{{ __('owner.expenses.show.notes') }}</th>
+                                            <th>{{ __('owner.generated.net') }}</th>
+                                            <th>{{ __('owner.payrolls.payment_col') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($captainRows as $d)
+                                            @php
+                                                $captainEffectiveBase = $d->user->salary_type === 'salary'
+                                                    ? (float) $d->base_salary
+                                                    : ((int) $d->captins_count > 0 ? round((float) $d->captins_amount / (int) $d->captins_count, 2) : (float) $d->final_salary);
+                                            @endphp
+                                            <tr data-detail-id="{{ $d->id }}">
+                                                <td>
+                                                    {{ $d->user->name }}
+                                                    <input type="hidden" name="details[{{ $looop }}][id]" value="{{ $d->id }}">
+                                                    <input type="hidden" name="details[{{ $looop }}][user_id]" value="{{ $d->user_id }}">
+                                                </td>
+                                                <input type="hidden" class="form-control base" value="{{ $captainEffectiveBase }}" readonly>
+                                                <td>{{ $captainEffectiveBase }}</td>
+                                                <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
+                                                <td><input type="number" name="details[{{ $looop }}][deduction]" class="form-control deduction" value="{{ $d->deduction }}" @readonly($d->is_paid)></td>
+                                                <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
+                                                <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
+                                                <td class="payment-cell">
+                                                    @include('owner.payroll.partials.pay-cell', ['d' => $d])
+                                                </td>
+                                            </tr>
+                                            @php $looop++; @endphp
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                     </div>
                 @else
                     <div id="percentage" class="tab-content">
+                        @php
+                            $percentageRows = ($payroll->details ?? collect())->filter(fn($d) => $d->user->salary_type === 'percentage' && $d->user->role !== 'captain');
+                            $captainPercentageRows = ($payroll->details ?? collect())->filter(fn($d) => $d->user->role === 'captain' && $d->user->salary_type === 'percentage');
+                        @endphp
+
                         <div class="row mb-3 mt-3 px-2">
                             <h5>{{ __('owner.generated.commission_employees') }}</h5>
                             <table class="table table-bordered mt-3">
@@ -172,8 +210,57 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($payroll->details ?? [] as $i => $d)
-                                        @if ($d->user->salary_type == 'percentage')
+                                    @foreach ($percentageRows as $d)
+                                        @php
+                                            $perHead = (int) $d->captins_count > 0
+                                                ? round((float) $d->captins_amount / (int) $d->captins_count, 2)
+                                                : 0;
+                                        @endphp
+                                        <tr data-detail-id="{{ $d->id }}">
+                                            <td>
+                                                {{ $d->user->name }}
+                                                <input type="hidden" name="details[{{ $looop }}][id]" value="{{ $d->id }}">
+                                                <input type="hidden" name="details[{{ $looop }}][user_id]" value="{{ $d->user_id }}">
+                                            </td>
+                                            <td>{{ $d->user->boat->name ?? '' }}</td>
+                                            <input type="hidden" class="form-control base" value="{{ $perHead }}" readonly>
+                                            <td>{{ (float) $d->captins_amount }}</td>
+                                            <td>{{ (int) $d->captins_count }}</td>
+                                            <td>{{ $perHead }}</td>
+                                            <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
+                                            <td><input type="number" name="details[{{ $looop }}][deduction]" class="form-control deduction" value="{{ $d->deduction }}" @readonly($d->is_paid)></td>
+                                            <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
+                                            <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
+                                            <td class="payment-cell">
+                                                @include('owner.payroll.partials.pay-cell', ['d' => $d])
+                                            </td>
+                                        </tr>
+                                        @php $looop++; @endphp
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if ($captainPercentageRows->isNotEmpty())
+                            <div class="row mb-3 mt-3 px-2">
+                                <h5>{{ __('owner.captain.title') }}</h5>
+                                <table class="table table-bordered mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('owner.payrolls.show.employee') }}</th>
+                                            <th>{{ __('owner.catch.filters.boat') }}</th>
+                                            <th>{{ __('owner.generated.total_fishermen_profits') }}</th>
+                                            <th>{{ __('owner.generated.fishermen_count') }}</th>
+                                            <th>{{ __('owner.generated.fisherman_percentage') }}</th>
+                                            <th>{{ __('owner.generated.increase') }}</th>
+                                            <th>{{ __('owner.generated.deduction') }}</th>
+                                            <th>{{ __('owner.expenses.show.notes') }}</th>
+                                            <th>{{ __('owner.generated.net') }}</th>
+                                            <th>{{ __('owner.payrolls.payment_col') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($captainPercentageRows as $d)
                                             @php
                                                 $perHead = (int) $d->captins_count > 0
                                                     ? round((float) $d->captins_amount / (int) $d->captins_count, 2)
@@ -182,43 +269,28 @@
                                             <tr data-detail-id="{{ $d->id }}">
                                                 <td>
                                                     {{ $d->user->name }}
-                                                    <input type="hidden" name="details[{{ $looop }}][id]"
-                                                        value="{{ $d->id }}">
-                                                    <input type="hidden" name="details[{{ $looop }}][user_id]"
-                                                        value="{{ $d->user_id }}">
+                                                    <input type="hidden" name="details[{{ $looop }}][id]" value="{{ $d->id }}">
+                                                    <input type="hidden" name="details[{{ $looop }}][user_id]" value="{{ $d->user_id }}">
                                                 </td>
                                                 <td>{{ $d->user->boat->name ?? '' }}</td>
-                                                <input type="hidden" class="form-control base"
-                                                    value="{{ $perHead }}" readonly>
+                                                <input type="hidden" class="form-control base" value="{{ $perHead }}" readonly>
                                                 <td>{{ (float) $d->captins_amount }}</td>
                                                 <td>{{ (int) $d->captins_count }}</td>
                                                 <td>{{ $perHead }}</td>
-                                                <td><input type="number" name="details[{{ $looop }}][increase]"
-                                                        class="form-control increase" value="{{ $d->increase }}"
-                                                        @readonly($d->is_paid)></td>
-                                                <td><input type="number" name="details[{{ $looop }}][deduction]"
-                                                        class="form-control deduction" value="{{ $d->deduction }}"
-                                                        @readonly($d->is_paid)></td>
-                                                <td><input type="text" name="details[{{ $looop }}][note]"
-                                                        class="form-control note" value="{{ $d->note }}"
-                                                        @readonly($d->is_paid)></td>
-                                                <td>
-                                                    <span class="text-black fw-bold net_salary">
-                                                        {{ $d->final_salary }}
-                                                    </span>
-                                                </td>
+                                                <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
+                                                <td><input type="number" name="details[{{ $looop }}][deduction]" class="form-control deduction" value="{{ $d->deduction }}" @readonly($d->is_paid)></td>
+                                                <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
+                                                <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
                                                 <td class="payment-cell">
                                                     @include('owner.payroll.partials.pay-cell', ['d' => $d])
                                                 </td>
                                             </tr>
-                                            @php
-                                                $looop++;
-                                            @endphp
-                                        @endif
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            @php $looop++; @endphp
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                     </div>
                 @endif
 

@@ -5,11 +5,8 @@ namespace App\Http\Controllers\Owner;
 use App\DataTable\Owner\TripDataTable;
 use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Owner\BoatRequest;
 use App\Http\Requests\Owner\TripRequest;
 use App\Http\Requests\Owner\TripTransitionRequest;
-use App\Models\Boat;
-use App\Models\BoatType;
 use App\Models\Region;
 use App\Models\Trip;
 use App\Models\User;
@@ -121,18 +118,42 @@ class TripController extends Controller
 
     public function edit($id)
     {
-        $regions = Region::Active()->orderByDesc('id')->get();
-        $data = Boat::find($id);
-        $boat_types = BoatType::Active()->get();
+        $trip = Trip::where('owner_id', auth()->id())->find($id);
 
-        return view('owner.boats.edit', compact('regions', 'data', 'boat_types'));
+        if (! $trip) {
+            return redirect()->route('owner.trips.index')->with(['error' => __('owner.swal.error')]);
+        }
+
+        $captains = User::Active()->CaptainRole()
+            ->where('owner_id', auth()->id())
+            ->select('id', 'name')
+            ->get();
+
+        return view('owner.trips.edit', ['trip' => $trip, 'captains' => $captains]);
     }
 
-    public function update(BoatRequest $request, $id)
+    public function update(TripRequest $request, $id)
     {
-        $request['guard'] = 'owner';
+        $trip = Trip::where('owner_id', auth()->id())->find($id);
 
-        return $this->rep->updateData($request, $id);
+        if (! $trip) {
+            return redirect()->route('owner.trips.index')->with(['error' => __('owner.swal.error')]);
+        }
+
+        $data = [
+            'name' => $request->name,
+            'name_en' => $request->name_en,
+            'license_number' => $request->license_number,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'notes' => $request->notes,
+            'updated_by' => auth()->user()->name ?? 'Owner',
+        ];
+        $data = fillBoatAndCrewData($data, $request->boat_id, $request->captain_id);
+
+        $trip->update($data);
+
+        return redirect()->route('owner.trips.index')->with('success', __('owner.swal.success'));
     }
 
     public function destroy($id)
@@ -147,7 +168,7 @@ class TripController extends Controller
         }
 
         try {
-            $service->transition($trip, TripStatus::from($request->to), $request->cancel_reason);
+            $service->transition($trip, TripStatus::from($request->to), $request->cancel_reason, $request->actual_end_date);
 
             return response()->json(['message' => __('owner.swal.success')]);
         } catch (\DomainException $e) {

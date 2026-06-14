@@ -18,6 +18,7 @@ class TripTransitionRequest extends FormRequest
         return [
             'to' => ['required', 'integer', Rule::in([2, 3, 4, 5, 6, 7, 8])],
             'cancel_reason' => ['nullable', 'string', 'required_if:to,3'],
+            'actual_end_date' => ['nullable', 'date_format:Y-m-d\TH:i'],
         ];
     }
 

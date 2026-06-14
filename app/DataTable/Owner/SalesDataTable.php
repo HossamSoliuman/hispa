@@ -5,6 +5,7 @@ namespace App\DataTable\Owner;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class SalesDataTable extends DataTables
@@ -15,6 +16,10 @@ class SalesDataTable extends DataTables
         if ($request->ajax()) {
             $query = Sale::where('seller_type', 'owner')
                 ->where('seller_id', auth()->user()->getAuthIdentifier())
+                ->whereBetween(DB::raw('DATE(sale_datetime)'), [
+                    now()->startOfMonth()->toDateString(),
+                    now()->endOfMonth()->toDateString(),
+                ])
                 ->with(['details', 'details.unit', 'paymentMethod']);
 
             $countQuery = clone $query;

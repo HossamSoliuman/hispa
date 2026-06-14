@@ -58,7 +58,11 @@ class TripDataTable extends DataTables
                     return $weight > 0 ? $weight : '--';
                 })
                 ->addColumn('start_date', fn (Trip $trip) => $trip->start_date ? Carbon::parse($trip->start_date)->format('H:i:s Y-m-d') : '--')
-                ->addColumn('end_date', fn (Trip $trip) => $trip->end_date ? Carbon::parse($trip->end_date)->format('H:i:s Y-m-d') : null)
+                ->addColumn('end_date', function (Trip $trip) {
+                    $date = $trip->actual_end_datetime ?? $trip->end_date;
+
+                    return $date ? Carbon::parse($date)->format('H:i:s Y-m-d') : null;
+                })
                 ->addColumn('status', function (Trip $trip) {
                     $label = e($trip->status->label());
                     $color = $trip->status->color();

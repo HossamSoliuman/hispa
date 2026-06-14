@@ -295,6 +295,29 @@ return [
         'create' => [
             'title' => 'Add New Trip',
         ],
+        'edit' => [
+            'title' => 'Edit Trip',
+        ],
+        'edit_trip' => 'Edit Trip',
+        'duration_days' => 'Trip Duration (days)',
+        'duration_hint' => 'Number of trip days, sets the return date automatically',
+        'finish' => [
+            'title' => 'End Trip',
+            'planned_end' => 'Planned end date',
+            'no_planned' => 'No planned end date set',
+            'actual_end_label' => 'Actual end date & time',
+            'ahead' => ':duration ahead of the planned date',
+            'delayed' => ':duration behind the planned date',
+            'on_time' => 'Exactly on the planned date',
+            'confirm' => 'Confirm End',
+            'required' => 'Please enter the end date & time',
+            'day' => 'day',
+            'days' => 'days',
+            'hour' => 'hour',
+            'hours' => 'hours',
+            'and' => 'and',
+            'less_than_hour' => 'less than an hour',
+        ],
         'end_trip' => 'End Trip',
         'confirm_end_trip_title' => 'End Trip',
         'confirm_end_trip_text' => 'Are you sure you want to end the trip?',
@@ -1075,6 +1098,8 @@ return [
         'messages' => [
             'closed_success' => 'Month closed and profits distributed successfully.',
             'reopened_success' => 'Month reopened successfully.',
+            'deleted_success' => 'Month closing deleted successfully.',
+            'delete_confirm' => 'Are you sure you want to delete this closing? This action cannot be undone.',
         ],
         'payroll_summary' => [
             'title' => 'Payroll Payments',

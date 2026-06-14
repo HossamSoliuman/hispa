@@ -231,14 +231,15 @@ class DashboardController extends Controller
      */
     private function currentMonthCatch(int $ownerId, string $from, string $to): float
     {
-        $tripIds = Trip::where('owner_id', $ownerId)->pluck('id');
+        $tripIds = Trip::where('owner_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(actual_end_datetime)'), [$from, $to])
+            ->pluck('id');
 
-        $monthCatch = CatchModel::whereIn('trip_id', $tripIds)
-            ->whereBetween(DB::raw('DATE(catch_date)'), [$from, $to]);
+        $catchIds = CatchModel::whereIn('trip_id', $tripIds)->pluck('id');
 
-        $totalWeight = (float) $monthCatch->sum('total_weight');
+        $totalWeight = (float) CatchModel::whereIn('trip_id', $tripIds)->sum('total_weight');
         if ($totalWeight == 0.0) {
-            $totalWeight = (float) CatchDetail::whereIn('catch_id', $monthCatch->pluck('id'))->sum('weight');
+            $totalWeight = (float) CatchDetail::whereIn('catch_id', $catchIds)->sum('weight');
         }
 
         return $totalWeight;

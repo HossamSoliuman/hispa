@@ -123,7 +123,7 @@
                         : number_format($totalCatch, 0) . ' ' . __('owner.units.kg'),
                 'icon' => 'bi bi-basket2-fill',
                 'gradient' => 'linear-gradient(135deg, #2980b9, #3498db)',
-                // 'footer' => __('owner.dashboard.average_price_per_kg', ['price' => number_format($averagePricePerKg, 2)]),
+                'footer' => __('owner.dashboard.this_month'),
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 

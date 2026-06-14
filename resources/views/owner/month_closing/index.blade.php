@@ -79,6 +79,14 @@
                                         <a href="{{ route('owner.month-closing.print', $closing) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                             <i class="fa fa-print"></i>
                                         </a>
+                                        <form method="POST" action="{{ route('owner.month-closing.destroy', $closing) }}"
+                                            onsubmit="return confirm('{{ __('owner.month_closing.messages.delete_confirm') }}')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

@@ -1,13 +1,22 @@
 @extends('owner.layouts.master')
 
-@section('title', __('owner.month_closing.preview_title').' '.sprintf('%02d/%d', $month, $year))
+@php
+    $arabicMonths = [
+        1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+        5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+        9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
+    ];
+    $monthLabel = ($arabicMonths[$month] ?? $month) . ' ' . $year;
+@endphp
+
+@section('title', __('owner.month_closing.preview_title').' '.$monthLabel)
 
 @section('content')
     @php $f = $preview['financials']; @endphp
 
     <div class="d-flex align-items-center mb-3">
         <div>
-            <h2 class="mb-1">{{ __('owner.month_closing.preview_title') }} {{ sprintf('%02d/%d', $month, $year) }}</h2>
+            <h2 class="mb-1">{{ __('owner.month_closing.preview_title') }} {{ $monthLabel }}</h2>
         </div>
         <div class="ms-auto">
             <a href="{{ route('owner.month-closing.index') }}" class="btn btn-outline-secondary">
@@ -102,14 +111,41 @@
     </div>
 
     @unless ($preview['existing'])
-        <form method="POST" action="{{ route('owner.month-closing.close') }}"
-            onsubmit="return confirm('{{ __('owner.month_closing.confirm_close') }}')">
+        <form method="POST" action="{{ route('owner.month-closing.close') }}" id="closeMonthForm">
             @csrf
             <input type="hidden" name="year" value="{{ $year }}">
             <input type="hidden" name="month" value="{{ $month }}">
-            <button type="submit" class="btn btn-success btn-lg">
+            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#closeMonthModal">
                 <i class="fa fa-lock me-2"></i>{{ __('owner.month_closing.close_btn') }}
             </button>
         </form>
+
+        <div class="modal fade" id="closeMonthModal" tabindex="-1" aria-labelledby="closeMonthModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="closeMonthModalLabel">
+                            <i class="fa fa-lock me-2 text-success"></i>{{ __('owner.month_closing.close_btn') }} — {{ $monthLabel }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('owner.generated.btn_close_modal') }}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">{{ __('owner.month_closing.confirm_close') }}</p>
+                        <div class="alert alert-warning mb-0 py-2 small">
+                            <i class="fa fa-exclamation-triangle me-1"></i>
+                            {{ __('owner.month_closing.preview_title') }}: <strong>{{ $monthLabel }}</strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            {{ __('owner.swal.cancel') }}
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="document.getElementById('closeMonthForm').submit()">
+                            <i class="fa fa-lock me-2"></i>{{ __('owner.swal.confirm_proceed') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endunless
 @endsection
