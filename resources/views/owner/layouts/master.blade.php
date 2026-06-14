@@ -350,19 +350,20 @@
             width: var(--app-sidebar-w) !important;
         }
         /* Only offset content for the sidebar on desktop. On mobile (<768px) the
-           sidebar is off-canvas, so the theme's own margin reset must win. */
+           sidebar is off-canvas, so the theme's own margin reset must win.
+           Logical properties keep this correct in both RTL and LTR:
+             - inline-start  = the side the sidebar sits on (offset for sidebar)
+             - inline-end    = the opposite side (extra gap to narrow the content) */
         @media (min-width: 768px) {
-            .app-content {
-                margin-right: var(--app-sidebar-w);
-            }
+            .app-content,
             .app-sidebar-toggled .app-content {
-                margin-right: var(--app-sidebar-w);
+                margin-inline-start: var(--app-sidebar-w);
+                margin-inline-end: var(--app-sidebar-w);
             }
-            .app-footer {
-                margin-right: calc(var(--app-sidebar-w) + 2rem);
-            }
+            .app-footer,
             .app-sidebar-toggled .app-footer {
-                margin-right: calc(var(--app-sidebar-w) + 2rem);
+                margin-inline-start: calc(var(--app-sidebar-w) + 2rem);
+                margin-inline-end: calc(var(--app-sidebar-w) + 2rem);
             }
         }
     </style>
