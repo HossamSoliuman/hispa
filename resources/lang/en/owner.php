@@ -1700,6 +1700,7 @@ return [
         'actions' => 'Actions',
         'total_sales' => 'Total Sales Operations',
         'add_sales' => 'Add Sales Invoice',
+        'edit_sales' => 'Edit Sales Invoice',
         'weight' => 'Total Weight',
         'datetime' => 'Date & Time',
         'boat_name' => 'Boat Name',

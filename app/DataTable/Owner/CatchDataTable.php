@@ -76,7 +76,10 @@ class CatchDataTable extends DataTables
                         }
                         $actions = '<a href="'.route('owner.catch.show', $row->catches?->id).'" class="btn btn-sm btn-outline-success">
                                         <i class="bi bi-eye"></i> '.__('owner.catch.view').'
-                                    </a>                                    
+                                    </a>
+                                    <a href="'.route('owner.catch.edit', $row->catches?->id).'" class="btn btn-sm btn-outline-warning mx-1" title="'.__('owner.actions.edit').'">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                     <a href="'.route('owner.printCatchReport', ['id' => $row->catches?->id]).'"  target="_blank" class="btn btn-sm btn-outline-danger" title="طباعه">
                                         <i class="bi bi-printer"></i>
                                     </a>';

@@ -114,7 +114,8 @@ class SalesDataTable extends DataTables
                 })
 
                 ->addColumn('actions', function ($row) {
-                    return '<a href="'.route('owner.sales.show', $row->id).'" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>';
+                    return '<a href="'.route('owner.sales.show', $row->id).'" class="btn btn-sm btn-outline-info" title="'.__('owner.actions.show').'"><i class="bi bi-eye"></i></a>
+                            <a href="'.route('owner.sales.edit', $row->id).'" class="btn btn-sm btn-outline-warning mx-1" title="'.__('owner.actions.edit').'"><i class="bi bi-pencil"></i></a>';
                 })
                 ->with([
                     'total_items' => $totalItems,

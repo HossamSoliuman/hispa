@@ -191,12 +191,194 @@ class SalesController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $sale = Sale::where('seller_type', 'owner')
+            ->where('seller_id', auth()->id())
+            ->with(['details.fish', 'details.unit', 'customer'])
+            ->findOrFail($id);
+
+        $customers = Customer::Active()->get();
+        $paymentMethods = PaymentMethod::active()->get();
+
+        $rows = $sale->details->map(function (SaleDetail $detail) use ($sale) {
+            $stock = FishQuantityStock::where('fish_id', $detail->fish_id)
+                ->where('unit_id', $detail->unit_id)
+                ->where('catch_id', $sale->catch_id ?? 0)
+                ->where('trip_id', $sale->trip_id)
+                ->first();
+
+            return [
+                'fish_id' => $detail->fish_id,
+                'fish_name' => $detail->fish->name ?? $detail->fish_name,
+                'unit_id' => $detail->unit_id,
+                'unit_name' => $detail->unit->name ?? '',
+                'weight' => (float) $detail->weight,
+                'price' => (float) $detail->price_per_kilo,
+                'available' => (float) ($stock->quantity ?? 0) + (float) $detail->weight,
+            ];
+        });
+
+        return view('owner.sales.edit', compact('sale', 'customers', 'paymentMethods', 'rows'));
+    }
+
+    public function update(SalesRequest $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $sale = Sale::where('seller_type', 'owner')
+                ->where('seller_id', auth()->id())
+                ->with('details')
+                ->findOrFail($id);
+
+            $trip = Trip::where('owner_id', auth()->id())->findOrFail($sale->trip_id);
+            $catch = CatchModel::find($sale->catch_id);
+            $customer = Customer::find($request->customer_id);
+
+            foreach ($sale->details as $detail) {
+                $this->restoreStock($sale, $detail->fish_id, $detail->unit_id, (float) $detail->weight);
+            }
+
+            SaleDetail::where('sale_id', $sale->id)->delete();
+
+            $sale->update([
+                'customer_id' => $request->customer_id,
+                'customer_name' => $customer?->name,
+                'payment_method_id' => $request->payment_method_id,
+                'payment_status' => $request->payment_status,
+                'status' => $request->payment_status == 'paid' ? 2 : 1,
+                'sale_datetime' => $request->sale_datetime,
+            ]);
+
+            $totalPrice = 0;
+            $soldRows = 0;
+
+            foreach ($request->fish_id as $index => $fishId) {
+                $weight = (float) ($request->weight[$index] ?? 0);
+                $price = (float) ($request->price_per_kilo[$index] ?? 0);
+                $unitId = $this->normalizeUnitId($request->unit_id[$index] ?? null);
+
+                if ($weight <= 0) {
+                    continue;
+                }
+
+                if ($price <= 0) {
+                    throw new \Exception('يجب إدخال سعر الكيلو للأصناف المباعة');
+                }
+
+                $fishStock = FishQuantityStock::firstOrCreate(
+                    [
+                        'fish_id' => $fishId,
+                        'unit_id' => $unitId,
+                        'catch_id' => $sale->catch_id ?? 0,
+                        'trip_id' => $sale->trip_id,
+                        'boat_id' => $sale->boat_id,
+                    ],
+                    ['quantity' => 0]
+                );
+
+                if ($fishStock->quantity < $weight) {
+                    throw new \Exception('الكمية المطلوبة أكبر من المخزون المتوفر');
+                }
+
+                $fishStock->decrement('quantity', $weight);
+
+                SaleDetail::create([
+                    'sale_id' => $sale->id,
+                    'fish_id' => $fishId,
+                    'unit_id' => $unitId,
+                    'fish_name' => optional(Fish::find($fishId))->scientific_name,
+                    'weight' => $weight,
+                    'price_per_kilo' => $price,
+                    'total_price' => ($price * $weight),
+                ]);
+
+                $this->stampCatchDetailPrice($catch, $fishId, $unitId, $price);
+
+                $totalPrice += ($price * $weight);
+                $soldRows++;
+            }
+
+            if ($soldRows === 0) {
+                throw new \Exception('يجب إدخال وزن صنف واحد على الأقل');
+            }
+
+            $paidAmount = match ($request->payment_status) {
+                'paid' => $totalPrice,
+                'partially_paid' => (float) $request->paid_amount,
+                default => 0,
+            };
+
+            $commissionRate = (float) ($request->commission_rate ?? 0);
+            $laborRate = (float) ($request->labor_rate ?? 0);
+            $commissionAmount = round($totalPrice * $commissionRate / 100, 2);
+            $laborAmount = round($totalPrice * $laborRate / 100, 2);
+            $netOwnerAmount = round($totalPrice - $commissionAmount - $laborAmount, 2);
+
+            $sale->update([
+                'total_price' => $totalPrice,
+                'commission_rate' => $commissionRate,
+                'commission_amount' => $commissionAmount,
+                'labor_rate' => $laborRate,
+                'labor_amount' => $laborAmount,
+                'net_owner_amount' => $netOwnerAmount,
+                'remaining_total' => ($totalPrice - $paidAmount),
+            ]);
+
+            $this->markTripSoldIfCatchDepleted($trip, $catch);
+
+            DB::commit();
+
+            return redirect()
+                ->route('owner.sales.index')
+                ->with('success', 'تم تعديل فاتورة البيع بنجاح');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
     /**
      * Mirror the selling price onto the catch details so the catch/trip
      * reports show the realised price instead of zero. The catch detail's
      * total reflects the full caught weight valued at the latest sale price.
      */
-    private function stampCatchDetailPrice(?CatchModel $catch, int $fishId, int $unitId, float $price): void
+    /**
+     * Normalise an incoming unit identifier. Legacy rows store a null unit, and
+     * the edit form echoes that back as an empty string, so coalesce blanks to
+     * null to keep stock lookups matching the stored records.
+     */
+    private function normalizeUnitId(mixed $unitId): ?int
+    {
+        return filled($unitId) ? (int) $unitId : null;
+    }
+
+    /**
+     * Return a previously sold quantity back to its stock record before the
+     * sale details are recalculated on update.
+     */
+    private function restoreStock(Sale $sale, int $fishId, ?int $unitId, float $weight): void
+    {
+        if ($weight <= 0) {
+            return;
+        }
+
+        FishQuantityStock::firstOrCreate(
+            [
+                'fish_id' => $fishId,
+                'unit_id' => $unitId,
+                'catch_id' => $sale->catch_id ?? 0,
+                'trip_id' => $sale->trip_id,
+                'boat_id' => $sale->boat_id,
+            ],
+            ['quantity' => 0]
+        )->increment('quantity', $weight);
+    }
+
+    private function stampCatchDetailPrice(?CatchModel $catch, int $fishId, ?int $unitId, float $price): void
     {
         if (! $catch) {
             return;
