@@ -167,6 +167,36 @@
         /* card content stays above the arrow overlay */
         .card > *:not(.card-arrow) { position: relative; z-index: 1; }
 
+        /* ── L-brackets on ALL four corners of every card (no markup needed) ── */
+        .card:before,
+        .card .card-arrow {
+            display: none !important;
+        }
+        .card:after {
+            content: "" !important;
+            position: absolute !important;
+            inset: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            border: 0 !important;
+            pointer-events: none !important;
+            z-index: 20 !important;
+            --brk-color: rgba(0, 0, 0, .6);
+            --brk-len: 14px;
+            --brk-th: 2px;
+            background:
+                linear-gradient(var(--brk-color), var(--brk-color)) top left / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) top left / var(--brk-th) var(--brk-len) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) top right / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) top right / var(--brk-th) var(--brk-len) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom left / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom left / var(--brk-th) var(--brk-len) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom right / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom right / var(--brk-th) var(--brk-len) no-repeat !important;
+        }
+
         /* ── section-head utility (usable on any page) ── */
         .hud-section-head {
             display: flex;

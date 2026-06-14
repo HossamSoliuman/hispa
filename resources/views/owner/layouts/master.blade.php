@@ -285,6 +285,69 @@
             border-radius: 5px !important;
         }
     </style>
+
+    {{-- ── Global UI overrides: HUD card corner-brackets + slimmer sidebar ── --}}
+    <style>
+        /* Client HUD card design: square card, thin border, L-brackets on ALL four corners */
+        .card,
+        .hud-stat-card,
+        .hud-card {
+            border-radius: 0 !important;
+        }
+        .card:not(.border-0) {
+            border: 1px solid var(--hud-border, rgba(0, 0, 0, .11)) !important;
+        }
+        /* hide the theme's default inset frame + manual card-arrow (avoid doubling) */
+        .card:before,
+        .card .card-arrow {
+            display: none !important;
+        }
+        /* draw four corner brackets via the card's ::after layer */
+        .card:after {
+            content: "" !important;
+            position: absolute !important;
+            inset: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            border: 0 !important;
+            pointer-events: none !important;
+            z-index: 20 !important;
+            --brk-color: rgba(0, 0, 0, .6);
+            --brk-len: 14px;
+            --brk-th: 2px;
+            background:
+                linear-gradient(var(--brk-color), var(--brk-color)) top left / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) top left / var(--brk-th) var(--brk-len) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) top right / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) top right / var(--brk-th) var(--brk-len) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom left / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom left / var(--brk-th) var(--brk-len) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom right / var(--brk-len) var(--brk-th) no-repeat,
+                linear-gradient(var(--brk-color), var(--brk-color)) bottom right / var(--brk-th) var(--brk-len) no-repeat !important;
+        }
+
+        /* Slimmer sidebar */
+        :root {
+            --app-sidebar-w: 12.5rem;
+        }
+        .app-sidebar {
+            width: var(--app-sidebar-w) !important;
+        }
+        .app-content {
+            margin-right: var(--app-sidebar-w);
+        }
+        .app-sidebar-toggled .app-content {
+            margin-right: var(--app-sidebar-w);
+        }
+        .app-footer {
+            margin-right: calc(var(--app-sidebar-w) + 2rem);
+        }
+        .app-sidebar-toggled .app-footer {
+            margin-right: calc(var(--app-sidebar-w) + 2rem);
+        }
+    </style>
 </head>
 
 <body>
