@@ -89,9 +89,4 @@ class Sale extends Model
     {
         return $this->belongsTo(PaymentMethod::class)->withDefault();
     }
-
-    public function returns()
-    {
-        return $this->hasMany(ReturnModel::class);
-    }
 }

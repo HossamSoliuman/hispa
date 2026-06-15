@@ -186,15 +186,6 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="stat-card expense">
-                                <div class="label">{{ __('owner.profit_loss.return') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['returns'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.net_sales') }}</div>
                                 <div class="value">

@@ -13,7 +13,6 @@ use App\Models\Expense;
 use App\Models\FishQuantityStock;
 use App\Models\Invoice;
 use App\Models\PayrollModel;
-use App\Models\ReturnModel;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use App\Models\Subscription;
@@ -21,7 +20,6 @@ use App\Models\SubscriptionPackage;
 use App\Models\Trip;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -47,7 +45,7 @@ class DashboardController extends Controller
         // ========== إحصائيات الفواتير ==========
         // Check if invoices table exists
         $hasInvoicesTable = Schema::hasTable('invoices');
-        
+
         $totalInvoices = $hasInvoicesTable ? Invoice::count() : 0;
         $paidInvoices = $hasInvoicesTable ? Invoice::where('payment_status', 'paid')->count() : 0;
         $pendingInvoices = $hasInvoicesTable ? Invoice::where('payment_status', 'pending')->count() : 0;
@@ -123,10 +121,6 @@ class DashboardController extends Controller
             ->sum('total_price') ?? 0;
         $totalSalesWeight = SaleDetail::sum('weight') ?? 0;
 
-        // ========== إحصائيات الإرجاع ==========
-        $totalReturns = ReturnModel::count();
-        $totalReturnsAmount = DB::table('return_details')->sum('total_price') ?? 0;
-
         // ========== إحصائيات النفقات ==========
         // إزالة global scope للـ owner في حالة admin
         $totalExpenses = Expense::withoutGlobalScopes()->count();
@@ -155,8 +149,9 @@ class DashboardController extends Controller
         // ========== إحصائيات الأصول ==========
         $totalAssets = Asset::count();
         $totalAssetsValue = Asset::sum('purchase_cost') ?? 0;
-        $totalAssetsCurrentValue = Asset::with('depreciations')->get()->sum(function($asset) {
+        $totalAssetsCurrentValue = Asset::with('depreciations')->get()->sum(function ($asset) {
             $latestDepreciation = $asset->depreciations()->latest('year')->first();
+
             return $latestDepreciation ? ($latestDepreciation->book_value ?? 0) : ($asset->purchase_cost ?? 0);
         });
 
@@ -200,7 +195,7 @@ class DashboardController extends Controller
         $totalPackages = SubscriptionPackage::where('is_active', true)->count();
 
         // ========== التحليلات المالية (Admin Analytics) ==========
-        
+
         // 1. MRR (Monthly Recurring Revenue) - الإيرادات الشهرية المتكررة
         // حساب الإيرادات من الاشتراكات النشطة الشهرية
         $activeMonthlySubscriptions = Subscription::where('status', 'active')
@@ -208,14 +203,14 @@ class DashboardController extends Controller
             ->where('end_date', '>=', Carbon::today())
             ->with('package')
             ->get();
-        
+
         $mrr = 0;
         foreach ($activeMonthlySubscriptions as $subscription) {
             if ($subscription->package) {
                 // حساب السعر الشهري حسب نوع المدة
                 $packagePrice = $subscription->package->effective_price ?? 0;
                 $durationType = $subscription->package->duration_type ?? 'monthly';
-                
+
                 switch ($durationType) {
                     case 'monthly':
                         $mrr += $packagePrice;
@@ -249,15 +244,15 @@ class DashboardController extends Controller
         // 3. معدل الإلغاء (Churn Rate)
         // الصيادين الذين انتهت اشتراكاتهم في آخر 30 يوم ولم يجددوا
         $thirtyDaysAgo = Carbon::now()->subDays(30);
-        
+
         // الصيادين الذين انتهت اشتراكاتهم في آخر 30 يوم
         $expiredSubscriptionsUsers = Subscription::where(function ($query) {
-                $query->where('status', 'expired')
-                    ->orWhere(function ($q) {
-                        $q->where('status', 'active')
-                            ->where('end_date', '<', Carbon::today());
-                    });
-            })
+            $query->where('status', 'expired')
+                ->orWhere(function ($q) {
+                    $q->where('status', 'active')
+                        ->where('end_date', '<', Carbon::today());
+                });
+        })
             ->where('end_date', '>=', $thirtyDaysAgo)
             ->where('end_date', '<=', Carbon::today())
             ->pluck('user_id')
@@ -288,7 +283,7 @@ class DashboardController extends Controller
                     ->where('start_date', '>', $lastExpiredSubscription->end_date)
                     ->exists();
 
-                if (!$hasRenewal) {
+                if (! $hasRenewal) {
                     $churnedUsers++;
                 }
             }
@@ -302,8 +297,8 @@ class DashboardController extends Controller
             ->distinct('user_id')
             ->count('user_id');
 
-        $churnRate = $totalActiveUsers30DaysAgo > 0 
-            ? ($churnedUsers / $totalActiveUsers30DaysAgo) * 100 
+        $churnRate = $totalActiveUsers30DaysAgo > 0
+            ? ($churnedUsers / $totalActiveUsers30DaysAgo) * 100
             : 0;
 
         // بيانات MRR للآخر 6 أشهر (للرسم البياني)
@@ -311,7 +306,7 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
             $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
-            
+
             $monthSubscriptions = Subscription::where('status', 'active')
                 ->where('is_suspended', false)
                 ->where(function ($query) use ($monthStart, $monthEnd) {
@@ -323,13 +318,13 @@ class DashboardController extends Controller
                 })
                 ->with('package')
                 ->get();
-            
+
             $monthMRR = 0;
             foreach ($monthSubscriptions as $sub) {
                 if ($sub->package) {
                     $packagePrice = $sub->package->effective_price ?? 0;
                     $durationType = $sub->package->duration_type ?? 'monthly';
-                    
+
                     switch ($durationType) {
                         case 'monthly':
                             $monthMRR += $packagePrice;
@@ -343,7 +338,7 @@ class DashboardController extends Controller
                     }
                 }
             }
-            
+
             $mrrHistory[] = [
                 'month' => $monthStart->format('Y-m'),
                 'month_label' => $monthStart->format('M Y'),
@@ -355,11 +350,11 @@ class DashboardController extends Controller
         $revenueByMada = $hasInvoicesTable ? Invoice::where('payment_status', 'paid')
             ->where('payment_method', 'mada')
             ->sum('total_amount') ?? 0 : 0;
-        
+
         $revenueByVisa = $hasInvoicesTable ? Invoice::where('payment_status', 'paid')
             ->where('payment_method', 'visa')
             ->sum('total_amount') ?? 0 : 0;
-        
+
         $revenueByBankTransfer = $hasInvoicesTable ? Invoice::where('payment_status', 'paid')
             ->where('payment_method', 'bank_transfer')
             ->sum('total_amount') ?? 0 : 0;
@@ -376,7 +371,7 @@ class DashboardController extends Controller
             ->where('is_suspended', false)
             ->whereBetween('end_date', [
                 Carbon::today(),
-                Carbon::today()->addDays(7)
+                Carbon::today()->addDays(7),
             ])
             ->with(['user:id,name,phone', 'package:id,name'])
             ->orderBy('end_date', 'asc')
@@ -385,12 +380,12 @@ class DashboardController extends Controller
 
         // الاشتراكات التي انتهت ولكن لم يتم تجديدها
         $expiredNotRenewed = Subscription::where(function ($query) {
-                $query->where('status', 'expired')
-                    ->orWhere(function ($q) {
-                        $q->where('status', 'active')
-                            ->where('end_date', '<', Carbon::today());
-                    });
-            })
+            $query->where('status', 'expired')
+                ->orWhere(function ($q) {
+                    $q->where('status', 'active')
+                        ->where('end_date', '<', Carbon::today());
+                });
+        })
             ->with(['user:id,name,phone', 'package:id,name'])
             ->orderBy('end_date', 'desc')
             ->limit(10)
@@ -407,16 +402,16 @@ class DashboardController extends Controller
                     $q->whereHas('captain', function ($subQ) {
                         $subQ->where('salary_type', 'salary');
                     })
-                    ->orWhereHas('crews', function ($subQ) {
-                        $subQ->where('salary_type', 'salary');
+                        ->orWhereHas('crews', function ($subQ) {
+                            $subQ->where('salary_type', 'salary');
+                        });
+                })
+                    ->whereDoesntHave('captain', function ($q) {
+                        $q->where('salary_type', 'percentage');
+                    })
+                    ->whereDoesntHave('crews', function ($q) {
+                        $q->where('salary_type', 'percentage');
                     });
-                })
-                ->whereDoesntHave('captain', function ($q) {
-                    $q->where('salary_type', 'percentage');
-                })
-                ->whereDoesntHave('crews', function ($q) {
-                    $q->where('salary_type', 'percentage');
-                });
             })
             ->count();
 
@@ -427,16 +422,16 @@ class DashboardController extends Controller
                     $q->whereHas('captain', function ($subQ) {
                         $subQ->where('salary_type', 'percentage');
                     })
-                    ->orWhereHas('crews', function ($subQ) {
-                        $subQ->where('salary_type', 'percentage');
+                        ->orWhereHas('crews', function ($subQ) {
+                            $subQ->where('salary_type', 'percentage');
+                        });
+                })
+                    ->whereDoesntHave('captain', function ($q) {
+                        $q->where('salary_type', 'salary');
+                    })
+                    ->whereDoesntHave('crews', function ($q) {
+                        $q->where('salary_type', 'salary');
                     });
-                })
-                ->whereDoesntHave('captain', function ($q) {
-                    $q->where('salary_type', 'salary');
-                })
-                ->whereDoesntHave('crews', function ($q) {
-                    $q->where('salary_type', 'salary');
-                });
             })
             ->count();
 
@@ -447,18 +442,18 @@ class DashboardController extends Controller
                     $q->whereHas('captain', function ($subQ) {
                         $subQ->where('salary_type', 'salary');
                     })
-                    ->orWhereHas('crews', function ($subQ) {
-                        $subQ->where('salary_type', 'salary');
-                    });
+                        ->orWhereHas('crews', function ($subQ) {
+                            $subQ->where('salary_type', 'salary');
+                        });
                 })
-                ->where(function ($q) {
-                    $q->whereHas('captain', function ($subQ) {
-                        $subQ->where('salary_type', 'percentage');
-                    })
-                    ->orWhereHas('crews', function ($subQ) {
-                        $subQ->where('salary_type', 'percentage');
+                    ->where(function ($q) {
+                        $q->whereHas('captain', function ($subQ) {
+                            $subQ->where('salary_type', 'percentage');
+                        })
+                            ->orWhereHas('crews', function ($subQ) {
+                                $subQ->where('salary_type', 'percentage');
+                            });
                     });
-                });
             })
             ->count();
 
@@ -483,7 +478,7 @@ class DashboardController extends Controller
             ->with(['owner:id,name'])
             ->select('id', 'name_ar', 'name_en', 'owner_id')
             ->get();
-        
+
         $captainsList = User::where('role', 'captain')
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
@@ -544,9 +539,6 @@ class DashboardController extends Controller
             'totalSalesAmount',
             'totalSalesThisMonth',
             'totalSalesWeight',
-            // Returns
-            'totalReturns',
-            'totalReturnsAmount',
             // Expenses
             'totalExpenses',
             'totalExpensesAmount',

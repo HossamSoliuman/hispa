@@ -36,7 +36,7 @@ class MonthlyFinancialsService
      *
      * @return array{
      *     from: string, to: string, owner_id: int, boat_id: int|null,
-     *     gross_sales: float, returns: float, net_sales: float,
+     *     gross_sales: float, net_sales: float,
      *     commission_labor: float, net_owner_revenue: float,
      *     trip_expenses: float, general_expenses: float, fixed_salaries: float,
      *     depreciation: float, total_expenses: float, net_profit: float,
@@ -54,13 +54,8 @@ class MonthlyFinancialsService
         $commissionLabor = (float) Sale::whereIn('id', $saleIds)
             ->sum(DB::raw('COALESCE(commission_amount,0) + COALESCE(labor_amount,0)'));
 
-        $returns = (float) DB::table('returns')
-            ->whereIn('sale_id', $saleIds)
-            ->where('status', 'approved')
-            ->sum('total_amount');
-
-        $netSales = $grossSales - $returns;
-        $netOwnerRevenue = $netOwnerSales - $returns;
+        $netSales = $grossSales;
+        $netOwnerRevenue = $netOwnerSales;
 
         $tripExpenses = (float) $this->expenseQuery($ownerId, $from, $to, $boatId)
             ->whereIn('category_id', $this->categoryIdsForTypes(['operating', 'maintenance']))
@@ -94,7 +89,6 @@ class MonthlyFinancialsService
             'owner_id' => $ownerId,
             'boat_id' => $boatId,
             'gross_sales' => round($grossSales, 2),
-            'returns' => round($returns, 2),
             'net_sales' => round($netSales, 2),
             'commission_labor' => round($commissionLabor, 2),
             'net_owner_revenue' => round($netOwnerRevenue, 2),

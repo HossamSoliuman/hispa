@@ -104,7 +104,6 @@ class MonthClosingService
                 'month' => $month,
                 'status' => 'closed',
                 'gross_sales' => $f['gross_sales'],
-                'returns' => $f['returns'],
                 'net_sales' => $f['net_sales'],
                 'net_owner_revenue' => $f['net_owner_revenue'],
                 'trip_expenses' => $f['trip_expenses'],

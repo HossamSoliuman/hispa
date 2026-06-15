@@ -83,10 +83,7 @@
                 request()->routeIs('owner.sales.index') ||
                 request()->routeIs('owner.sales.create') ||
                 request()->routeIs('owner.sales.edit') ||
-                request()->routeIs('owner.sales.show') ||
-                request()->routeIs('owner.returns.index') ||
-                request()->routeIs('owner.returns.create') ||
-                request()->routeIs('owner.returns.show')
+                request()->routeIs('owner.sales.show')
                     ? 'active'
                     : '' }}">
                 <a href="#" class="menu-link">

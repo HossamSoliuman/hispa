@@ -53,11 +53,6 @@ class Fish extends Model
         return $this->hasMany(CatchDetail::class, 'fish_id');
     }
 
-    public function returnDetails(): HasMany
-    {
-        return $this->hasMany(ReturnDetail::class);
-    }
-
     public function region(): BelongsTo
     {
         return $this->belongsTo(Region::class);

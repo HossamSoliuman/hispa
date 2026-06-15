@@ -17,7 +17,6 @@ return new class extends Migration
 
             // Frozen snapshot of the canonical monthly waterfall (Part 2).
             $table->decimal('gross_sales', 14, 2)->default(0);
-            $table->decimal('returns', 14, 2)->default(0);
             $table->decimal('net_sales', 14, 2)->default(0);
             $table->decimal('net_owner_revenue', 14, 2)->default(0);
             $table->decimal('trip_expenses', 14, 2)->default(0);

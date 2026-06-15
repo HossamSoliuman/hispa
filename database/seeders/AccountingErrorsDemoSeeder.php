@@ -9,8 +9,6 @@ use App\Models\Coupon;
 use App\Models\Fish;
 use App\Models\Invoice;
 use App\Models\Region;
-use App\Models\ReturnDetail;
-use App\Models\ReturnModel;
 use App\Models\Sale;
 use App\Models\Subscription;
 use App\Models\Trip;
@@ -32,7 +30,6 @@ use Illuminate\Support\Facades\Schema;
  * Where to look after seeding (owner panel, logged in as owner@example.com):
  *  - Finding 2 & 3  Assets / depreciation  → /owner/assets and /owner/asset_depreciation
  *  - Finding 5      Cross-tenant revenue   → /owner dashboard (totals include owner #2)
- *  - Finding 6      Returns                → /owner/returns (sale total_price stays inflated)
  *  - Finding 7      Payroll 50% / div-by-0 → /owner/payrolls (percentage crew)
  *  - Finding 8      Invoice discount/VAT   → /admin/invoices (VAT charged on pre-discount base)
  *  - Finding 1 & 4  P&L double-count       → /owner/profit-loss (already visible from DemoDataSeeder)
@@ -44,7 +41,6 @@ class AccountingErrorsDemoSeeder extends Seeder
         $owner = User::where('email', 'owner@example.com')->firstOrFail();
 
         $this->seedAssets();
-        $this->seedReturn($owner);
         $this->seedPayrollCrew($owner);
         $this->seedDiscountedInvoice($owner);
         $this->seedSecondOwnerSales();
@@ -134,51 +130,6 @@ class AccountingErrorsDemoSeeder extends Seeder
         if (AssetDepreciation::count() === 0) {
             Artisan::call('app:assets-depreciation-run');
         }
-    }
-
-    /**
-     * Finding 6 — returns never reduce revenue.
-     *
-     * Creates an approved return against an existing PAID sale, refunding part
-     * of one line. The parent sale's total_price / net_owner_amount are left
-     * untouched (exactly as the app does), so the returned value stays counted
-     * in every revenue and profit total.
-     */
-    private function seedReturn(User $owner): void
-    {
-        $sale = Sale::with('details')
-            ->where('seller_id', $owner->id)
-            ->where('payment_status', 'paid')
-            ->whereHas('details')
-            ->orderBy('id')
-            ->first();
-
-        if (! $sale || ReturnModel::where('sale_id', $sale->id)->exists()) {
-            return;
-        }
-
-        /** @var \App\Models\SaleDetail $line */
-        $line = $sale->details->first();
-        $returnedWeight = round((float) $line->weight * 0.4, 2); // refund 40% of the line
-        $returnedValue = round($returnedWeight * (float) $line->price_per_kilo, 2);
-
-        $return = ReturnModel::create([
-            'sale_id' => $sale->id,
-            'returned_by' => $owner->id,
-            'returned_at' => Carbon::parse($sale->sale_datetime)->addDays(2),
-            'total_amount' => $returnedValue,
-            'status' => 'approved',
-            'notes' => 'إرجاع جزئي — لاحظ أن إجمالي الفاتورة لم ينقص.',
-        ]);
-
-        ReturnDetail::create([
-            'return_id' => $return->id,
-            'sale_detail_id' => $line->id,
-            'fish_id' => $line->fish_id,
-            'weight' => $returnedWeight,
-            'price_per_kilo' => $line->price_per_kilo,
-            'total_price' => $returnedValue,
-        ]);
     }
 
     /**

@@ -37,17 +37,6 @@ class MonthlyReportsService
             ->get()
             ->keyBy('boat_id');
 
-        $returnsByBoat = DB::table('returns')
-            ->join('sales', 'returns.sale_id', '=', 'sales.id')
-            ->join('trips', 'sales.trip_id', '=', 'trips.id')
-            ->where('sales.seller_type', 'owner')
-            ->where('sales.seller_id', $ownerId)
-            ->where('returns.status', 'approved')
-            ->whereBetween(DB::raw('DATE(sales.sale_datetime)'), [$from, $to])
-            ->groupBy('trips.boat_id')
-            ->select('trips.boat_id', DB::raw('SUM(returns.total_amount) as total'))
-            ->pluck('total', 'boat_id');
-
         $expensesByBoat = DB::table('expenses')
             ->where('owner_id', $ownerId)
             ->whereNotNull('boat_id')
@@ -58,9 +47,8 @@ class MonthlyReportsService
 
         $rows = [];
         foreach ($boats as $boat) {
-            $returns = (float) ($returnsByBoat[$boat->id] ?? 0);
-            $gross = (float) ($salesByBoat[$boat->id]->gross ?? 0) - $returns;
-            $net = (float) ($salesByBoat[$boat->id]->net ?? 0) - $returns;
+            $gross = (float) ($salesByBoat[$boat->id]->gross ?? 0);
+            $net = (float) ($salesByBoat[$boat->id]->net ?? 0);
             $expenses = (float) ($expensesByBoat[$boat->id] ?? 0);
             $netProfit = $net - $expenses;
 
@@ -108,21 +96,10 @@ class MonthlyReportsService
             ->get()
             ->keyBy('trip_id');
 
-        $returnsByTrip = DB::table('returns')
-            ->join('sales', 'returns.sale_id', '=', 'sales.id')
-            ->where('sales.seller_type', 'owner')
-            ->where('sales.seller_id', $ownerId)
-            ->where('returns.status', 'approved')
-            ->whereIn('sales.trip_id', $trips->pluck('id'))
-            ->groupBy('sales.trip_id')
-            ->select('sales.trip_id', DB::raw('SUM(returns.total_amount) as total'))
-            ->pluck('total', 'trip_id');
-
         $rows = [];
         foreach ($trips as $trip) {
-            $returns = (float) ($returnsByTrip[$trip->id] ?? 0);
-            $gross = (float) ($salesByTrip[$trip->id]->gross ?? 0) - $returns;
-            $net = (float) ($salesByTrip[$trip->id]->net ?? 0) - $returns;
+            $gross = (float) ($salesByTrip[$trip->id]->gross ?? 0);
+            $net = (float) ($salesByTrip[$trip->id]->net ?? 0);
             $expenses = $this->tripExpenses($ownerId, $trip);
             $netProfit = $net - $expenses;
 

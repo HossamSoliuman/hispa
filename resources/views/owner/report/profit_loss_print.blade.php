@@ -87,13 +87,6 @@
             :showCurrency="true"
         />
         <x-report-summary-row
-            :label="__('owner.profit_loss.return')"
-            :value="$f['returns'] * -1"
-            valueClass="text-danger"
-            :showMinus="true"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
             :label="__('owner.profit_loss.net_owner_revenue')"
             :value="$f['net_owner_revenue']"
             valueClass="text-success"

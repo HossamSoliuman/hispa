@@ -44,7 +44,6 @@ use App\Http\Controllers\Owner\Report\SalesReportController;
 use App\Http\Controllers\Owner\Report\StockReportController;
 use App\Http\Controllers\Owner\Report\TripReportController;
 use App\Http\Controllers\Owner\ReportsController;
-use App\Http\Controllers\Owner\ReturnsController;
 use App\Http\Controllers\Owner\SalesController;
 use App\Http\Controllers\Owner\SettingsController;
 use App\Http\Controllers\Owner\StockController;
@@ -53,7 +52,6 @@ use App\Http\Controllers\Owner\UnitController;
 use App\Http\Controllers\Owner\UserRequestController;
 use App\Http\Controllers\Owner\VendorsController;
 use App\Http\Controllers\SupportTicketController;
-use App\Models\CatchModel;
 use App\Models\Trip;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -133,10 +131,6 @@ Route::group([
 
         Route::resource('/assets', AssetController::class);
         Route::get('/getAssetsData', [AssetController::class, 'getAssetsData'])->name('getAssetsData');
-
-        Route::resource('/returns', ReturnsController::class)->only(['index', 'create', 'store', 'show']);
-        Route::get('/getReturnsData', [ReturnsController::class, 'getReturnsData'])->name('getReturnsData');
-        Route::get('/saleDetails/{id}', [ReturnsController::class, 'saleDetails'])->name('saleDetails');
 
         Route::resource('/categories', CategoryController::class);
         Route::get('/getCategoriesData', [CategoryController::class, 'getData'])->name('getCategoriesData');
@@ -350,7 +344,7 @@ Route::group([
         // Contact submission from floating button
         Route::post('/contact', function (\Illuminate\Http\Request $request) {
             \App\Models\Contact::create([
-                'name' => trim($request->first_name . ' ' . $request->last_name),
+                'name' => trim($request->first_name.' '.$request->last_name),
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'subject' => $request->subject,

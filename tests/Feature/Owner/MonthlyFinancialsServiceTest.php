@@ -106,35 +106,6 @@ class MonthlyFinancialsServiceTest extends TestCase
         $this->assertSame(40000.0, $distribution['dues']['b']);
     }
 
-    public function test_returns_are_deducted_from_net_sales(): void
-    {
-        $owner = $this->makeOwner();
-        $sale = $this->makeSale($owner, 100000, 100000, '2026-06-15 10:00:00');
-
-        \DB::table('returns')->insert([
-            'sale_id' => $sale->id,
-            'returned_by' => $owner->id,
-            'returned_at' => '2026-06-16 10:00:00',
-            'total_amount' => 10000,
-            'status' => 'approved',
-        ]);
-        // A pending return must NOT be deducted.
-        \DB::table('returns')->insert([
-            'sale_id' => $sale->id,
-            'returned_by' => $owner->id,
-            'returned_at' => '2026-06-16 10:00:00',
-            'total_amount' => 5000,
-            'status' => 'pending',
-        ]);
-
-        $result = $this->service->compute($owner->id, '2026-06-01', '2026-06-30');
-
-        $this->assertSame(10000.0, $result['returns']);
-        $this->assertSame(90000.0, $result['net_sales']);
-        $this->assertSame(90000.0, $result['net_owner_revenue']);
-        $this->assertSame(90000.0, $result['net_profit']);
-    }
-
     public function test_tenancy_isolation(): void
     {
         $ownerA = $this->makeOwner();

@@ -16,7 +16,6 @@ class MonthClosing extends Model
             'year' => 'integer',
             'month' => 'integer',
             'gross_sales' => 'decimal:2',
-            'returns' => 'decimal:2',
             'net_sales' => 'decimal:2',
             'net_owner_revenue' => 'decimal:2',
             'trip_expenses' => 'decimal:2',

@@ -40,9 +40,4 @@ class SaleDetail extends Model
     {
         return $this->belongsTo(Unit::class)->withDefault();
     }
-
-    public function returns()
-    {
-        return $this->hasMany(ReturnDetail::class);
-    }
 }

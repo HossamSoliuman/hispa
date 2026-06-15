@@ -66,19 +66,6 @@ class DashboardController extends Controller
         return [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()];
     }
 
-    private function approvedReturns(int $ownerId, ?string $from = null, ?string $to = null): float
-    {
-        $query = DB::table('returns')
-            ->whereIn('sale_id', $this->ownerSaleIds($ownerId))
-            ->where('status', 'approved');
-
-        if ($from && $to) {
-            $query->whereBetween(DB::raw('DATE(returned_at)'), [$from, $to]);
-        }
-
-        return (float) $query->sum('total_amount');
-    }
-
     public function index()
     {
         $ownerId = $this->ownerId();
@@ -253,7 +240,7 @@ class DashboardController extends Controller
         $netRevenue = (float) Sale::where('seller_type', 'owner')
             ->where('seller_id', $ownerId)
             ->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to])
-            ->sum('net_owner_amount') - $this->approvedReturns($ownerId, $from, $to);
+            ->sum('net_owner_amount');
 
         $expenses = (float) Expense::where('owner_id', $ownerId)
             ->whereBetween('date', [$from, $to])
@@ -299,15 +286,14 @@ class DashboardController extends Controller
             ->whereBetween(DB::raw('DATE(sale_datetime)'), [$yearFrom, $yearTo])->sum('net_owner_amount');
         $totalExpenses = (float) Expense::where('owner_id', $ownerId)
             ->whereBetween('date', [$yearFrom, $yearTo])->sum('final_price');
-        $returns = $this->approvedReturns($ownerId, $yearFrom, $yearTo);
 
         return response()->json([
             'monthly' => $monthly,
             'catchComposition' => $catchComposition,
             'totalCatchKg' => $totalCatchKg,
             'summary' => [
-                'revenue' => round($totalRevenue - $returns, 2),
-                'profit' => round($totalRevenue - $returns - $totalExpenses, 2),
+                'revenue' => round($totalRevenue, 2),
+                'profit' => round($totalRevenue - $totalExpenses, 2),
                 'avgPricePerKg' => $totalCatchKg > 0 ? round($totalRevenue / $totalCatchKg, 2) : 0,
             ],
         ]);
@@ -359,7 +345,6 @@ class DashboardController extends Controller
 
         $revenue = (float) Sale::where('seller_type', 'owner')->where('seller_id', $ownerId)
             ->whereBetween(DB::raw('DATE(sale_datetime)'), [$yearFrom, $yearTo])->sum('total_price');
-        $returns = $this->approvedReturns($ownerId, $yearFrom, $yearTo);
         $expenses = (float) Expense::where('owner_id', $ownerId)
             ->whereBetween('date', [$yearFrom, $yearTo])->sum('final_price');
 
@@ -367,7 +352,7 @@ class DashboardController extends Controller
             $q->where('owner_id', $ownerId)->whereBetween('date', [$yearFrom, $yearTo]);
         }], 'final_price')->get();
 
-        $netRevenue = $revenue - $returns;
+        $netRevenue = $revenue;
         $profit = $netRevenue - $expenses;
         $margin = $netRevenue > 0 ? round(($profit / $netRevenue) * 100, 2) : 0;
 
