@@ -53,6 +53,8 @@ use App\Http\Controllers\Owner\UnitController;
 use App\Http\Controllers\Owner\UserRequestController;
 use App\Http\Controllers\Owner\VendorsController;
 use App\Http\Controllers\SupportTicketController;
+use App\Models\CatchModel;
+use App\Models\Trip;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -348,7 +350,7 @@ Route::group([
         // Contact submission from floating button
         Route::post('/contact', function (\Illuminate\Http\Request $request) {
             \App\Models\Contact::create([
-                'name' => trim($request->first_name.' '.$request->last_name),
+                'name' => trim($request->first_name . ' ' . $request->last_name),
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'subject' => $request->subject,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
+use App\Models\Setting;
 use App\Service\Owner\MonthlyFinancialsService;
 use App\Service\Owner\ReportQrService;
 use Illuminate\Http\Request;
@@ -66,7 +67,7 @@ class ProfitLossController extends Controller
             'phone' => $owner->phone ?? 'N/A',
             'email' => $owner->email ?? 'N/A',
             'address' => $owner->address ?? 'N/A',
-            'logo' => $owner->logo ?? null,
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
             'qr_code' => app(ReportQrService::class)->dataUri("Company: {$companyName}\nVAT: {$vat}"),
         ];
     }

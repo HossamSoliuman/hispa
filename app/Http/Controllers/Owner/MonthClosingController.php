@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\MonthClosing;
+use App\Models\Setting;
 use App\Service\Owner\MonthClosingService;
 use App\Service\Owner\PayrollService;
 use App\Service\Owner\ReportQrService;
@@ -176,7 +177,7 @@ class MonthClosingController extends Controller
             'phone' => $owner->phone ?? 'N/A',
             'email' => $owner->email ?? 'N/A',
             'address' => $owner->address ?? 'N/A',
-            'logo' => $owner->logo ?? null,
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
             'qr_code' => app(ReportQrService::class)->dataUri("Company: {$companyName}\nVAT: {$vat}"),
         ];
     }
