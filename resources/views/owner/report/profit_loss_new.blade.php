@@ -213,15 +213,6 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.profit_loss.fixed_salaries') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['fixed_salaries'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
                             <div class="stat-card expense">
                                 <div class="label">{{ __('owner.profit_loss.depreciation') }}</div>
                                 <div class="value">

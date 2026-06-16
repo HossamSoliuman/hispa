@@ -112,7 +112,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (['salary' => 'fixed', 'percentage' => 'percentage'] as $key => $label)
+                        @foreach (['percentage' => 'percentage'] as $key => $label)
                             @php
                                 $row = $payrollSummary[$key];
                                 $badge = ['fully_paid' => 'success', 'partially_paid' => 'info', 'unpaid' => 'warning', 'not_created' => 'secondary'][$row['status']] ?? 'secondary';

@@ -97,38 +97,6 @@ class PayrollService
         ];
     }
 
-    public function calculateMonthlyPayroll(int $ownerId, int $year, int $month)
-    {
-        $payroll = PayrollModel::create([
-            'owner_id' => $ownerId,
-            'year' => $year,
-            'month' => $month,
-            'status' => 'draft',
-            'type' => 'salary',
-        ]);
-        $users = User::where('owner_id', $ownerId)
-            ->whereIn('role', ['employee', 'crew', 'captain'])
-            ->get();
-
-        foreach ($users as $user) {
-            if ($user->salary_type !== 'salary') {
-                continue;
-            }
-
-            $base_salary = (float) $user->salary_amount;
-            PayrollDetailsModel::create([
-                'payroll_id' => $payroll->id,
-                'user_id' => $user->id,
-                'base_salary' => $base_salary,
-                'percentage' => 0,
-                'sales_amount' => 0,
-                'final_salary' => $base_salary,
-            ]);
-        }
-
-        return PayrollModel::with('details', 'details.user')->find($payroll->id);
-    }
-
     public function calculateMonthlyPayrollPercentage(int $ownerId, int $year, int $month)
     {
         $payroll = PayrollModel::create([
@@ -187,29 +155,12 @@ class PayrollService
                 ->whereBetween(DB::raw('DATE(sale_datetime)'), [$startDate->toDateString(), $endDate->toDateString()])
                 ->sum('total_price');
 
-            $salaries = PayrollModel::where('owner_id', $ownerId)
-                ->where('year', $year)
-                ->where('month', $month)
-                ->where('type', 'salary')
-                ->first();
-
-            $captins = User::where('owner_id', $ownerId)->whereIn('role', ['crew', 'captain'])->where('salary_type', 'salary')->where('boat_id', $user->boat_id)->pluck('id');
-            $employees = User::whereIn('role', ['employee'])->where('salary_type', 'salary')->where('owner_id', $ownerId)->pluck('id');
-            $boats = max(Boat::active()->where('owner_id', $ownerId)->count(), 1);
-
-            $captinsTotalSalaries = $salaries
-                ? (float) $salaries->details()->whereIn('user_id', $captins)->sum('final_salary')
-                : 0.0;
-            $employeesTotalSalaries = $salaries
-                ? (float) $salaries->details()->whereIn('user_id', $employees)->sum('final_salary')
-                : 0.0;
-
             $expenses = (float) Expense::where('owner_id', $ownerId)
                 ->where('boat_id', $user->boat_id)
                 ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->sum('final_price');
 
-            $totalIncome = $sales - ($expenses + $captinsTotalSalaries + ($employeesTotalSalaries / $boats));
+            $totalIncome = $sales - $expenses;
 
             $ownerPercent = (float) (Setting::where('key', MonthlyFinancialsService::SETTING_OWNER_PERCENT)->value('value')
                 ?? MonthlyFinancialsService::DEFAULT_OWNER_PERCENT);
@@ -221,15 +172,14 @@ class PayrollService
     }
 
     /**
-     * Read-only payroll payment summary for a month (salary + percentage),
-     * used by the month-close report. Does not alter any financial totals.
+     * Read-only crew percentage payroll payment summary for a month, used by the
+     * month-close report. Does not alter any financial totals.
      *
-     * @return array{salary: array<string, mixed>, percentage: array<string, mixed>}
+     * @return array{percentage: array<string, mixed>}
      */
     public function monthlyPayrollSummary(int $ownerId, int $year, int $month): array
     {
         return [
-            'salary' => $this->payrollTypeSummary($ownerId, $year, $month, 'salary'),
             'percentage' => $this->payrollTypeSummary($ownerId, $year, $month, 'percentage'),
         ];
     }

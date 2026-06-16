@@ -102,7 +102,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (['salary' => 'fixed', 'percentage' => 'percentage'] as $key => $label)
+                @foreach (['percentage' => 'percentage'] as $key => $label)
                     @php $row = $payrollSummary[$key]; @endphp
                     <tr>
                         <td>{{ __('owner.month_closing.payroll_summary.'.$label) }}</td>

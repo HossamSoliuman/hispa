@@ -273,12 +273,11 @@ Route::group([
 
         Route::resource('/expenses', ExpensesController::class);
 
-        // payroll
-        Route::resource('/payrolls', PayrollController::class);
+        // payroll (crew percentage payroll only; fixed-salary payroll feature removed)
+        Route::resource('/payrolls', PayrollController::class)->only(['store', 'edit', 'update', 'destroy']);
         // printable payroll report
         Route::get('/payrolls/{payroll}/print', [PayrollController::class, 'print'])->name('payrolls.print');
         Route::get('/getPayrollsData', [PayrollController::class, 'getData'])->name('getPayrollsData');
-        Route::post('/payrolls/check', [PayrollController::class, 'check'])->name('payrolls.check');
         Route::post('/payrolls/percentageCheck', [PayrollController::class, 'percentageCheck'])->name('payrolls.percentageCheck');
         // per-person payment (crew/captain/employee)
         Route::post('/payrolls/details/{detail}/pay', [PayrollController::class, 'payDetail'])->name('payrolls.payDetail');

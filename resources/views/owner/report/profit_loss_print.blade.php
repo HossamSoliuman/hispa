@@ -107,13 +107,6 @@
             :showCurrency="true"
         />
         <x-report-summary-row
-            :label="__('owner.profit_loss.fixed_salaries')"
-            :value="$f['fixed_salaries'] * -1"
-            valueClass="text-warning"
-            :showMinus="true"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
             :label="__('owner.profit_loss.depreciation')"
             :value="$f['depreciation'] * -1"
             valueClass="text-danger"

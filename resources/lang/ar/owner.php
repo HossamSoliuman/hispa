@@ -20,7 +20,6 @@ return [
         'catches' => 'سجل المصيد',
         'financial_management' => 'الإدارة المالية',
         'expenses' => 'النفقات',
-        'payrolls' => 'الرواتب الثابتة',
         'payrolls_percentage' => 'رواتب البحاره',
         'profit_loss' => 'الأرباح والخسائر',
         'reports' => 'التقارير',

@@ -1,6 +1,6 @@
 @php
     $isPercentage = $payroll->type === 'percentage';
-    $typeLabel = $isPercentage ? __('owner.menu.payrolls_percentage') : __('owner.menu.payrolls');
+    $typeLabel = __('owner.menu.payrolls_percentage');
     $title = $typeLabel.' - '.$payroll->month.'/'.$payroll->year;
     $totalIncrease = (float) $payroll->details->sum('increase');
     $totalDeduction = (float) $payroll->details->sum('deduction');

@@ -4,13 +4,10 @@ namespace App\Service\Owner;
 
 use App\Models\Category;
 use App\Models\Expense;
-use App\Models\PayrollDetailsModel;
-use App\Models\PayrollModel;
 use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -38,7 +35,7 @@ class MonthlyFinancialsService
      *     from: string, to: string, owner_id: int, boat_id: int|null,
      *     gross_sales: float, net_sales: float,
      *     commission_labor: float, net_owner_revenue: float,
-     *     trip_expenses: float, general_expenses: float, fixed_salaries: float,
+     *     trip_expenses: float, general_expenses: float,
      *     depreciation: float, total_expenses: float, net_profit: float,
      *     owner_percent: float, owner_share: float, crew_share: float,
      *     crew_count: int, per_fisherman: float,
@@ -65,10 +62,9 @@ class MonthlyFinancialsService
             ->whereIn('category_id', $this->categoryIdsForTypes(['general', 'government']))
             ->sum('final_price');
 
-        $fixedSalaries = $this->fixedSalaries($ownerId, $from, $boatId);
         $depreciation = (float) $this->setting(self::SETTING_DEPRECIATION, 0);
 
-        $totalExpenses = $tripExpenses + $generalExpenses + $fixedSalaries + $depreciation;
+        $totalExpenses = $tripExpenses + $generalExpenses + $depreciation;
         $netProfit = $netOwnerRevenue - $totalExpenses;
 
         $ownerPercent = (float) $this->setting(self::SETTING_OWNER_PERCENT, self::DEFAULT_OWNER_PERCENT);
@@ -94,7 +90,6 @@ class MonthlyFinancialsService
             'net_owner_revenue' => round($netOwnerRevenue, 2),
             'trip_expenses' => round($tripExpenses, 2),
             'general_expenses' => round($generalExpenses, 2),
-            'fixed_salaries' => round($fixedSalaries, 2),
             'depreciation' => round($depreciation, 2),
             'total_expenses' => round($totalExpenses, 2),
             'net_profit' => round($netProfit, 2),
@@ -172,43 +167,6 @@ class MonthlyFinancialsService
     private function categoryIdsForTypes(array $types): array
     {
         return Category::whereIn('type', $types)->pluck('id')->all();
-    }
-
-    /**
-     * Σ payroll_details_models.final_salary for the month's salary payroll,
-     * scoped to the owner's salaried staff (and boat when filtered).
-     */
-    private function fixedSalaries(int $ownerId, string $from, ?int $boatId): float
-    {
-        $date = Carbon::parse($from);
-
-        $payrollIds = PayrollModel::query()
-            ->where(function ($query) use ($ownerId) {
-                $query->where('owner_id', $ownerId)->orWhereNull('owner_id');
-            })
-            ->where('type', 'salary')
-            ->where('year', $date->year)
-            ->where('month', $date->month)
-            ->pluck('id');
-
-        if ($payrollIds->isEmpty()) {
-            return 0.0;
-        }
-
-        $staffQuery = User::query()
-            ->where('owner_id', $ownerId)
-            ->where('salary_type', 'salary');
-
-        if ($boatId) {
-            $staffQuery->whereIn('role', ['crew', 'captain'])->where('boat_id', $boatId);
-        } else {
-            $staffQuery->whereIn('role', ['crew', 'captain', 'employee']);
-        }
-
-        return (float) PayrollDetailsModel::query()
-            ->whereIn('payroll_id', $payrollIds)
-            ->whereIn('user_id', $staffQuery->pluck('id'))
-            ->sum('final_salary');
     }
 
     /**

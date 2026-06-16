@@ -29,18 +29,47 @@ class PayrollPaymentTest extends TestCase
         return $owner;
     }
 
+    /**
+     * Build a single-person crew percentage payroll whose per-head share equals
+     * $perHead (captins_amount / captins_count).
+     *
+     * @return array{0: PayrollModel, 1: PayrollDetailsModel}
+     */
+    private function makePercentagePayroll(User $owner, float $perHead): array
+    {
+        $crew = User::factory()->create([
+            'role' => 'crew',
+            'owner_id' => $owner->id,
+            'salary_type' => 'percentage',
+            'salary_amount' => 20,
+        ]);
+
+        $payroll = PayrollModel::create([
+            'owner_id' => $owner->id,
+            'year' => 2026,
+            'month' => 6,
+            'status' => 'draft',
+            'type' => 'percentage',
+        ]);
+
+        $detail = PayrollDetailsModel::create([
+            'payroll_id' => $payroll->id,
+            'user_id' => $crew->id,
+            'base_salary' => 0,
+            'percentage' => 20,
+            'sales_amount' => 0,
+            'final_salary' => $perHead,
+            'captins_amount' => $perHead,
+            'captins_count' => 1,
+        ]);
+
+        return [$payroll, $detail];
+    }
+
     public function test_pay_detail_marks_person_paid_and_freezes_net_amount(): void
     {
         $owner = $this->makeOwner();
-        User::factory()->create([
-            'role' => 'employee',
-            'owner_id' => $owner->id,
-            'salary_type' => 'salary',
-            'salary_amount' => 3000,
-        ]);
-
-        $payroll = (new PayrollService)->calculateMonthlyPayroll($owner->id, 2026, 6);
-        $detail = $payroll->details->first();
+        [$payroll, $detail] = $this->makePercentagePayroll($owner, 3000);
 
         $this->assertFalse((bool) $detail->is_paid);
 
@@ -104,15 +133,7 @@ class PayrollPaymentTest extends TestCase
     public function test_already_paid_detail_is_rejected(): void
     {
         $owner = $this->makeOwner();
-        User::factory()->create([
-            'role' => 'employee',
-            'owner_id' => $owner->id,
-            'salary_type' => 'salary',
-            'salary_amount' => 1500,
-        ]);
-
-        $payroll = (new PayrollService)->calculateMonthlyPayroll($owner->id, 2026, 6);
-        $detail = $payroll->details->first();
+        [, $detail] = $this->makePercentagePayroll($owner, 1500);
         $detail->update(['is_paid' => true, 'paid_at' => now(), 'paid_amount' => 1500]);
 
         $this->actingAs($owner, 'owner')
@@ -124,15 +145,7 @@ class PayrollPaymentTest extends TestCase
     {
         $ownerA = $this->makeOwner();
         $ownerB = $this->makeOwner();
-        User::factory()->create([
-            'role' => 'employee',
-            'owner_id' => $ownerA->id,
-            'salary_type' => 'salary',
-            'salary_amount' => 2000,
-        ]);
-
-        $payroll = (new PayrollService)->calculateMonthlyPayroll($ownerA->id, 2026, 6);
-        $detail = $payroll->details->first();
+        [, $detail] = $this->makePercentagePayroll($ownerA, 2000);
 
         $this->actingAs($ownerB, 'owner')
             ->post(route('owner.payrolls.payDetail', $detail))
@@ -144,15 +157,7 @@ class PayrollPaymentTest extends TestCase
     public function test_update_does_not_overwrite_a_paid_row(): void
     {
         $owner = $this->makeOwner();
-        User::factory()->create([
-            'role' => 'employee',
-            'owner_id' => $owner->id,
-            'salary_type' => 'salary',
-            'salary_amount' => 4000,
-        ]);
-
-        $payroll = (new PayrollService)->calculateMonthlyPayroll($owner->id, 2026, 6);
-        $detail = $payroll->details->first();
+        [$payroll, $detail] = $this->makePercentagePayroll($owner, 4000);
         $detail->update(['is_paid' => true, 'paid_at' => now(), 'paid_amount' => 4000, 'final_salary' => 4000]);
 
         $this->actingAs($owner, 'owner')
@@ -172,26 +177,17 @@ class PayrollPaymentTest extends TestCase
     public function test_monthly_payroll_summary_reflects_payments(): void
     {
         $owner = $this->makeOwner();
-        User::factory()->create([
-            'role' => 'employee',
-            'owner_id' => $owner->id,
-            'salary_type' => 'salary',
-            'salary_amount' => 2500,
-        ]);
-
-        $payroll = (new PayrollService)->calculateMonthlyPayroll($owner->id, 2026, 6);
-        $detail = $payroll->details->first();
+        [, $detail] = $this->makePercentagePayroll($owner, 2500);
 
         $summary = (new PayrollService)->monthlyPayrollSummary($owner->id, 2026, 6);
-        $this->assertSame('unpaid', $summary['salary']['status']);
-        $this->assertSame(0.0, $summary['salary']['paid_amount']);
-        $this->assertSame('not_created', $summary['percentage']['status']);
+        $this->assertSame('unpaid', $summary['percentage']['status']);
+        $this->assertSame(0.0, $summary['percentage']['paid_amount']);
 
         $detail->update(['is_paid' => true, 'paid_at' => now(), 'paid_amount' => 2500]);
 
         $summary = (new PayrollService)->monthlyPayrollSummary($owner->id, 2026, 6);
-        $this->assertSame('fully_paid', $summary['salary']['status']);
-        $this->assertSame(2500.0, $summary['salary']['paid_amount']);
-        $this->assertSame(1, $summary['salary']['paid_count']);
+        $this->assertSame('fully_paid', $summary['percentage']['status']);
+        $this->assertSame(2500.0, $summary['percentage']['paid_amount']);
+        $this->assertSame(1, $summary['percentage']['paid_count']);
     }
 }

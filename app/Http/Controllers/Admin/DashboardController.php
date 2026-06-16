@@ -132,14 +132,6 @@ class DashboardController extends Controller
             ->whereYear('date', Carbon::now()->year)
             ->sum('final_price') ?? 0;
 
-        // ========== إحصائيات الرواتب الثابتة ==========
-        $totalFixedSalaries = PayrollModel::where('type', 'salary')->count();
-        $paidFixedSalaries = PayrollModel::where('type', 'salary')->where('is_paid', 1)->count();
-        $totalFixedSalariesAmount = DB::table('payroll_details_models')
-            ->join('payroll_models', 'payroll_details_models.payroll_id', '=', 'payroll_models.id')
-            ->where('payroll_models.type', 'salary')
-            ->sum('payroll_details_models.final_salary') ?? 0;
-
         // ========== إحصائيات الدفع السريع ==========
         // ملاحظة: جدول payments تم حذفه، لذلك نستخدم 0 كقيم افتراضية
         $totalQuickPayments = 0;
@@ -458,13 +450,6 @@ class DashboardController extends Controller
             ->count();
 
         // ========== فلترة الرواتب ==========
-        // الموظفين الذين استلموا رواتبهم (fixed salaries)
-        $paidFixedSalariesCount = PayrollModel::where('type', 'salary')
-            ->where('is_paid', 1)
-            ->withCount('details')
-            ->get()
-            ->sum('details_count');
-
         // الموظفين الذين ينتظرون تصفية النسبة
         $pendingPercentagePayroll = PayrollModel::where('type', 'percentage')
             ->where('is_paid', 0)
@@ -545,10 +530,6 @@ class DashboardController extends Controller
             'paidExpenses',
             'pendingExpenses',
             'totalExpensesThisMonth',
-            // Fixed Salaries
-            'totalFixedSalaries',
-            'paidFixedSalaries',
-            'totalFixedSalariesAmount',
             // Quick Payments
             'totalQuickPayments',
             'totalQuickPaymentsAmount',
@@ -587,7 +568,6 @@ class DashboardController extends Controller
             'ownersPercentage',
             'ownersMixed',
             // Payroll Filtering
-            'paidFixedSalariesCount',
             'pendingPercentagePayroll',
             // Trip Filtering Data
             'boatsList',

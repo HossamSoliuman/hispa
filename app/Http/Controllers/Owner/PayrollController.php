@@ -33,11 +33,6 @@ class PayrollController extends Controller
         $this->datatable = new PayrollDataTable;
     }
 
-    public function index()
-    {
-        return view('owner.payroll.index');
-    }
-
     public function getPercentage()
     {
         return view('owner.payroll.percentage');
@@ -79,43 +74,9 @@ class PayrollController extends Controller
         return PayrollModel::where('owner_id', $this->ownerId())->findOrFail($id);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request)
-    {
-        return view('owner.payroll.create');
-    }
-
     public function percentageCreate(Request $request)
     {
         return view('owner.payroll.percentage_create');
-    }
-
-    public function check(Request $request, PayrollService $service)
-    {
-        $request->validate([
-            'year' => 'required|integer',
-            'month' => 'required|integer|between:1,12',
-        ]);
-
-        $ownerId = $this->ownerId();
-
-        $payroll = PayrollModel::where('owner_id', $ownerId)
-            ->where('year', $request->year)
-            ->where('month', $request->month)
-            ->where('type', 'salary')
-            ->with('details')
-            ->first();
-
-        if ($payroll) {
-            return redirect()->route('owner.payrolls.edit', $payroll);
-        }
-
-        $payroll = app(PayrollService::class)
-            ->calculateMonthlyPayroll($ownerId, $request->year, $request->month);
-
-        return redirect()->route('owner.payrolls.edit', $payroll);
     }
 
     public function percentageCheck(Request $request, PayrollService $service)
@@ -127,32 +88,21 @@ class PayrollController extends Controller
 
         $ownerId = $this->ownerId();
 
-        $salaryPayroll = PayrollModel::where('owner_id', $ownerId)
+        $payroll = PayrollModel::where('owner_id', $ownerId)
             ->where('year', $request->year)
             ->where('month', $request->month)
-            ->where('type', 'salary')
-            ->where('status', 'approved')
-            ->where('is_paid', 1)
+            ->where('type', 'percentage')
+            ->with('details')
             ->first();
-        if ($salaryPayroll) {
-            $payroll = PayrollModel::where('owner_id', $ownerId)
-                ->where('year', $request->year)
-                ->where('month', $request->month)
-                ->where('type', 'percentage')
-                ->with('details')
-                ->first();
 
-            if ($payroll) {
-                return redirect()->route('owner.payrolls.edit', $payroll);
-            }
-
-            $payroll = app(PayrollService::class)
-                ->calculateMonthlyPayrollPercentage($ownerId, $request->year, $request->month);
-
+        if ($payroll) {
             return redirect()->route('owner.payrolls.edit', $payroll);
         }
 
-        return redirect()->back()->with('error', 'لم بتم اعتماد كشف الرواتب الثابتة لهذا الشهر الرجاء اعتماده ومن ثاول مرة اخرى');
+        $payroll = app(PayrollService::class)
+            ->calculateMonthlyPayrollPercentage($ownerId, $request->year, $request->month);
+
+        return redirect()->route('owner.payrolls.edit', $payroll);
     }
 
     public function store(PayrollRequest $request)
@@ -201,10 +151,6 @@ class PayrollController extends Controller
             }
 
             $this->syncPayrollPaidState($payroll);
-        }
-
-        if ($payroll->type == 'salary') {
-            return redirect()->route('owner.payrolls.index')->with('success', 'تم حفظ مسير الرواتب بنجاح');
         }
 
         return redirect()->route('owner.percentage')->with('success', 'تم حفظ مسير الرواتب بنجاح');
@@ -259,19 +205,14 @@ class PayrollController extends Controller
     }
 
     /**
-     * Net pay for a detail row: salaried staff use base_salary; percentage staff
-     * use the per-head share (captins_amount / captins_count). Increase/deduction
-     * are applied on top.
+     * Net pay for a detail row: percentage staff use the per-head share
+     * (captins_amount / captins_count). Increase/deduction are applied on top.
      */
     private function detailFinalSalary(PayrollDetailsModel $detail, float $increase, float $deduction): float
     {
-        if ($detail->user && $detail->user->salary_type === 'salary') {
-            $base = (float) $detail->base_salary;
-        } else {
-            $base = (int) $detail->captins_count > 0
-                ? (float) $detail->captins_amount / (int) $detail->captins_count
-                : 0.0;
-        }
+        $base = (int) $detail->captins_count > 0
+            ? (float) $detail->captins_amount / (int) $detail->captins_count
+            : 0.0;
 
         return round($base + $increase - $deduction, 2);
     }
@@ -335,11 +276,7 @@ class PayrollController extends Controller
         $qrCode = app(\App\Service\Owner\ReportQrService::class)
             ->dataUri(route('owner.payrolls.print', $payroll->id));
 
-        if (view()->exists('owner.payroll.print')) {
-            return view('owner.payroll.print', compact('payroll', 'settings', 'qrCode'));
-        }
-
-        return view('owner.payroll.show', compact('payroll'));
+        return view('owner.payroll.print', compact('payroll', 'settings', 'qrCode'));
     }
 
     // Local helpers reused for report generation (kept in-controller for now)

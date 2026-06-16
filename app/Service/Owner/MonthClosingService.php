@@ -108,7 +108,6 @@ class MonthClosingService
                 'net_owner_revenue' => $f['net_owner_revenue'],
                 'trip_expenses' => $f['trip_expenses'],
                 'general_expenses' => $f['general_expenses'],
-                'fixed_salaries' => $f['fixed_salaries'],
                 'depreciation' => $f['depreciation'],
                 'total_expenses' => $f['total_expenses'],
                 'net_profit' => $f['net_profit'],

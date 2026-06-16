@@ -112,10 +112,7 @@
                 request()->routeIs('owner.expenses.create') ||
                 request()->routeIs('owner.expenses.edit') ||
                 request()->routeIs('owner.expenses.show') ||
-                request()->routeIs('owner.payrolls.index') ||
-                request()->routeIs('owner.payrolls.create') ||
                 request()->routeIs('owner.payrolls.edit') ||
-                request()->routeIs('owner.payrolls.show') ||
                 request()->routeIs('owner.assets.index') ||
                 request()->routeIs('owner.assets.create') ||
                 request()->routeIs('owner.assets.edit') ||
@@ -134,13 +131,6 @@
                     <div class="menu-item {{ request()->routeIs('owner.expenses.index') ? 'active' : '' }}">
                         <a href="{{ route('owner.expenses.index') }}" class="menu-link">
                             <span class="menu-text">{{ __('owner.menu.expenses') }}</span>
-                        </a>
-                    </div>
-
-                    <div
-                        class="menu-item {{ request()->routeIs('owner.payrolls.index') || request()->routeIs('owner.payrolls.create') || request()->routeIs('owner.payrolls.edit') ? 'active' : '' }}">
-                        <a href="{{ route('owner.payrolls.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.payrolls') }}</span>
                         </a>
                     </div>
 

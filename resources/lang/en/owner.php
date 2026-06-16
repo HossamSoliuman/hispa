@@ -20,7 +20,6 @@ return [
         'catches' => 'Catches',
         'financial_management' => 'Financial Management',
         'expenses' => 'Expenses',
-        'payrolls' => 'Payrolls',
         'profit_loss' => 'Profit & Loss',
         'reports' => 'Reports',
         'sales_report' => 'Sales Report',
