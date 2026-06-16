@@ -201,6 +201,7 @@
         expensesUpdate: "{{ route('owner.expenses.update', ':id') }}",
         expensesDestroy: "{{ route('owner.expenses.destroy', ':id') }}",
         expensesStatus: "{{ route('owner.expenses.status', ':id') }}",
+        expensesPrint: "{{ route('owner.expenses.print', ':id') }}",
     };
 </script>
 <script>

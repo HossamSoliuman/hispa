@@ -1,6 +1,18 @@
-$(document).ready(function () {
-    let table;
+let table;
 
+function csrfToken() {
+    return $('meta[name="csrf-token"]').attr('content');
+}
+
+function reloadExpensesTable() {
+    if (table) {
+        table.ajax.reload(null, false);
+    } else {
+        location.reload();
+    }
+}
+
+$(document).ready(function () {
     function initDataTable() {
         if ($.fn.DataTable.isDataTable('#expensesTable')) {
             $('#expensesTable').DataTable().destroy();
@@ -104,15 +116,15 @@ function changeExpenseStatus(expenseId, newStatus) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${routes.expensesStatus.replace(':id', expenseId)}`,
+                url: `${window.routes.expensesStatus.replace(':id', expenseId)}`,
                 method: 'PATCH',
                 data: {
                     status: newStatus,
-                    _token: '{{ csrf_token() }}'
+                    _token: csrfToken()
                 },
                 success: function (response) {
                     Swal.fire('تم!', `تم تغيير حالة المصروف إلى ${statusText}`, 'success');
-                    table.ajax.reload();
+                    reloadExpensesTable();
                 },
                 error: function () {
                     Swal.fire('خطأ!', 'حدث خطأ أثناء تحديث الحالة', 'error');
@@ -120,4 +132,42 @@ function changeExpenseStatus(expenseId, newStatus) {
             });
         }
     });
+}
+
+function deleteExpense(expenseId) {
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: 'لن تتمكن من التراجع عن حذف هذا المصروف!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `${window.routes.expensesDestroy.replace(':id', expenseId)}`,
+                method: 'DELETE',
+                data: {
+                    _token: csrfToken()
+                },
+                success: function (response) {
+                    Swal.fire('تم الحذف!', response.message, 'success');
+                    reloadExpensesTable();
+                },
+                error: function (xhr) {
+                    let message = 'حدث خطأ أثناء حذف المصروف';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    Swal.fire('خطأ!', message, 'error');
+                }
+            });
+        }
+    });
+}
+
+function printExpense(expenseId) {
+    window.open(`${window.routes.expensesPrint.replace(':id', expenseId)}`, '_blank');
 }
