@@ -17,65 +17,6 @@
             </div>
 
             <div
-                class="menu-item has-sub {{ request()->routeIs('owner.crew.index') ||
-                request()->routeIs('owner.crew.create') ||
-                request()->routeIs('owner.crew.edit') ||
-                request()->routeIs('owner.crew.show') ||
-                request()->routeIs('owner.employee.index') ||
-                request()->routeIs('owner.employee.create') ||
-                request()->routeIs('owner.employee.edit') ||
-                request()->routeIs('owner.employee.show') ||
-                request()->routeIs('owner.captain.index') ||
-                request()->routeIs('owner.captain.create') ||
-                request()->routeIs('owner.captain.edit') ||
-                request()->routeIs('owner.captain.show') ||
-                request()->routeIs('owner.customers.index') ||
-                request()->routeIs('owner.customers.create') ||
-                request()->routeIs('owner.customers.edit') ||
-                request()->routeIs('owner.vendors.index') ||
-                request()->routeIs('owner.vendors.create') ||
-                request()->routeIs('owner.vendors.edit')
-                    ? 'active'
-                    : '' }}">
-                <a href="#" class="menu-link ">
-                    <span class="menu-icon"><i class="bi bi-people"></i></span>
-                    <span class="menu-text">{{ __('owner.menu.hr') }}</span>
-                    <span class="menu-caret"><b class="caret"></b></span>
-                </a>
-                <div
-                    class="menu-submenu {{ request()->routeIs('owner.captain.index') || request()->routeIs('owner.captain.create') || request()->routeIs('owner.captain.edit') ? 'active' : '' }}">
-                    <div class="menu-item {{ request()->routeIs('owner.captain.index') ? 'active' : '' }}">
-                        <a href="{{ route('owner.captain.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.captains') }}</span>
-                        </a>
-                    </div>
-                    <div
-                        class="menu-item {{ request()->routeIs('owner.crew.index') || request()->routeIs('owner.crew.create') || request()->routeIs('owner.crew.edit') || request()->routeIs('owner.crew.show') ? 'active' : '' }} ">
-                        <a href="{{ route('owner.crew.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.crew') }}</span>
-                        </a>
-                    </div>
-                    <div
-                        class="menu-item {{ request()->routeIs('owner.employee.index') || request()->routeIs('owner.employee.create') || request()->routeIs('owner.employee.edit') || request()->routeIs('owner.employee.show') ? 'active' : '' }} ">
-                        <a href="{{ route('owner.employee.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.employees') }}</span>
-                        </a>
-                    </div>
-                    <div class="menu-item {{ request()->routeIs('owner.customers.index') ? 'active' : '' }}">
-                        <a href="{{ route('owner.customers.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.customers') }}</span>
-                        </a>
-                    </div>
-
-                    <div class="menu-item {{ request()->routeIs('owner.vendors.index') ? 'active' : '' }}">
-                        <a href="{{ route('owner.vendors.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.vendors') }}</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div
                 class="menu-item has-sub {{ request()->routeIs('owner.catch.index') ||
                 request()->routeIs('owner.catch.create') ||
                 request()->routeIs('owner.catch.edit') ||
@@ -148,6 +89,65 @@
                         </a>
                     </div>
 
+                </div>
+            </div>
+
+            <div
+                class="menu-item has-sub {{ request()->routeIs('owner.crew.index') ||
+                request()->routeIs('owner.crew.create') ||
+                request()->routeIs('owner.crew.edit') ||
+                request()->routeIs('owner.crew.show') ||
+                request()->routeIs('owner.employee.index') ||
+                request()->routeIs('owner.employee.create') ||
+                request()->routeIs('owner.employee.edit') ||
+                request()->routeIs('owner.employee.show') ||
+                request()->routeIs('owner.captain.index') ||
+                request()->routeIs('owner.captain.create') ||
+                request()->routeIs('owner.captain.edit') ||
+                request()->routeIs('owner.captain.show') ||
+                request()->routeIs('owner.customers.index') ||
+                request()->routeIs('owner.customers.create') ||
+                request()->routeIs('owner.customers.edit') ||
+                request()->routeIs('owner.vendors.index') ||
+                request()->routeIs('owner.vendors.create') ||
+                request()->routeIs('owner.vendors.edit')
+                    ? 'active'
+                    : '' }}">
+                <a href="#" class="menu-link ">
+                    <span class="menu-icon"><i class="bi bi-people"></i></span>
+                    <span class="menu-text">{{ __('owner.menu.hr') }}</span>
+                    <span class="menu-caret"><b class="caret"></b></span>
+                </a>
+                <div
+                    class="menu-submenu {{ request()->routeIs('owner.captain.index') || request()->routeIs('owner.captain.create') || request()->routeIs('owner.captain.edit') ? 'active' : '' }}">
+                    <div class="menu-item {{ request()->routeIs('owner.captain.index') ? 'active' : '' }}">
+                        <a href="{{ route('owner.captain.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.menu.captains') }}</span>
+                        </a>
+                    </div>
+                    <div
+                        class="menu-item {{ request()->routeIs('owner.crew.index') || request()->routeIs('owner.crew.create') || request()->routeIs('owner.crew.edit') || request()->routeIs('owner.crew.show') ? 'active' : '' }} ">
+                        <a href="{{ route('owner.crew.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.menu.crew') }}</span>
+                        </a>
+                    </div>
+                    <div
+                        class="menu-item {{ request()->routeIs('owner.employee.index') || request()->routeIs('owner.employee.create') || request()->routeIs('owner.employee.edit') || request()->routeIs('owner.employee.show') ? 'active' : '' }} ">
+                        <a href="{{ route('owner.employee.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.menu.employees') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('owner.customers.index') ? 'active' : '' }}">
+                        <a href="{{ route('owner.customers.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.menu.customers') }}</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item {{ request()->routeIs('owner.vendors.index') ? 'active' : '' }}">
+                        <a href="{{ route('owner.vendors.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('owner.menu.vendors') }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -246,7 +246,7 @@
                         <a href="{{route('owner.governorates.index')}}" class="menu-link">
                             <span class="menu-text">{{ __('owner.generated.governorates') }}</span>
                         </a>
-                    </div>                    
+                    </div>
                     <div class="menu-item {{ request()->routeIs('owner.ports.index') ? 'active' : '' }}">
                         <a href="{{route('owner.ports.index')}}" class="menu-link">
                             <span class="menu-text">{{ __('owner.generated.ports') }}</span>
