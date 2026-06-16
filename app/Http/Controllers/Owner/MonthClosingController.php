@@ -74,9 +74,9 @@ class MonthClosingController extends Controller
         $monthClosing->load('dues');
         $this->linkPayrollPayments($monthClosing);
 
-        // return $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month);
         return view('owner.month_closing.show', [
             'closing' => $monthClosing,
+            'details' => $this->service->details($monthClosing),
             'payrollSummary' => $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month),
         ]);
     }
@@ -91,6 +91,7 @@ class MonthClosingController extends Controller
         return view('owner.month_closing.print', [
             'closing' => $monthClosing,
             'settings' => $settings,
+            'details' => $this->service->details($monthClosing),
             'payrollSummary' => $this->payrollService->monthlyPayrollSummary($monthClosing->owner_id, $monthClosing->year, $monthClosing->month),
         ]);
     }

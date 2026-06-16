@@ -104,6 +104,34 @@ class MonthlyFinancialsService
     }
 
     /**
+     * Detailed sale & expense records backing the monthly figures, scoped and
+     * filtered exactly like {@see compute()} so the totals reconcile line by line.
+     *
+     * @return array{
+     *     sales: \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sale>,
+     *     expenses: \Illuminate\Database\Eloquent\Collection<int, \App\Models\Expense>
+     * }
+     */
+    public function details(int $ownerId, string $from, string $to, ?int $boatId = null): array
+    {
+        $sales = $this->ownerSalesQuery($ownerId, $from, $to, $boatId)
+            ->with(['customer', 'trip'])
+            ->orderBy('sale_datetime')
+            ->get();
+
+        $expenses = $this->expenseQuery($ownerId, $from, $to, $boatId)
+            ->whereIn('category_id', $this->categoryIdsForTypes(['operating', 'maintenance', 'general', 'government']))
+            ->with(['category', 'vendor'])
+            ->orderBy('date')
+            ->get();
+
+        return [
+            'sales' => $sales,
+            'expenses' => $expenses,
+        ];
+    }
+
+    /**
      * Distribute a crew pool across members by their profit shares (أسهم).
      * Equal split is the special case where every member has shares = 1.
      *

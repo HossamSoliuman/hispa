@@ -157,6 +157,22 @@ class MonthClosingService
         $closing->delete();
     }
 
+    /**
+     * Detailed sale & expense records for a closed month, used to render the
+     * full line-by-line breakdown beneath the report summary.
+     *
+     * @return array{
+     *     sales: \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sale>,
+     *     expenses: \Illuminate\Database\Eloquent\Collection<int, \App\Models\Expense>
+     * }
+     */
+    public function details(MonthClosing $closing): array
+    {
+        [$from, $to] = $this->monthRange($closing->year, $closing->month);
+
+        return $this->financials->details($closing->owner_id, $from, $to);
+    }
+
     public function find(int $ownerId, int $year, int $month): ?MonthClosing
     {
         return MonthClosing::where('owner_id', $ownerId)

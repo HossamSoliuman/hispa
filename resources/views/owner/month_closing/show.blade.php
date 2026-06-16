@@ -47,6 +47,108 @@
         @endforeach
     </div>
 
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ __('owner.month_closing.revenue_details.title') }}</h5>
+            <small class="text-muted">{{ __('owner.month_closing.revenue_details.subtitle') }}</small>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{ __('owner.month_closing.revenue_details.date') }}</th>
+                        <th>{{ __('owner.month_closing.revenue_details.number') }}</th>
+                        <th>{{ __('owner.month_closing.revenue_details.customer') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.revenue_details.total') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.revenue_details.commission_labor') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.revenue_details.net_owner') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.revenue_details.remaining') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($details['sales'] as $sale)
+                        <tr>
+                            <td>{{ optional($sale->sale_datetime)->format('Y-m-d') }}</td>
+                            <td>{{ $sale->number }}</td>
+                            <td>{{ $sale->customer_name ?: $sale->customer->name }}</td>
+                            <td class="text-end">{{ number_format((float) $sale->total_price, 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $sale->commission_amount + (float) $sale->labor_amount, 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $sale->net_owner_amount, 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $sale->remaining_total, 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">{{ __('owner.month_closing.revenue_details.no_data') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if ($details['sales']->isNotEmpty())
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="3">{{ __('owner.month_closing.revenue_details.total_label') }}</td>
+                            <td class="text-end">{{ number_format((float) $details['sales']->sum('total_price'), 2) }}</td>
+                            <td class="text-end">{{ number_format($details['sales']->sum(fn ($s) => (float) $s->commission_amount + (float) $s->labor_amount), 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $details['sales']->sum('net_owner_amount'), 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $details['sales']->sum('remaining_total'), 2) }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ __('owner.month_closing.expense_details.title') }}</h5>
+            <small class="text-muted">{{ __('owner.month_closing.expense_details.subtitle') }}</small>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{ __('owner.month_closing.expense_details.date') }}</th>
+                        <th>{{ __('owner.month_closing.expense_details.number') }}</th>
+                        <th>{{ __('owner.month_closing.expense_details.category') }}</th>
+                        <th>{{ __('owner.month_closing.expense_details.vendor') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.expense_details.total') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.expense_details.discount') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.expense_details.vat') }}</th>
+                        <th class="text-end">{{ __('owner.month_closing.expense_details.final') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($details['expenses'] as $expense)
+                        <tr>
+                            <td>{{ \Illuminate\Support\Carbon::parse($expense->date)->format('Y-m-d') }}</td>
+                            <td>{{ $expense->number }}</td>
+                            <td>{{ $expense->category->name }}</td>
+                            <td>{{ optional($expense->vendor)->name ?: '-' }}</td>
+                            <td class="text-end">{{ number_format((float) $expense->total_price, 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $expense->calculated_discount, 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $expense->vat_amount, 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $expense->final_price, 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">{{ __('owner.month_closing.expense_details.no_data') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if ($details['expenses']->isNotEmpty())
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="4">{{ __('owner.month_closing.expense_details.total_label') }}</td>
+                            <td class="text-end">{{ number_format((float) $details['expenses']->sum('total_price'), 2) }}</td>
+                            <td class="text-end">{{ number_format($details['expenses']->sum(fn ($e) => (float) $e->calculated_discount), 2) }}</td>
+                            <td class="text-end">{{ number_format($details['expenses']->sum(fn ($e) => (float) $e->vat_amount), 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $details['expenses']->sum('final_price'), 2) }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+    </div>
+
     <div class="card shadow-sm border-0">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">{{ __('owner.month_closing.distribution') }}</h5>
