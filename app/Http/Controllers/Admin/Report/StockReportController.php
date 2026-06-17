@@ -58,7 +58,6 @@ class StockReportController extends Controller
             'logo' => public_path('default-logo.png'),
             'watermark' => public_path('default-logo.png'),
             'cr_number' => '',
-            'vat_number' => '',
             'phone' => config('app.phone', ''),
             'email' => config('app.email', ''),
             'address' => config('app.address', ''),

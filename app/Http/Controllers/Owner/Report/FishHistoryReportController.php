@@ -132,8 +132,7 @@ class FishHistoryReportController extends Controller
 
     private function generateQRCodeImage(string $companyName): string
     {
-        $vatNumber = Setting::where('key', 'vat_number')->value('value') ?? '';
-        $qrData = "Company: {$companyName}\nVAT: {$vatNumber}";
+        $qrData = "Company: {$companyName}";
 
         return app(\App\Service\Owner\ReportQrService::class)->dataUri($qrData)
             ?? 'data:image/svg+xml;base64,'.base64_encode('<svg width="200" height="200"><rect fill="#f0f0f0" width="200" height="200"/></svg>');

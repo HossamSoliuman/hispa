@@ -212,7 +212,6 @@ class CustomersController extends Controller
             'logo' => $logoPath,
             'watermark' => $watermarkPath,
             'cr_number' => $user->cr_number ?? '',
-            'vat_number' => $user->vat_number ?? '',
             'phone' => $user->phone ?? '',
             'email' => $user->email ?? '',
             'address' => $user->address ?? '',

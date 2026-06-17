@@ -143,13 +143,6 @@
         </div>
         @endif
 
-        @if($expense->vat_rate > 0)
-        <div class="summary-row" style="color: #007bff;">
-            <span>{{ __('owner.expenses.show.totals.vat_label', ['rate' => $expense->vat_rate]) }}:</span>
-            <span>+ {{ number_format($expense->vat_amount, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
-        </div>
-        @endif
-
         <div class="summary-row total-row">
             <span><strong>{{ __('owner.expenses.show.totals.final_total') }}:</strong></span>
             <span><strong style="color: #28a745; font-size: 1.1em;">{{ number_format($expense->final_price, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></strong></span>

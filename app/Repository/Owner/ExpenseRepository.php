@@ -190,7 +190,7 @@ class ExpenseRepository
 
             if ($expenseType === 'general' || $expenseType === 'government' || ($expenseType === 'operating' && $expense->category->type != 'operating-equipments')) {
                 $total = (float) ($data['total_price'] ?? 0);
-                $calc = $this->calculateFinalPrice($total, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0), $expense->vendor);
+                $calc = $this->calculateFinalPrice($total, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0));
 
                 $expense->update(array_merge($expenseData, [
                     'total_price' => $total,
@@ -201,7 +201,7 @@ class ExpenseRepository
                 ]));
             } elseif ($expenseType === 'maintenance') {
                 $total = (float) ($data['estimated_cost'] ?? 0);
-                $calc = $this->calculateFinalPrice($total, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0), $expense->vendor);
+                $calc = $this->calculateFinalPrice($total, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0));
 
                 $expense->update(array_merge($expenseData, [
                     'total_price' => $total,
@@ -238,7 +238,7 @@ class ExpenseRepository
                         'total_price' => $totalPrice,
                     ];
                 }
-                $calc = $this->calculateFinalPrice($grandTotal, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0), $expense->vendor);
+                $calc = $this->calculateFinalPrice($grandTotal, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0));
 
                 foreach ($expense->details as $detail) {
                     $detail->expenseable()->delete();
@@ -300,9 +300,8 @@ class ExpenseRepository
 
     private function handleGeneral(array $data, array $expenseData): Expense
     {
-        $vendor = User::find($expenseData['vendor_id']);
         $total = (float) ($data['total_price'] ?? 0);
-        $calc = $this->calculateFinalPrice($total, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0), $vendor);
+        $calc = $this->calculateFinalPrice($total, $data['discount_type'] ?? null, (float) ($data['discount_value'] ?? 0));
 
         return Expense::create(array_merge($expenseData, [
             'category_id' => $data['category_id'],
@@ -320,14 +319,12 @@ class ExpenseRepository
             return $this->handleOperatingEquipment($data, $expenseData);
         }
 
-        $vendor = User::find($expenseData['vendor_id']);
         $total = (float) ($data['total_price_operating'] ?? 0);
 
         $calc = $this->calculateFinalPrice(
             $total,
             $data['discount_type_operating'] ?? null,
-            (float) ($data['discount_value_operating'] ?? 0),
-            $vendor
+            (float) ($data['discount_value_operating'] ?? 0)
         );
 
         return Expense::create(array_merge($expenseData, [
@@ -363,12 +360,10 @@ class ExpenseRepository
             ];
         }
 
-        $vendor = User::find($expenseData['vendor_id']);
         $calc = $this->calculateFinalPrice(
             $grandTotal,
             $data['discount_type_operating'] ?? null,
-            (float) ($data['discount_value_operating'] ?? 0),
-            $vendor
+            (float) ($data['discount_value_operating'] ?? 0)
         );
 
         $expense = Expense::create(array_merge($expenseData, [
@@ -399,12 +394,10 @@ class ExpenseRepository
         $maintenances = Maintenance::whereIn('id', $ids)->get();
         $totalCost = $maintenances->sum('estimated_cost');
 
-        $vendor = User::find($expenseData['vendor_id']);
         $calc = $this->calculateFinalPrice(
             $totalCost,
             $data['discount_type_maintenance'] ?? null,
-            (float) ($data['discount_value_maintenance'] ?? 0),
-            $vendor
+            (float) ($data['discount_value_maintenance'] ?? 0)
         );
 
         // $category = Category::where('type', 'maintenance')->whereNull('parent_id')->first();
@@ -423,7 +416,7 @@ class ExpenseRepository
         return $expense;
     }
 
-    private function calculateFinalPrice(float $total, ?string $type, float $value, ?User $vendor = null): array
+    private function calculateFinalPrice(float $total, ?string $type, float $value): array
     {
         // Apply discount
         if ($type === 'percentage') {
@@ -431,17 +424,10 @@ class ExpenseRepository
         } elseif ($type === 'fixed') {
             $total -= $value;
         }
-        $vatRate = 0;
-
-        // Apply VAT if vendor is taxable
-        if ($vendor && $vendor->is_vat_applicable) {
-            $vatRate = getVatRate();
-            $total += ($total * $vatRate / 100);
-        }
 
         return [
             'final_price' => round($total, 2),
-            'vat_rate' => $vatRate,
+            'vat_rate' => 0,
         ];
     }
 

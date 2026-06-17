@@ -257,7 +257,6 @@ class SeedOwnerFinancialTestData extends Command
                 'role' => 'vendor',
                 'company_name' => 'شركة الإمداد البحري',
                 'tax_number' => '3009876543',
-                'is_vat_applicable' => 1,
             ],
         ];
 

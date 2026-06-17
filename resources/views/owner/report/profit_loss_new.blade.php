@@ -171,7 +171,7 @@
         {{-- Summary Cards --}}
         <div id="printable-area">
             <div class="row">
-                <div class="col-md-8 border-end">
+                <div class="col-md-12">
                     <div class="row">
                         <div class="col-md-12 p-2 pb-3">
                             <h3>{{ __('owner.profit_loss.profit_loss_title') }}</h3>
@@ -274,41 +274,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12 p-2 pb-3">
-                            <h3>{{ __('owner.profit_loss.tax_title') }}</h3>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.profit_loss.sales_tax') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['sales_vat'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="stat-card expense">
-                                <div class="label">{{ __('owner.profit_loss.expenses_tax') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['expenses_vat'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="stat-card revenue">
-                                <div class="label">{{ __('owner.profit_loss.net_tax') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['sales_vat'] - $f['expenses_vat'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
+                        <div class="col-md-4">
                             <div class="stat-card payroll">
                                 <div class="label">{{ __('owner.profit_loss.commission_labor') }}</div>
                                 <div class="value">

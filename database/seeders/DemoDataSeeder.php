@@ -611,8 +611,6 @@ class DemoDataSeeder extends Seeder
             /** @var Boat $boat */
             $boat = $data['boat'];
             $total = $data['total'];
-            $vatRate = 15;
-            $finalPrice = round($total * 1.15, 2);
 
             Expense::create([
                 'date' => $data['date']->toDateString(),
@@ -623,11 +621,11 @@ class DemoDataSeeder extends Seeder
                 'total_price' => $total,
                 'discount_type' => null,
                 'discount_value' => 0,
-                'final_price' => $finalPrice,
+                'final_price' => $total,
                 'status' => 'paid',
                 'payment_method_id' => $paymentMethods->isNotEmpty() ? $paymentMethods->random()->id : null,
                 'category_id' => $data['category']?->id,
-                'vat_rate' => $vatRate,
+                'vat_rate' => 0,
             ]);
         }
     }

@@ -46,10 +46,8 @@ class BoatReportController extends Controller
         // QR payload and image using same TLV approach as other reports
         $qrPayload = [
             'seller_name' => $settings['title'] ?? 'حسبة',
-            'vat_number' => Setting::where('key', 'vat_number')->value('value') ?? '',
             'timestamp' => now()->toIso8601String(),
             'total' => number_format((float) ($statistics['total_boats'] ?? 0), 2, '.', ''),
-            'vat_amount' => number_format(0, 2, '.', ''),
         ];
 
         $tlvBase64 = $this->generateQRCode($qrPayload);
@@ -85,10 +83,8 @@ class BoatReportController extends Controller
     {
         $tlv = '';
         $tlv .= $this->encodeTLV(1, $data['seller_name'] ?? '');
-        $tlv .= $this->encodeTLV(2, $data['vat_number'] ?? '');
         $tlv .= $this->encodeTLV(3, $data['timestamp'] ?? now()->toIso8601String());
         $tlv .= $this->encodeTLV(4, number_format((float) ($data['total'] ?? 0), 2, '.', ''));
-        $tlv .= $this->encodeTLV(5, number_format((float) ($data['vat_amount'] ?? 0), 2, '.', ''));
 
         return base64_encode($tlv);
     }

@@ -131,7 +131,6 @@ class ProfitabilityReportController extends Controller
     {
         $owner = Auth::guard('owner')->user();
         $companyName = $owner->name ?? 'N/A';
-        $vat = $owner->vat_number ?? '';
 
         return [
             'name' => $companyName,
@@ -140,7 +139,7 @@ class ProfitabilityReportController extends Controller
             'email' => $owner->email ?? 'N/A',
             'address' => $owner->address ?? 'N/A',
             'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => app(ReportQrService::class)->dataUri("Company: {$companyName}\nVAT: {$vat}"),
+            'qr_code' => app(ReportQrService::class)->dataUri("Company: {$companyName}"),
         ];
     }
 }

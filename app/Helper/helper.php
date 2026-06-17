@@ -203,11 +203,6 @@ function formatHijriDate($date, $pattern = 'dd/MM/yyyy')
     }
 }
 
-function getVatRate(): float
-{
-    return (float) (Setting::where('key', 'vat_rate')->value('value') ?? 15);
-}
-
 /**
  * Public URL of the uploaded company logo, or null when none has been set.
  * Used for the panel brand/header where an <img src> URL is needed.

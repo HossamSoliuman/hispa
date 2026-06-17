@@ -132,13 +132,6 @@
                     </div>
                     @endif
 
-                    @if($expense->vat_rate > 0)
-                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom text-primary">
-                        <span>{{ __('owner.expenses.show.totals.vat_label', ['rate' => $expense->vat_rate]) }}</span>
-                        <span>+ {!! number_format($expense->vat_amount, 2) . ' <span class="unit">' . view('components.riyal-icon', ['size' => 'sm'])->render() . '</span>' !!}</span>
-                    </div>
-                    @endif
-
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-2">
                         <span class="fw-bold fs-5">{{ __('owner.expenses.show.totals.final_total') }}</span>
                         <span class="fw-bold fs-5 text-success">{!! number_format($expense->final_price, 2) . ' <span class="unit">' . view('components.riyal-icon', ['size' => 'sm'])->render() . '</span>' !!}</span>

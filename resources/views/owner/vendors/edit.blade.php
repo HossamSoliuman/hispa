@@ -83,24 +83,6 @@
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label">{{ __('owner.generated.item_dad3cc') }}</label>
-                                <select name="is_vat_applicable" class="form-select" id="is_vat_applicable">
-                                    <option value="0"
-                                        {{ old('is_vat_applicable', $vendor->is_vat_applicable) == '0' ? 'selected' : '' }}>
-                                        {{ __('owner.generated.item_b27ea9') }}</option>
-                                    <option value="1"
-                                        {{ old('is_vat_applicable', $vendor->is_vat_applicable) == '1' ? 'selected' : '' }}>
-                                        {{ __('owner.trips.confirm_end_trip_yes') }}</option>
-                                </select>
-                                @error('is_vat_applicable')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-3 d-flex align-items-center">
-                                <span class="fw-bold me-2">{{ __('owner.generated.item_96097c') }}</span>
-                                <span class="badge bg-primary">{{ getVatRate() }}%</span>
-                            </div>
                         </div>
 
                         <!-- Address -->
@@ -230,28 +212,6 @@
             if (oldRegionId) {
                 loadGovernorates(oldRegionId, oldGovernorateId);
             }
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const select = document.querySelector('select[name="is_vat_applicable"]');
-            const group = document.getElementById('tax_number_group');
-            const input = document.getElementById('tax_number');
-
-            function toggleTaxField() {
-                if (select.value == "1") {
-                    group.style.display = '';
-                    input.setAttribute('required', 'required');
-                } else {
-                    group.style.display = 'none';
-                    input.removeAttribute('required');
-                    input.value = '';
-                }
-            }
-
-            toggleTaxField(); // تشغيل عند تحميل الصفحة (مع old values)
-            select.addEventListener('change', toggleTaxField);
         });
     </script>
 @endsection

@@ -129,13 +129,6 @@ class Expense extends Model
         return 0;
     }
 
-    public function getVatAmountAttribute()
-    {
-        $baseAmount = $this->total_price - $this->calculated_discount;
-
-        return $this->vat_rate ? $baseAmount * ($this->vat_rate / 100) : 0;
-    }
-
     public function getAttachmentUrlAttribute()
     {
         return $this->attachment

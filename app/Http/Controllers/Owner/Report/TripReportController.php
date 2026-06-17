@@ -132,10 +132,8 @@ class TripReportController extends Controller
         // Generate QR code payload (TLV) and image using Dalal controller pattern
         $qrPayload = [
             'seller_name' => $settings['title'] ?? 'حسبة',
-            'vat_number' => Setting::where('key', 'vat_number')->value('value') ?? '',
             'timestamp' => now()->toIso8601String(),
             'total' => number_format((float) ($statistics['total_revenue'] ?? 0), 2, '.', ''),
-            'vat_amount' => number_format(0, 2, '.', ''),
         ];
 
         $tlvBase64 = $this->generateQRCode($qrPayload);
@@ -237,21 +235,13 @@ class TripReportController extends Controller
         $sellerName = $data['seller_name'] ?? '';
         $tlv .= $this->encodeTLV(1, $sellerName);
 
-        // Tag 2: VAT registration number
-        $vatNumber = $data['vat_number'] ?? '';
-        $tlv .= $this->encodeTLV(2, $vatNumber);
-
         // Tag 3: Timestamp (ISO 8601)
         $timestamp = $data['timestamp'] ?? now()->toIso8601String();
         $tlv .= $this->encodeTLV(3, $timestamp);
 
-        // Tag 4: Invoice total (with VAT)
+        // Tag 4: Invoice total
         $total = number_format((float) ($data['total'] ?? 0), 2, '.', '');
         $tlv .= $this->encodeTLV(4, $total);
-
-        // Tag 5: VAT amount
-        $vatAmount = number_format((float) ($data['vat_amount'] ?? 0), 2, '.', '');
-        $tlv .= $this->encodeTLV(5, $vatAmount);
 
         // Base64 encode the TLV data
         return base64_encode($tlv);

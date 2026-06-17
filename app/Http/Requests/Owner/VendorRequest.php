@@ -26,7 +26,7 @@ class VendorRequest extends FormRequest
             'company_name' => 'nullable|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:255',
-            'tax_number' => 'required_if:is_vat_applicable,1|nullable|string|max:255',
+            'tax_number' => 'nullable|string|max:255',
             'region_id' => 'required|exists:regions,id',
             'governorate_id' => 'required|exists:governorates,id',
             'address' => 'nullable|string|max:500',
@@ -35,7 +35,6 @@ class VendorRequest extends FormRequest
             'IBAN' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
             'status' => 'nullable|in:0,1',
-            'is_vat_applicable' => 'nullable|in:0,1',
         ];
     }
 
@@ -45,7 +44,6 @@ class VendorRequest extends FormRequest
             'name.required' => 'الاسم مطلوب',
             'email.required' => 'البريد الإلكتروني مطلوب',
             'phone.required' => 'رقم الجوال مطلوب',
-            'tax_number.required' => 'رقم التعريف الضريبي مطلوب',
             'region_id.required' => 'المنطقة مطلوبة',
             'governorate_id.required' => 'المحافظة مطلوبة',
             'address.required' => 'العنوان مطلوب',

@@ -100,7 +100,6 @@
                 <th>{{ __('owner.month_closing.expense_details.vendor') }}</th>
                 <th>{{ __('owner.month_closing.expense_details.total') }}</th>
                 <th>{{ __('owner.month_closing.expense_details.discount') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.vat') }}</th>
                 <th>{{ __('owner.month_closing.expense_details.final') }}</th>
             </tr>
         </thead>
@@ -113,12 +112,11 @@
                     <td>{{ optional($expense->vendor)->name ?: '-' }}</td>
                     <td>{{ number_format((float) $expense->total_price, 2) }}</td>
                     <td>{{ number_format((float) $expense->calculated_discount, 2) }}</td>
-                    <td>{{ number_format((float) $expense->vat_amount, 2) }}</td>
                     <td>{{ number_format((float) $expense->final_price, 2) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">{{ __('owner.month_closing.expense_details.no_data') }}</td>
+                    <td colspan="7">{{ __('owner.month_closing.expense_details.no_data') }}</td>
                 </tr>
             @endforelse
         </tbody>
@@ -128,7 +126,6 @@
                     <td colspan="4">{{ __('owner.month_closing.expense_details.total_label') }}</td>
                     <td>{{ number_format((float) $details['expenses']->sum('total_price'), 2) }}</td>
                     <td>{{ number_format($details['expenses']->sum(fn ($e) => (float) $e->calculated_discount), 2) }}</td>
-                    <td>{{ number_format($details['expenses']->sum(fn ($e) => (float) $e->vat_amount), 2) }}</td>
                     <td>{{ number_format((float) $details['expenses']->sum('final_price'), 2) }}</td>
                 </tr>
             </tfoot>

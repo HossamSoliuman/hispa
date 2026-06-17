@@ -26,8 +26,6 @@ class MonthlyFinancialsService
 
     public const DEFAULT_OWNER_PERCENT = 50.0;
 
-    public const VAT_RATE = 15.0;
-
     /**
      * Compute the full monthly financial waterfall for an owner.
      *
@@ -38,8 +36,7 @@ class MonthlyFinancialsService
      *     trip_expenses: float, general_expenses: float,
      *     depreciation: float, total_expenses: float, net_profit: float,
      *     owner_percent: float, owner_share: float, crew_share: float,
-     *     crew_count: int, per_fisherman: float,
-     *     sales_vat: float, expenses_vat: float
+     *     crew_count: int, per_fisherman: float
      * }
      */
     public function compute(int $ownerId, string $from, string $to, ?int $boatId = null): array
@@ -74,11 +71,6 @@ class MonthlyFinancialsService
         $crewCount = $this->participatingCrewQuery($ownerId, $boatId)->count();
         $perFisherman = $crewCount > 0 ? $crewShare / $crewCount : 0.0;
 
-        $expensesVat = $this->expensesVat($ownerId, $from, $to, $boatId);
-        $salesVat = $this->ownerIsVatApplicable($ownerId)
-            ? $grossSales * (self::VAT_RATE / (100 + self::VAT_RATE))
-            : 0.0;
-
         return [
             'from' => $from,
             'to' => $to,
@@ -98,8 +90,6 @@ class MonthlyFinancialsService
             'crew_share' => round($crewShare, 2),
             'crew_count' => $crewCount,
             'per_fisherman' => round($perFisherman, 2),
-            'sales_vat' => round($salesVat, 2),
-            'expenses_vat' => round($expensesVat, 2),
         ];
     }
 
@@ -212,24 +202,6 @@ class MonthlyFinancialsService
         }
 
         return $query;
-    }
-
-    private function expensesVat(int $ownerId, string $from, string $to, ?int $boatId): float
-    {
-        return (float) $this->expenseQuery($ownerId, $from, $to, $boatId)
-            ->where('vat_rate', '>', 0)
-            ->get(['final_price', 'vat_rate'])
-            ->sum(function ($expense): float {
-                $rate = (float) $expense->vat_rate;
-                $final = (float) $expense->final_price;
-
-                return $final - ($final / (1 + $rate / 100));
-            });
-    }
-
-    private function ownerIsVatApplicable(int $ownerId): bool
-    {
-        return (bool) User::whereKey($ownerId)->value('is_vat_applicable');
     }
 
     private function setting(string $key, float $default): float

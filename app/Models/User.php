@@ -85,7 +85,6 @@ class User extends Authenticatable
         'company_name',
         'category_id',
         'notes',
-        'is_vat_applicable',
 
         'fishing_license_number',
         'fishing_license_expiry',
@@ -118,7 +117,6 @@ class User extends Authenticatable
         'city_id' => 'integer',
         'port_id' => 'integer',
         'roles_name' => 'array',
-        'is_vat_applicable' => 'integer',
     ];
 
     public function captainCount()

@@ -129,7 +129,6 @@ class BasicWorkflowSeeder extends Seeder
                 'region_id' => $region->id,
                 'governorate_id' => $governorate->id,
                 'tax_number' => '3009876543',
-                'is_vat_applicable' => 1,
                 'address' => 'المنطقة الصناعية',
                 'bank_name' => 'البنك الأهلي',
                 'account_number' => '1234567890',

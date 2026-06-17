@@ -106,9 +106,8 @@ class SalesReportController extends Controller
     private function generateQRCodeImage(): ?string
     {
         $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
-        $vatNumber = Setting::where('key', 'vat_number')->value('value') ?? '';
 
         return app(\App\Service\Owner\ReportQrService::class)
-            ->dataUri("Company: {$companyName}\nVAT: {$vatNumber}");
+            ->dataUri("Company: {$companyName}");
     }
 }

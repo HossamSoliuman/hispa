@@ -31,10 +31,6 @@
                 <input type="text" class="form-control" value="">
             </div>
             <div class="col-md-6">
-                <label class="form-label">{{ __('owner.dalal.modal.form.tax_number') }}(VAT)</label>
-                <input type="text" class="form-control" value="301054997700003">
-            </div>
-            <div class="col-md-6">
                 <label class="form-label">{{ __('owner.dalal.modal.form.email') }}</label>
                 <input type="email" class="form-control" value="yaquobi@ymail.com">
             </div>
