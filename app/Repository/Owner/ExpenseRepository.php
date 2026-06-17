@@ -10,6 +10,7 @@ use App\Models\ExpenseFishingEquipment;
 use App\Models\FishingEquipment;
 use App\Models\Maintenance;
 use App\Models\PaymentMethod;
+use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -134,6 +135,42 @@ class ExpenseRepository
             ->where('owner_id', $ownerId)
             ->where('boat_id', $boatId)
             ->get();
+    }
+
+    /**
+     * Create expense records from the quick-expense amounts entered while creating a trip.
+     *
+     * @param  array<int|string, mixed>  $amounts  category_id => amount
+     */
+    public function createQuickExpensesForTrip(Trip $trip, array $amounts, string $status = 'pending'): void
+    {
+        $date = $trip->start_date?->toDateString() ?? now()->toDateString();
+        $status = in_array($status, ['paid', 'pending'], true) ? $status : 'pending';
+
+        DB::transaction(function () use ($trip, $amounts, $status, $date) {
+            foreach ($amounts as $categoryId => $amount) {
+                $amount = (float) $amount;
+
+                if ($amount <= 0) {
+                    continue;
+                }
+
+                Expense::create([
+                    'date' => $date,
+                    'number' => $this->generateExpenseNumber(),
+                    'notes' => __('owner.trips.quick_expenses.title').' - '.$trip->number,
+                    'owner_id' => $trip->owner_id,
+                    'boat_id' => $trip->boat_id,
+                    'category_id' => (int) $categoryId,
+                    'total_price' => $amount,
+                    'discount_type' => null,
+                    'discount_value' => 0,
+                    'final_price' => $amount,
+                    'vat_rate' => 0,
+                    'status' => $status,
+                ]);
+            }
+        });
     }
 
     public function store(array $data, string $expenseType): Expense

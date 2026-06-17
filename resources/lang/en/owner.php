@@ -293,6 +293,15 @@ return [
         'create' => [
             'title' => 'Add New Trip',
         ],
+        'quick_expenses' => [
+            'title' => 'Quick Trip Expenses',
+            'hint' => 'Enter an amount for each item to record it automatically in expenses. Leave blank to skip.',
+            'amount' => 'Amount',
+            'status' => 'Payment Status',
+            'status_pending' => 'Pending',
+            'status_paid' => 'Paid',
+            'total' => 'Quick Expenses Total',
+        ],
         'edit' => [
             'title' => 'Edit Trip',
         ],

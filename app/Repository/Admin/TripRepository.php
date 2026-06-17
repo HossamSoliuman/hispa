@@ -84,7 +84,16 @@ class TripRepository implements CRUD
             $data['created_by'] = Auth::guard($guard)->user()->name ?? 'Admin';
             $data = fillBoatAndCrewData($data, $request->boat_id, $request->captain_id);
 
-            Trip::create($data);
+            $trip = Trip::create($data);
+
+            if ($guard === 'owner' && $request->filled('quick_expenses')) {
+                app(\App\Repository\Owner\ExpenseRepository::class)->createQuickExpensesForTrip(
+                    $trip,
+                    $request->input('quick_expenses', []),
+                    $request->input('quick_expenses_status', 'pending')
+                );
+            }
+
             DB::commit();
             session()->flash('success', 'تم اضافة البيانات بنجاح');
 

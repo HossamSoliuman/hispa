@@ -105,6 +105,48 @@
                     </div>
                 </div>
 
+                @if(isset($quickExpenseCategories) && $quickExpenseCategories->count())
+                <hr>
+                <div class="row mb-2">
+                    <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h5 class="mb-1">{{ __('owner.trips.quick_expenses.title') }}</h5>
+                            <small class="text-muted">{{ __('owner.trips.quick_expenses.hint') }}</small>
+                        </div>
+                        <div class="form-group mb-0" style="min-width: 180px;">
+                            <label for="quick_expenses_status" class="form-label">{{ __('owner.trips.quick_expenses.status') }}</label>
+                            <select name="quick_expenses_status" id="quick_expenses_status" class="form-control">
+                                <option value="pending" {{ old('quick_expenses_status', 'pending') == 'pending' ? 'selected' : '' }}>{{ __('owner.trips.quick_expenses.status_pending') }}</option>
+                                <option value="paid" {{ old('quick_expenses_status') == 'paid' ? 'selected' : '' }}>{{ __('owner.trips.quick_expenses.status_paid') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    @foreach($quickExpenseCategories as $category)
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="form-group">
+                            <label class="form-label">{{ $category->name }}</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0"
+                                    name="quick_expenses[{{ $category->id }}]"
+                                    value="{{ old('quick_expenses.'.$category->id) }}"
+                                    class="form-control quick-expense-amount"
+                                    placeholder="{{ __('owner.trips.quick_expenses.amount') }}">
+                            </div>
+                            @error('quick_expenses.'.$category->id) <span class="text-danger error">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <span class="fw-bold">{{ __('owner.trips.quick_expenses.total') }}:</span>
+                        <span id="quickExpensesTotal" class="fw-bold">0.00</span>
+                    </div>
+                </div>
+                @endif
+
 
                 <div class="mt-4">
                     <button type="submit" class="btn btn-success">{{__('owner.actions.save')}}</button>
@@ -136,6 +178,18 @@
 
 <script>
     $("#createForm").validate();
+</script>
+<script>
+    $(document).on('input', '.quick-expense-amount', function() {
+        let total = 0;
+        $('.quick-expense-amount').each(function() {
+            let value = parseFloat($(this).val());
+            if (!isNaN(value) && value > 0) {
+                total += value;
+            }
+        });
+        $('#quickExpensesTotal').text(total.toFixed(2));
+    });
 </script>
 <script>
     $(document).ready(function() {

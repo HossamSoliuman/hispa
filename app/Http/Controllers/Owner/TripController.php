@@ -7,6 +7,7 @@ use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\TripRequest;
 use App\Http\Requests\Owner\TripTransitionRequest;
+use App\Models\Category;
 use App\Models\Region;
 use App\Models\Trip;
 use App\Models\User;
@@ -35,7 +36,9 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
-        return view('owner.trips.index', compact('captains'));
+        $quickExpenseCategories = $this->quickExpenseCategories();
+
+        return view('owner.trips.index', compact('captains', 'quickExpenseCategories'));
     }
 
     public function getTripData(Request $request)
@@ -82,7 +85,19 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
-        return view('owner.trips.create', compact('regions', 'captains'));
+        $quickExpenseCategories = $this->quickExpenseCategories();
+
+        return view('owner.trips.create', compact('regions', 'captains', 'quickExpenseCategories'));
+    }
+
+    private function quickExpenseCategories()
+    {
+        return Category::active()
+            ->where('type', 'operating')
+            ->whereNotNull('parent_id')
+            ->whereNotIn('name_en', ['Fishing Tools', 'Fishing Equipment'])
+            ->orderBy('id')
+            ->get();
     }
 
     public function store(TripRequest $request)

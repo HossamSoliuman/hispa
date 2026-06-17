@@ -37,6 +37,10 @@ class TripRequest extends FormRequest
             'boat_name' => 'nullable|max:255',
             'notes' => 'nullable|max:255',
 
+            'quick_expenses' => 'nullable|array',
+            'quick_expenses.*' => 'nullable|numeric|min:0',
+            'quick_expenses_status' => 'nullable|in:paid,pending',
+
         ];
     }
 
