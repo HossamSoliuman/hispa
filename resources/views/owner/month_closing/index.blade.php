@@ -72,7 +72,7 @@
                                 <td>{{ number_format($closing->crew_share, 2) }}</td>
                                 <td>{{ optional($closing->closed_at)->format('Y-m-d H:i') }}</td>
                                 <td>
-                                    <div class="d-flex gap-1 align-items-center">
+                                    <div class="d-flex gap-1 align-items-center justify-content-center">
                                         <a href="{{ route('owner.month-closing.show', $closing) }}" class="btn btn-sm btn-info">
                                             <i class="fa fa-eye"></i>
                                         </a>
@@ -80,6 +80,7 @@
                                             <i class="fa fa-print"></i>
                                         </a>
                                         <form method="POST" action="{{ route('owner.month-closing.destroy', $closing) }}"
+                                            class="d-flex m-0"
                                             onsubmit="return confirm('{{ __('owner.month_closing.messages.delete_confirm') }}')">
                                             @csrf
                                             @method('DELETE')
