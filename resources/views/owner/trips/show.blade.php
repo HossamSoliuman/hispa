@@ -25,14 +25,14 @@
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.gross_revenue'),
-            'value'    => number_format($financials['gross_revenue'], 2),
+            'title'    => __('owner.reports.total_income'),
+            'value'    => number_format($financials['total_income'], 2),
             'icon'     => 'fas fa-coins',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.total_costs'),
-            'value'    => number_format($financials['total_costs'], 2),
+            'title'    => __('owner.reports.depreciation') . ' (' . number_format($financials['depreciation_percent'], 2) . '%)',
+            'value'    => number_format($financials['depreciation'], 2),
             'icon'     => 'fas fa-receipt',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
@@ -157,16 +157,16 @@
                     <table class="table table-bordered table-sm m-0 text-center">
                         <tbody>
                             <tr>
-                                <th class="w-50">{{ __('owner.reports.gross_revenue') }}</th>
-                                <td>{{ number_format($financials['gross_revenue'], 2) }}</td>
+                                <th class="w-50">{{ __('owner.reports.total_income') }}</th>
+                                <td>{{ number_format($financials['total_income'], 2) }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('owner.reports.commission') }}</th>
-                                <td>{{ number_format($financials['commission'], 2) }}</td>
+                                <th>{{ __('owner.reports.depreciation_percent') }}</th>
+                                <td>{{ number_format($financials['depreciation_percent'], 2) }}%</td>
                             </tr>
                             <tr>
-                                <th>{{ __('owner.reports.labor') }}</th>
-                                <td>{{ number_format($financials['labor'], 2) }}</td>
+                                <th>{{ __('owner.reports.total_expenses') }}</th>
+                                <td>{{ number_format($financials['total_expenses'], 2) }}</td>
                             </tr>
                             <tr>
                                 <th>{{ __('owner.reports.outstanding') }}</th>
@@ -176,6 +176,61 @@
                                 <th>{{ __('owner.reports.net_profit') }}</th>
                                 <td>{{ number_format($financials['net_profit'], 2) }}</td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-arrow">
+                    <div class="card-arrow-top-left"></div>
+                    <div class="card-arrow-top-right"></div>
+                    <div class="card-arrow-bottom-left"></div>
+                    <div class="card-arrow-bottom-right"></div>
+                </div>
+            </div>
+
+            {{-- Crew salaries --}}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold">
+                    <i class="fas fa-users me-2"></i> {{ __('owner.reports.crew_salaries') }}
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-sm m-0 text-center">
+                        <tbody>
+                            <tr>
+                                <th class="w-50">{{ __('owner.reports.owner_share') }} (50%)</th>
+                                <td>{{ number_format($financials['owner_share'], 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ __('owner.reports.crew_share') }} (50%)</th>
+                                <td>{{ number_format($financials['crew_share'], 2) }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ __('owner.reports.per_crew') }}</th>
+                                <td>{{ number_format($financials['per_crew'], 2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-sm table-bordered text-center mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ __('owner.reports.member_name') }}</th>
+                                <th>{{ __('owner.reports.percentage') }}</th>
+                                <th>{{ __('owner.reports.amount') }}</th>
+                                <th>{{ __('owner.reports.signature') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($financials['crew_members'] as $member)
+                                <tr>
+                                    <td>{{ $member['name'] }}</td>
+                                    <td>{{ number_format($member['percent'], 2) }}%</td>
+                                    <td>{{ number_format($member['due'], 2) }}</td>
+                                    <td></td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-muted">{{ __('owner.reports.no_crew') }}</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -242,8 +297,12 @@
                                 </tr>
                             @endif
                             <tr>
+                                <th>{{ __('owner.reports.captain_count') }}</th>
+                                <td>{{ $data->captain ? 1 : 0 }}</td>
+                            </tr>
+                            <tr>
                                 <th>{{ __('owner.trips.show.crew_count') }}</th>
-                                <td>{{ $data->crew_count ?? '---' }}</td>
+                                <td>{{ $data->crew_count ?? 0 }}</td>
                             </tr>
                         </tbody>
                     </table>

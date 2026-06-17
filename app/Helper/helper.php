@@ -56,7 +56,9 @@ function fillBoatAndCrewData(array $data, $boatId, $captainId)
     $data['boat_color'] = $boat->color;
     $data['boat_length'] = $boat->length;
     $data['boat_width'] = $boat->width;
-    $data['crew_count'] = \App\Models\User::where('captain_id', $captainId)->count();
+    $data['crew_count'] = \App\Models\User::where('boat_id', $boatId)
+        ->where('role', 'crew')
+        ->count();
 
     return $data;
 }

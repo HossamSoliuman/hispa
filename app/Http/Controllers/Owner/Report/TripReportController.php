@@ -101,8 +101,9 @@ class TripReportController extends Controller
         }
 
         // Per-trip financial breakdown (catch, revenue, costs, profit), keyed by trip id
-        $financials = $trips->mapWithKeys(function ($trip) {
-            return [$trip->id => $this->calculateTripFinancials($trip)];
+        $tripFinancials = app(\App\Service\Owner\TripFinancialsService::class);
+        $financials = $trips->mapWithKeys(function ($trip) use ($tripFinancials) {
+            return [$trip->id => $tripFinancials->compute($trip)];
         });
 
         // Calculate aggregate statistics
@@ -158,37 +159,6 @@ class TripReportController extends Controller
             'owner_id',
             'filters'
         ));
-    }
-
-    /**
-     * Calculate the financial summary for a single trip from its catch and sales.
-     *
-     * @return array{catch_weight: float, sold_weight: float, gross_revenue: float, commission: float, labor: float, total_costs: float, net_profit: float, outstanding: float}
-     */
-    private function calculateTripFinancials(Trip $trip): array
-    {
-        $catchWeight = (float) ($trip->catches?->total_weight ?? 0);
-        if ($catchWeight <= 0 && $trip->catches) {
-            $catchWeight = (float) $trip->catches->details->sum('weight');
-        }
-
-        $grossRevenue = (float) $trip->sales->sum('total_price');
-        $commission = (float) $trip->sales->sum('commission_amount');
-        $labor = (float) $trip->sales->sum('labor_amount');
-        $netProfit = (float) $trip->sales->sum(function ($sale) {
-            return $sale->net_owner_amount ?? ($sale->total_price - ($sale->commission_amount ?? 0) - ($sale->labor_amount ?? 0));
-        });
-
-        return [
-            'catch_weight' => $catchWeight,
-            'sold_weight' => (float) $trip->sales->sum(fn ($sale) => $sale->details->sum('weight')),
-            'gross_revenue' => $grossRevenue,
-            'commission' => $commission,
-            'labor' => $labor,
-            'total_costs' => $commission + $labor,
-            'net_profit' => $netProfit,
-            'outstanding' => (float) $trip->sales->sum('remaining_total'),
-        ];
     }
 
     public function printAllTripsReport(Request $request)

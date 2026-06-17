@@ -98,6 +98,7 @@
             __('owner.trips.status'),
             __('owner.trips.total_catch'),
             __('owner.reports.total_revenue'),
+            __('owner.reports.total_costs'),
         ]"
         :data="$trips">
 
@@ -117,6 +118,10 @@
             <div class="meta-item">
                 <span class="meta-label">{{ __('owner.reports.total_revenue') }}:</span>
                 <span class="meta-value">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">{{ __('owner.reports.total_costs') }}:</span>
+                <span class="meta-value">{{ number_format($statistics['total_costs'], 2) }} <x-riyal-icon /></span>
             </div>
             <div class="meta-item">
                 <span class="meta-label">{{ __('owner.reports.net_profit') }}:</span>
@@ -141,6 +146,7 @@
                 <td>{{ $tripItem->status->label() }}</td>
                 <td>{{ number_format(round($tripFinancials['catch_weight']), 0) }} {{ __('owner.units.kg') }}</td>
                 <td>{{ number_format($tripFinancials['gross_revenue'], 2) }} <x-riyal-icon /></td>
+                <td>{{ number_format($tripFinancials['total_costs'], 2) }} <x-riyal-icon /></td>
             </tr>
         @endforeach
     </x-report-table>
@@ -167,15 +173,15 @@
             <div class="summary-card">
                 <span class="summary-icon catch"><i class="fas fa-coins"></i></span>
                 <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.reports.gross_revenue') }}</div>
-                    <div class="summary-value">{{ number_format($f['gross_revenue'], 2) }} <x-riyal-icon /></div>
+                    <div class="summary-label">{{ __('owner.reports.total_income') }}</div>
+                    <div class="summary-value">{{ number_format($f['total_income'], 2) }} <x-riyal-icon /></div>
                 </div>
             </div>
             <div class="summary-card">
                 <span class="summary-icon list"><i class="fas fa-receipt"></i></span>
                 <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.reports.total_costs') }}</div>
-                    <div class="summary-value">{{ number_format($f['total_costs'], 2) }} <x-riyal-icon /></div>
+                    <div class="summary-label">{{ __('owner.reports.depreciation') }} ({{ number_format($f['depreciation_percent'], 2) }}%)</div>
+                    <div class="summary-value">{{ number_format($f['depreciation'], 2) }} <x-riyal-icon /></div>
                 </div>
             </div>
             <div class="summary-card">
@@ -215,7 +221,8 @@
                 @if($trip->captain?->phone)
                     <p>{{ $trip->captain->phone }}</p>
                 @endif
-                <p><strong>{{ __('owner.reports.crew_count') }}:</strong> {{ $trip->crew_count ?? '-' }}</p>
+                <p><strong>{{ __('owner.reports.captain_count') }}:</strong> {{ $trip->captain ? 1 : 0 }}</p>
+                <p><strong>{{ __('owner.reports.crew_count') }}:</strong> {{ $trip->crew_count ?? 0 }}</p>
                 @if($trip->port)
                     <p><strong>{{ __('owner.reports.port') }}:</strong> {{ $trip->port->name }}</p>
                 @endif
@@ -318,16 +325,16 @@
         <div class="bottom-section">
             <div class="summary-box">
                 <div class="summary-row">
-                    <span>{{ __('owner.reports.gross_revenue') }}</span>
-                    <span class="summary-value">{{ number_format($f['gross_revenue'], 2) }} <x-riyal-icon /></span>
+                    <span>{{ __('owner.reports.total_income') }}</span>
+                    <span class="summary-value">{{ number_format($f['total_income'], 2) }} <x-riyal-icon /></span>
                 </div>
                 <div class="summary-row">
-                    <span>{{ __('owner.reports.commission') }}</span>
-                    <span class="summary-value">{{ number_format($f['commission'], 2) }} <x-riyal-icon /></span>
+                    <span>{{ __('owner.reports.depreciation_percent') }}</span>
+                    <span class="summary-value">{{ number_format($f['depreciation_percent'], 2) }}%</span>
                 </div>
                 <div class="summary-row">
-                    <span>{{ __('owner.reports.labor') }}</span>
-                    <span class="summary-value">{{ number_format($f['labor'], 2) }} <x-riyal-icon /></span>
+                    <span>{{ __('owner.reports.total_expenses') }}</span>
+                    <span class="summary-value">{{ number_format($f['total_expenses'], 2) }} <x-riyal-icon /></span>
                 </div>
                 <div class="summary-row">
                     <span>{{ __('owner.reports.outstanding') }}</span>
@@ -338,6 +345,60 @@
                     <span class="summary-value">{{ number_format($f['net_profit'], 2) }} <x-riyal-icon /></span>
                 </div>
             </div>
+        </div>
+
+        {{-- Profit distribution --}}
+        <div class="summary-section mt-4">
+            <h5 class="info-label">{{ __('owner.reports.profit_distribution') }}</h5>
+            <table class="report-table">
+                <tbody>
+                    <tr>
+                        <th>{{ __('owner.reports.net_profit') }}</th>
+                        <td>{{ number_format($f['net_profit'], 2) }} <x-riyal-icon /></td>
+                    </tr>
+                    <tr>
+                        <th>{{ __('owner.reports.owner_share') }} (50%)</th>
+                        <td>{{ number_format($f['owner_share'], 2) }} <x-riyal-icon /></td>
+                    </tr>
+                    <tr>
+                        <th>{{ __('owner.reports.crew_share') }} (50%)</th>
+                        <td>{{ number_format($f['crew_share'], 2) }} <x-riyal-icon /></td>
+                    </tr>
+                    <tr>
+                        <th>{{ __('owner.reports.per_crew') }}</th>
+                        <td>{{ number_format($f['per_crew'], 2) }} <x-riyal-icon /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Crew salaries --}}
+        <div class="summary-section mt-4">
+            <h5 class="info-label">{{ __('owner.reports.crew_salaries') }}</h5>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>{{ __('owner.reports.member_name') }}</th>
+                        <th>{{ __('owner.reports.percentage') }}</th>
+                        <th>{{ __('owner.reports.amount') }}</th>
+                        <th>{{ __('owner.reports.signature') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($f['crew_members'] as $member)
+                        <tr>
+                            <td>{{ $member['name'] }}</td>
+                            <td>{{ number_format($member['percent'], 2) }}%</td>
+                            <td>{{ number_format($member['due'], 2) }} <x-riyal-icon /></td>
+                            <td></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#95a5a6;">{{ __('owner.reports.no_crew') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
 
         @if($trip->notes)

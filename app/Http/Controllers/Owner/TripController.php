@@ -11,6 +11,7 @@ use App\Models\Region;
 use App\Models\Trip;
 use App\Models\User;
 use App\Repository\Admin\TripRepository;
+use App\Service\Owner\TripFinancialsService;
 use App\Services\TripTransitionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -68,34 +69,9 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
-        $financials = $this->calculateTripFinancials($data);
+        $financials = app(TripFinancialsService::class)->compute($data);
 
         return view('owner.trips.show', compact('regions', 'owners', 'data', 'captains', 'financials'));
-    }
-
-    private function calculateTripFinancials(Trip $trip): array
-    {
-        $catchWeight = (float) ($trip->catches?->total_weight ?? 0);
-        if ($catchWeight <= 0 && $trip->catches) {
-            $catchWeight = (float) $trip->catches->details->sum('weight');
-        }
-
-        $grossRevenue = (float) $trip->sales->sum('total_price');
-        $commission = (float) $trip->sales->sum('commission_amount');
-        $labor = (float) $trip->sales->sum('labor_amount');
-        $netProfit = (float) $trip->sales->sum(function ($sale) {
-            return $sale->net_owner_amount ?? ($sale->total_price - ($sale->commission_amount ?? 0) - ($sale->labor_amount ?? 0));
-        });
-
-        return [
-            'catch_weight' => $catchWeight,
-            'gross_revenue' => $grossRevenue,
-            'commission' => $commission,
-            'labor' => $labor,
-            'total_costs' => $commission + $labor,
-            'net_profit' => $netProfit,
-            'outstanding' => (float) $trip->sales->sum('remaining_total'),
-        ];
     }
 
     public function create()
