@@ -91,6 +91,7 @@ return [
     'error_saving' => 'An error occurred while saving: :error',
     'error_updating' => 'An error occurred while updating: :error',
     'error_deleting' => 'An error occurred while deleting: :error',
+    'captain_has_trips' => 'Cannot delete the captain because they are linked to trips. Please delete or reassign their trips first.',
 
     // Success messages
     'list_sale_success' => 'Sales fetched successfully',

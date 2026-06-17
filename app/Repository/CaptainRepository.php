@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Interfaces\CRUD;
+use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -63,6 +64,9 @@ class CaptainRepository implements CRUD
             }
 
             $data['role'] = 'captain';
+            $data['custom_share_percent'] = ($data['salary_type'] ?? null) === 'percentage'
+                ? ($data['custom_share_percent'] ?? null)
+                : null;
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
@@ -142,6 +146,12 @@ class CaptainRepository implements CRUD
                 $data['id_attachment'] = $path; // fix key to singular 'id_attachment'
             }
 
+            if (isset($data['salary_type'])) {
+                $data['custom_share_percent'] = $data['salary_type'] === 'percentage'
+                    ? ($data['custom_share_percent'] ?? null)
+                    : null;
+            }
+
             $captain->update($data);
 
             DB::commit();
@@ -167,6 +177,14 @@ class CaptainRepository implements CRUD
         try {
             $captain = User::findOrFail($id);
 
+            if (Trip::withTrashed()->where('captain_id', $captain->id)->exists()) {
+                DB::rollBack();
+
+                return response()->json(['message' => trans('api.captain_has_trips')], 422);
+            }
+
+            User::where('captain_id', $captain->id)->update(['captain_id' => null]);
+
             if (! is_null($captain->getRawOriginal('logo'))) {
                 deleteFile($captain->getRawOriginal('logo'));
             }
@@ -181,7 +199,7 @@ class CaptainRepository implements CRUD
             DB::commit();
             session()->flash('success', trans('api.captain_deleted'));
 
-            return response()->json(['message' => 'Data saved successfully'], 200);
+            return response()->json(['message' => trans('api.captain_deleted')], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
 

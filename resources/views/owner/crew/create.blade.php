@@ -231,6 +231,19 @@
                                 value="{{ old('salary_amount') }}" class="form-control">
                         </div>
 
+                        {{-- نسبة خاصة من حصة الطاقم (اختياري، تظهر مع النسبة فقط) --}}
+                        <div class="col-md-4 custom-share-field"
+                            style="display: {{ old('salary_type') === 'percentage' ? 'block' : 'none' }};">
+                            <label class="form-label">{{ __('owner.custom_share.label') }}</label>
+                            <input type="number" step="0.01" min="0" max="100" name="custom_share_percent"
+                                value="{{ old('custom_share_percent') }}" class="form-control"
+                                placeholder="{{ __('owner.custom_share.placeholder') }}">
+                            <small class="text-muted d-block">{{ __('owner.custom_share.hint') }}</small>
+                            @error('custom_share_percent')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
 
                         <div class="col-md-4">
                             <label class="form-label">{{ __('owner.generated.fishing_license') }}<span
@@ -534,16 +547,33 @@
     </script>
 
     <script>
-        document.querySelector('select[name="salary_type"]').addEventListener('change', function() {
+        (function() {
+            const salaryTypeSelect = document.querySelector('select[name="salary_type"]');
+            const salaryValue = document.getElementById('salary_value');
+            const salaryAmount = document.querySelector('input[name="salary_amount"]');
             const label = document.getElementById('salaryAmountLabel');
+            const customShareFields = document.querySelectorAll('.custom-share-field');
 
-            if (this.value === 'percentage') {
-                label.innerHTML = '{{ __('owner.generated.item_87c8b2') }} <span class="text-danger">*</span>';
-                document.getElementById('salary_value').style.display = 'none';
-            } else {
-                label.innerHTML = '{{ __('owner.generated.item_98b1f2') }} <span class="text-danger">*</span>';
-                document.getElementById('salary_value').style.display = 'block';
-            }
-        });
+            const applySalaryType = () => {
+                const isPercentage = salaryTypeSelect.value === 'percentage';
+
+                if (isPercentage) {
+                    label.innerHTML = '{{ __('owner.generated.item_87c8b2') }} <span class="text-danger">*</span>';
+                    salaryValue.style.display = 'none';
+                    salaryAmount.required = false;
+                } else {
+                    label.innerHTML = '{{ __('owner.generated.item_98b1f2') }} <span class="text-danger">*</span>';
+                    salaryValue.style.display = 'block';
+                    salaryAmount.required = true;
+                }
+
+                customShareFields.forEach(f => {
+                    f.style.display = isPercentage ? 'block' : 'none';
+                });
+            };
+
+            salaryTypeSelect.addEventListener('change', applySalaryType);
+            applySalaryType();
+        })();
     </script>
 @endsection

@@ -74,6 +74,50 @@ class MonthClosingServiceTest extends TestCase
         $this->assertSame(20869.56, $captainDue['due_amount']);
     }
 
+    public function test_custom_percentage_member_takes_cut_off_the_top(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        // net profit 100,000 => crew pool 50,000.
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 100000,
+            'net_owner_amount' => 100000,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        // Captain on a custom 40% of the crew pool, plus 4 equal-share sailors.
+        $captain = User::factory()->create([
+            'role' => 'captain', 'owner_id' => $owner->id,
+            'salary_type' => 'percentage', 'custom_share_percent' => 40.0,
+        ]);
+        for ($i = 0; $i < 4; $i++) {
+            User::factory()->create([
+                'role' => 'crew', 'owner_id' => $owner->id,
+                'salary_type' => 'percentage', 'profit_shares' => 1.0,
+            ]);
+        }
+
+        $preview = $this->service->preview($owner->id, 2026, 6);
+
+        $this->assertSame(50000.0, $preview['financials']['crew_share']);
+
+        // Captain: 40% of 50,000 = 20,000. Remaining 30,000 / 4 = 7,500 each.
+        $captainDue = collect($preview['dues'])->firstWhere('user_id', $captain->id);
+        $this->assertSame(20000.0, $captainDue['due_amount']);
+        $this->assertSame(40.0, (float) $captainDue['custom_share_percent']);
+
+        $sailorDue = collect($preview['dues'])->firstWhere('role', 'crew');
+        $this->assertSame(7500.0, $sailorDue['due_amount']);
+        $this->assertNull($sailorDue['custom_share_percent']);
+
+        // Whole crew pool is fully distributed.
+        $this->assertSame(50000.0, round(collect($preview['dues'])->sum('due_amount'), 2));
+    }
+
     public function test_close_persists_frozen_snapshot(): void
     {
         $owner = $this->seedClientExample();

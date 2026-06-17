@@ -134,6 +134,38 @@
         />
     </x-report-summary>
 
+    @if (!empty($f['crew_distribution']) && count($f['crew_distribution']) > 0)
+        <h3 style="margin-top: 25px;">{{ __('owner.profit_loss.crew_distribution_title') }}</h3>
+        <table class="dues-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+            <thead>
+                <tr>
+                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.member') }}</th>
+                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.role') }}</th>
+                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.custom_percent') }}</th>
+                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.shares') }}</th>
+                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.due') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($f['crew_distribution'] as $member)
+                    <tr>
+                        <td style="border:1px solid #e2e8f0; padding:8px;">{{ $member['name'] }}</td>
+                        <td style="border:1px solid #e2e8f0; padding:8px;">{{ $member['role'] }}</td>
+                        <td style="border:1px solid #e2e8f0; padding:8px; text-align:center;">{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}</td>
+                        <td style="border:1px solid #e2e8f0; padding:8px; text-align:center;">{{ $member['custom_percent'] !== null ? '-' : number_format($member['shares'], 2) }}</td>
+                        <td style="border:1px solid #e2e8f0; padding:8px; text-align:end;">{{ number_format($member['due'], 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="border:1px solid #e2e8f0; padding:8px; font-weight:700; background:#f8f9fa;">{{ __('owner.profit_loss.crew_share') }}</td>
+                    <td style="border:1px solid #e2e8f0; padding:8px; text-align:end; font-weight:700; background:#f8f9fa;">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    @endif
+
     <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
         <small style="color: #64748b; font-weight: 500;">{{ __('owner.profit_loss.formula_note') }}</small>
     </div>

@@ -74,6 +74,10 @@ class CrewRepository implements CRUD
             }
             // للنوع salary، salary_amount موجود بالفعل في $data
 
+            $data['custom_share_percent'] = $data['salary_type'] === 'percentage'
+                ? ($data['custom_share_percent'] ?? null)
+                : null;
+
             User::create($data);
 
             DB::commit();
@@ -154,6 +158,10 @@ class CrewRepository implements CRUD
                 } elseif ($data['salary_type'] === 'percentage') {
                     $data['salary_amount'] = $data['percentage_amount'] ?? 0;
                 }
+
+                $data['custom_share_percent'] = $data['salary_type'] === 'percentage'
+                    ? ($data['custom_share_percent'] ?? null)
+                    : null;
             }
 
             $crew->update($data);

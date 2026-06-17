@@ -37,6 +37,7 @@ class CrewRequest extends FormRequest
             'job_title' => 'required|string|max:255',
             'salary_type' => 'required|in:salary,percentage',
             'salary_amount' => 'nullable|numeric|min:0|required_if:salary_type,salary',
+            'custom_share_percent' => 'nullable|numeric|min:0|max:100',
             'bank_name' => 'required|string|max:255',
             'account_number' => 'required|string|max:50',
             'IBAN' => 'required|string|max:50',

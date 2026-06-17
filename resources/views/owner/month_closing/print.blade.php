@@ -139,6 +139,7 @@
                 <th>{{ __('owner.month_closing.columns.member') }}</th>
                 <th>{{ __('owner.month_closing.columns.role') }}</th>
                 <th>{{ __('owner.month_closing.columns.shares') }}</th>
+                <th>{{ __('owner.month_closing.columns.custom_percent') }}</th>
                 <th>{{ __('owner.month_closing.columns.share_value') }}</th>
                 <th>{{ __('owner.month_closing.columns.due') }}</th>
                 <th>{{ __('owner.month_closing.columns.advances') }}</th>
@@ -151,7 +152,8 @@
                 <tr>
                     <td>{{ $due->member_name }}</td>
                     <td>{{ $due->role }}</td>
-                    <td>{{ number_format($due->shares, 2) }}</td>
+                    <td>{{ $due->custom_share_percent !== null ? '-' : number_format($due->shares, 2) }}</td>
+                    <td>{{ $due->custom_share_percent !== null ? number_format($due->custom_share_percent, 2) . '%' : '-' }}</td>
                     <td>{{ number_format($due->share_value, 2) }}</td>
                     <td>{{ number_format($due->due_amount, 2) }}</td>
                     <td>{{ number_format($due->advances, 2) }}</td>
@@ -164,6 +166,7 @@
             <tr>
                 <td colspan="2">{{ __('owner.month_closing.status_closed') }}</td>
                 <td>{{ number_format($closing->total_shares, 2) }}</td>
+                <td></td>
                 <td>{{ number_format($closing->share_value, 2) }}</td>
                 <td>{{ number_format($closing->dues->sum('due_amount'), 2) }}</td>
                 <td>{{ number_format($closing->dues->sum('advances'), 2) }}</td>

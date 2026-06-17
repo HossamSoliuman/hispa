@@ -287,6 +287,43 @@
                 </div>
             </div>
             <small class="text-muted d-block mt-2 px-2">{{ __('owner.profit_loss.formula_note') }}</small>
+
+            {{-- Crew share distribution (custom percentages + shares) --}}
+            @if (!empty($f['crew_distribution']) && count($f['crew_distribution']) > 0)
+                <div class="px-2 mt-4">
+                    <h4 class="mb-3">{{ __('owner.profit_loss.crew_distribution_title') }}</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{ __('owner.month_closing.columns.member') }}</th>
+                                    <th>{{ __('owner.month_closing.columns.role') }}</th>
+                                    <th>{{ __('owner.month_closing.columns.custom_percent') }}</th>
+                                    <th>{{ __('owner.month_closing.columns.shares') }}</th>
+                                    <th class="text-end">{{ __('owner.month_closing.columns.due') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($f['crew_distribution'] as $member)
+                                    <tr>
+                                        <td>{{ $member['name'] }}</td>
+                                        <td>{{ $member['role'] }}</td>
+                                        <td>{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}</td>
+                                        <td>{{ $member['custom_percent'] !== null ? '-' : number_format($member['shares'], 2) }}</td>
+                                        <td class="text-end fw-bold">{{ number_format($member['due'], 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light fw-bold">
+                                    <td colspan="4">{{ __('owner.profit_loss.crew_share') }}</td>
+                                    <td class="text-end">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 

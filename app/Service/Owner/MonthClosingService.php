@@ -7,7 +7,6 @@ use App\Models\CrewAdvance;
 use App\Models\MonthClosing;
 use App\Models\Sale;
 use App\Models\Trip;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -44,24 +43,22 @@ class MonthClosingService
 
         $financials = $this->financials->compute($ownerId, $from, $to);
 
-        $members = $this->participatingCrew($ownerId);
-        $sharesMap = $members->mapWithKeys(fn (User $m) => [$m->id => (float) $m->profit_shares])->all();
+        $distribution = $this->financials->crewDistribution($ownerId, $financials['crew_share']);
 
-        $distribution = $this->financials->distributeCrewPool($financials['crew_share'], $sharesMap);
-
-        $dues = $members->map(function (User $member) use ($distribution, $ownerId, $from, $to) {
-            $due = (float) ($distribution['dues'][$member->id] ?? 0);
-            $advances = (float) CrewAdvance::where('user_id', $member->id)
+        $dues = $distribution['members']->map(function (array $member) use ($distribution, $ownerId, $from, $to) {
+            $due = (float) $member['due'];
+            $advances = (float) CrewAdvance::where('user_id', $member['user_id'])
                 ->where('owner_id', $ownerId)
                 ->whereBetween('date', [$from, $to])
                 ->sum('amount');
 
             return [
-                'user_id' => $member->id,
-                'member_name' => $member->name,
-                'role' => $member->role,
-                'shares' => (float) $member->profit_shares,
-                'share_value' => $distribution['share_value'],
+                'user_id' => $member['user_id'],
+                'member_name' => $member['name'],
+                'role' => $member['role'],
+                'shares' => (float) $member['shares'],
+                'custom_share_percent' => $member['custom_percent'],
+                'share_value' => $member['custom_percent'] !== null ? 0.0 : $distribution['share_value'],
                 'due_amount' => round($due, 2),
                 'advances' => round($advances, 2),
                 'paid_amount' => 0.0,
@@ -126,6 +123,7 @@ class MonthClosingService
                     'member_name' => $due['member_name'],
                     'role' => $due['role'],
                     'shares' => $due['shares'],
+                    'custom_share_percent' => $due['custom_share_percent'],
                     'share_value' => $due['share_value'],
                     'due_amount' => $due['due_amount'],
                     'advances' => $due['advances'],
@@ -180,17 +178,6 @@ class MonthClosingService
             ->where('month', $month)
             ->where('status', 'closed')
             ->first();
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection<int, \App\Models\User>
-     */
-    private function participatingCrew(int $ownerId)
-    {
-        return User::where('owner_id', $ownerId)
-            ->whereIn('role', ['crew', 'captain'])
-            ->where('salary_type', 'percentage')
-            ->get();
     }
 
     /**

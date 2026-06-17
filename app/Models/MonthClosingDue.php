@@ -13,6 +13,7 @@ class MonthClosingDue extends Model
     {
         return [
             'shares' => 'decimal:2',
+            'custom_share_percent' => 'decimal:2',
             'share_value' => 'decimal:2',
             'due_amount' => 'decimal:2',
             'advances' => 'decimal:2',

@@ -36,7 +36,8 @@ class MonthlyFinancialsService
      *     trip_expenses: float, general_expenses: float,
      *     depreciation: float, total_expenses: float, net_profit: float,
      *     owner_percent: float, owner_share: float, crew_share: float,
-     *     crew_count: int, per_fisherman: float
+     *     crew_count: int, per_fisherman: float, custom_share_total: float,
+     *     crew_distribution: \Illuminate\Support\Collection<int, array<string, mixed>>
      * }
      */
     public function compute(int $ownerId, string $from, string $to, ?int $boatId = null): array
@@ -68,8 +69,12 @@ class MonthlyFinancialsService
         $ownerShare = $netProfit * ($ownerPercent / 100);
         $crewShare = $netProfit - $ownerShare;
 
-        $crewCount = $this->participatingCrewQuery($ownerId, $boatId)->count();
-        $perFisherman = $crewCount > 0 ? $crewShare / $crewCount : 0.0;
+        $distribution = $this->crewDistribution($ownerId, $crewShare, $boatId);
+        $crewCount = $distribution['members']->count();
+        $shareMemberCount = $distribution['members']->whereNull('custom_percent')->count();
+        $perFisherman = $shareMemberCount > 0
+            ? round($distribution['remaining_pool'] / $shareMemberCount, 2)
+            : 0.0;
 
         return [
             'from' => $from,
@@ -90,6 +95,8 @@ class MonthlyFinancialsService
             'crew_share' => round($crewShare, 2),
             'crew_count' => $crewCount,
             'per_fisherman' => round($perFisherman, 2),
+            'custom_share_total' => $distribution['custom_total'],
+            'crew_distribution' => $distribution['members'],
         ];
     }
 
@@ -143,6 +150,75 @@ class MonthlyFinancialsService
             'total_shares' => (float) $totalShares,
             'dues' => $dues,
         ];
+    }
+
+    /**
+     * Per-member distribution of the crew pool for the owner's participating crew.
+     *
+     * A member with a custom percentage (نسبة خاصة) — typically a captain given
+     * an advantage over the rest — takes that percentage of the pool off the top.
+     * The remaining pool is then split among the other crew by their profit
+     * shares (أسهم), exactly as {@see distributeCrewPool()} does.
+     *
+     * @return array{
+     *     members: \Illuminate\Support\Collection<int, array{user_id:int, name:string, role:string, custom_percent: float|null, shares: float, due: float}>,
+     *     custom_total: float, remaining_pool: float,
+     *     share_value: float, total_shares: float
+     * }
+     */
+    public function crewDistribution(int $ownerId, float $crewPool, ?int $boatId = null): array
+    {
+        $crew = $this->participatingCrewQuery($ownerId, $boatId)->get();
+
+        $customTotal = 0.0;
+        $totalShares = 0.0;
+        foreach ($crew as $member) {
+            $percent = $this->customPercent($member);
+            if ($percent !== null) {
+                $customTotal += round($crewPool * ($percent / 100), 2);
+            } else {
+                $totalShares += (float) $member->profit_shares;
+            }
+        }
+
+        $customTotal = round($customTotal, 2);
+        $remainingPool = round($crewPool - $customTotal, 2);
+        $shareValue = $totalShares > 0 ? round($remainingPool / $totalShares, 2) : 0.0;
+
+        $members = $crew->map(function (User $member) use ($crewPool, $shareValue): array {
+            $percent = $this->customPercent($member);
+            $due = $percent !== null
+                ? round($crewPool * ($percent / 100), 2)
+                : round($shareValue * (float) $member->profit_shares, 2);
+
+            return [
+                'user_id' => $member->id,
+                'name' => $member->name,
+                'role' => $member->role,
+                'custom_percent' => $percent,
+                'shares' => $percent !== null ? 0.0 : (float) $member->profit_shares,
+                'due' => $due,
+            ];
+        });
+
+        return [
+            'members' => $members,
+            'custom_total' => $customTotal,
+            'remaining_pool' => $remainingPool,
+            'share_value' => $shareValue,
+            'total_shares' => round($totalShares, 2),
+        ];
+    }
+
+    /**
+     * The member's positive custom percentage of the crew pool, or null when it
+     * has none (then it shares the remaining pool by profit shares instead).
+     */
+    private function customPercent(User $member): ?float
+    {
+        $percent = $member->custom_share_percent;
+
+        return ($percent !== null && (float) $percent > 0) ? (float) $percent : null;
     }
 
     /**

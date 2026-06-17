@@ -77,6 +77,7 @@ class User extends Authenticatable
         'salary_type',
         'salary_amount',
         'profit_shares',
+        'custom_share_percent',
         'bank_name',
         'account_number',
         'IBAN',
