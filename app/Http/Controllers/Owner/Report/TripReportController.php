@@ -49,6 +49,7 @@ class TripReportController extends Controller
             'region',
             'governorate',
             'catches.details.fish',
+            'catches.details.unit',
             'sales.details',
         ])->where('owner_id', $owner_id);
 

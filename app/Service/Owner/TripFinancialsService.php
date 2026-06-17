@@ -2,6 +2,7 @@
 
 namespace App\Service\Owner;
 
+use App\Models\CatchDetail;
 use App\Models\Trip;
 use Illuminate\Support\Collection;
 
@@ -31,6 +32,7 @@ class TripFinancialsService
      *     total_expenses: float, net_profit: float, owner_share: float,
      *     crew_share: float, crew_count: int, per_crew: float,
      *     outstanding: float,
+     *     catch_weight_by_unit: \Illuminate\Support\Collection<string, float>,
      *     crew_members: \Illuminate\Support\Collection<int, array<string, mixed>>
      * }
      */
@@ -56,8 +58,15 @@ class TripFinancialsService
             $catchWeight = (float) $trip->catches->details->sum('weight');
         }
 
+        $catchWeightByUnit = $trip->catches
+            ? $trip->catches->details
+                ->groupBy(fn (CatchDetail $detail): string => $detail->unit->name ?: __('owner.units.kg'))
+                ->map(fn (Collection $group): float => (float) $group->sum('weight'))
+            : collect();
+
         return [
             'catch_weight' => $catchWeight,
+            'catch_weight_by_unit' => $catchWeightByUnit,
             'gross_revenue' => round($grossRevenue, 2),
             'total_income' => round($grossRevenue, 2),
             'depreciation' => round($depreciation, 2),

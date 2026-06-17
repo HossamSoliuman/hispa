@@ -154,6 +154,11 @@
     @if($trip)
         @php
             $f = $financials[$trip->id];
+            $catchWeightDisplay = $f['catch_weight_by_unit']->isNotEmpty()
+                ? $f['catch_weight_by_unit']
+                    ->map(fn ($weight, $unit) => number_format(round($weight), 0) . ' ' . $unit)
+                    ->implode('، ')
+                : '0';
             $catchDetails = $trip->catches?->details ?? collect();
             $depart = $trip->start_date ? $trip->start_date->format('Y-m-d') : '-';
             $departTime = $trip->departure_time ? $trip->departure_time->format('H:i') : null;
@@ -167,7 +172,7 @@
                 <span class="summary-icon weight"><i class="fas fa-weight-hanging"></i></span>
                 <div class="summary-content">
                     <div class="summary-label">{{ __('owner.reports.catch_weight') }}</div>
-                    <div class="summary-value">{{ number_format(round($f['catch_weight']), 0) }} {{ __('owner.units.kg') }}</div>
+                    <div class="summary-value">{{ $catchWeightDisplay }}</div>
                 </div>
             </div>
             <div class="summary-card">
@@ -221,8 +226,7 @@
                 @if($trip->captain?->phone)
                     <p>{{ $trip->captain->phone }}</p>
                 @endif
-                <p><strong>{{ __('owner.reports.captain_count') }}:</strong> {{ $trip->captain ? 1 : 0 }}</p>
-                <p><strong>{{ __('owner.reports.crew_count') }}:</strong> {{ $trip->crew_count ?? 0 }}</p>
+                <p><strong>{{ __('owner.reports.crew_count') }}:</strong> {{ ($trip->crew_count ?? 0) + ($trip->captain ? 1 : 0) }}</p>
                 @if($trip->port)
                     <p><strong>{{ __('owner.reports.port') }}:</strong> {{ $trip->port->name }}</p>
                 @endif
@@ -266,6 +270,7 @@
                         <th>#</th>
                         <th>{{ __('owner.reports.fish_name') }}</th>
                         <th>{{ __('owner.reports.weight') }}</th>
+                        <th>{{ __('owner.catch.unit') }}</th>
                         <th>{{ __('owner.reports.price_per_kg') }}</th>
                         <th>{{ __('owner.reports.total_value') }}</th>
                     </tr>
@@ -275,13 +280,14 @@
                         <tr>
                             <td>{{ $i + 1 }}</td>
                             <td>{{ $detail->fish->name ?? ($detail->fish_name ?? __('owner.reports.unknown_fish')) }}</td>
-                            <td>{{ number_format(round($detail->weight), 0) }} {{ __('owner.units.kg') }}</td>
+                            <td>{{ number_format(round($detail->weight), 0) }}</td>
+                            <td>{{ $detail->unit->name ?: __('owner.units.kg') }}</td>
                             <td>{{ number_format($detail->price_per_kg, 2) }} <x-riyal-icon /></td>
                             <td>{{ number_format($detail->total_price, 2) }} <x-riyal-icon /></td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align:center; color:#95a5a6;">{{ __('owner.trips.show.no_catch_data') }}</td>
+                            <td colspan="6" style="text-align:center; color:#95a5a6;">{{ __('owner.trips.show.no_catch_data') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -363,10 +369,6 @@
                     <tr>
                         <th>{{ __('owner.reports.crew_share') }} (50%)</th>
                         <td>{{ number_format($f['crew_share'], 2) }} <x-riyal-icon /></td>
-                    </tr>
-                    <tr>
-                        <th>{{ __('owner.reports.per_crew') }}</th>
-                        <td>{{ number_format($f['per_crew'], 2) }} <x-riyal-icon /></td>
                     </tr>
                 </tbody>
             </table>

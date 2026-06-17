@@ -16,11 +16,19 @@
         </div>
     </div>
 
+    @php
+        $catchWeightDisplay = $financials['catch_weight_by_unit']->isNotEmpty()
+            ? $financials['catch_weight_by_unit']
+                ->map(fn ($weight, $unit) => number_format(round($weight), 0) . ' ' . $unit)
+                ->implode('، ')
+            : '0';
+    @endphp
+
     {{-- Financial summary cards --}}
     <div class="row mb-3">
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.catch_weight') . ' (' . __('owner.units.kg') . ')',
-            'value'    => number_format(round($financials['catch_weight']), 0),
+            'title'    => __('owner.reports.catch_weight'),
+            'value'    => $catchWeightDisplay,
             'icon'     => 'fas fa-weight-hanging',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
@@ -90,8 +98,7 @@
                     @endif
                 </div>
                 <div class="card-footer text-muted text-center small">
-                    {{ __('owner.trips.show.total_weight') }}:
-                    {{ number_format($financials['catch_weight'], 2) }} {{ __('owner.units.kg') }}
+                    {{ __('owner.trips.show.total_weight') }}: {{ $catchWeightDisplay }}
                 </div>
                 <div class="card-arrow">
                     <div class="card-arrow-top-left"></div>
@@ -203,10 +210,6 @@
                                 <th>{{ __('owner.reports.crew_share') }} (50%)</th>
                                 <td>{{ number_format($financials['crew_share'], 2) }}</td>
                             </tr>
-                            <tr>
-                                <th>{{ __('owner.reports.per_crew') }}</th>
-                                <td>{{ number_format($financials['per_crew'], 2) }}</td>
-                            </tr>
                         </tbody>
                     </table>
                     <table class="table table-sm table-bordered text-center mb-0">
@@ -297,12 +300,8 @@
                                 </tr>
                             @endif
                             <tr>
-                                <th>{{ __('owner.reports.captain_count') }}</th>
-                                <td>{{ $data->captain ? 1 : 0 }}</td>
-                            </tr>
-                            <tr>
                                 <th>{{ __('owner.trips.show.crew_count') }}</th>
-                                <td>{{ $data->crew_count ?? 0 }}</td>
+                                <td>{{ ($data->crew_count ?? 0) + ($data->captain ? 1 : 0) }}</td>
                             </tr>
                         </tbody>
                     </table>
