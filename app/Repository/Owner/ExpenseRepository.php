@@ -138,18 +138,18 @@ class ExpenseRepository
     }
 
     /**
-     * Create expense records from the quick-expense amounts entered while creating a trip.
+     * Create expense records from the quick-expense rows entered while creating a trip.
      *
-     * @param  array<int|string, mixed>  $amounts  category_id => amount
+     * @param  array<int, array{category_id?: int|string|null, vendor_id?: int|string|null, amount?: mixed}>  $rows
      */
-    public function createQuickExpensesForTrip(Trip $trip, array $amounts, string $status = 'pending'): void
+    public function createQuickExpensesForTrip(Trip $trip, array $rows, string $status = 'pending'): void
     {
         $date = $trip->start_date?->toDateString() ?? now()->toDateString();
         $status = in_array($status, ['paid', 'pending'], true) ? $status : 'pending';
 
-        DB::transaction(function () use ($trip, $amounts, $status, $date) {
-            foreach ($amounts as $categoryId => $amount) {
-                $amount = (float) $amount;
+        DB::transaction(function () use ($trip, $rows, $status, $date) {
+            foreach ($rows as $row) {
+                $amount = (float) ($row['amount'] ?? 0);
 
                 if ($amount <= 0) {
                     continue;
@@ -161,7 +161,8 @@ class ExpenseRepository
                     'notes' => __('owner.trips.quick_expenses.title').' - '.$trip->number,
                     'owner_id' => $trip->owner_id,
                     'boat_id' => $trip->boat_id,
-                    'category_id' => (int) $categoryId,
+                    'category_id' => ! empty($row['category_id']) ? (int) $row['category_id'] : null,
+                    'vendor_id' => ! empty($row['vendor_id']) ? (int) $row['vendor_id'] : null,
                     'total_price' => $amount,
                     'discount_type' => null,
                     'discount_value' => 0,

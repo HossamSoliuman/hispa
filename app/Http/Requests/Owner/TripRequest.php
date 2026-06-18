@@ -38,7 +38,9 @@ class TripRequest extends FormRequest
             'notes' => 'nullable|max:255',
 
             'quick_expenses' => 'nullable|array',
-            'quick_expenses.*' => 'nullable|numeric|min:0',
+            'quick_expenses.*.category_id' => 'nullable|integer|exists:categories,id',
+            'quick_expenses.*.vendor_id' => 'nullable|integer|exists:users,id',
+            'quick_expenses.*.amount' => 'nullable|numeric|min:0',
             'quick_expenses_status' => 'nullable|in:paid,pending',
 
         ];

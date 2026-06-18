@@ -37,8 +37,9 @@ class TripController extends Controller
             ->get();
 
         $quickExpenseCategories = $this->quickExpenseCategories();
+        $quickExpenseVendors = $this->quickExpenseVendors();
 
-        return view('owner.trips.index', compact('captains', 'quickExpenseCategories'));
+        return view('owner.trips.index', compact('captains', 'quickExpenseCategories', 'quickExpenseVendors'));
     }
 
     public function getTripData(Request $request)
@@ -86,8 +87,9 @@ class TripController extends Controller
             ->get();
 
         $quickExpenseCategories = $this->quickExpenseCategories();
+        $quickExpenseVendors = $this->quickExpenseVendors();
 
-        return view('owner.trips.create', compact('regions', 'captains', 'quickExpenseCategories'));
+        return view('owner.trips.create', compact('regions', 'captains', 'quickExpenseCategories', 'quickExpenseVendors'));
     }
 
     private function quickExpenseCategories()
@@ -98,6 +100,14 @@ class TripController extends Controller
             ->whereNotIn('name_en', ['Fishing Tools', 'Fishing Equipment'])
             ->orderBy('id')
             ->get();
+    }
+
+    private function quickExpenseVendors()
+    {
+        return User::where('role', 'vendor')
+            ->where('owner_id', auth()->id())
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 
     public function store(TripRequest $request)

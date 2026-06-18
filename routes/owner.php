@@ -38,6 +38,7 @@ use App\Http\Controllers\Owner\ProfitLossController;
 use App\Http\Controllers\Owner\RegionController;
 use App\Http\Controllers\Owner\Report\DalalStockReportController;
 use App\Http\Controllers\Owner\Report\FishHistoryReportController;
+use App\Http\Controllers\Owner\Report\MonthSummaryController;
 use App\Http\Controllers\Owner\Report\ProfitabilityReportController;
 use App\Http\Controllers\Owner\Report\ReportsHubController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
@@ -207,6 +208,10 @@ Route::group([
         Route::get('/reports', [ReportsHubController::class, 'index'])->name('reports.hub');
         Route::get('/reports/expenses-by-category', [ProfitabilityReportController::class, 'expensesByCategory'])->name('reports.expenses-by-category');
         Route::get('/reports/expenses-by-category/print', [ProfitabilityReportController::class, 'expensesByCategoryPrint'])->name('reports.expenses-by-category.print');
+
+        // month financial summary (single-page P&L statement)
+        Route::get('/reports/month-summary', [MonthSummaryController::class, 'index'])->name('reports.month-summary');
+        Route::get('/reports/month-summary/print', [MonthSummaryController::class, 'print'])->name('reports.month-summary.print');
 
         // analysis reports (P0): trip/boat profitability, production by species
         Route::get('/reports/trip-profitability', [ProfitabilityReportController::class, 'tripProfitability'])->name('reports.trip-profitability');

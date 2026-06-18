@@ -125,10 +125,17 @@
             border-bottom: 1px solid var(--hud-border) !important;
         }
 
-        /* ── top stat cards: soft gray fill for better visibility ── */
-        .hud-stat-card {
-            background: #eef1f5 !important;
-            border-color: rgba(0, 0, 0, .14) !important;
+        /* ── top stat cards: month-status style — rounded, subtle single-accent fill ── */
+        .card.hud-stat-card:not(.border-0) {
+            border-radius: .65rem !important;
+            background: rgba(var(--hud-accent-rgb), .07) !important;
+            border: 1px solid rgba(var(--hud-accent-rgb), .28) !important;
+        }
+        .card.hud-stat-card:after {
+            display: none !important;
+        }
+        .hud-stat-card .hud-sc-label {
+            color: var(--hud-accent) !important;
         }
 
         /* ── corner bracket arrows: full definition + brand-blue color ── */

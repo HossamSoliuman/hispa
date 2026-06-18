@@ -71,10 +71,13 @@ class TripQuickExpensesTest extends TestCase
     public function test_quick_expenses_create_expense_records_for_owner(): void
     {
         [$owner, $boat, $captain, $ice] = $this->makeOwnerSetup();
+        $vendor = User::factory()->create(['role' => 'vendor', 'owner_id' => $owner->id]);
         $this->actingAs($owner, 'owner');
 
         $payload = $this->tripPayload($owner, $boat, $captain) + [
-            'quick_expenses' => [$ice->id => 150.50],
+            'quick_expenses' => [
+                ['category_id' => $ice->id, 'vendor_id' => $vendor->id, 'amount' => 150.50],
+            ],
             'quick_expenses_status' => 'paid',
         ];
 
@@ -86,6 +89,7 @@ class TripQuickExpensesTest extends TestCase
             'owner_id' => $owner->id,
             'boat_id' => $boat->id,
             'category_id' => $ice->id,
+            'vendor_id' => $vendor->id,
             'final_price' => 150.50,
             'status' => 'paid',
         ]);
@@ -100,7 +104,10 @@ class TripQuickExpensesTest extends TestCase
         $this->actingAs($owner, 'owner');
 
         $payload = $this->tripPayload($owner, $boat, $captain) + [
-            'quick_expenses' => [$ice->id => 0],
+            'quick_expenses' => [
+                ['category_id' => $ice->id, 'vendor_id' => null, 'amount' => 0],
+                ['category_id' => '', 'vendor_id' => '', 'amount' => ''],
+            ],
         ];
 
         $this->post(route('owner.trips.store'), $payload)->assertRedirect();

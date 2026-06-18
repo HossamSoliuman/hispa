@@ -93,10 +93,9 @@
         </div>
         <div class="row">
 
-            {{-- KPI cards: use Dalal shared stat-card component for consistent look --}}
+            {{-- KPI cards: shared stat-card component (unified month-status style) --}}
             @include('owner.components.stat-card', [
                 'title' => __('owner.dashboard.total_revenue'),
-                // Use the Dalal SVG Riyal icon component for consistent appearance
                 'value' => new \Illuminate\Support\HtmlString(
                     number_format($totalRevenue, 0) .
                         ' ' .
@@ -106,15 +105,12 @@
                                 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
                         ])->render()),
                 'icon' => 'bi bi-cash-coin',
-                'gradient' => 'linear-gradient(135deg, #27ae60, #2ecc71)',
                 'badge' => number_format($percentageChange, 1),
-                // 'badgeText' => __('owner.dashboard.percentage_since_last_month'),
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 
             @include('owner.components.stat-card', [
                 'title' => __('owner.dashboard.total_catch'),
-                // Show in tons when the total is >= 1000 kg, otherwise show in kg
                 'value' =>
                     $totalCatch >= 1000
                         ? number_format($totalCatch / 1000, 2) .
@@ -122,7 +118,6 @@
                             (__('owner.units.ton') !== 'owner.units.ton' ? __('owner.units.ton') : 't')
                         : number_format($totalCatch, 0) . ' ' . __('owner.units.kg'),
                 'icon' => 'bi bi-basket2-fill',
-                'gradient' => 'linear-gradient(135deg, #2980b9, #3498db)',
                 'footer' => __('owner.dashboard.this_month'),
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
@@ -131,8 +126,6 @@
                 'title' => __('owner.dashboard.active_boats'),
                 'value' => $activeBoats,
                 'icon' => 'fas fa-ship',
-                'gradient' => 'linear-gradient(135deg, #f39c12, #f1c40f)',
-                // 'footer' => __('owner.dashboard.completed_trips', ['count' => $completedTrips]),
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 
@@ -140,8 +133,6 @@
                 'title' => __('owner.dashboard.profit_margin'),
                 'value' => number_format($profitMargin, 1) . '%',
                 'icon' => 'bi bi-graph-up-arrow',
-                'gradient' => 'linear-gradient(135deg, #c0392b, #e74c3c)',
-                // 'footer' => __('owner.dashboard.profit_amount', ['amount' => number_format($profit, 0)]),
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 

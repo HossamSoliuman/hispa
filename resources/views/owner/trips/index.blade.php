@@ -219,6 +219,7 @@
                         </div>
 
                         @if(isset($quickExpenseCategories) && $quickExpenseCategories->count())
+                        @php $quickExpenseRows = old('quick_expenses') ?: [['category_id' => '', 'vendor_id' => '', 'amount' => '']]; @endphp
                         <hr>
                         <div class="row mb-2">
                             <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -235,25 +236,85 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row mb-2">
-                            @foreach($quickExpenseCategories as $category)
-                            <div class="col-md-3 col-6 mb-2">
-                                <label class="form-label">{{ $category->name }}</label>
-                                <input type="number" step="0.01" min="0"
-                                    name="quick_expenses[{{ $category->id }}]"
-                                    value="{{ old('quick_expenses.'.$category->id) }}"
-                                    class="form-control quick-expense-amount"
-                                    placeholder="{{ __('owner.trips.quick_expenses.amount') }}">
-                                @error('quick_expenses.'.$category->id) <span class="text-danger">{{ $message }}</span> @enderror
+
+                        <div id="quickExpensesRows" data-next-index="{{ count($quickExpenseRows) }}">
+                            @foreach($quickExpenseRows as $index => $row)
+                            <div class="row g-2 align-items-end mb-2 quick-expense-row">
+                                <div class="col-md-4 col-12">
+                                    <label class="form-label">{{ __('owner.trips.quick_expenses.category') }}</label>
+                                    <select name="quick_expenses[{{ $index }}][category_id]" class="form-control">
+                                        <option value="">{{ __('owner.trips.quick_expenses.choose_category') }}</option>
+                                        @foreach($quickExpenseCategories as $category)
+                                            <option value="{{ $category->id }}" {{ (string)($row['category_id'] ?? '') === (string)$category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <label class="form-label">{{ __('owner.trips.quick_expenses.provider') }}</label>
+                                    <select name="quick_expenses[{{ $index }}][vendor_id]" class="form-control">
+                                        <option value="">{{ __('owner.trips.quick_expenses.choose_provider') }}</option>
+                                        @foreach($quickExpenseVendors as $vendor)
+                                            <option value="{{ $vendor->id }}" {{ (string)($row['vendor_id'] ?? '') === (string)$vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3 col-9">
+                                    <label class="form-label">{{ __('owner.trips.quick_expenses.amount') }}</label>
+                                    <input type="number" step="0.01" min="0"
+                                        name="quick_expenses[{{ $index }}][amount]"
+                                        value="{{ $row['amount'] ?? '' }}"
+                                        class="form-control quick-expense-amount"
+                                        placeholder="{{ __('owner.trips.quick_expenses.amount') }}">
+                                </div>
+                                <div class="col-md-1 col-3">
+                                    <button type="button" class="btn btn-danger w-100 btn-remove-expense" title="{{ __('owner.trips.quick_expenses.remove_row') }}"><i class="fa fa-times"></i></button>
+                                </div>
                             </div>
                             @endforeach
                         </div>
+
                         <div class="row mb-3">
-                            <div class="col-12">
-                                <span class="fw-bold">{{ __('owner.trips.quick_expenses.total') }}:</span>
-                                <span id="quickExpensesTotal" class="fw-bold">0.00</span>
+                            <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <button type="button" id="addQuickExpense" class="btn btn-outline-primary btn-sm"><i class="fa fa-plus me-1"></i>{{ __('owner.trips.quick_expenses.add_row') }}</button>
+                                <div>
+                                    <span class="fw-bold">{{ __('owner.trips.quick_expenses.total') }}:</span>
+                                    <span id="quickExpensesTotal" class="fw-bold">0.00</span>
+                                </div>
                             </div>
                         </div>
+
+                        <template id="quickExpenseRowTemplate">
+                            <div class="row g-2 align-items-end mb-2 quick-expense-row">
+                                <div class="col-md-4 col-12">
+                                    <label class="form-label">{{ __('owner.trips.quick_expenses.category') }}</label>
+                                    <select name="quick_expenses[__INDEX__][category_id]" class="form-control">
+                                        <option value="">{{ __('owner.trips.quick_expenses.choose_category') }}</option>
+                                        @foreach($quickExpenseCategories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <label class="form-label">{{ __('owner.trips.quick_expenses.provider') }}</label>
+                                    <select name="quick_expenses[__INDEX__][vendor_id]" class="form-control">
+                                        <option value="">{{ __('owner.trips.quick_expenses.choose_provider') }}</option>
+                                        @foreach($quickExpenseVendors as $vendor)
+                                            <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3 col-9">
+                                    <label class="form-label">{{ __('owner.trips.quick_expenses.amount') }}</label>
+                                    <input type="number" step="0.01" min="0"
+                                        name="quick_expenses[__INDEX__][amount]"
+                                        class="form-control quick-expense-amount"
+                                        placeholder="{{ __('owner.trips.quick_expenses.amount') }}">
+                                </div>
+                                <div class="col-md-1 col-3">
+                                    <button type="button" class="btn btn-danger w-100 btn-remove-expense" title="{{ __('owner.trips.quick_expenses.remove_row') }}"><i class="fa fa-times"></i></button>
+                                </div>
+                            </div>
+                        </template>
                         @endif
 
                         <div class="modal-footer px-0">
@@ -564,7 +625,7 @@
             });
         }
 
-        $(document).on('input', '.quick-expense-amount', function() {
+        function recalcQuickExpensesTotal() {
             let total = 0;
             $('.quick-expense-amount').each(function() {
                 let value = parseFloat($(this).val());
@@ -573,6 +634,26 @@
                 }
             });
             $('#quickExpensesTotal').text(total.toFixed(2));
+        }
+
+        $(document).on('input', '.quick-expense-amount', recalcQuickExpensesTotal);
+
+        $(document).on('click', '#addQuickExpense', function() {
+            let container = document.getElementById('quickExpensesRows');
+            let index = parseInt(container.dataset.nextIndex, 10) || 0;
+            let html = document.getElementById('quickExpenseRowTemplate').innerHTML.replace(/__INDEX__/g, index);
+            container.insertAdjacentHTML('beforeend', html);
+            container.dataset.nextIndex = index + 1;
+        });
+
+        $(document).on('click', '.btn-remove-expense', function() {
+            let rows = $('#quickExpensesRows .quick-expense-row');
+            if (rows.length > 1) {
+                $(this).closest('.quick-expense-row').remove();
+            } else {
+                $(this).closest('.quick-expense-row').find('select, input').val('');
+            }
+            recalcQuickExpensesTotal();
         });
     </script>
 @endsection

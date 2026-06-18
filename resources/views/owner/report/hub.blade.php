@@ -26,6 +26,7 @@
                 'icon' => 'bi-cash-stack',
                 'color' => 'success',
                 'items' => [
+                    ['owner.reports.month-summary', __('owner.month_summary.title')],
                     ['owner.profit.loss', __('owner.profit_loss.title')],
                     ['owner.sales-report', __('owner.menu.sales_report')],
                     ['owner.reports.expenses-by-category', __('owner.analysis_reports.expenses_by_category.title')],
