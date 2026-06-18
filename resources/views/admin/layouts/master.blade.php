@@ -125,6 +125,12 @@
             border-bottom: 1px solid var(--hud-border) !important;
         }
 
+        /* ── top stat cards: soft gray fill for better visibility ── */
+        .hud-stat-card {
+            background: #eef1f5 !important;
+            border-color: rgba(0, 0, 0, .14) !important;
+        }
+
         /* ── corner bracket arrows: full definition + brand-blue color ── */
         .card-arrow {
             position: absolute;

@@ -308,6 +308,11 @@
         .hud-card {
             border-radius: 0 !important;
         }
+        /* top stat cards: soft gray fill for better visibility */
+        .hud-stat-card {
+            background: #eef1f5 !important;
+            border-color: rgba(0, 0, 0, .14) !important;
+        }
         .card:not(.border-0) {
             border: 1px solid var(--hud-border, rgba(0, 0, 0, .11)) !important;
         }
