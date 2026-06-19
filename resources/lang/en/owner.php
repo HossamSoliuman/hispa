@@ -166,6 +166,8 @@ return [
         'latest_updates' => 'Latest updates from operations',
         'loading' => 'Loading...',
         'error_loading_activities' => 'An error occurred while loading activities',
+        'sale' => 'Sale',
+        'sar' => 'SAR',
         'revenue' => 'Revenue',
         'profit' => 'Profit',
         'monthly_performance' => 'Monthly financial performance',

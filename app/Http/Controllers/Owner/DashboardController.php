@@ -320,11 +320,12 @@ class DashboardController extends Controller
         $ownerId = $this->ownerId();
         $activities = [];
 
-        $trips = Trip::where('owner_id', $ownerId)->latest('updated_at')->take(5)->get();
+        $trips = Trip::with('boat:id,name_ar,name_en')->where('owner_id', $ownerId)->latest('updated_at')->take(5)->get();
         foreach ($trips as $trip) {
+            $boatName = $trip->boat?->name ?: $trip->boat_name;
             $activities[] = [
                 'icon' => 'bi-clipboard-check text-info',
-                'message' => "{$trip->status->label()} - {$trip->boat_name} - {$trip->number}",
+                'message' => "{$trip->status->label()} - {$boatName} - {$trip->number}",
                 'timestamp' => $trip->updated_at,
                 'badge_class' => 'bg-'.$trip->status->color(),
             ];
@@ -334,7 +335,7 @@ class DashboardController extends Controller
         foreach ($sales as $sale) {
             $activities[] = [
                 'icon' => 'bi-cash-coin text-success',
-                'message' => 'بيع - '.($sale->customer_name ?? '').' - ر.س'.number_format((float) $sale->total_price),
+                'message' => __('owner.dashboard.sale').' - '.($sale->customer_name ?? '').' - '.__('owner.dashboard.sar').number_format((float) $sale->total_price),
                 'timestamp' => $sale->sale_datetime ?? $sale->updated_at,
                 'badge_class' => 'bg-success',
             ];

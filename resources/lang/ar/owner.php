@@ -166,6 +166,8 @@ return [
         'latest_updates' => 'آخر التحديثات من العمليات',
         'loading' => 'جاري التحميل...',
         'error_loading_activities' => 'حدث خطأ في تحميل الأنشطة',
+        'sale' => 'بيع',
+        'sar' => 'ر.س',
         'revenue' => 'الإيرادات',
         'profit' => 'الأرباح',
         'monthly_performance' => 'الأداء المالي الشهري',
