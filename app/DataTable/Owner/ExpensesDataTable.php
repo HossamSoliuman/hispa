@@ -34,7 +34,7 @@ class ExpensesDataTable
                 }
 
                 if ($hijri) {
-                    return $greg . '<br><small class="text-muted">' . $hijri . '</small>';
+                    return $greg.'<br><small class="text-muted">'.$hijri.'</small>';
                 }
 
                 return $greg;
@@ -57,12 +57,12 @@ class ExpensesDataTable
             ->addColumn('formatted_total', function ($expense) {
                 $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
 
-                return number_format($expense->total_price, 2) . ' <span class="unit">' . $icon . '</span>';
+                return number_format($expense->total_price, 2).' <span class="unit">'.$icon.'</span>';
             })
             ->addColumn('formatted_final', function ($expense) {
                 $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
 
-                return number_format($expense->final_price, 2) . ' <span class="unit">' . $icon . '</span>';
+                return number_format($expense->final_price, 2).' <span class="unit">'.$icon.'</span>';
             })
             ->addColumn('expense_type', function ($expense) {
                 return $expense->category ? $expense->category->name : '-';
@@ -72,7 +72,8 @@ class ExpensesDataTable
                 if (! $categoryParent) {
                     return '-';
                 }
-                return ['type' => $categoryParent->type, 'name' => $categoryParent->name_ar];
+
+                return ['type' => $categoryParent->type, 'name' => $categoryParent->name];
             })
             ->addColumn('action', function ($expense) {
                 return view('owner.expenses.partials.actions', compact('expense'))->render();

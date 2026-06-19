@@ -56,7 +56,7 @@ class CatchDataTable extends DataTables
             return datatables()->of($trips)
                 ->addIndexColumn()
                 ->addColumn('trip', fn ($row) => $row->name)
-                ->addColumn('boat', fn ($row) => $row->boat->name_ar ?? '-')
+                ->addColumn('boat', fn ($row) => $row->boat->name ?: '-')
                 ->addColumn('total_weight', fn ($row) => number_format($row->catches?->total_weight ?? 0, 2))
                 ->addColumn('total_amount', fn ($row) => number_format($row->catches?->total_amount ?? 0, 2))
                 ->addColumn('start_date', fn ($row) => optional($row->start_date)->format('Y-m-d'))

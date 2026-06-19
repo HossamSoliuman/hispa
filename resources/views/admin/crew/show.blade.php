@@ -61,7 +61,7 @@
         ])
         @include('admin.components.stat-card', [
             'title' => __('admin.crew.table.boat') ?? 'القارب',
-            'value' => '<span class="text-white">' . e($crew->boat?->name_ar ?? $crew->boat?->name_en ?? '—') . '</span>',
+            'value' => '<span class="text-white">' . e($crew->boat?->name ?: '—') . '</span>',
             'icon' => 'bi bi-signpost-split',
             'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
             'colClass' => 'col-md-4 col-sm-6 mb-3',
@@ -132,7 +132,7 @@
                 <div class="card-body">
                     @if($crew->boat)
                         <table class="table table-detail table-bordered">
-                            <tr><th class="text-muted">{{ __('admin.crew.table.boat') ?? 'اسم القارب' }}</th><td>{{ $crew->boat->name_ar ?? $crew->boat->name_en ?? '—' }}</td></tr>
+                            <tr><th class="text-muted">{{ __('admin.crew.table.boat') ?? 'اسم القارب' }}</th><td>{{ $crew->boat->name ?: '—' }}</td></tr>
                             <tr><th class="text-muted">{{ __('admin.boats.number') ?? 'رقم القارب' }}</th><td>{{ $crew->boat->number ?? '—' }}</td></tr>
                             <tr><th class="text-muted">{{ __('admin.captains.table.owner') ?? 'الصياد' }}</th><td>{{ $crew->boat->owner?->name ?? '—' }}</td></tr>
                             <tr><th class="text-muted">{{ __('admin.captains.table.name') ?? 'الكابتن' }}</th><td>{{ $crew->boat->captain?->name ?? '—' }}</td></tr>

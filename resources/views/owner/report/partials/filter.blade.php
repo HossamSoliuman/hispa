@@ -21,7 +21,7 @@
                             <option value="">{{ __('owner.analysis_reports.all_boats') }}</option>
                             @foreach ($boats as $boat)
                                 <option value="{{ $boat->id }}" {{ ($boatId ?? null) == $boat->id ? 'selected' : '' }}>
-                                    {{ $boat->name_ar ?? $boat->name }}
+                                    {{ $boat->name ?? $boat->name_ar }}
                                 </option>
                             @endforeach
                         </select>

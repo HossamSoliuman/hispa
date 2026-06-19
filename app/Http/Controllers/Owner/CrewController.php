@@ -60,7 +60,7 @@ class CrewController extends Controller
     public function create()
     {
         $regions = Region::Active()->select('id', 'name')->get();
-        $boats = Boat::Active()->select('id', 'name_ar')->get();
+        $boats = Boat::Active()->select('id', 'name_ar', 'name_en')->get();
 
         return view('owner.crew.create', compact('regions', 'boats'));
     }
@@ -112,7 +112,7 @@ class CrewController extends Controller
         $owner_id = auth()->user()->id;
         $regions = Region::Active()->select('id', 'name')->get();
         $captains = User::Active()->CaptainRole()->where('owner_id', $owner_id)->select('id', 'name')->get();
-        $boats = Boat::Active()->select('id', 'name_ar')->get();
+        $boats = Boat::Active()->select('id', 'name_ar', 'name_en')->get();
         $data = User::CrewRole()->find($id);
         if (! $data) {
             return redirect()->back()->with(['error' => 'حدث خطأ ما']);

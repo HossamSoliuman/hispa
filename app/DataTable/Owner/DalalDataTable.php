@@ -202,9 +202,13 @@ class DalalDataTable extends DataTables
 
     public function getDalalPaymentData(Request $request)
     {
+        $boatNameExpr = app()->getLocale() === 'en'
+            ? "COALESCE(NULLIF(boats.name_en, ''), boats.name_ar)"
+            : 'boats.name_ar';
+
         $query = Sale::select(
             'sales.*',
-            'boats.name_ar as boat_name'
+            DB::raw($boatNameExpr.' as boat_name')
         )
             ->leftJoin('trips', 'trips.id', '=', 'sales.trip_id')
             ->leftJoin('boats', 'boats.id', '=', 'trips.boat_id')

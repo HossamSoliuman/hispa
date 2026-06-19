@@ -27,6 +27,12 @@ class DashboardController extends Controller
         9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
     ];
 
+    private const ENGLISH_MONTHS = [
+        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December',
+    ];
+
     public function __construct(
         private MonthlyFinancialsService $financials,
         private MonthlyReportsService $reports,
@@ -35,6 +41,16 @@ class DashboardController extends Controller
     private function ownerId(): int
     {
         return (int) Auth::guard('owner')->id();
+    }
+
+    /**
+     * Localized month name for the active application locale.
+     */
+    private function monthName(int $month): string
+    {
+        return app()->getLocale() === 'en'
+            ? self::ENGLISH_MONTHS[$month]
+            : self::ARABIC_MONTHS[$month];
     }
 
     /**
@@ -180,7 +196,7 @@ class DashboardController extends Controller
             $closing = $yearClosings->get($m);
             $months[] = [
                 'month' => $m,
-                'name' => self::ARABIC_MONTHS[$m],
+                'name' => $this->monthName($m),
                 'is_closed' => $closing !== null,
                 'is_future' => $m > $currentMonth,
                 'closing_id' => $closing?->id,
@@ -391,7 +407,7 @@ class DashboardController extends Controller
         for ($m = 1; $m <= 12; $m++) {
             $monthly[] = [
                 'month' => $m,
-                'month_name' => self::ARABIC_MONTHS[$m],
+                'month_name' => $this->monthName($m),
                 'revenue' => round((float) ($sales[$m] ?? 0), 2),
                 'expenses' => round((float) ($expenses[$m] ?? 0), 2),
             ];
@@ -534,7 +550,7 @@ class DashboardController extends Controller
         for ($m = 1; $m <= 12; $m++) {
             $comparison[] = [
                 'month' => $m,
-                'label' => self::ARABIC_MONTHS[$m],
+                'label' => $this->monthName($m),
                 'catch' => round((float) ($monthlyCatch[$m] ?? 0), 2),
                 'revenue' => round((float) ($monthlyRevenue[$m] ?? 0), 2),
             ];
@@ -576,7 +592,7 @@ class DashboardController extends Controller
             $expense = (float) ($expenses[$m] ?? 0);
             $monthly[] = [
                 'month' => $m,
-                'month_name' => self::ARABIC_MONTHS[$m],
+                'month_name' => $this->monthName($m),
                 'revenue' => round($revenue, 2),
                 'profit' => round($revenue - $expense, 2),
             ];

@@ -26,14 +26,14 @@ class ExpenseRepository
 
         $topCategory = Expense::select('category_id')
             ->selectRaw('SUM(final_price) as total, COUNT(*) as expenses_count, AVG(final_price) as avg')
-            ->with('category:id,name_ar')
+            ->with('category:id,name_ar,name_en')
             ->groupBy('category_id')
             ->orderByDesc('total')
             ->first();
 
         $topBoat = Expense::select('boat_id')
             ->selectRaw('SUM(final_price) as total, COUNT(*) as expenses_count')
-            ->with('boat:id,name_ar')
+            ->with('boat:id,name_ar,name_en')
             ->groupBy('boat_id')
             ->orderByDesc('total')
             ->first();
@@ -489,7 +489,7 @@ class ExpenseRepository
                 $parent = $group->first()->category->parent ?? $group->first()->category;
 
                 return [
-                    'category' => $parent->name_ar ?? $parent->name_en ?? 'غير محدد',
+                    'category' => $parent->name ?: 'غير محدد',
                     'total' => $group->sum('total'),
                 ];
             })

@@ -132,7 +132,7 @@
                     <select class="form-select" id="boat_id">
                         <option value="">{{ __('owner.catch.filters.all_boats') }}</option>
                         @foreach ($boats as $boat)
-                            <option value="{{ $boat->id }}">{{ $boat->name_ar }}</option>
+                            <option value="{{ $boat->id }}">{{ $boat->name }}</option>
                         @endforeach
                     </select>
                 </div>

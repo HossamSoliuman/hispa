@@ -61,7 +61,7 @@ class CaptainController extends Controller
     {
         $owner_id = auth()->user()->id;
         $regions = Region::Active()->select('id', 'name')->get();
-        $boats = Boat::Active()->where('owner_id', $owner_id)->select('id', 'name_ar')->get();
+        $boats = Boat::Active()->where('owner_id', $owner_id)->select('id', 'name_ar', 'name_en')->get();
 
         return view('owner.captain.create', compact('regions', 'boats'));
     }
@@ -117,7 +117,7 @@ class CaptainController extends Controller
     {
         $owner_id = auth()->user()->id;
         $regions = Region::Active()->select('id', 'name')->get();
-        $boats = Boat::Active()->where('owner_id', $owner_id)->select('id', 'name_ar')->get();
+        $boats = Boat::Active()->where('owner_id', $owner_id)->select('id', 'name_ar', 'name_en')->get();
         $data = User::where('owner_id', $owner_id)->find($id);
 
         if (! $data) {

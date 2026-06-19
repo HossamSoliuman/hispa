@@ -25,11 +25,11 @@ class BoatTypeDataTable extends DataTables
 
                 // في حال لم توجد قيمة بحث فعلية لا نطبق الفلتر
                 if ($term !== null && $term !== '') {
-                $query->where(function ($q) use ($term) {
-                    $q->where('name_ar', 'like', "%{$term}%")
-                        ->orWhere('name_en', 'like', "%{$term}%");
-                });
-            }
+                    $query->where(function ($q) use ($term) {
+                        $q->where('name_ar', 'like', "%{$term}%")
+                            ->orWhere('name_en', 'like', "%{$term}%");
+                    });
+                }
             }
             if ($request->filled('status') && in_array($request->status, ['0', '1'])) {
                 $query->where('status', (int) $request->status);
@@ -46,7 +46,7 @@ class BoatTypeDataTable extends DataTables
                 ->addIndexColumn()
                 ->addColumn('name', function ($row) use ($showRouteName) {
                     $url = route($showRouteName, $row->id);
-                    $name = $row->name_ar ?? $row->name_en ?? ('#'.$row->id);
+                    $name = $row->name ?: ('#'.$row->id);
 
                     return '<a href="'.$url.'" class="text-primary fw-semibold text-decoration-none">'.e($name).'</a>';
                 })

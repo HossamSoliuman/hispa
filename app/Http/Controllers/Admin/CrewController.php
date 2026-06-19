@@ -37,7 +37,7 @@ class CrewController extends Controller
     public function create()
     {
         $regions = Region::Active()->select('id', 'name')->orderByDesc('id')->get();
-        $boats = Boat::Active()->select('id', 'name_ar')->get();
+        $boats = Boat::Active()->select('id', 'name_ar', 'name_en')->get();
         $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
         $captains = User::Active()->CaptainRole()->select('id', 'name')->get();
 
@@ -103,7 +103,7 @@ class CrewController extends Controller
     {
         $data = User::CrewRole()->findOrFail($id);
         $regions = Region::Active()->select('id', 'name')->orderByDesc('id')->get();
-        $boats = Boat::Active()->select('id', 'name_ar')->get();
+        $boats = Boat::Active()->select('id', 'name_ar', 'name_en')->get();
         $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
         $captains = User::Active()->CaptainRole()->select('id', 'name')->get();
 

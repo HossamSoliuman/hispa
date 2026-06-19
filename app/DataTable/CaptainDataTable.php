@@ -60,7 +60,7 @@ class CaptainDataTable extends DataTables
                     return $user->boat_id ? ($user->boat->crews->count() ?? '0') : '0';
                 })
                 ->addColumn('boat_name', function (User $user) {
-                    return $user->boat?->name_ar ?? '--';
+                    return $user->boat?->name ?: '--';
                 })
                 ->addColumn('region', function (User $user) {
                     return optional($user->region)->name ?? '--';
@@ -80,6 +80,7 @@ class CaptainDataTable extends DataTables
                 })
                 ->addColumn('action', function (User $user) {
                     $btn = '';
+
                     return $btn;
                 })
                 ->with([

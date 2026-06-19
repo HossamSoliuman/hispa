@@ -31,7 +31,7 @@
             <div class="row">
                 <div class="col-md-3">
                     <h6 class="text-muted mb-1">{{ __('owner.catch.filters.boat') }}</h6>
-                    <p class="mb-0 fw-bold">{{ $expense->boat->name_ar ?? '{{ __('owner.general') }}' }}</p>
+                    <p class="mb-0 fw-bold">{{ $expense->boat->name ?? __('owner.general') }}</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-muted mb-1">{{ __('owner.sales.date') }}</h6>

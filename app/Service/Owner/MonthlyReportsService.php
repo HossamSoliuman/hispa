@@ -54,7 +54,7 @@ class MonthlyReportsService
 
             $rows[] = [
                 'boat_id' => $boat->id,
-                'boat_name' => $boat->name_ar ?: $boat->name_en ?: ('#'.$boat->id),
+                'boat_name' => $boat->name ?: ('#'.$boat->id),
                 'gross_sales' => round($gross, 2),
                 'net_sales' => round($net, 2),
                 'expenses' => round($expenses, 2),
@@ -77,7 +77,7 @@ class MonthlyReportsService
      */
     public function tripProfitability(int $ownerId, string $from, string $to, ?int $boatId = null): array
     {
-        $query = Trip::with(['captain'])
+        $query = Trip::with(['captain', 'boat:id,name_ar,name_en'])
             ->where('owner_id', $ownerId)
             ->whereBetween(DB::raw('DATE(start_date)'), [$from, $to]);
 
@@ -106,7 +106,7 @@ class MonthlyReportsService
             $rows[] = [
                 'trip_id' => $trip->id,
                 'number' => $trip->number,
-                'boat_name' => $trip->boat_name,
+                'boat_name' => $trip->boat?->name ?: $trip->boat_name,
                 'captain_name' => $trip->captain->name ?? '',
                 'start_date' => optional($trip->start_date)->format('Y-m-d'),
                 'status_label' => $trip->status instanceof \BackedEnum ? $trip->status->label() : (string) $trip->status,
@@ -160,10 +160,13 @@ class MonthlyReportsService
             $query->where('expenses.boat_id', $boatId);
         }
 
-        $rows = $query->groupBy('expenses.category_id', 'categories.name_ar', 'categories.type')
+        $isEnglish = app()->getLocale() === 'en';
+
+        $rows = $query->groupBy('expenses.category_id', 'categories.name_ar', 'categories.name_en', 'categories.type')
             ->select(
                 'expenses.category_id',
-                'categories.name_ar as category',
+                'categories.name_ar',
+                'categories.name_en',
                 'categories.type',
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(expenses.final_price) as amount')
@@ -171,7 +174,7 @@ class MonthlyReportsService
             ->get()
             ->map(fn ($row): array => [
                 'category_id' => (int) $row->category_id,
-                'category' => $row->category ?: '—',
+                'category' => ($isEnglish ? ($row->name_en ?: $row->name_ar) : ($row->name_ar ?: $row->name_en)) ?: '—',
                 'type' => $row->type,
                 'count' => (int) $row->count,
                 'amount' => round((float) $row->amount, 2),

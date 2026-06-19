@@ -41,6 +41,7 @@ class CrewDataTable extends DataTables
                     // $profileUrl = route('users.show', $user->id);
 
                     $profileUrl = route('admin.crew.show', $user->id);
+
                     return '<div class="d-flex align-items-center">
         <a href="'.e($profileUrl).'" class="d-flex align-items-center text-decoration-none">
             <img src="'.e($logoUrl).'" alt="logo" width="30" height="30" class="rounded-circle me-2">
@@ -58,7 +59,7 @@ class CrewDataTable extends DataTables
                     return $user->owner->name ?? '--';
                 })
                 ->addColumn('boat', function (User $user) {
-                    return $user->boat?->name_ar ?? '--';
+                    return $user->boat?->name ?: '--';
                 })
                 ->addColumn('region', function (User $user) {
                     return $user->region->name ?? '--';
@@ -78,6 +79,7 @@ class CrewDataTable extends DataTables
                 })
                 ->addColumn('action', function (User $user) {
                     $showUrl = route('admin.crew.show', $user->id);
+
                     return '<a href="'.e($showUrl).'" class="btn btn-outline-info btn-sm" title="'.e(__('admin.actions.view')).'"><i class="bi bi-eye"></i></a>';
                 })
                 ->with([

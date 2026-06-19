@@ -5,7 +5,7 @@
         <div class="card shadow-lg border-0 h-100">
             <div class="card-body">
                 <h6 class="text-muted mb-2">{{ __('owner.expenses.sections.trends.top_category_title') }}</h6>
-                <h4 class="fw-bold mb-1 text-primary">{{ $topCategory?->category?->name_ar ?? '-' }}</h4>
+                <h4 class="fw-bold mb-1 text-primary">{{ $topCategory?->category?->name ?? '-' }}</h4>
                 <p class="mb-2">{{ __('owner.expenses.sections.trends.total_spending') }}
                     <span class="fw-bold text-success">{!! number_format($topCategory->total ?? 0, 2) . ' <span class="unit">' . view('components.riyal-icon', ['size' => 'sm'])->render() . '</span>' !!}</span>
                 </p>
@@ -22,7 +22,7 @@
         <div class="card shadow-lg border-0 h-100">
             <div class="card-body">
                 <h6 class="text-muted mb-2">{{ __('owner.expenses.sections.trends.top_boat_title') }}</h6>
-                <h4 class="fw-bold mb-1 text-primary">{{ $topBoat?->boat?->name_ar ?? '-' }}</h4>
+                <h4 class="fw-bold mb-1 text-primary">{{ $topBoat?->boat?->name ?? '-' }}</h4>
                 <p class="mb-2">{{ __('owner.expenses.sections.trends.total_expenses') }}
                     <span class="fw-bold text-info">{!! number_format($topBoat->total ?? 0, 2) . ' <span class="unit">' . view('components.riyal-icon', ['size' => 'sm'])->render() . '</span>' !!}</span>
                 </p>

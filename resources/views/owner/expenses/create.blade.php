@@ -116,7 +116,7 @@
                             <select class="form-select" name="boat_id">
                                 <option value="general">{{ __('owner.general') }}</option>
                                 @foreach ($boats as $boat)
-                                    <option value="{{ $boat->id }}">{{ $boat->name_ar }}</option>
+                                    <option value="{{ $boat->id }}">{{ $boat->name }}</option>
                                 @endforeach
                             </select>
                         </div>

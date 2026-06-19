@@ -67,7 +67,7 @@
         ])
         @include('admin.components.stat-card', [
             'title' => display_string(__('admin.boat_types.name'), 'الاسم'),
-            'value' => '<span class="text-white">' . e($data->name_ar ?? $data->name_en ?? '—') . '</span>',
+            'value' => '<span class="text-white">' . e($data->name ?: '—') . '</span>',
             'icon' => 'bi bi-tag-fill',
             'gradient' => 'linear-gradient(135deg, #6f42c1, #0dcaf0)',
             'colClass' => 'col-md-4 col-sm-6 mb-3',
@@ -137,7 +137,7 @@
                                     @foreach($data->boats as $boat)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $boat->name_ar ?? $boat->name_en ?? $boat->number ?? '—' }}</td>
+                                            <td>{{ $boat->name ?: ($boat->number ?? '—') }}</td>
                                             <td>{{ $boat->owner?->name ?? '—' }}</td>
                                             <td>
                                                 @if($boat->status == 1)

@@ -47,7 +47,7 @@
                                     @foreach ($boats as $boat)
                                         <option value="{{ $boat->id }}"
                                             {{ old('boat_id', $data->boat_id) == $boat->id ? 'selected' : '' }}>
-                                            {{ $boat->name_ar }}
+                                            {{ $boat->name }}
                                         </option>
                                     @endforeach
                                 </select>

@@ -32,7 +32,7 @@
 
                 <div class="row mb-3">
                     <h5>{{ __('owner.catch.trip') }}: {{ $catch->trip->name }}</h5>
-                    <h6>{{ __('owner.catch.boat') }}: {{ $catch->trip->boat->name_ar }}</h6>
+                    <h6>{{ __('owner.catch.boat') }}: {{ $catch->trip->boat->name }}</h6>
 
                     <table class="table table-bordered">
                         <thead>

@@ -125,7 +125,7 @@
     <tbody>
         @foreach ($boatTypes as $boatType)
             <tr>
-                <td>{{ $boatType->name_ar }}</td>
+                <td>{{ $boatType->name }}</td>
                 <td>
                     @if ($boatType->status == 1)
                         <span class="badge bg-success">{{ __('owner.boat_type.status_active') }}</span>

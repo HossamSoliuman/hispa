@@ -38,7 +38,7 @@
                             <select name="boat_id" class="form-control" required id="boat_id">
                                 <option value="">{{ __('admin.captains.placeholders.choose') }}</option>
                                 @foreach ($boats as $boat)
-                                    <option value="{{ $boat->id }}" {{ old('boat_id') == $boat->id ? 'selected' : '' }}>{{ $boat->name_ar }}</option>
+                                    <option value="{{ $boat->id }}" {{ old('boat_id') == $boat->id ? 'selected' : '' }}>{{ $boat->name }}</option>
                                 @endforeach
                             </select>
                             @error('boat_id')<span class="text-danger error">{{ $message }}</span>@enderror

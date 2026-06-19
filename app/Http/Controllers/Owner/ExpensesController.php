@@ -177,7 +177,7 @@ class ExpensesController extends Controller
     public function getBoats()
     {
         $boats = Boat::where('owner_id', auth()->id())
-            ->select('id', 'name_ar')
+            ->select('id', 'name_ar', 'name_en')
             ->get();
 
         return response()->json($boats);

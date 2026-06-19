@@ -1,6 +1,6 @@
 <x-report-layout
     :title="__('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year)"
-    :titleEn="'Monthly Profit Distribution'"
+    :titleEn="app()->getLocale() === 'ar' ? 'Monthly Profit Distribution' : ''"
     :documentNumber="'MC-'.$closing->year.str_pad($closing->month, 2, '0', STR_PAD_LEFT)"
     :settings="$settings ?? []"
 >
@@ -18,7 +18,7 @@
     <x-report-header
         :documentNumber="'MC-'.$closing->year.str_pad($closing->month, 2, '0', STR_PAD_LEFT)"
         :title="__('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year)"
-        :titleEn="'Monthly Profit Distribution'"
+        :titleEn="app()->getLocale() === 'ar' ? 'Monthly Profit Distribution' : ''"
         :settings="$settings ?? []"
     />
 

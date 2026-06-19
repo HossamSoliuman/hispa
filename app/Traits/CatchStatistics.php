@@ -136,12 +136,16 @@ trait CatchStatistics
             ->first();
 
         // أداء القوارب (عدد الرحلات لكل قارب)
+        $boatNameExpr = app()->getLocale() === 'en'
+            ? "COALESCE(NULLIF(boats.name_en, ''), boats.name_ar)"
+            : 'boats.name_ar';
+
         $boatsStats = DB::table('sales')
             ->join('trips', 'sales.trip_id', '=', 'trips.id')
             ->join('boats', 'trips.boat_id', '=', 'boats.id')
             ->where('sales.seller_id', $seller_id)
-            ->select('boats.name_ar as boat_name', DB::raw('COUNT(DISTINCT sales.trip_id) as trip_count'))
-            ->groupBy('boats.name_ar')
+            ->select(DB::raw($boatNameExpr.' as boat_name'), DB::raw('COUNT(DISTINCT sales.trip_id) as trip_count'))
+            ->groupBy(DB::raw($boatNameExpr))
             ->orderByDesc('trip_count')
             ->get();
 
