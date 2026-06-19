@@ -97,7 +97,6 @@ class TripController extends Controller
         return Category::active()
             ->where('type', 'operating')
             ->whereNotNull('parent_id')
-            ->whereNotIn('name_en', ['Fishing Tools', 'Fishing Equipment'])
             ->orderBy('id')
             ->get();
     }
