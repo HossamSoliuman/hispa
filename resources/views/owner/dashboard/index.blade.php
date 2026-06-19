@@ -93,6 +93,13 @@
         </div>
         <div class="row">
 
+            @php
+                $monthPeriodFooter = new \Illuminate\Support\HtmlString(
+                    '<span class="fw-semibold d-block">' . e($currentMonthLabel) . '</span>' .
+                    '<span class="text-muted">' . e($currentMonthRangeLabel) . '</span>'
+                );
+            @endphp
+
             {{-- KPI cards: shared stat-card component (unified month-status style) --}}
             @include('owner.components.stat-card', [
                 'title' => __('owner.dashboard.total_revenue'),
@@ -106,6 +113,7 @@
                         ])->render()),
                 'icon' => 'bi bi-cash-coin',
                 'badge' => number_format($percentageChange, 1),
+                'footer' => $monthPeriodFooter,
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 
@@ -118,7 +126,7 @@
                             (__('owner.units.ton') !== 'owner.units.ton' ? __('owner.units.ton') : 't')
                         : number_format($totalCatch, 0) . ' ' . __('owner.units.kg'),
                 'icon' => 'bi bi-basket2-fill',
-                'footer' => __('owner.dashboard.this_month'),
+                'footer' => $monthPeriodFooter,
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 
@@ -133,6 +141,7 @@
                 'title' => __('owner.dashboard.profit_margin'),
                 'value' => number_format($profitMargin, 1) . '%',
                 'icon' => 'bi bi-graph-up-arrow',
+                'footer' => $monthPeriodFooter,
                 'colClass' => 'col-md-3 col-sm-6 mb-3',
             ])
 

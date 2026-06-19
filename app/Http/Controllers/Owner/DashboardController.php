@@ -87,6 +87,10 @@ class DashboardController extends Controller
         $ownerId = $this->ownerId();
         [$from, $to] = $this->currentMonthRange();
 
+        $currentMonthLabel = $this->monthName(now()->month).' '.now()->year;
+        $currentMonthRangeLabel = now()->startOfMonth()->day.' – '.now()->endOfMonth()->day
+            .' '.$this->monthName(now()->month).' '.now()->year;
+
         $ownerSales = fn () => Sale::where('seller_type', 'owner')->where('seller_id', $ownerId);
         $currentMonthSales = fn () => $ownerSales()->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to]);
 
@@ -127,7 +131,9 @@ class DashboardController extends Controller
             'profit',
             'activeBoats',
             'completedTrips',
-            'topFive'
+            'topFive',
+            'currentMonthLabel',
+            'currentMonthRangeLabel'
         ));
     }
 
