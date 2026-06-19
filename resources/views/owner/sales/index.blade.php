@@ -117,18 +117,18 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ __('owner.catch.filters.from_date') }}</label>
-                    <input type="date" class="form-control">
+                    <input type="date" id="from_date" class="form-control">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ __('owner.catch.filters.to_date') }}</label>
-                    <input type="date" class="form-control">
+                    <input type="date" id="to_date" class="form-control">
                 </div>
 
             </div>
             <div class="text-end mt-3">
-                <button class="btn btn-success sm me-2"><i class="bi bi-search"></i>
+                <button type="button" id="searchBtn" class="btn btn-success sm me-2"><i class="bi bi-search"></i>
                     {{ __('owner.catch.filters.search') }}</button>
-                <button class="btn btn-light btn-sm me-2"><i class="bi bi-x-circle"></i>
+                <button type="button" id="clearBtn" class="btn btn-light btn-sm me-2"><i class="bi bi-x-circle"></i>
                     {{ __('owner.catch.filters.clear') }}</button>
             </div>
         </div>
@@ -226,6 +226,9 @@
                     url: "{{ route('owner.getSalesData') }}",
                     data: function(d) {
                         d.status = '{{ request('status') }}'; // تمرير الحالة الحالية من الرابط
+                        d.fish_id = $('#fish_id').val();
+                        d.from_date = $('#from_date').val();
+                        d.to_date = $('#to_date').val();
                     },
                     dataSrc: function(json) {
                         // ✅ عرض القيم في أي مكان خارج الجدول
@@ -296,7 +299,14 @@
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
             });
-            $('#from_date, #to_date').change(function() {
+            $('#searchBtn').on('click', function() {
+                table.draw();
+            });
+
+            $('#clearBtn').on('click', function() {
+                $('#fish_id').val('');
+                $('#from_date').val('');
+                $('#to_date').val('');
                 table.draw();
             });
         });

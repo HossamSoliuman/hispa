@@ -14,13 +14,33 @@ class SalesDataTable extends DataTables
     {
 
         if ($request->ajax()) {
+            $hasFilters = $request->filled('fish_id')
+                || $request->filled('from_date')
+                || $request->filled('to_date')
+                || filled($request->input('search.value'));
+
             $query = Sale::where('seller_type', 'owner')
                 ->where('seller_id', auth()->user()->getAuthIdentifier())
-                ->whereBetween(DB::raw('DATE(sale_datetime)'), [
+                ->with(['details', 'details.unit', 'paymentMethod']);
+
+            if (! $hasFilters) {
+                $query->whereBetween(DB::raw('DATE(sale_datetime)'), [
                     now()->startOfMonth()->toDateString(),
                     now()->endOfMonth()->toDateString(),
-                ])
-                ->with(['details', 'details.unit', 'paymentMethod']);
+                ]);
+            }
+
+            if ($request->filled('from_date')) {
+                $query->whereDate('sale_datetime', '>=', $request->from_date);
+            }
+
+            if ($request->filled('to_date')) {
+                $query->whereDate('sale_datetime', '<=', $request->to_date);
+            }
+
+            if ($request->filled('fish_id')) {
+                $query->whereHas('details', fn ($q) => $q->where('fish_id', $request->fish_id));
+            }
 
             $countQuery = clone $query;
 

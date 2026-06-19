@@ -59,44 +59,39 @@
     </div>
 
 
-    {{-- Financial KPIs --}}
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card bg-success text-white text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-white"><i class="bi bi-coin me-2"></i>{{ __('owner.reports.total_revenue') }}</h6>
-                    <h4 class="fw-bold text-white"> {{ __('owner.generated.amount_0_sar') }}</h4>
-                    <small>{{ __('owner.generated.from_0_catch_record') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-white"><i class="bi bi-graph-down me-2"></i>{{ __('owner.generated.net_income') }}</h6>
-                    <h4 class="fw-bold text-white">{{ __('owner.generated.amount_0_sar') }}</h4>
-                    <small>{{ __('owner.generated.profit_margin_0') }}%</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-white"><i class="bi bi-bank2 me-2"></i>{{ __('owner.generated.total_assets') }}</h6>
-                    <h4 class="fw-bold text-white">{{ __('owner.generated.amount_10000_sar') }}</h4>
-                    <small>{{ __('owner.generated.ownership_100') }}%</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-white"><i class="bi bi-cash-stack me-2"></i>{{ __('owner.generated.operating_cash_flow') }}</h6>
-                    <h4 class="fw-bold text-white">{{ __('owner.generated.amount_0_sar') }}</h4>
-                    <small>{{ __('owner.generated.from_operating_activities') }}</small>
-                </div>
-            </div>
-        </div>
+    {{-- Financial KPIs: unified dashboard HUD stat-card style --}}
+    <div class="row mb-4">
+        @include('owner.components.stat-card', [
+            'title' => __('owner.reports.total_revenue'),
+            'value' => __('owner.generated.amount_0_sar'),
+            'icon' => 'bi bi-coin',
+            'footer' => __('owner.generated.from_0_catch_record'),
+            'colClass' => 'col-md-3 col-sm-6 mb-3',
+        ])
+
+        @include('owner.components.stat-card', [
+            'title' => __('owner.generated.net_income'),
+            'value' => __('owner.generated.amount_0_sar'),
+            'icon' => 'bi bi-graph-down',
+            'footer' => __('owner.generated.profit_margin_0') . '%',
+            'colClass' => 'col-md-3 col-sm-6 mb-3',
+        ])
+
+        @include('owner.components.stat-card', [
+            'title' => __('owner.generated.total_assets'),
+            'value' => __('owner.generated.amount_10000_sar'),
+            'icon' => 'bi bi-bank2',
+            'footer' => __('owner.generated.ownership_100') . '%',
+            'colClass' => 'col-md-3 col-sm-6 mb-3',
+        ])
+
+        @include('owner.components.stat-card', [
+            'title' => __('owner.generated.operating_cash_flow'),
+            'value' => __('owner.generated.amount_0_sar'),
+            'icon' => 'bi bi-cash-stack',
+            'footer' => __('owner.generated.from_operating_activities'),
+            'colClass' => 'col-md-3 col-sm-6 mb-3',
+        ])
     </div>
 
     {{-- Tabs --}}
