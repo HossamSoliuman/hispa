@@ -23,37 +23,11 @@
         </x-slot:additionalInfo>
     </x-report-info>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <div class="summary-icon fish">
-                <i class="fas fa-fish"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.dalal_stock_report.total_fish_types') }}</div>
-                <div class="summary-value">{{ $totalFishCount }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon weight">
-                <i class="bi bi-box-seam"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.dalal_stock_report.total_weight') }}</div>
-                <div class="summary-value">{{ number_format($totalWeight, 2) }} {{ __('owner.dalal_stock_report.kg') }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon dalal">
-                <i class="bi bi-person-badge-fill"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.dalal_stock_report.total_dalals') }}</div>
-                <div class="summary-value">{{ $totalDalalCount }}</div>
-            </div>
-        </div>
-    </div>
+    <x-report-stats :items="[
+        ['label' => __('owner.dalal_stock_report.total_fish_types'), 'value' => $totalFishCount],
+        ['label' => __('owner.dalal_stock_report.total_weight'), 'value' => number_format($totalWeight, 2) . ' ' . __('owner.dalal_stock_report.kg')],
+        ['label' => __('owner.dalal_stock_report.total_dalals'), 'value' => $totalDalalCount],
+    ]" />
 
     <x-report-table>
         <thead>

@@ -11,6 +11,7 @@ use App\Models\CatchDetail;
 use App\Models\CatchModel;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
+use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\Unit;
 use App\Services\TripTransitionService;
@@ -253,6 +254,20 @@ class CatchController extends Controller
             ->with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
-        return view('owner.reports.print.catch-report', compact('catch'));
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $settings = [
+            'name' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ];
+
+        $tripNumber = $catch->trip?->number ?? $id;
+        $filename = 'catch-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) $tripNumber)), '-').'.pdf';
+
+        return pdf_report(view('owner.reports.print.catch-report', compact('catch', 'settings')), [], $filename);
     }
 }

@@ -176,7 +176,7 @@ class VendorsController extends Controller
         $settings = $this->getCompanySettings();
         $qrCode = $this->generateQRCodeImage(route('owner.reports.print.vendor', $vendor->id));
 
-        return view('owner.reports.vendor', compact('vendor', 'expenses', 'totalDue', 'totalExpenses', 'settings', 'qrCode'));
+        return pdf_report(view('owner.reports.vendor', compact('vendor', 'expenses', 'totalDue', 'totalExpenses', 'settings', 'qrCode')), [], 'vendor-report.pdf');
     }
 
     // reuse simple company settings & QR helpers

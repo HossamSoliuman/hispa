@@ -6,7 +6,7 @@
 >
 
     <x-slot name="extraStyles">
-        .stats-section { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 30px 0; }
+        .stats-section { margin: 24px 0; }
         .currency-symbol { display: inline-flex; align-items: center; gap: 5px; }
         .currency-symbol svg { width: 14px; height: 14px; fill: currentColor; }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 3px; font-size: 8pt; font-weight: 600; }
@@ -35,29 +35,12 @@
     </x-report-info>
 
     {{-- Statistics Cards --}}
-    <div class="stats-section">
-        <div class="stat-card">
-            <div class="stat-label">{{ __('owner.customers.cards.total') }}</div>
-            <div class="stat-value">{{ number_format($totalCustomers) }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">{{ __('owner.customers.cards.active') }}</div>
-            <div class="stat-value">{{ number_format($activeCustomers) }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">{{ __('owner.customers.cards.total_sales') }}</div>
-            <div class="stat-value">
-                <span class="currency-symbol">
-                    {{ number_format($totalRevenue, 2) }}
-                    <x-riyal-icon size="sm" />
-                </span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">{{ __('owner.customers.cards.total_orders') }}</div>
-            <div class="stat-value">{{ number_format($totalOrders) }}</div>
-        </div>
-    </div>
+    <x-report-stats :items="[
+        ['label' => __('owner.customers.cards.total'), 'value' => number_format($totalCustomers)],
+        ['label' => __('owner.customers.cards.active'), 'value' => number_format($activeCustomers)],
+        ['label' => __('owner.customers.cards.total_sales'), 'value' => number_format($totalRevenue, 2)],
+        ['label' => __('owner.customers.cards.total_orders'), 'value' => number_format($totalOrders)],
+    ]" />
 
     {{-- Metadata Row --}}
     <div class="metadata">

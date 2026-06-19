@@ -81,7 +81,9 @@ class FishHistoryReportController extends Controller
             $fishName = Fish::find($request->fish_id)->scientific_name ?? null;
         }
 
-        return view('owner.report.fish_history_print', compact(
+        $filename = 'fish-history-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
+
+        return pdf_report(view('owner.report.fish_history_print', compact(
             'records',
             'totalRecords',
             'totalFishTypes',
@@ -91,7 +93,7 @@ class FishHistoryReportController extends Controller
             'from',
             'to',
             'fishName'
-        ));
+        )), [], $filename);
     }
 
     private function calculateTotalWeight(int $ownerId, Request $request): float

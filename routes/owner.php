@@ -136,6 +136,7 @@ Route::group([
         Route::resource('/categories', CategoryController::class);
         Route::get('/getCategoriesData', [CategoryController::class, 'getData'])->name('getCategoriesData');
 
+        Route::get('/fish/print', [FishController::class, 'print'])->name('fish.print');
         Route::resource('/fish', FishController::class);
         Route::get('/getFishData', [FishController::class, 'getFishData'])->name('getFishData');
         Route::get('/fishStock', [FishController::class, 'getFishStock'])->name('fishStock');
@@ -366,8 +367,11 @@ Route::group([
         Route::post('/support/ticket', [SupportTicketController::class, 'createTicket'])->name('support.ticket.create');
 
         Route::resource('/cities', CityController::class);
+        Route::get('/governorates/print', [GovernorateController::class, 'print'])->name('governorates.print');
         Route::resource('/governorates', GovernorateController::class);
+        Route::get('/ports/print', [PortController::class, 'print'])->name('ports.print');
         Route::resource('/ports', PortController::class);
+        Route::get('/regions/print', [RegionController::class, 'print'])->name('regions.print');
         Route::resource('/regions', RegionController::class);
         Route::resource('/boat-types', BoatTypeController::class)->only(['store', 'update', 'destroy']);
     });

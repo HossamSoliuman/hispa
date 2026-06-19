@@ -53,6 +53,9 @@
             </div>
 
             <div class="col-md-6 col-sm-12 text-md-end text-sm-start d-flex justify-content-md-end gap-2">
+                <a href="{{ route('owner.fish.print') }}" class="btn btn-outline-theme btn-sm">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>{{ __('owner.list_reports.download') }}
+                </a>
                 <button type="button" data-bs-toggle="modal" data-bs-target="#modalCreate" class="btn btn-black btn-sm">
                     <i class="bi bi-plus"></i>{{__('owner.fish.add_new')}}
                 </button>

@@ -167,36 +167,12 @@
         @endphp
 
         {{-- Financial summary cards --}}
-        <div class="summary-grid">
-            <div class="summary-card">
-                <span class="summary-icon weight"><i class="fas fa-weight-hanging"></i></span>
-                <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.reports.catch_weight') }}</div>
-                    <div class="summary-value">{{ $catchWeightDisplay }}</div>
-                </div>
-            </div>
-            <div class="summary-card">
-                <span class="summary-icon catch"><i class="fas fa-coins"></i></span>
-                <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.reports.total_income') }}</div>
-                    <div class="summary-value">{{ number_format($f['total_income'], 2) }} <x-riyal-icon /></div>
-                </div>
-            </div>
-            <div class="summary-card">
-                <span class="summary-icon list"><i class="fas fa-receipt"></i></span>
-                <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.reports.depreciation') }} ({{ number_format($f['depreciation_percent'], 2) }}%)</div>
-                    <div class="summary-value">{{ number_format($f['depreciation'], 2) }} <x-riyal-icon /></div>
-                </div>
-            </div>
-            <div class="summary-card">
-                <span class="summary-icon fish"><i class="fas fa-chart-line"></i></span>
-                <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.reports.net_profit') }}</div>
-                    <div class="summary-value">{{ number_format($f['net_profit'], 2) }} <x-riyal-icon /></div>
-                </div>
-            </div>
-        </div>
+        <x-report-stats :items="[
+            ['label' => __('owner.reports.catch_weight'), 'value' => $catchWeightDisplay],
+            ['label' => __('owner.reports.total_income'), 'value' => number_format($f['total_income'], 2)],
+            ['label' => __('owner.reports.depreciation') . ' (' . number_format($f['depreciation_percent'], 2) . '%)', 'value' => number_format($f['depreciation'], 2)],
+            ['label' => __('owner.reports.net_profit'), 'value' => number_format($f['net_profit'], 2), 'color' => $f['net_profit'] >= 0 ? '#16a34a' : '#dc2626'],
+        ]" />
 
         {{-- Trip information & schedule --}}
         <div class="info-section">
@@ -328,30 +304,33 @@
         </div>
 
         {{-- Financial summary --}}
-        <div class="bottom-section">
-            <div class="summary-box">
-                <div class="summary-row">
-                    <span>{{ __('owner.reports.total_income') }}</span>
-                    <span class="summary-value">{{ number_format($f['total_income'], 2) }} <x-riyal-icon /></span>
-                </div>
-                <div class="summary-row">
-                    <span>{{ __('owner.reports.depreciation_percent') }}</span>
-                    <span class="summary-value">{{ number_format($f['depreciation_percent'], 2) }}%</span>
-                </div>
-                <div class="summary-row">
-                    <span>{{ __('owner.reports.total_expenses') }}</span>
-                    <span class="summary-value">{{ number_format($f['total_expenses'], 2) }} <x-riyal-icon /></span>
-                </div>
-                <div class="summary-row">
-                    <span>{{ __('owner.reports.outstanding') }}</span>
-                    <span class="summary-value">{{ number_format($f['outstanding'], 2) }} <x-riyal-icon /></span>
-                </div>
-                <div class="summary-row">
-                    <span>{{ __('owner.reports.net_profit') }}</span>
-                    <span class="summary-value">{{ number_format($f['net_profit'], 2) }} <x-riyal-icon /></span>
-                </div>
-            </div>
-        </div>
+        <x-report-summary :qr-code="$qrCode">
+            <x-report-summary-row
+                :label="__('owner.reports.total_income')"
+                :value="number_format($f['total_income'], 2)"
+                :showCurrency="true"
+            />
+            <x-report-summary-row
+                :label="__('owner.reports.depreciation_percent')"
+                :value="number_format($f['depreciation_percent'], 2) . '%'"
+            />
+            <x-report-summary-row
+                :label="__('owner.reports.total_expenses')"
+                :value="number_format($f['total_expenses'], 2)"
+                :showCurrency="true"
+            />
+            <x-report-summary-row
+                :label="__('owner.reports.outstanding')"
+                :value="number_format($f['outstanding'], 2)"
+                :showCurrency="true"
+            />
+            <x-report-summary-row
+                :label="__('owner.reports.net_profit')"
+                :value="number_format($f['net_profit'], 2)"
+                :showCurrency="true"
+                :highlight="true"
+            />
+        </x-report-summary>
 
         {{-- Profit distribution --}}
         <div class="summary-section mt-4">
@@ -411,14 +390,15 @@
         @endif
     @endif
 
-    <div class="qr-box" style="text-align:center; margin:18px 0;">
-        @if(!empty($qrCode))
+    {{-- For the all-trips view (no single $trip) show the QR on its own. --}}
+    @if(!$trip && !empty($qrCode))
+        <div class="qr-box" style="text-align:center; margin:18px 0;">
             <img src="{{ $qrCode }}" alt="QR Code" style="width:110px; height:110px;" />
-        @endif
-    </div>
+        </div>
+    @endif
 
     <div class="footer">
-        <p>{{ $settings['title'] }} - {{ __('owner.reports.all_rights_reserved') }} © {{ date('Y') }}</p>
+        <p>{{ $settings['title'] ?? ($settings['company_name'] ?? '') }} - {{ __('owner.reports.all_rights_reserved') }} © {{ date('Y') }}</p>
         <p>{{ __('owner.reports.thank_you') }}</p>
     </div>
 

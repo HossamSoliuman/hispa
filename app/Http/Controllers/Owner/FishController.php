@@ -58,7 +58,7 @@ class FishController extends Controller
 
         $settings = $this->getCompanySettings();
 
-        return view('owner.report.fish_print', compact('fishes', 'total', 'active', 'settings'));
+        return pdf_report(view('owner.report.fish_print', compact('fishes', 'total', 'active', 'settings')), [], 'fish-report.pdf');
     }
 
     private function getCompanySettings()
@@ -72,7 +72,7 @@ class FishController extends Controller
             'phone' => Setting::where('key', 'phone')->value('value') ?? '',
             'email' => Setting::where('key', 'email')->value('value') ?? '',
             'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => null,
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
         ];
     }
 

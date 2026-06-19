@@ -23,27 +23,10 @@
         </x-slot:additionalInfo>
     </x-report-info>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <div class="summary-icon fish">
-                <i class="fas fa-fish"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.stock_report.total_fish_types') }}</div>
-                <div class="summary-value">{{ $totalFishCount }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon weight">
-                <i class="bi bi-box-seam"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.stock_report.total_weight') }}</div>
-                <div class="summary-value">{{ number_format($totalWeight, 2) }} {{ __('owner.stock_report.kg') }}</div>
-            </div>
-        </div>
-    </div>
+    <x-report-stats :items="[
+        ['label' => __('owner.stock_report.total_fish_types'), 'value' => $totalFishCount],
+        ['label' => __('owner.stock_report.total_weight'), 'value' => number_format($totalWeight, 2) . ' ' . __('owner.stock_report.kg')],
+    ]" />
 
     <x-report-table>
         <thead>

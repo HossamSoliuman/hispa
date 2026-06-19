@@ -141,7 +141,7 @@ class CustomersController extends Controller
         // Generate QR code
         $qrCode = $this->generateQRCodeImage(route('owner.customers.index'));
 
-        return view('owner.reports.customers', compact('customers', 'owner', 'totalCustomers', 'activeCustomers', 'totalRevenue', 'totalOrders', 'settings', 'qrCode'));
+        return pdf_report(view('owner.reports.customers', compact('customers', 'owner', 'totalCustomers', 'activeCustomers', 'totalRevenue', 'totalOrders', 'settings', 'qrCode')), [], 'customers-report.pdf');
     }
 
     public function printSalesReport()
@@ -163,7 +163,7 @@ class CustomersController extends Controller
         $settings = $this->getCompanySettings();
         $qrCode = $this->generateQRCodeImage(route('owner.reports.print.sales'));
 
-        return view('owner.reports.customer-sales', compact('owner', 'sales', 'totalRevenue', 'settings', 'qrCode'));
+        return pdf_report(view('owner.reports.customer-sales', compact('owner', 'sales', 'totalRevenue', 'settings', 'qrCode')), [], 'customer-sales.pdf');
     }
 
     /**

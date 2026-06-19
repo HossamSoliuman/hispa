@@ -23,51 +23,12 @@
         </x-slot:additionalInfo>
     </x-report-info>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <div class="summary-icon sales">
-                <i class="fas fa-file-invoice"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.sales_report.total_sales') }}</div>
-                <div class="summary-value">{{ $totalSales }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon revenue">
-                <i class="fas fa-coins"></i>
-            </div>
-            <div class="summary-content">
-                    <div class="summary-label">{{ __('owner.sales_report.total_revenue') }}</div>
-                    <div class="summary-value">
-                        <x-money-inline :amount="$totalRevenue" />
-                    </div>
-                </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon weight">
-                <i class="fas fa-weight"></i>
-            </div>
-                <div class="summary-content">
-                <div class="summary-label">{{ __('owner.sales_report.total_weight') }}</div>
-                <div class="summary-value">{{ formatWeight($totalWeight) }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon net">
-                <i class="fas fa-hand-holding-usd"></i>
-            </div>
-                <div class="summary-content">
-                <div class="summary-label">{{ __('owner.sales_report.net_owner_amount') }}</div>
-                <div class="summary-value">
-                    <x-money-inline :amount="$netOwnerAmount" />
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-report-stats :items="[
+        ['label' => __('owner.sales_report.total_sales'), 'value' => $totalSales],
+        ['label' => __('owner.sales_report.total_revenue'), 'value' => number_format($totalRevenue, 2)],
+        ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeight($totalWeight)],
+        ['label' => __('owner.sales_report.net_owner_amount'), 'value' => number_format($netOwnerAmount, 2), 'color' => '#16a085'],
+    ]" />
 
     <x-report-table>
         <thead>

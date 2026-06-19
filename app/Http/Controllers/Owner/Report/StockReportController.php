@@ -86,7 +86,9 @@ class StockReportController extends Controller
             $fishName = Fish::find($request->fish_type)->scientific_name ?? null;
         }
 
-        return view('owner.report.stock_print', compact(
+        $filename = 'stock-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
+
+        return pdf_report(view('owner.report.stock_print', compact(
             'stocks',
             'totalFishCount',
             'totalWeight',
@@ -94,7 +96,7 @@ class StockReportController extends Controller
             'from',
             'to',
             'fishName'
-        ));
+        )), [], $filename);
     }
 
     /**

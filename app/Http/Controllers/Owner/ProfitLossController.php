@@ -30,7 +30,9 @@ class ProfitLossController extends Controller
         $f = $this->financials->compute($ownerId, $from, $to, $boatId);
         $settings = $this->companySettings();
 
-        return view('owner.report.profit_loss_print', compact('from', 'to', 'boatId', 'boats', 'f', 'settings'));
+        $filename = 'profit-loss-'.$from.'-to-'.$to.'.pdf';
+
+        return pdf_report(view('owner.report.profit_loss_print', compact('from', 'to', 'boatId', 'boats', 'f', 'settings')), [], $filename);
     }
 
     /**

@@ -23,47 +23,12 @@
         </x-slot:additionalInfo>
     </x-report-info>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <div class="summary-icon fish">
-                <i class="fas fa-fish"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.stock_report.total_fish_types') }}</div>
-                <div class="summary-value">{{ $totalFishTypes ?? 0 }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon weight">
-                <i class="bi bi-box-seam"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.stock_report.total_weight') }}</div>
-                <div class="summary-value">{{ number_format($totalWeight ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon list">
-                <i class="fas fa-list"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.stock_report.total_records') }}</div>
-                <div class="summary-value">{{ $totalRecords ?? ($records ? count($records) : 0) }}</div>
-            </div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-icon catch">
-                <i class="fas fa-water"></i>
-            </div>
-            <div class="summary-content">
-                <div class="summary-label">{{ __('owner.reports.total_catch') }}</div>
-                <div class="summary-value">{{ $totalCatch ?? 0 }}</div>
-            </div>
-        </div>
-    </div>
+    <x-report-stats :items="[
+        ['label' => __('owner.stock_report.total_fish_types'), 'value' => $totalFishTypes ?? 0],
+        ['label' => __('owner.stock_report.total_weight'), 'value' => number_format($totalWeight ?? 0, 2) . ' ' . __('owner.stock_report.kg')],
+        ['label' => __('owner.stock_report.total_records'), 'value' => $totalRecords ?? ($records ? count($records) : 0)],
+        ['label' => __('owner.reports.total_catch'), 'value' => number_format($totalCatch ?? 0, 2)],
+    ]" />
 
     <x-report-table>
         <thead>

@@ -276,7 +276,7 @@ class PayrollController extends Controller
         $qrCode = app(\App\Service\Owner\ReportQrService::class)
             ->dataUri(route('owner.payrolls.print', $payroll->id));
 
-        return view('owner.payroll.print', compact('payroll', 'settings', 'qrCode'));
+        return pdf_report(view('owner.payroll.print', compact('payroll', 'settings', 'qrCode')), [], 'payroll.pdf');
     }
 
     // Local helpers reused for report generation (kept in-controller for now)

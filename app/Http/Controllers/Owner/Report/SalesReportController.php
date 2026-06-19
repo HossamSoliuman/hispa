@@ -69,7 +69,9 @@ class SalesReportController extends Controller
         $to = $request->end_date ?? null;
         $status = $request->status ?? null;
 
-        return view('owner.report.sales_print', compact(
+        $filename = 'sales-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
+
+        return pdf_report(view('owner.report.sales_print', compact(
             'sales',
             'totalSales',
             'totalWeight',
@@ -79,7 +81,7 @@ class SalesReportController extends Controller
             'from',
             'to',
             'status'
-        ));
+        )), [], $filename);
     }
 
     /**

@@ -9,6 +9,7 @@
 ])
 
 @php
+    $isRtl = app()->getLocale() == 'ar';
     $rowClasses = 'summary-row';
     if ($highlight) {
         $rowClasses .= ' summary-row-highlight';
@@ -23,15 +24,18 @@
     }
 @endphp
 
-<div class="{{ trim($rowClasses) }}">
-    <span>{{ $label }}</span>
-    <span class="summary-value {{ $valueClass }}">
-        @if($showMinus)
-            <span class="minus">-</span>
-        @endif
-        {{ $displayValue }}
-        @if($showCurrency)
-            <x-riyal-icon size="sm" />
-        @endif
-    </span>
-</div>
+{{-- Two-cell table keeps label and value on opposite ends across mPDF --}}
+<table class="{{ trim($rowClasses) }}">
+    <tr>
+        <td style="text-align: {{ $isRtl ? 'right' : 'left' }};">{{ $label }}</td>
+        <td class="summary-value {{ $valueClass }}" style="text-align: {{ $isRtl ? 'left' : 'right' }}; font-weight: 600;">
+            @if($showMinus)
+                <span class="minus">-</span>
+            @endif
+            {{ $displayValue }}
+            @if($showCurrency)
+                <x-riyal-icon size="sm" />
+            @endif
+        </td>
+    </tr>
+</table>

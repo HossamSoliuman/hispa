@@ -53,7 +53,11 @@ class BoatReportController extends Controller
         $tlvBase64 = $this->generateQRCode($qrPayload);
         $qrCode = $this->generateQRCodeImage($tlvBase64);
 
-        return view('owner.reports.print.boat-report', compact('boats', 'statistics', 'settings', 'qrCode', 'boat_id'));
+        $filename = $boat_id
+            ? 'boat-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) ($boats->first()?->name_en ?? $boats->first()?->name ?? $boat_id))), '-').'.pdf'
+            : 'all-boats-report.pdf';
+
+        return pdf_report(view('owner.reports.print.boat-report', compact('boats', 'statistics', 'settings', 'qrCode', 'boat_id')), [], $filename);
     }
 
     public function printAllBoatsReport(Request $request)

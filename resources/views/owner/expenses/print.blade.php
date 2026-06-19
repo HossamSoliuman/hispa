@@ -24,20 +24,22 @@
 
     <x-report-info :settings="$settings ?? []">
         <x-slot name="additionalInfo">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <div style="flex: 1;">
-                    <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.table.expense_number') }}:</strong> {{ $expense->number }}</p>
-                    <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.table.date') }}:</strong> {{ $expense->date }} <small class="text-muted">(@hijri($expense->date))</small></p>
-                </div>
-                <div style="flex: 1; text-align: left;">
-                    <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.table.status') }}:</strong>
-                        <span class="badge {{ $expense->status === 'paid' ? 'bg-success' : 'bg-warning' }}">
-                            {{ $expense->status === 'paid' ? __('owner.paid') : __('owner.pending') }}
-                        </span>
-                    </p>
-                    <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.show.payment_method') }}:</strong> {{ $expense->paymentMethod->name ?? '-' }}</p>
-                </div>
-            </div>
+            <table style="width: 100%; border: none; margin-bottom: 10px;">
+                <tr>
+                    <td style="border: none; vertical-align: top; text-align: start;">
+                        <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.table.expense_number') }}:</strong> {{ $expense->number }}</p>
+                        <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.table.date') }}:</strong> {{ $expense->date }} <small class="text-muted">(@hijri($expense->date))</small></p>
+                    </td>
+                    <td style="border: none; vertical-align: top; text-align: end;">
+                        <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.table.status') }}:</strong>
+                            <span class="badge {{ $expense->status === 'paid' ? 'bg-success' : 'bg-warning' }}">
+                                {{ $expense->status === 'paid' ? __('owner.paid') : __('owner.pending') }}
+                            </span>
+                        </p>
+                        <p style="margin: 5px 0;"><strong>{{ __('owner.expenses.show.payment_method') }}:</strong> {{ $expense->paymentMethod->name ?? '-' }}</p>
+                    </td>
+                </tr>
+            </table>
         </x-slot>
     </x-report-info>
 

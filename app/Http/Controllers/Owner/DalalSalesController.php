@@ -105,7 +105,7 @@ class DalalSalesController extends Controller
         $settings = $this->getCompanySettings();
         $qrCode = $this->generateQRCodeImage(route('owner.reports.print.dalal', $dalal->id));
 
-        return view('owner.reports.dalal', compact('dalal', 'sales', 'totalDue', 'totalCommission', 'totalPaid', 'settings', 'qrCode'));
+        return pdf_report(view('owner.reports.dalal', compact('dalal', 'sales', 'totalDue', 'totalCommission', 'totalPaid', 'settings', 'qrCode')), [], 'dalal-report.pdf');
     }
 
     // reuse simple company settings & QR helpers

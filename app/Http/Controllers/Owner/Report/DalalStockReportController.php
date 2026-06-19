@@ -83,7 +83,9 @@ class DalalStockReportController extends Controller
             $dalalName = User::find($request->dalal_id_filter)->name ?? null;
         }
 
-        return view('owner.report.dalal_stock_print', compact(
+        $filename = 'dalal-stock-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
+
+        return pdf_report(view('owner.report.dalal_stock_print', compact(
             'stocks',
             'totalFishCount',
             'totalWeight',
@@ -92,7 +94,7 @@ class DalalStockReportController extends Controller
             'from',
             'to',
             'dalalName'
-        ));
+        )), [], $filename);
     }
 
     private function getCompanySettings()

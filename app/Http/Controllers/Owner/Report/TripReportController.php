@@ -148,7 +148,11 @@ class TripReportController extends Controller
         // Get single trip for detailed view
         $trip = $trip_id ? $trips->first() : null;
 
-        return view('owner.reports.print.trip-report', compact(
+        $filename = $trip_id
+            ? 'trip-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) ($trips->first()?->number ?? $trip_id))), '-').'.pdf'
+            : 'trips-report-'.($fromDate ?? 'all').'-to-'.($toDate ?? 'all').'.pdf';
+
+        return pdf_report(view('owner.reports.print.trip-report', compact(
             'trips',
             'statistics',
             'financials',
@@ -159,7 +163,7 @@ class TripReportController extends Controller
             'trip',
             'owner_id',
             'filters'
-        ));
+        )), [], $filename);
     }
 
     public function printAllTripsReport(Request $request)

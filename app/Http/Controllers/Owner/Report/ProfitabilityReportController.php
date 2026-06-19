@@ -35,7 +35,9 @@ class ProfitabilityReportController extends Controller
         $totals = $this->totals($rows);
         $settings = $this->companySettings();
 
-        return view('owner.report.trip_profitability_print', compact('from', 'to', 'boatId', 'boats', 'rows', 'totals', 'settings'));
+        $filename = 'trip-profitability-'.$from.'-to-'.$to.'.pdf';
+
+        return pdf_report(view('owner.report.trip_profitability_print', compact('from', 'to', 'boatId', 'boats', 'rows', 'totals', 'settings')), [], $filename);
     }
 
     public function boatProfitability(Request $request)
@@ -54,7 +56,9 @@ class ProfitabilityReportController extends Controller
         $totals = $this->totals($rows);
         $settings = $this->companySettings();
 
-        return view('owner.report.boat_profitability_print', compact('from', 'to', 'boats', 'rows', 'totals', 'settings'));
+        $filename = 'boat-profitability-'.$from.'-to-'.$to.'.pdf';
+
+        return pdf_report(view('owner.report.boat_profitability_print', compact('from', 'to', 'boats', 'rows', 'totals', 'settings')), [], $filename);
     }
 
     public function productionBySpecies(Request $request)
@@ -71,7 +75,9 @@ class ProfitabilityReportController extends Controller
         $rows = $this->reports->productionBySpecies($ownerId, $from, $to);
         $settings = $this->companySettings();
 
-        return view('owner.report.production_species_print', compact('from', 'to', 'rows', 'settings'));
+        $filename = 'production-species-'.$from.'-to-'.$to.'.pdf';
+
+        return pdf_report(view('owner.report.production_species_print', compact('from', 'to', 'rows', 'settings')), [], $filename);
     }
 
     public function expensesByCategory(Request $request)
@@ -90,7 +96,9 @@ class ProfitabilityReportController extends Controller
         $total = round(array_sum(array_column($rows, 'amount')), 2);
         $settings = $this->companySettings();
 
-        return view('owner.report.expenses_by_category_print', compact('from', 'to', 'boatId', 'boats', 'rows', 'total', 'settings'));
+        $filename = 'expenses-category-'.$from.'-to-'.$to.'.pdf';
+
+        return pdf_report(view('owner.report.expenses_by_category_print', compact('from', 'to', 'boatId', 'boats', 'rows', 'total', 'settings')), [], $filename);
     }
 
     /**

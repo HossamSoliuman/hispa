@@ -32,13 +32,14 @@
 
     <x-report-info :settings="$settings ?? []">
         <x-slot name="additionalInfo">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <div style="flex: 1;">
+            <table style="width: 100%; border: none; margin-bottom: 10px;">
+                <tr>
+                    <td style="border: none; vertical-align: top; text-align: start;">
                     <p style="margin: 5px 0;"><strong>{{ __('owner.generated.the_year') }}:</strong> {{ $payroll->year }}</p>
                     <p style="margin: 5px 0;"><strong>{{ __('owner.generated.month') }}:</strong> {{ $payroll->month }}</p>
                     <p style="margin: 5px 0;"><strong>{{ __('owner.payrolls.show.salary_type') }}:</strong> {{ $typeLabel }}</p>
-                </div>
-                <div style="flex: 1; text-align: left;">
+                    </td>
+                    <td style="border: none; vertical-align: top; text-align: end;">
                     <p style="margin: 5px 0;">
                         <strong>{{ __('owner.assets.status') }}:</strong>
                         @if ($payroll->status === 'approved')
@@ -58,8 +59,9 @@
                     @if ($payroll->paid_at)
                         <p style="margin: 5px 0;"><strong>{{ __('owner.generated.payment_date') }}:</strong> {{ $payroll->paid_at }}</p>
                     @endif
-                </div>
-            </div>
+                    </td>
+                </tr>
+            </table>
         </x-slot>
     </x-report-info>
 

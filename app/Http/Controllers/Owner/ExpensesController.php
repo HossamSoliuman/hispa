@@ -87,7 +87,7 @@ class ExpensesController extends Controller
 
         // If a printable report view exists, render it. Otherwise fall back to the show page.
         if (view()->exists('owner.expenses.print')) {
-            return view('owner.expenses.print', compact('expense', 'settings', 'qrCode'));
+            return pdf_report(view('owner.expenses.print', compact('expense', 'settings', 'qrCode')), [], 'expense.pdf');
         }
 
         return view('owner.expenses.show', compact('expense'));

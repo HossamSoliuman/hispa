@@ -50,10 +50,11 @@
     </div>
 
     <div class="ms-auto d-flex flex-nowrap align-items-center gap-2">
-        
+        <a href="{{ route('owner.governorates.print') }}" class="btn btn-outline-theme btn-equal"><i
+                class="bi bi-file-earmark-pdf me-1"></i>{{ __('owner.list_reports.download') }}</a>
         <a href="#modalCreate" data-bs-toggle="modal" class="btn btn-outline-theme btn-equal"><i
                 class="fa fa-plus-circle btn-success fa-fw me-1"></i>{{__('admin.governorates.add_new')}}</a>
-        
+
     </div>
 </div>
 <!-- BEGIN #modalCreate -->

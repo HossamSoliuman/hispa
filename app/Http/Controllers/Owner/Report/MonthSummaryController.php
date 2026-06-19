@@ -42,7 +42,9 @@ class MonthSummaryController extends Controller
         $expenses = $this->groupedExpenses($ownerId, $from, $to, $boatId);
         $settings = $this->companySettings();
 
-        return view('owner.report.month_summary_print', compact('from', 'to', 'boatId', 'boats', 'f', 'expenses', 'settings'));
+        $filename = 'month-summary-'.$from.'-to-'.$to.'.pdf';
+
+        return pdf_report(view('owner.report.month_summary_print', compact('from', 'to', 'boatId', 'boats', 'f', 'expenses', 'settings')), [], $filename);
     }
 
     /**

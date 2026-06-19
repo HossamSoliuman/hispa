@@ -49,8 +49,10 @@
         <h1 class="page-header mb-0">{{ __('admin.regions.page_header') }}</h1>
     </div>
     
-    <div class="ms-auto d-flex align-items-center flex-nowrap">
-       
+    <div class="ms-auto d-flex align-items-center flex-nowrap gap-2">
+        <a href="{{ route('owner.regions.print') }}" class="btn btn-outline-theme btn-sm btn-equal">
+            <i class="bi bi-file-earmark-pdf me-1"></i> {{ __('owner.list_reports.download') }}
+        </a>
         <a href="#modalCreate" data-bs-toggle="modal" class="btn btn-outline-theme btn-sm btn-equal">
             <i class="fa fa-plus-circle btn-success fa-fw me-1"></i> {{ __('admin.regions.add_new') }}
         </a>

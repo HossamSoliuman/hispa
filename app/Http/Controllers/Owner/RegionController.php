@@ -57,10 +57,10 @@ class RegionController extends Controller
             'phone' => Setting::where('key', 'phone')->value('value') ?? '',
             'email' => Setting::where('key', 'email')->value('value') ?? '',
             'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => null,
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
         ];
 
-        return view('admin.report.regions_print', compact('regions', 'total', 'active', 'settings'));
+        return pdf_report(view('owner.report.region_print', compact('regions', 'total', 'active', 'settings')), [], 'regions-report.pdf');
     }
 
     /**

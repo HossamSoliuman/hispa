@@ -63,10 +63,10 @@ class PortController extends Controller
             'phone' => Setting::where('key', 'phone')->value('value') ?? '',
             'email' => Setting::where('key', 'email')->value('value') ?? '',
             'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => null,
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
         ];
 
-        return view('admin.report.ports_print', compact('ports', 'total', 'active', 'settings'));
+        return pdf_report(view('owner.report.port_print', compact('ports', 'total', 'active', 'settings')), [], 'ports-report.pdf');
     }
 
     /**
