@@ -325,75 +325,35 @@
                 <div class="tab-pane fade" id="financial" role="tabpanel" aria-labelledby="financial-tab">
                     <h5 class="mb-4 fw-bold">{{ __('owner.dashboard.financial_title') }}</h5>
 
-                    {{-- Financial Summary Cards --}}
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-success-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-success">
-                                            <i class="bi bi-arrow-up-circle fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-success-subtle text-success">{{ __('owner.dashboard.income') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.total_revenue') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="financialSummaryRevenue">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                    {{-- Financial Summary Cards: unified dashboard HUD stat-card style --}}
+                    <div class="row mb-3">
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.total_revenue'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="financialSummaryRevenue">0</span>'),
+                            'icon' => 'bi bi-arrow-up-circle',
+                            'colClass' => 'col-md-3 col-sm-6 mb-3',
+                        ])
 
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-danger-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-danger">
-                                            <i class="bi bi-arrow-down-circle fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-danger-subtle text-danger">{{ __('owner.dashboard.expenses') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.total_expenses') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="financialSummaryExpenses">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.total_expenses'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="financialSummaryExpenses">0</span>'),
+                            'icon' => 'bi bi-arrow-down-circle',
+                            'colClass' => 'col-md-3 col-sm-6 mb-3',
+                        ])
 
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-info-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-info">
-                                            <i class="bi bi-cash-stack fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-info-subtle text-info">{{ __('owner.dashboard.net') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.net_profit') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="financialSummaryProfit">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.net_profit'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="financialSummaryProfit">0</span>'),
+                            'icon' => 'bi bi-cash-stack',
+                            'colClass' => 'col-md-3 col-sm-6 mb-3',
+                        ])
 
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-primary-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-primary">
-                                            <i class="bi bi-percent fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-primary-subtle text-primary">{{ __('owner.dashboard.margin') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.profit_margin') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="financialSummaryMargin">0%</h3>
-                                </div>
-                            </div>
-                        </div>
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.profit_margin'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="financialSummaryMargin">0%</span>'),
+                            'icon' => 'bi bi-percent',
+                            'colClass' => 'col-md-3 col-sm-6 mb-3',
+                        ])
                     </div>
 
                     <div class="row g-3">
@@ -575,76 +535,35 @@
                 <div class="tab-pane fade" id="analytics" role="tabpanel" aria-labelledby="analytics-tab">
                     <h5 class="mb-4 fw-bold">{{ __('owner.dashboard.analytics_title') }}</h5>
 
-                    {{-- Performance KPIs --}}
-                    <div class="row g-3 mb-3">
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-success-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-success">
-                                            <i class="bi bi-basket3 fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-success-subtle text-success">{{ __('owner.units.kg') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb- small">{{ __('owner.dashboard.avg_catch_per_trip') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="avgCatchPerTrip">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                    {{-- Performance KPIs: unified dashboard HUD stat-card style --}}
+                    <div class="row mb-3">
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.avg_catch_per_trip'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="avgCatchPerTrip">0</span>'),
+                            'icon' => 'bi bi-basket3',
+                            'colClass' => 'col-lg-3 col-md-6 mb-3',
+                        ])
 
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-danger-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-danger">
-                                            <i class="bi bi-currency-dollar fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-danger-subtle text-danger">{{ __('owner.units.sar') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.avg_revenue_per_trip') }}
-                                    </h6>
-                                    <h3 class="mb-0 fw-bold" id="avgRevenuePerTrip">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.avg_revenue_per_trip'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="avgRevenuePerTrip">0</span>'),
+                            'icon' => 'bi bi-currency-dollar',
+                            'colClass' => 'col-lg-3 col-md-6 mb-3',
+                        ])
 
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-info-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-info">
-                                            <i class="bi bi-pin-map text-info fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-info-subtle text-info">{{ __('owner.dashboard.trips_label') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.trips_per_captain') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="avgTripsPerCaptain">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.trips_per_captain'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="avgTripsPerCaptain">0</span>'),
+                            'icon' => 'bi bi-pin-map',
+                            'colClass' => 'col-lg-3 col-md-6 mb-3',
+                        ])
 
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                @include('owner.partials._card_arrow')
-                                <div class="card-body bg-primary-subtle">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="text-primary">
-                                            <i class="bi bi-graph-up-arrow text-primary fs-3"></i>
-                                        </div>
-                                        <span
-                                            class="badge bg-primary-subtle text-primary">{{ __('owner.units.sar') }}/{{ __('owner.units.kg') }}</span>
-                                    </div>
-                                    <h6 class="text-muted mb-1 small">{{ __('owner.dashboard.avg_price_per_kg') }}</h6>
-                                    <h3 class="mb-0 fw-bold" id="avgPricePerKg">0</h3>
-                                </div>
-                            </div>
-                        </div>
+                        @include('owner.components.stat-card', [
+                            'title' => __('owner.dashboard.avg_price_per_kg'),
+                            'value' => new \Illuminate\Support\HtmlString('<span id="avgPricePerKg">0</span>'),
+                            'icon' => 'bi bi-graph-up-arrow',
+                            'colClass' => 'col-lg-3 col-md-6 mb-3',
+                        ])
                     </div>
 
                     <div class="row g-3">
@@ -1012,7 +931,7 @@
                                 ]
                             },
                             options: {
-                                responsive: false, scrollX: true,
+                                responsive: true,
                                 maintainAspectRatio: false,
                                 plugins: {
                                     legend: {
