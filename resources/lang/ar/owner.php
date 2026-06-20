@@ -117,6 +117,50 @@ return [
         'am' => 'ص',
         'pm' => 'م',
     ],
+    'alerts' => [
+        'title' => 'التنبيهات',
+        'all_clear' => 'لا توجد تنبيهات حالياً 🎉',
+        'count_badge' => ':count تنبيه',
+        'showing' => 'عرض :shown من :total',
+        'severity' => [
+            'Info' => 'معلومة',
+            'Warning' => 'تحذير',
+            'Critical' => 'حرِج',
+        ],
+        'trip_overdue' => [
+            'title' => 'رحلة تجاوزت الوقت المتوقع',
+            'message' => 'الرحلة :trip (:boat) تجاوزت موعد العودة :date',
+        ],
+        'captain_fishing_license' => [
+            'title' => 'رخصة صيد القبطان على وشك الانتهاء',
+            'message' => 'رخصة صيد القبطان :name تنتهي بتاريخ :date',
+        ],
+        'captain_driving_license' => [
+            'title' => 'رخصة قيادة القبطان على وشك الانتهاء',
+            'message' => 'رخصة قيادة القبطان :name تنتهي بتاريخ :date',
+        ],
+        'crew_fishing_license' => [
+            'title' => 'رخصة صيد البحّار على وشك الانتهاء',
+            'message' => 'رخصة صيد البحّار :name تنتهي بتاريخ :date',
+        ],
+        'crew_residence' => [
+            'title' => 'إقامة البحّار على وشك الانتهاء',
+            'message' => 'إقامة البحّار :name تنتهي بتاريخ :date',
+        ],
+        'boat_license' => [
+            'title' => 'رخصة القارب على وشك الانتهاء',
+            'message' => 'رخصة القارب :boat تنتهي بتاريخ :date',
+        ],
+        'inspection_due' => [
+            'title' => 'فحص القارب مستحق',
+            'message' => 'فحص القارب :boat مستحق بتاريخ :date',
+        ],
+        'maintenance_due' => [
+            'title' => 'صيانة القارب مستحقة',
+            'message' => 'صيانة القارب :boat مستحقة بتاريخ :date',
+        ],
+    ],
+
     'dashboard' => [
         'title' => 'لوحة التحكم',
         'subtitle' => 'نظرة شاملة على أعمال الصيد الخاصة بك',
@@ -369,6 +413,7 @@ return [
         'maintenance_table' => 'جدول الصيانة',
         'maintenance_type' => 'نوع الصيانة',
         'date_maintenance' => 'تاريخ الصيانة',
+        'next_maintenance_date' => 'تاريخ الصيانة القادمة',
         'technician' => ' المسؤول الفني',
         'cost_expected' => 'التكلفة المتوقعة',
         'description' => 'وصف الصيانة',

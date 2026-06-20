@@ -117,6 +117,50 @@ return [
         'am' => 'AM',
         'pm' => 'PM',
     ],
+    'alerts' => [
+        'title' => 'Alerts',
+        'all_clear' => 'No warnings right now 🎉',
+        'count_badge' => ':count alerts',
+        'showing' => 'Showing :shown of :total',
+        'severity' => [
+            'Info' => 'Info',
+            'Warning' => 'Warning',
+            'Critical' => 'Critical',
+        ],
+        'trip_overdue' => [
+            'title' => 'Trip past expected time',
+            'message' => 'Trip :trip (:boat) is overdue since :date',
+        ],
+        'captain_fishing_license' => [
+            'title' => 'Captain fishing licence expiring',
+            'message' => 'Fishing licence for captain :name expires :date',
+        ],
+        'captain_driving_license' => [
+            'title' => 'Captain driving licence expiring',
+            'message' => 'Driving licence for captain :name expires :date',
+        ],
+        'crew_fishing_license' => [
+            'title' => 'Crew fishing licence expiring',
+            'message' => 'Fishing licence for crew member :name expires :date',
+        ],
+        'crew_residence' => [
+            'title' => 'Crew residence expiring',
+            'message' => 'Residence (iqama) for crew member :name expires :date',
+        ],
+        'boat_license' => [
+            'title' => 'Boat licence expiring',
+            'message' => 'Licence for boat :boat expires :date',
+        ],
+        'inspection_due' => [
+            'title' => 'Boat inspection due',
+            'message' => 'Inspection for boat :boat is due :date',
+        ],
+        'maintenance_due' => [
+            'title' => 'Boat maintenance due',
+            'message' => 'Maintenance for boat :boat is due :date',
+        ],
+    ],
+
     'dashboard' => [
         'title' => 'Dashboard',
         'subtitle' => 'Overview of your fishing operations',
@@ -369,6 +413,7 @@ return [
         'maintenance_table' => 'Maintenance Table',
         'maintenance_type' => 'Maintenance Type',
         'date_maintenance' => 'Maintenance Date',
+        'next_maintenance_date' => 'Next Maintenance Date',
         'technician' => 'Technician',
         'cost_expected' => 'Expected Cost',
         'description' => 'Maintenance Description',

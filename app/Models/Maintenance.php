@@ -11,6 +11,7 @@ class Maintenance extends Model
 
     protected $fillable = [
         'date',
+        'next_maintenance_date',
         'category_id',
         'boat_id',
         'owner_id',
@@ -18,6 +19,13 @@ class Maintenance extends Model
         'description',
         'technician',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'next_maintenance_date' => 'date:Y-m-d',
+        ];
+    }
 
     protected static function booted()
     {

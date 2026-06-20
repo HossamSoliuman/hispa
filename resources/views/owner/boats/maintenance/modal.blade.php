@@ -34,10 +34,14 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label>{{ __('owner.boats.date_maintenance') }}</label>
                             <input type="date" name="date" class="form-control"
                                 value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label>{{ __('owner.boats.next_maintenance_date') }}</label>
+                            <input type="date" name="next_maintenance_date" class="form-control">
                         </div>
                         <div class="col-md-12">
                             <label>{{ __('owner.boats.cost_expected') }}</label>
@@ -86,9 +90,13 @@
                         <label>{{ __('owner.boats.maintenance_type') }}</label>
                         <input type="text" class="form-control" name="category_name" readonly>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <label>{{ __('owner.boats.date_maintenance') }}</label>
                         <input type="date" name="date" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label>{{ __('owner.boats.next_maintenance_date') }}</label>
+                        <input type="date" name="next_maintenance_date" class="form-control" readonly>
                     </div>
                     <div class="col-md-12">
                         <label>{{ __('owner.boats.cost_expected') }}</label>

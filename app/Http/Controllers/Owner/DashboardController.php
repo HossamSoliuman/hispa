@@ -16,6 +16,9 @@ use App\Models\Trip;
 use App\Models\User;
 use App\Service\Owner\MonthlyFinancialsService;
 use App\Service\Owner\MonthlyReportsService;
+use App\Service\Owner\OwnerAlertService;
+use App\Support\Alert;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -36,6 +39,7 @@ class DashboardController extends Controller
     public function __construct(
         private MonthlyFinancialsService $financials,
         private MonthlyReportsService $reports,
+        private OwnerAlertService $alerts,
     ) {}
 
     private function ownerId(): int
@@ -120,6 +124,9 @@ class DashboardController extends Controller
 
         $topFive = $this->topFive($ownerId);
 
+        $alerts = $this->alerts->for($ownerId);
+        $alertSummary = $this->alerts->summarize($alerts);
+
         return view('owner.dashboard.index', compact(
             'totalRevenue',
             'currentMonthRevenue',
@@ -133,8 +140,23 @@ class DashboardController extends Controller
             'completedTrips',
             'topFive',
             'currentMonthLabel',
-            'currentMonthRangeLabel'
+            'currentMonthRangeLabel',
+            'alerts',
+            'alertSummary'
         ));
+    }
+
+    /**
+     * Owner alerts as JSON for the dashboard card's optional background refresh.
+     */
+    public function alerts(): JsonResponse
+    {
+        $alerts = $this->alerts->for($this->ownerId());
+
+        return response()->json([
+            'alerts' => $alerts->map(fn (Alert $alert): array => $alert->toArray())->values(),
+            'summary' => $this->alerts->summarize($alerts),
+        ]);
     }
 
     /**

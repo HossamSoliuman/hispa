@@ -72,6 +72,7 @@ function editMaintenance(id) {
         $('[name="boat_id"]').val(data.boat_id).trigger('change');
         $('[name="category_id"]').val(data.category_id).trigger('change');
         $('[name="date"]').val(data.date);
+        $('[name="next_maintenance_date"]').val(data.next_maintenance_date);
         $('[name="estimated_cost"]').val(data.estimated_cost);
         $('[name="technician"]').val(data.technician);
         $('[name="description"]').val(data.description);
@@ -114,6 +115,7 @@ function showDetails(id) {
         $('[name="boat_name"]').val(data.boat.name);
         $('[name="category_name"]').val(data.category.name);
         $('[name="date"]').val(data.date);
+        $('[name="next_maintenance_date"]').val(data.next_maintenance_date);
         $('[name="estimated_cost"]').val(data.estimated_cost);
         $('[name="technician"]').val(data.technician);
         $('[name="description"]').val(data.description);

@@ -74,6 +74,7 @@ Route::group([
         Route::get('/dashboard/overview-data', [DashboardController::class, 'overviewData'])->name('overview.data');
         Route::get('/recent-activities', [DashboardController::class, 'getRecentActivities'])
             ->name('recent.activities');
+        Route::get('/dashboard/alerts', [DashboardController::class, 'alerts'])->name('alerts.data');
         Route::get('/financial-summary', [DashboardController::class, 'summary'])->name('financial.summary');
         Route::get('/operations/data', [DashboardController::class, 'getOperationsData'])->name('operations.data');
         Route::get('/analytics-data', [DashboardController::class, 'getAnalyticsData'])->name('analytics.data');

@@ -91,7 +91,7 @@
             {{--    </div> --}}
 
         </div>
-        <div class="row">
+        <div class="row g-3">
 
             @php
                 $monthPeriodFooter = new \Illuminate\Support\HtmlString(
@@ -99,6 +99,10 @@
                     '<span class="text-muted">' . e($currentMonthRangeLabel) . '</span>'
                 );
             @endphp
+
+            {{-- KPI cards as a 2×2 grid beside the alerts panel --}}
+            <div class="col-12 col-lg-8 col-xxl-9">
+                <div class="row g-3">
 
             {{-- KPI cards: shared stat-card component (unified month-status style) --}}
             @include('owner.components.stat-card', [
@@ -114,7 +118,7 @@
                 'icon' => 'bi bi-cash-coin',
                 'badge' => number_format($percentageChange, 1),
                 'footer' => $monthPeriodFooter,
-                'colClass' => 'col-md-3 col-sm-6 mb-3',
+                'colClass' => 'col-sm-6',
             ])
 
             @include('owner.components.stat-card', [
@@ -127,14 +131,14 @@
                         : number_format($totalCatch, 0) . ' ' . __('owner.units.kg'),
                 'icon' => 'bi bi-basket2-fill',
                 'footer' => $monthPeriodFooter,
-                'colClass' => 'col-md-3 col-sm-6 mb-3',
+                'colClass' => 'col-sm-6',
             ])
 
             @include('owner.components.stat-card', [
                 'title' => __('owner.dashboard.active_boats'),
                 'value' => $activeBoats,
                 'icon' => 'fas fa-ship',
-                'colClass' => 'col-md-3 col-sm-6 mb-3',
+                'colClass' => 'col-sm-6',
             ])
 
             @include('owner.components.stat-card', [
@@ -142,8 +146,16 @@
                 'value' => number_format($profitMargin, 1) . '%',
                 'icon' => 'bi bi-graph-up-arrow',
                 'footer' => $monthPeriodFooter,
-                'colClass' => 'col-md-3 col-sm-6 mb-3',
+                'colClass' => 'col-sm-6',
             ])
+
+                </div>
+            </div>
+
+            {{-- Alerts panel beside the KPI grid (renders on the left in RTL) --}}
+            <div class="col-12 col-lg-4 col-xxl-3">
+                @include('owner.dashboard._alerts')
+            </div>
 
         </div>
 
@@ -1355,5 +1367,76 @@
                 }
             });
         });
+    </script>
+    <script>
+        // Owner alerts card: optional background refresh (mirrors _alert_row markup).
+        (function() {
+            const listEl = document.getElementById('ownerAlertsList');
+            const badgeEl = document.getElementById('ownerAlertsBadge');
+            if (!listEl) return;
+
+            const MAX_VISIBLE = {{ (int) config('alerts.max_visible', 6) }};
+            const badgeTpl = @json(__('owner.alerts.count_badge', ['count' => '__COUNT__']));
+            const allClearHtml =
+                `<div class="text-center text-muted py-4"><i class="bi bi-check-circle-fill text-success fs-2 d-block mb-2"></i><span class="small">{{ __('owner.alerts.all_clear') }}</span></div>`;
+
+            function esc(s) {
+                return String(s ?? '').replace(/[&<>"']/g, c => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                } [c]));
+            }
+
+            function rowHtml(a) {
+                const color = a.severity_color;
+                const tag = a.url ? 'a' : 'div';
+                const href = a.url ? ` href="${esc(a.url)}"` : '';
+                const due = a.due_for_humans ?
+                    `<span class="d-block text-${color}" style="font-size:.7rem;"><i class="bi bi-clock me-1"></i>${esc(a.due_for_humans)}</span>` :
+                    '';
+                return `<${tag}${href} class="alert-row d-flex gap-2 align-items-start py-2 text-decoration-none">` +
+                    `<span class="alert-bar bg-${color}"></span>` +
+                    `<span class="text-${color} flex-shrink-0 pt-1"><i class="bi ${esc(a.icon)}"></i></span>` +
+                    `<span class="flex-grow-1 min-w-0">` +
+                    `<span class="d-block fw-semibold small text-body">${esc(a.title)}</span>` +
+                    `<span class="d-block text-muted lh-sm" style="font-size:.75rem;">${esc(a.message)}</span>` +
+                    due + `</span></${tag}>`;
+            }
+
+            function refresh() {
+                $.ajax({
+                    url: "{{ route('owner.alerts.data') }}",
+                    method: 'GET',
+                    success: function(res) {
+                        const alerts = res.alerts || [];
+                        const summary = res.summary || {
+                            total: 0,
+                            critical: 0,
+                            warning: 0
+                        };
+
+                        listEl.innerHTML = alerts.length ?
+                            alerts.slice(0, MAX_VISIBLE).map(rowHtml).join('') :
+                            allClearHtml;
+
+                        if (badgeEl) {
+                            if (summary.total > 0) {
+                                badgeEl.className = 'badge rounded-pill ' + (summary.critical > 0 ?
+                                    'bg-danger' : (summary.warning > 0 ? 'bg-warning text-dark' :
+                                        'bg-secondary'));
+                                badgeEl.textContent = badgeTpl.replace('__COUNT__', summary.total);
+                            } else {
+                                badgeEl.classList.add('d-none');
+                            }
+                        }
+                    }
+                });
+            }
+
+            setInterval(refresh, 60000);
+        })();
     </script>
 @endsection

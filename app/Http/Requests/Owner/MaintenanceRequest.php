@@ -25,6 +25,7 @@ class MaintenanceRequest extends FormRequest
             'boat_id' => 'required|exists:boats,id',
             'category_id' => 'required|exists:categories,id',
             'date' => 'required|date',
+            'next_maintenance_date' => 'nullable|date|after_or_equal:date',
             'estimated_cost' => 'required|numeric',
             'technician' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -39,6 +40,7 @@ class MaintenanceRequest extends FormRequest
             'category_id.required' => 'يجب اختيار نوع الصيانة',
             'category_id.exists' => 'نوع الصيانة غير موجود',
             'date.required' => 'تاريخ الصيانة مطلوب',
+            'next_maintenance_date.after_or_equal' => 'تاريخ الصيانة القادمة يجب أن يكون بعد تاريخ الصيانة',
             'estimated_cost.required' => 'التكلفة المتوقعة مطلوبة',
             'technician.required' => 'اسم الفني مطلوب',
         ];

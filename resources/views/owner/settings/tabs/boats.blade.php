@@ -580,6 +580,10 @@
                             <input type="date" name="date" class="form-control" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">{{ __('owner.boats.next_maintenance_date') }}</label>
+                            <input type="date" name="next_maintenance_date" class="form-control">
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label">{{ __('owner.boats.cost_expected') }} <span class="text-danger">*</span></label>
                             <input type="number" name="estimated_cost" class="form-control" placeholder="0">
                         </div>
