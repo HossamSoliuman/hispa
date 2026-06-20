@@ -7,6 +7,13 @@
             --bg:#f7f9fc; --card:#ffffff; --text:#0f172a; --muted:#64748b;
             --border:#e2e8f0; --accent:#16a34a; --danger:#dc2626; --warn:#d97706;
         }
+        [data-bs-theme=dark]{
+            --bg:#1d2835; --card:#2b3947; --text:#e9edf1; --muted:#9aa7b2; --border:rgba(255,255,255,.14);
+        }
+        [data-bs-theme=dark] .pl-form input, [data-bs-theme=dark] .pl-form select{ background:var(--card); }
+        [data-bs-theme=dark] .pl-btn.secondary{ background:var(--card); color:var(--text); }
+        [data-bs-theme=dark] table.pl-table th{ background:rgba(255,255,255,.06); color:var(--text); }
+        [data-bs-theme=dark] .badge{ background:var(--card); color:var(--text); }
         [dir="rtl"] .pl-wrap, .pl-wrap{ direction: rtl; }
         .pl-wrap{ background: var(--bg); padding: 20px; border-radius: 16px; }
         .pl-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px; }

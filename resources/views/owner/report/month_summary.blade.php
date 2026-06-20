@@ -22,6 +22,13 @@
         .ms-total-loss td { background: #dc2626; color: #fff; }
         .ms-statement-distribution thead th { background: #d97706; }
         .ms-statement-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+        [data-bs-theme=dark] .ms-statement-wrap { background: var(--bs-secondary-bg); box-shadow: none; }
+        [data-bs-theme=dark] .ms-section td { background: rgba(255,255,255,.05); color: var(--bs-emphasis-color); border-color: var(--bs-border-color); }
+        [data-bs-theme=dark] .ms-line td { color: var(--bs-body-color); border-color: var(--bs-border-color); }
+        [data-bs-theme=dark] .ms-subtotal td { background: rgba(255,255,255,.04); color: var(--bs-emphasis-color); border-color: var(--bs-border-color); }
+        [data-bs-theme=dark] .ms-subtotal-light td { background: transparent; border-color: var(--bs-border-color); }
+        [data-bs-theme=dark] .ms-muted { color: var(--bs-secondary-color); }
     </style>
 @endsection
 

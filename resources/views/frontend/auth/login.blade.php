@@ -48,7 +48,7 @@
                         {{-- <a href="#" class="ms-auto text-inverse text-decoration-none text-opacity-50">Forgot --}}
                         {{-- password?</a> --}}
                     </div>
-                    <input id="password" type="password" name="password" required autocomplete="email" autofocus
+                    <input id="password" type="password" name="password" required autocomplete="current-password"
                         class="form-control form-control-lg bg-inverse bg-opacity-5 @error('password') is-invalid @enderror"
                         placeholder="كلمة المرور">
                     @error('password')
@@ -59,9 +59,9 @@
                 </div>
                 <div class="mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="remember">
-                        <label class="form-check-label" for="remember" id="remember"
-                            {{ old('remember') ? 'checked' : '' }}>تذكرني</label>
+                        <input class="form-check-input" type="checkbox" name="remember" value="1" id="remember"
+                            {{ old('remember') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="remember">تذكرني</label>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-outline-theme btn-lg d-block w-100 fw-500 mb-3">تسجيل

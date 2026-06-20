@@ -70,6 +70,10 @@
             margin-bottom: 20px;
         }
 
+        [data-bs-theme=dark] .stat-card,
+        [data-bs-theme=dark] .filter-card { background: var(--bs-secondary-bg); box-shadow: none; }
+        [data-bs-theme=dark] .stat-card .label { color: var(--bs-secondary-color); }
+
         .form-group label {
             font-size: 13px;
             font-weight: 600;

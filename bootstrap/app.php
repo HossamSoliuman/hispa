@@ -29,6 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+        // The owner theme preference is set client-side via JS (plaintext cookie),
+        // so it must be excluded from cookie encryption to be readable server-side.
+        $middleware->encryptCookies(except: ['owner_theme']);
+
         $middleware->alias([
             'localize' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRoutes::class,
             'localizationRedirect' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,

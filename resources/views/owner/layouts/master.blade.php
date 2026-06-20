@@ -1,6 +1,7 @@
+@php $ownerTheme = request()->cookie('owner_theme') === 'dark' ? 'dark' : 'light'; @endphp
 <!DOCTYPE html dir="rtl">
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
-    data-bs-theme="light">
+    data-bs-theme="{{ $ownerTheme }}">
 
 <head>
     <meta charset="utf-8">
@@ -379,6 +380,56 @@
             }
         }
     </style>
+
+    {{-- ── Dark-mode corrections ──────────────────────────────────────────
+         Light mode is left untouched. These rules only re-map the hardcoded
+         light colors (in the styles above + reused page utilities) that would
+         otherwise override the theme's native [data-bs-theme=dark] palette. --}}
+    <style>
+        /* themed border token used by the HUD cards */
+        [data-bs-theme=dark] { --hud-border: var(--bs-border-color); }
+
+        /* cards / panels that hardcode a white fill (no !important so colored
+           utility backgrounds like .bg-warning still win) */
+        [data-bs-theme=dark] .card,
+        [data-bs-theme=dark] .hud-card { background: var(--bs-secondary-bg); }
+
+        /* corner L-brackets: light strokes on dark */
+        [data-bs-theme=dark] .card:after { --brk-color: rgba(255, 255, 255, .5); }
+
+        /* HUD typography that hardcodes near-black / translucent-black */
+        [data-bs-theme=dark] .hud-stat-value,
+        [data-bs-theme=dark] .hud-sc-value,
+        [data-bs-theme=dark] .hud-sc-grid-value { color: var(--bs-emphasis-color); }
+        [data-bs-theme=dark] .hud-card-label,
+        [data-bs-theme=dark] .hud-section-head small,
+        [data-bs-theme=dark] .hud-sc-grid-label,
+        [data-bs-theme=dark] .hud-sc-footer { color: var(--bs-secondary-color); }
+        [data-bs-theme=dark] .hud-section-head .hud-line {
+            background: linear-gradient(90deg, rgba(var(--bs-emphasis-color-rgb), .18), transparent);
+        }
+        [data-bs-theme=dark] .small-text th { color: var(--bs-emphasis-color) !important; }
+
+        /* Bootstrap utility classes that pin light colors on page content */
+        [data-bs-theme=dark] .bg-white { background-color: var(--bs-secondary-bg) !important; }
+        [data-bs-theme=dark] .bg-light { background-color: var(--bs-tertiary-bg) !important; }
+        [data-bs-theme=dark] .text-dark,
+        [data-bs-theme=dark] .text-black { color: var(--bs-body-color) !important; }
+
+        /* …but keep dark text legible where it sits on a light-colored badge/box */
+        [data-bs-theme=dark] .bg-warning.text-dark,
+        [data-bs-theme=dark] .bg-warning .text-dark,
+        [data-bs-theme=dark] .bg-info.text-dark,
+        [data-bs-theme=dark] .bg-info .text-dark { color: #000 !important; }
+    </style>
+
+    {{-- Make ApexCharts (dashboard, analytics, sales, expenses, …) follow the theme --}}
+    <script>
+        window.Apex = window.Apex || {};
+        window.Apex.theme = Object.assign({}, window.Apex.theme || {}, { mode: '{{ $ownerTheme }}' });
+        window.Apex.chart = Object.assign({}, window.Apex.chart || {}, { background: 'transparent' });
+        window.Apex.tooltip = Object.assign({}, window.Apex.tooltip || {}, { theme: '{{ $ownerTheme }}' });
+    </script>
 </head>
 
 <body>

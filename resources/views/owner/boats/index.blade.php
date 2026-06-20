@@ -94,7 +94,7 @@
         @include('owner.components.stat-card', [
             'title' => __('owner.boats.maintenance_cost'),
             'value' => new \Illuminate\Support\HtmlString(
-                '<div id="boats_maintenance_cost">0.00 <span style="color:#fff;">' .
+                '<div id="boats_maintenance_cost">0.00 <span style="color:transparent;">' .
                     view('components.riyal-icon', [
                         'size' => 'sm',
                         'style' =>

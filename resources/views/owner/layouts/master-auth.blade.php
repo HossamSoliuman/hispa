@@ -1,5 +1,6 @@
+@php $ownerTheme = request()->cookie('owner_theme') === 'dark' ? 'dark' : 'light'; @endphp
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-bs-theme="light">
+<html lang="ar" dir="rtl" data-bs-theme="{{ $ownerTheme }}">
 <head>
     <meta charset="utf-8">
     <title>@yield('title')</title>

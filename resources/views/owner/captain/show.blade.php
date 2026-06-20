@@ -43,6 +43,8 @@
             padding: 20px;
         }
 
+        [data-bs-theme=dark] .profile-card { background-color: var(--bs-secondary-bg); box-shadow: none; }
+
         .profile-logo {
             width: 60px;
             height: 60px;

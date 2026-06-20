@@ -1,18 +1,24 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-bs-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
+    data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <title>@yield('title')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="حسبة - الحل الأمثل لإدارة مشاريعك ومتابعة أعصيّاد بسهولة" />
+    <meta name="description" content="حسبة - الحل الأمثل لإدارة مشاريعك ومتابعة أعمالك بسهولة" />
     <meta name="author" content="حسبة" />
     <meta name="keywords" content="حسبة, حسبة, إدارة مشاريع, تطبيق ويب" />
     <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
 
     <!-- ================== BEGIN core-css ================== -->
-    <link href="{{asset('dashboard/assets/css/vendor.min.css')}}" rel="stylesheet">
-    <link href="{{asset('dashboard/assets/css/app.min-rtl.css')}}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="{{ asset('dashboard/assets/css/vendor.min.css') }}" rel="stylesheet">
+    @if (app()->getLocale() == 'ar')
+        <link href="{{ asset('dashboard/assets/css/app.min-rtl.css') }}" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @else
+        <link href="{{ asset('dashboard/assets/css/app.min.css') }}" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
 
     <!-- ================== END core-css ================== -->
 @yield('css')

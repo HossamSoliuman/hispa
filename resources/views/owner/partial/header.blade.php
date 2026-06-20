@@ -40,6 +40,17 @@
 
     <!-- BEGIN menu -->
     <div class="menu">
+        {{-- Dark / Light mode toggle --}}
+        @php $isDarkMode = request()->cookie('owner_theme') === 'dark'; @endphp
+        <div class="menu-item">
+            <a href="#" class="menu-link" onclick="event.preventDefault(); ownerToggleTheme();"
+                title="{{ app()->getLocale() === 'ar' ? 'تبديل الوضع الليلي' : 'Toggle dark mode' }}">
+                <div class="menu-icon">
+                    <i class="bi {{ $isDarkMode ? 'bi-sun' : 'bi-moon-stars' }} nav-icon" id="themeToggleIcon"></i>
+                </div>
+            </a>
+        </div>
+
         {{-- Language Dropdown --}}
         <div class="menu-item dropdown dropdown-mobile-full">
             <a href="#" data-bs-toggle="dropdown" data-bs-display="static" class="menu-link">
@@ -143,6 +154,14 @@
     {{--    </form> --}}
     <!-- END menu-search -->
 </div>
+<script>
+    function ownerToggleTheme() {
+        var html = document.documentElement;
+        var next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+        document.cookie = 'owner_theme=' + next + ';path=/;max-age=31536000;SameSite=Lax';
+        location.reload();
+    }
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const readAllBtn = document.getElementById('readAllBtn');

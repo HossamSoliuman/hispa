@@ -120,7 +120,7 @@
                     <div id="equipmentContainer">
                         @foreach($expense->details as $detail)
                         @if($detail->expenseable_type === 'App\\Models\\ExpenseFishingEquipment')
-                        <div class="equipment-row border rounded p-3 mb-3" style="background-color: #f8f9fa;">
+                        <div class="equipment-row border rounded p-3 mb-3" style="background-color: var(--bs-tertiary-bg);">
                             <div class="row align-items-center">
                                 {{-- <div class="col-md-4">
                                     <label class="form-label">{{ __('owner.expenses.print.equipment_name') }}</label>

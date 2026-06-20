@@ -33,6 +33,10 @@
         .info-value {
             color: #555;
         }
+
+        [data-bs-theme=dark] .info-card { background: var(--bs-secondary-bg); box-shadow: none; }
+        [data-bs-theme=dark] .info-label { color: var(--bs-emphasis-color); }
+        [data-bs-theme=dark] .info-value { color: var(--bs-body-color); }
     </style>
 @endsection
 

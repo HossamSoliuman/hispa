@@ -38,7 +38,7 @@
         }
 
         .equipment-row {
-            background-color: #f8f9fa;
+            background-color: var(--bs-tertiary-bg);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;

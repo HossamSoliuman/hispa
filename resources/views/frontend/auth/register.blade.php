@@ -17,6 +17,14 @@
         <div class="login-content">
             <form action="{{ route('frontend.register') }}" method="POST" name="login_form">
                 @csrf
+                @php
+                    $locale = app()->getLocale();
+                    $logoPath = $locale === 'ar'
+                        ? asset('logo/arabic/main.png')
+                        : asset('logo/english/main.png');
+                @endphp
+                <img src="{{ $logoPath }}" alt="{{ $settings['title'] ?? 'حسبة' }}" style="height: 200px; width: auto; margin:auto;display:block;">
+
                 <h1 class="text-center">تسجيل جديد</h1>
                 <div class="text-inverse text-opacity-50 text-center mb-4">
                     لحمايتك، يرجى التحقق من هويتك.
@@ -84,7 +92,7 @@
                         {{--                            password?</a>--}}
                     </div>
                     <input id="password" type="password" name="password"  required
-                           autocomplete="email" autofocus
+                           autocomplete="new-password"
                            class="form-control form-control-lg bg-inverse bg-opacity-5 @error('password') is-invalid @enderror"
                            placeholder="كلمة المرور">
                     @error('password')
@@ -98,8 +106,8 @@
                         {{--                        <a href="#" class="ms-auto text-inverse text-decoration-none text-opacity-50">Forgot--}}
                         {{--                            password?</a>--}}
                     </div>
-                    <input id="password" type="password" name="password_confirmation"  required
-                           autocomplete="email" autofocus
+                    <input id="password_confirmation" type="password" name="password_confirmation"  required
+                           autocomplete="new-password"
                            class="form-control form-control-lg bg-inverse bg-opacity-5 @error('password_confirmation') is-invalid @enderror"
                            placeholder="تأكيد كلمة المرور">
                     @error('password_confirmation')
@@ -110,9 +118,9 @@
                 </div>
                 <div class="mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="remember">
-                        <label class="form-check-label" for="remember"
-                               id="remember" {{ old('remember') ? 'checked' : '' }}>تذكرني</label>
+                        <input class="form-check-input" type="checkbox" name="remember" value="1" id="remember"
+                               {{ old('remember') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="remember">تذكرني</label>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-outline-theme btn-lg d-block w-100 fw-500 mb-3">تسجيل جديد</button>
