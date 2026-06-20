@@ -24,7 +24,7 @@
             : '0';
     @endphp
 
-    {{-- Financial summary cards --}}
+    {{-- Trip-wide financial summary cards (sum of all boats) --}}
     <div class="row mb-3">
         @include('owner.components.stat-card', [
             'title'    => __('owner.reports.catch_weight'),
@@ -55,51 +55,38 @@
     <div class="row gx-4">
         <div class="col-lg-8">
 
-            {{-- Catch breakdown --}}
+            {{-- Boats & captains overview --}}
             <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header fw-bold d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fas fa-fish me-2"></i>
-                        {{ __('owner.trips.show.catch_title', ['count' => $data->catches?->details->count() ?? 0]) }}
+                <div class="card-header fw-bold">
+                    <i class="fas fa-anchor me-2"></i> {{ __('owner.trips.show.boats_title') }}
+                    <span class="badge bg-primary ms-1">{{ $financials['boats']->count() }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered text-center mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{ __('owner.trips.boats.boat') }}</th>
+                                    <th>{{ __('owner.trips.show.boat_number') }}</th>
+                                    <th>{{ __('owner.trips.boats.captains') }}</th>
+                                    <th>{{ __('owner.trips.show.crew_count') }}</th>
+                                    <th>{{ __('owner.reports.net_profit') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($financials['boats'] as $boat)
+                                    <tr>
+                                        <td>{{ $boat['boat_name'] }}</td>
+                                        <td>{{ $boat['boat_number'] ?? '—' }}</td>
+                                        <td>{{ $boat['captains']->pluck('name')->implode('، ') ?: __('owner.trips.no_captain') }}</td>
+                                        <td>{{ $boat['crew_count'] + $boat['captains']->count() }}</td>
+                                        <td>{{ number_format($boat['net_profit'], 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    @if($data->catches && $data->catches->details->isNotEmpty())
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered text-center mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>{{ __('owner.catch.fish') }}</th>
-                                        <th>{{ __('owner.catch.weight') }}</th>
-                                        <th>{{ __('owner.catch.unit') }}</th>
-                                        <th>{{ __('owner.sales.price_per_kilo') }}</th>
-                                        <th>{{ __('owner.catch.total_price') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($data->catches->details as $i => $detail)
-                                        <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $detail->fish->scientific_name ?? '---' }}</td>
-                                            <td>{{ number_format($detail->weight, 2) }}</td>
-                                            <td>{{ $detail->unit->name ?? '—' }}</td>
-                                            <td>{{ number_format($detail->price_per_kg, 2) }}</td>
-                                            <td>{{ number_format($detail->total_price, 2) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="alert alert-secondary text-center mb-0 m-3">
-                            {{ __('owner.trips.show.no_catch_data') }}
-                        </div>
-                    @endif
-                </div>
-                <div class="card-footer text-muted text-center small">
-                    {{ __('owner.trips.show.total_weight') }}: {{ $catchWeightDisplay }}
-                </div>
                 <div class="card-arrow">
                     <div class="card-arrow-top-left"></div>
                     <div class="card-arrow-top-right"></div>
@@ -108,57 +95,15 @@
                 </div>
             </div>
 
-            {{-- Sales breakdown --}}
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header fw-bold">
-                    <i class="fas fa-cash-register me-2"></i> {{ __('owner.reports.sales_breakdown') }}
-                </div>
-                <div class="card-body p-0">
-                    @if($data->sales->isNotEmpty())
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered text-center mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>{{ __('owner.reports.sale_number') }}</th>
-                                        <th>{{ __('owner.reports.customer') }}</th>
-                                        <th>{{ __('owner.reports.sale_date') }}</th>
-                                        <th>{{ __('owner.reports.amount') }}</th>
-                                        <th>{{ __('owner.reports.payment_status') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($data->sales as $i => $sale)
-                                        <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $sale->number }}</td>
-                                            <td>{{ $sale->customer_name ?? ($sale->customer->name ?? '-') }}</td>
-                                            <td>{{ $sale->sale_datetime ? $sale->sale_datetime->format('Y-m-d') : '-' }}</td>
-                                            <td>{{ number_format($sale->total_price, 2) }}</td>
-                                            <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="alert alert-secondary text-center mb-0 m-3">
-                            {{ __('owner.reports.no_sales') }}
-                        </div>
-                    @endif
-                </div>
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
-            </div>
+            {{-- Per-boat financial breakdown --}}
+            @foreach($financials['boats'] as $boat)
+                @include('owner.trips._boat_breakdown', ['boat' => $boat])
+            @endforeach
 
-            {{-- Financial breakdown --}}
+            {{-- Trip totals --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-header fw-bold">
-                    <i class="fas fa-calculator me-2"></i> {{ __('owner.reports.financial_summary') }}
+                    <i class="fas fa-calculator me-2"></i> {{ __('owner.trips.show.trip_totals') }}
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-sm m-0 text-center">
@@ -168,10 +113,6 @@
                                 <td>{{ number_format($financials['total_income'], 2) }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('owner.reports.depreciation_percent') }}</th>
-                                <td>{{ number_format($financials['depreciation_percent'], 2) }}%</td>
-                            </tr>
-                            <tr>
                                 <th>{{ __('owner.reports.total_expenses') }}</th>
                                 <td>{{ number_format($financials['total_expenses'], 2) }}</td>
                             </tr>
@@ -179,61 +120,18 @@
                                 <th>{{ __('owner.reports.outstanding') }}</th>
                                 <td>{{ number_format($financials['outstanding'], 2) }}</td>
                             </tr>
-                            <tr class="table-success fw-bold">
-                                <th>{{ __('owner.reports.net_profit') }}</th>
-                                <td>{{ number_format($financials['net_profit'], 2) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
-            </div>
-
-            {{-- Crew salaries --}}
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header fw-bold">
-                    <i class="fas fa-users me-2"></i> {{ __('owner.reports.crew_salaries') }}
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-bordered table-sm m-0 text-center">
-                        <tbody>
                             <tr>
-                                <th class="w-50">{{ __('owner.reports.owner_share') }} (50%)</th>
+                                <th>{{ __('owner.reports.owner_share') }} (50%)</th>
                                 <td>{{ number_format($financials['owner_share'], 2) }}</td>
                             </tr>
                             <tr>
                                 <th>{{ __('owner.reports.crew_share') }} (50%)</th>
                                 <td>{{ number_format($financials['crew_share'], 2) }}</td>
                             </tr>
-                        </tbody>
-                    </table>
-                    <table class="table table-sm table-bordered text-center mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>{{ __('owner.reports.member_name') }}</th>
-                                <th>{{ __('owner.reports.percentage') }}</th>
-                                <th>{{ __('owner.reports.amount') }}</th>
-                                <th>{{ __('owner.reports.signature') }}</th>
+                            <tr class="table-success fw-bold">
+                                <th>{{ __('owner.reports.net_profit') }}</th>
+                                <td>{{ number_format($financials['net_profit'], 2) }}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($financials['crew_members'] as $member)
-                                <tr>
-                                    <td>{{ $member['name'] }}</td>
-                                    <td>{{ number_format($member['percent'], 2) }}%</td>
-                                    <td>{{ number_format($member['due'], 2) }}</td>
-                                    <td></td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-muted">{{ __('owner.reports.no_crew') }}</td>
-                                </tr>
-                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -300,71 +198,11 @@
                                 </tr>
                             @endif
                             <tr>
-                                <th>{{ __('owner.trips.show.crew_count') }}</th>
-                                <td>{{ ($data->crew_count ?? 0) + ($data->captain ? 1 : 0) }}</td>
+                                <th>{{ __('owner.trips.show.boats_title') }}</th>
+                                <td>{{ $financials['boats']->count() }}</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
-            </div>
-
-            {{-- Boat info --}}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header fw-bold">
-                    <i class="fas fa-anchor me-2"></i> {{ __('owner.trips.show.boat_info') }}
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-bordered table-sm m-0 text-center">
-                        <tbody>
-                            <tr>
-                                <th class="w-40">{{ __('owner.trips.boat_name') }}</th>
-                                <td>{{ $data->boat_name ?? ($data->boat?->name ?? '---') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('owner.trips.show.boat_number') }}</th>
-                                <td>{{ $data->boat_number ?? '---' }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('owner.trips.show.boat_color') }}</th>
-                                <td>{{ $data->boat_color ?? '---' }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('owner.trips.show.boat_length') }}</th>
-                                <td>{{ $data->boat_length ?? '---' }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('owner.trips.show.boat_width') }}</th>
-                                <td>{{ $data->boat_width ?? '---' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
-            </div>
-
-            {{-- Captain --}}
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header fw-bold">
-                    <i class="fas fa-user-ninja me-2"></i> {{ __('owner.trips.show.captain') }}
-                </div>
-                <div class="card-body d-flex align-items-center">
-                    <img src="{{ asset($data->captain->logo ?? 'assets/img/avatar.png') }}"
-                        alt="{{ __('owner.generated.item_0a9699') }}" class="rounded-circle border" width="50" height="50">
-                    <div class="ms-3">
-                        <div class="fw-bold">{{ $data->captain?->name ?? '---' }}</div>
-                        <div class="text-muted small">{{ $data->captain?->phone ?? '---' }}</div>
-                    </div>
                 </div>
                 <div class="card-arrow">
                     <div class="card-arrow-top-left"></div>

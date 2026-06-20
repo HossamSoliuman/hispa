@@ -148,7 +148,7 @@
     </div>
     <!-- Modal: Add Trip -->
     <div class="modal fade" id="addTripModal" tabindex="-1" aria-labelledby="addTripModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addTripModalLabel">{{ __('owner.trips.title') }}</h5>
@@ -180,35 +180,20 @@
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label">{{ __('owner.trips.start_date') }} <span class="text-danger">*</span></label>
                                 <input type="datetime-local" name="start_date" id="trip_start_date" value="{{ old('start_date', now()->format('Y-m-d\TH:i')) }}" class="form-control" required>
                                 @error('start_date') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label">{{ __('owner.trips.duration_days') }}</label>
                                 <input type="number" name="duration" id="trip_duration" min="1" step="1" value="{{ old('duration', 1) }}" class="form-control" placeholder="{{ __('owner.trips.duration_days') }}">
                                 <small class="text-muted">{{ __('owner.trips.duration_hint') }}</small>
                                 @error('duration') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label">{{ __('owner.trips.captain_name') }} <span class="text-danger">*</span></label>
-                                <select name="captain_id" id="trip_captain_id" class="form-control" required>
-                                    <option value="">{{ __('owner.actions.choose') }}</option>
-                                    @foreach($captains as $captain)
-                                        <option value="{{ $captain->id }}" {{ old('captain_id') == $captain->id ? 'selected' : '' }}>{{ $captain->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('captain_id') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">{{ __('owner.trips.boat_name') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="boat_name" id="trip_boat_name" class="form-control" readonly value="{{ old('boat_name') }}" placeholder="{{ __('owner.trips.boat_name') }}">
-                                <input type="hidden" name="boat_id" id="trip_boat_id" value="{{ old('boat_id') }}">
-                                @error('boat_name') <span class="text-danger">{{ $message }}</span> @enderror
-                                @error('boat_id') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
                         </div>
+
+                        @include('owner.trips._boats_fields', ['boats' => $boats, 'captains' => $captains, 'selected' => old('boats', [])])
 
                         <div class="row mb-3">
                             <div class="col-12">
@@ -461,25 +446,15 @@
     <script>
         $("#addTripForm").validate();
     </script>
+    @include('owner.trips._boats_script')
+    @if($errors->any() && old('_form') === 'add_trip')
     <script>
-        $(document).ready(function () {
-            $('#trip_captain_id').on('change', function () {
-                let captainId = $(this).val();
-                if (!captainId) {
-                    $('#trip_boat_id').val('');
-                    $('#trip_boat_name').val('');
-                    return;
-                }
-                let url = "{{ route('owner.getBoatInfo', ['id' => 'CAPTAIN_ID']) }}".replace('CAPTAIN_ID', captainId);
-                $.get(url, function (data) {
-                    $('#trip_boat_id').val(data.boat_id);
-                    $('#trip_boat_name').val(data.boat_name);
-                }).fail(function () {
-                    console.error('Failed to load boat info');
-                });
-            });
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalEl = document.getElementById('addTripModal');
+            if (modalEl) { bootstrap.Modal.getOrCreateInstance(modalEl).show(); }
         });
     </script>
+    @endif
     <script>
         function tripTransition(tripId, toStatus, needsReason) {
             let cancelReason = null;

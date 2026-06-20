@@ -52,15 +52,12 @@
                         </div>
                         <div class="col-xl-4">
                             <div class="form-group">
-                                <label for="boat_name" class="form-label">{{ __('owner.catch.boat_name') }}<span
+                                <label for="boat_id" class="form-label">{{ __('owner.catch.boat_name') }}<span
                                         class="text-danger">*</span></label>
-                                <input type="text" name="boat_name" id="boat_name" class="form-control" disabled
-                                    value="{{ old('boat_name', $selectedTrip->boat_name ?? '') }}">
-                                <input type="hidden" name="boat_id" id="boat_id"
-                                    value="{{ old('boat_id', $selectedTrip->boat_id ?? '') }}">
-                                @error('boat_name')
-                                    <span class="text-danger error">{{ $message }}</span>
-                                @enderror
+                                <select name="boat_id" id="boat_id" class="form-select" required
+                                    data-selected="{{ old('boat_id', $selectedTrip->boat_id ?? '') }}">
+                                    <option value="">{{ __('owner.actions.choose') }}</option>
+                                </select>
                                 @error('boat_id')
                                     <span class="text-danger error">{{ $message }}</span>
                                 @enderror
@@ -191,22 +188,35 @@
                 }
             });
 
-            $('#trip_id').change(function() {
-                let tripId = $(this).val();
-
+            function loadTripBoats(tripId, selected) {
+                let $boat = $('#boat_id');
+                $boat.html('<option value="">{{ __('owner.actions.choose') }}</option>');
                 if (!tripId) {
-                    $('[name="boat_id"], [name="boat_name"]').val('');
                     return;
                 }
-
-                let url = `${baseUrl}/owner/getBoatInfoByTrip/${tripId}`;
-                $.get(url, function(data) {
-                    $('[name="boat_id"]').val(data.boat_id);
-                    $('[name="boat_name"]').val(data.boat_name);
+                $.get("{{ route('owner.getBoatsByTrip', ['id' => 'TRIP_ID']) }}".replace('TRIP_ID', tripId), function(data) {
+                    data.forEach(function(b) {
+                        let sel = (String(b.boat_id) === String(selected)) ? 'selected' : '';
+                        $boat.append('<option value="' + b.boat_id + '" ' + sel + '>' + b.boat_name + '</option>');
+                    });
+                    if (data.length === 1) {
+                        $boat.val(data[0].boat_id);
+                    }
                 }).fail(function() {
-                    console.error('Failed to load boat info');
+                    console.error('Failed to load boats');
                 });
+            }
+
+            $('#trip_id').on('change', function() {
+                loadTripBoats($(this).val(), null);
             });
+
+            (function() {
+                let tripId = $('#trip_id').val();
+                if (tripId) {
+                    loadTripBoats(tripId, $('#boat_id').data('selected'));
+                }
+            })();
 
             // عند تحميل الصفحة إذا في old value للمنطقة والمحافظة والمدينة
             if (oldRegionId && !$('#governorate_id option:selected').val()) {

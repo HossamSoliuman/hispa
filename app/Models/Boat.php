@@ -116,6 +116,14 @@ class Boat extends Model
         return $this->hasMany(Trip::class);
     }
 
+    /**
+     * Per-trip participations of this boat (multi-boat trips).
+     */
+    public function tripBoats()
+    {
+        return $this->hasMany(TripBoat::class);
+    }
+
     public function getNameAttribute()
     {
         $locale = app()->getLocale();
@@ -131,7 +139,6 @@ class Boat extends Model
     {
         return $this->belongsTo(BoatType::class, 'boat_type_id');
     }
-
 
     public function expenses()
     {

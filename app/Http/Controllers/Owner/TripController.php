@@ -7,11 +7,13 @@ use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\TripRequest;
 use App\Http\Requests\Owner\TripTransitionRequest;
+use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Region;
 use App\Models\Trip;
 use App\Models\User;
 use App\Repository\Admin\TripRepository;
+use App\Service\Owner\TripBoatService;
 use App\Service\Owner\TripFinancialsService;
 use App\Services\TripTransitionService;
 use Illuminate\Http\JsonResponse;
@@ -36,10 +38,12 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
+        $boats = Boat::active()->where('owner_id', auth()->id())->get(['id', 'name_ar', 'name_en', 'number']);
+
         $quickExpenseCategories = $this->quickExpenseCategories();
         $quickExpenseVendors = $this->quickExpenseVendors();
 
-        return view('owner.trips.index', compact('captains', 'quickExpenseCategories', 'quickExpenseVendors'));
+        return view('owner.trips.index', compact('captains', 'boats', 'quickExpenseCategories', 'quickExpenseVendors'));
     }
 
     public function getTripData(Request $request)
@@ -53,9 +57,11 @@ class TripController extends Controller
         $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
         $data = Trip::with([
             'fishQuantityStocks.fish',
-            'catches.details.fish',
-            'catches.details.unit',
+            'catchModels.details.fish',
+            'catchModels.details.unit',
             'sales.details',
+            'tripBoats.boat',
+            'tripBoats.captains',
             'boat',
             'captain',
             'owner',
@@ -86,10 +92,12 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
+        $boats = Boat::active()->where('owner_id', auth()->id())->get(['id', 'name_ar', 'name_en', 'number']);
+
         $quickExpenseCategories = $this->quickExpenseCategories();
         $quickExpenseVendors = $this->quickExpenseVendors();
 
-        return view('owner.trips.create', compact('regions', 'captains', 'quickExpenseCategories', 'quickExpenseVendors'));
+        return view('owner.trips.create', compact('regions', 'captains', 'boats', 'quickExpenseCategories', 'quickExpenseVendors'));
     }
 
     private function quickExpenseCategories()
@@ -118,7 +126,7 @@ class TripController extends Controller
 
     public function edit($id)
     {
-        $trip = Trip::where('owner_id', auth()->id())->find($id);
+        $trip = Trip::with('tripBoats.captains')->where('owner_id', auth()->id())->find($id);
 
         if (! $trip) {
             return redirect()->route('owner.trips.index')->with(['error' => __('owner.swal.error')]);
@@ -129,10 +137,12 @@ class TripController extends Controller
             ->select('id', 'name')
             ->get();
 
-        return view('owner.trips.edit', ['trip' => $trip, 'captains' => $captains]);
+        $boats = Boat::active()->where('owner_id', auth()->id())->get(['id', 'name_ar', 'name_en', 'number']);
+
+        return view('owner.trips.edit', ['trip' => $trip, 'captains' => $captains, 'boats' => $boats]);
     }
 
-    public function update(TripRequest $request, $id)
+    public function update(TripRequest $request, $id, TripBoatService $boatService)
     {
         $trip = Trip::where('owner_id', auth()->id())->find($id);
 
@@ -140,7 +150,7 @@ class TripController extends Controller
             return redirect()->route('owner.trips.index')->with(['error' => __('owner.swal.error')]);
         }
 
-        $data = [
+        $trip->update([
             'name' => $request->name,
             'name_en' => $request->name_en,
             'license_number' => $request->license_number,
@@ -148,10 +158,9 @@ class TripController extends Controller
             'end_date' => $request->end_date,
             'notes' => $request->notes,
             'updated_by' => auth()->user()->name ?? 'Owner',
-        ];
-        $data = fillBoatAndCrewData($data, $request->boat_id, $request->captain_id);
+        ]);
 
-        $trip->update($data);
+        $boatService->sync($trip, $boatService->fromRequest($request));
 
         return redirect()->route('owner.trips.index')->with('success', __('owner.swal.success'));
     }

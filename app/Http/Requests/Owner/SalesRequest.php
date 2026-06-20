@@ -24,6 +24,7 @@ class SalesRequest extends FormRequest
         return [
             'customer_id' => 'required|exists:customers,id',
             'trip_id' => 'required|exists:trips,id',
+            'boat_id' => 'nullable|integer|exists:boats,id',
             'payment_method_id' => 'required|exists:payment_methods,id',
             'payment_status' => 'required|in:unpaid,partially_paid,paid',
             'sale_datetime' => 'required|date_format:Y-m-d\TH:i',

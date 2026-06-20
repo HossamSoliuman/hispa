@@ -48,9 +48,11 @@ class TripReportController extends Controller
             'port',
             'region',
             'governorate',
-            'catches.details.fish',
-            'catches.details.unit',
-            'sales.details',
+            'tripBoats.boat',
+            'tripBoats.captains',
+            'catchModels.details.fish',
+            'catchModels.details.unit',
+            'sales',
         ])->where('owner_id', $owner_id);
 
         // Filter by specific trip if provided

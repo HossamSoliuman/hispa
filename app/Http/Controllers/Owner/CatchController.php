@@ -75,6 +75,22 @@ class CatchController extends Controller
     }
 
     /**
+     * Resolve which boat a catch/sale belongs to within a trip. Defaults to the
+     * trip's only boat; for multi-boat trips the boat must be chosen explicitly
+     * and must be one of the trip's boats.
+     */
+    private function resolveBoatId(Trip $trip, $requested): int
+    {
+        $boatId = $trip->resolveBoatId($requested);
+
+        if (! $boatId) {
+            throw new \Exception(__('owner.catch.choose_boat'));
+        }
+
+        return $boatId;
+    }
+
+    /**
      * Catches limited to the logged-in owner's trips.
      *
      * @return \Illuminate\Database\Eloquent\Builder<CatchModel>
@@ -118,14 +134,15 @@ class CatchController extends Controller
             DB::beginTransaction();
 
             $catch = $this->ownerCatchQuery()->findOrFail($id);
-            $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
-            $boatId = $trip->boat_id;
+            $trip = Trip::with('tripBoats')->where('owner_id', auth()->id())->findOrFail($request->trip_id);
+            $boatId = $this->resolveBoatId($trip, $request->boat_id);
 
             CatchDetail::where('catch_id', $catch->id)->delete();
             FishQuantityStock::where('catch_id', $catch->id)->delete();
 
             $catch->update([
                 'trip_id' => $request->trip_id,
+                'boat_id' => $boatId,
             ]);
 
             $defaultUnitId = Unit::defaultId();
@@ -183,11 +200,12 @@ class CatchController extends Controller
         try {
             DB::beginTransaction();
 
-            $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
-            $boatId = $trip->boat_id;
+            $trip = Trip::with('tripBoats')->where('owner_id', auth()->id())->findOrFail($request->trip_id);
+            $boatId = $this->resolveBoatId($trip, $request->boat_id);
 
             $catch = CatchModel::create([
                 'trip_id' => $request->trip_id,
+                'boat_id' => $boatId,
                 'owner_id' => auth()->user()->getAuthIdentifier(),
                 'catch_date' => now()->format('Y-m-d H:i:s'),
                 'total_weight' => 0,

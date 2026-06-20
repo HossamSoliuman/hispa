@@ -61,41 +61,15 @@
                         <div class="form-group">
                             <label for="start_date" class="form-label">{{ __('owner.trips.start_date') }}<span class="text-danger">*</span></label>
                             <input type="datetime-local" name="start_date" value="{{ old('start_date', now()->format('Y-m-d\TH:i')) }}" class="form-control" required>
+                            <input type="hidden" name="owner_id" id="owner_id" value="{{ auth()->user()->getAuthIdentifier() }}">
                             @error('start_date') <span class="text-danger error">{{ $message }}</span>@enderror
                         </div>
                     </div>
-
-                    <div class="col-xl-4">
-                        <div class="form-group">
-                            <label for="captain_id" class="form-label">{{ __('owner.trips.captain_name') }}<span class="text-danger">*</span></label>
-                            <input type="hidden" name="owner_id" id="owner_id" value="{{ auth()->user()->getAuthIdentifier() }}">
-                            <select name="captain_id" id="captain_id" class="form-control" required>
-                                <option value="">{{ __('owner.actions.choose') }}</option>
-                                    {{-- @php
-                                        $ownerId = auth()->user()->getAuthIdentifier();
-                                        $captains = \App\Models\User::where('owner_id', $ownerId)->get();
-                                    @endphp --}}
-                                    @foreach($captains as $captain)
-                                        <option value="{{ $captain->id }}" {{ old('captain_id', $trip->captain_id ?? '') == $captain->id ? 'selected' : '' }}>{{ $captain->name }}</option>
-                                    @endforeach
-                            </select>
-                            @error('captain_id') <span class="text-danger error">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4">
-                        <div class="form-group">
-                            <label for="boat_name" class="form-label">{{ __('owner.trips.boat_name') }}<span class="text-danger">*</span></label>
-                            <input type="text" name="boat_name" id="boat_name" class="form-control" disabled value="{{ old('boat_name', $trip->boat_name ?? '') }}" placeholder="{{ __('owner.trips.boat_name') }}">
-                            <input type="hidden" name="boat_id" id="boat_id" value="{{ old('boat_id', $trip->boat_id ?? '') }}">
-                            @error('boat_name') <span class="text-danger error">{{ $message }}</span>@enderror
-                            @error('boat_id') <span class="text-danger error">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
                 </div>
 
-                <div class="row mb-3">
+                @include('owner.trips._boats_fields', ['boats' => $boats, 'captains' => $captains, 'selected' => old('boats', [])])
+
+                <div class="row mb-3 mt-3">
                     <div class="col-xl-12">
                         <div class="form-group">
                             <label for="notes" class="form-label">{{ __('owner.trips.notes') }}</label>
@@ -236,6 +210,7 @@
 <script>
     $("#createForm").validate();
 </script>
+@include('owner.trips._boats_script')
 <script>
     function recalcQuickExpensesTotal() {
         let total = 0;
@@ -304,23 +279,6 @@
                     });
                 });
             }
-        });
-
-        $('#captain_id').change(function() {
-            let captainId = $(this).val();
-
-            if (!captainId) {
-                $('[name="boat_id"], [name="boat_name"]').val('');
-                return;
-            }
-
-            let url = `${baseUrl}/owner/getBoatInfo/${captainId}`;
-            $.get(url, function(data) {
-                $('[name="boat_id"]').val(data.boat_id);
-                $('[name="boat_name"]').val(data.boat_name);
-            }).fail(function() {
-                console.error('Failed to load boat info');
-            });
         });
 
         // عند تحميل الصفحة إذا في old value للمنطقة والمحافظة والمدينة

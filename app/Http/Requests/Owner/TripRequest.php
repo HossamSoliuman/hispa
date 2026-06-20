@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Owner;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TripRequest extends FormRequest
 {
@@ -23,6 +24,8 @@ class TripRequest extends FormRequest
     {
         $id = $this->route('trip');
 
+        $ownerId = auth()->id();
+
         return [
 
             'name' => 'required|max:255',
@@ -32,10 +35,18 @@ class TripRequest extends FormRequest
             'duration' => 'nullable|integer|min:1',
             'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'owner_id' => 'required|integer|exists:users,id',
-            'captain_id' => 'required|integer|exists:users,id',
-            'boat_id' => 'required|numeric|exists:boats,id',
-            'boat_name' => 'nullable|max:255',
             'notes' => 'nullable|max:255',
+
+            'boats' => 'required|array|min:1',
+            'boats.*.boat_id' => [
+                'required', 'integer', 'distinct',
+                Rule::exists('boats', 'id')->where('owner_id', $ownerId),
+            ],
+            'boats.*.captain_ids' => 'required|array|min:1',
+            'boats.*.captain_ids.*' => [
+                'required', 'integer',
+                Rule::exists('users', 'id')->where('owner_id', $ownerId)->where('role', 'captain'),
+            ],
 
             'quick_expenses' => 'nullable|array',
             'quick_expenses.*.category_id' => 'nullable|integer|exists:categories,id',
@@ -56,9 +67,14 @@ class TripRequest extends FormRequest
             'duration.min' => 'مدة الرحلة يجب أن تكون يوماً واحداً على الأقل',
             'end_date.after_or_equal' => 'تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء',
             'owner_id.required' => 'الصيّاد مطلوب',
-            'captain_id.required' => 'القائد مطلوب',
-            'boat_id.required' => 'القارب مطلوب',
-            'boat_name.required' => 'اسم القارب مطلوب',
+            'boats.required' => 'يجب اختيار قارب واحد على الأقل',
+            'boats.min' => 'يجب اختيار قارب واحد على الأقل',
+            'boats.*.boat_id.required' => 'القارب مطلوب',
+            'boats.*.boat_id.distinct' => 'لا يمكن تكرار نفس القارب في الرحلة',
+            'boats.*.boat_id.exists' => 'القارب غير صحيح',
+            'boats.*.captain_ids.required' => 'يجب اختيار قائد واحد على الأقل لكل قارب',
+            'boats.*.captain_ids.min' => 'يجب اختيار قائد واحد على الأقل لكل قارب',
+            'boats.*.captain_ids.*.exists' => 'القائد غير صحيح',
             'notes.required' => 'الملاحظات مطلوبة',
         ];
     }

@@ -121,5 +121,31 @@ class BoatController extends Controller
         ]);
     }
 
+    /**
+     * Boats participating in a trip, for the catch/sales boat pickers.
+     */
+    public function getBoatsByTrip($trip_id)
+    {
+        $trip = Trip::with('tripBoats.boat')->where('owner_id', auth()->id())->find($trip_id);
+
+        if (! $trip) {
+            return response()->json([]);
+        }
+
+        $boats = $trip->tripBoats->map(fn ($tripBoat) => [
+            'boat_id' => $tripBoat->boat_id,
+            'boat_name' => $tripBoat->boat_name ?: ($tripBoat->boat->name ?? ''),
+        ]);
+
+        if ($boats->isEmpty() && $trip->boat_id) {
+            $boats = collect([[
+                'boat_id' => $trip->boat_id,
+                'boat_name' => $trip->boat_name,
+            ]]);
+        }
+
+        return response()->json($boats->values());
+    }
+
     public function getAssets() {}
 }

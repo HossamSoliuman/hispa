@@ -16,15 +16,15 @@ class TripDataTable extends DataTables
             $owner_id = auth()->id();
 
             $boat_id = $request->boat_id;
+            $query = Trip::with(['sales', 'owner', 'boat', 'captain', 'catches', 'tripBoats.boat', 'tripBoats.captains'])
+                ->where('owner_id', $owner_id)
+                ->orderBy('created_at', 'desc');
+
             if ($boat_id) {
-                $query = Trip::with(['sales', 'owner', 'boat', 'captain', 'catches'])
-                    ->where('owner_id', $owner_id)
-                    ->where('boat_id', $boat_id)
-                    ->orderBy('created_at', 'desc');
-            } else {
-                $query = Trip::with(['sales', 'owner', 'boat', 'captain', 'catches'])
-                    ->where('owner_id', $owner_id)
-                    ->orderBy('created_at', 'desc');
+                $query->where(function ($q) use ($boat_id) {
+                    $q->whereHas('tripBoats', fn ($t) => $t->where('boat_id', $boat_id))
+                        ->orWhere('boat_id', $boat_id);
+                });
             }
 
             if ($request->has('status') && in_array($request->status, range(1, 8))) {
@@ -50,8 +50,22 @@ class TripDataTable extends DataTables
                     return "<a href='{$url}' class='text-primary fw-bold'>{$number}</a>";
                 })
                 ->addColumn('owner', fn (Trip $trip) => $trip->owner->name ?? '--')
-                ->addColumn('boat', fn (Trip $trip) => $trip->boat->name ?? '--')
-                ->addColumn('captain', fn (Trip $trip) => $trip->captain->name ?? '--')
+                ->addColumn('boat', function (Trip $trip) {
+                    $names = $trip->tripBoats->map(fn ($tb) => $tb->boat_name ?: ($tb->boat->name ?? null))->filter();
+
+                    if ($names->isEmpty()) {
+                        return $trip->boat->name ?? '--';
+                    }
+
+                    return $names->count() > 1
+                        ? $names->first().' +'.($names->count() - 1)
+                        : $names->first();
+                })
+                ->addColumn('captain', function (Trip $trip) {
+                    $names = $trip->tripBoats->flatMap(fn ($tb) => $tb->captains->pluck('name'))->unique();
+
+                    return $names->isNotEmpty() ? $names->implode('، ') : ($trip->captain->name ?? '--');
+                })
                 ->addColumn('total_sales', function (Trip $trip) {
                     $weight = $trip->sales->sum('net_owner_amount');
 

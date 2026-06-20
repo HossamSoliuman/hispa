@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -153,12 +154,8 @@ class MonthlyFinancialsService
     }
 
     /**
-     * Per-member distribution of the crew pool for the owner's participating crew.
-     *
-     * A member with a custom percentage (نسبة خاصة) — typically a captain given
-     * an advantage over the rest — takes that percentage of the pool off the top.
-     * The remaining pool is then split among the other crew by their profit
-     * shares (أسهم), exactly as {@see distributeCrewPool()} does.
+     * Per-member distribution of the crew pool for the owner's participating
+     * crew (optionally scoped to one boat by the crew's permanent boat_id).
      *
      * @return array{
      *     members: \Illuminate\Support\Collection<int, array{user_id:int, name:string, role:string, custom_percent: float|null, shares: float, due: float}>,
@@ -168,8 +165,24 @@ class MonthlyFinancialsService
      */
     public function crewDistribution(int $ownerId, float $crewPool, ?int $boatId = null): array
     {
-        $crew = $this->participatingCrewQuery($ownerId, $boatId)->get();
+        return $this->distributeAmong($this->participatingCrewQuery($ownerId, $boatId)->get(), $crewPool);
+    }
 
+    /**
+     * Distribute a crew pool across an explicit set of members, applying the
+     * same custom-percentage-then-shares rule as {@see crewDistribution()}.
+     * Used by trip-level financials, where the participants are a boat's crew
+     * plus the captains assigned to that boat for the specific trip.
+     *
+     * @param  \Illuminate\Support\Collection<int, User>  $crew
+     * @return array{
+     *     members: \Illuminate\Support\Collection<int, array{user_id:int, name:string, role:string, custom_percent: float|null, shares: float, due: float}>,
+     *     custom_total: float, remaining_pool: float,
+     *     share_value: float, total_shares: float
+     * }
+     */
+    public function distributeAmong(Collection $crew, float $crewPool): array
+    {
         $customTotal = 0.0;
         $totalShares = 0.0;
         foreach ($crew as $member) {

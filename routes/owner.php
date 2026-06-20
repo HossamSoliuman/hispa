@@ -129,6 +129,7 @@ Route::group([
         Route::get('/getBoatData', [BoatController::class, 'getBoatData'])->name('getBoatData');
         Route::get('/getBoatInfo/{id}', [BoatController::class, 'getBoatInfo'])->name('getBoatInfo');
         Route::get('/getBoatInfoByTrip/{id}', [BoatController::class, 'getBoatInfoByTrip'])->name('getBoatInfoByTrip');
+        Route::get('/getBoatsByTrip/{id}', [BoatController::class, 'getBoatsByTrip'])->name('getBoatsByTrip');
 
         Route::resource('/assets', AssetController::class);
         Route::get('/getAssetsData', [AssetController::class, 'getAssetsData'])->name('getAssetsData');
@@ -180,7 +181,7 @@ Route::group([
         // sales in customers
         Route::resource('/sales', SalesController::class);
         Route::get('/getSalesData', [SalesController::class, 'getSalesData'])->name('getSalesData');
-        Route::get('/catchDetails/{id}', [SalesController::class, 'catchDetails'])->name('catchDetails');
+        Route::get('/catchDetails/{id}/{boat?}', [SalesController::class, 'catchDetails'])->name('catchDetails');
 
         // reports  sales_report
         Route::get('/sales_report', [SalesReportController::class, 'index'])->name('sales-report');

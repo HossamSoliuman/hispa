@@ -88,8 +88,9 @@ class SalesController extends Controller
             DB::beginTransaction();
 
             $customer = Customer::find($request->customer_id);
-            $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
-            $catch = CatchModel::where('trip_id', $request->trip_id)->first();
+            $trip = Trip::with('tripBoats')->where('owner_id', auth()->id())->findOrFail($request->trip_id);
+            $boatId = $this->resolveBoatId($trip, $request->boat_id);
+            $catch = $this->boatCatch($trip, $boatId);
 
             $sale = Sale::create([
                 'number' => $request->customer_id.'_'.time(),
@@ -104,7 +105,7 @@ class SalesController extends Controller
                 'sale_datetime' => $request->sale_datetime,
                 'catch_id' => $catch->id ?? 0,
                 'trip_id' => $request->trip_id,
-                'boat_id' => $trip->boat_id ?? 0,
+                'boat_id' => $boatId,
             ]);
 
             $defaultUnitId = Unit::defaultId();
@@ -402,8 +403,8 @@ class SalesController extends Controller
             return;
         }
 
+        // A multi-boat trip is only fully sold once every boat's stock is gone.
         $hasRemainingStock = FishQuantityStock::where('trip_id', $trip->id)
-            ->where('catch_id', $catch->id ?? 0)
             ->where('quantity', '>', 0)
             ->exists();
 
@@ -412,21 +413,52 @@ class SalesController extends Controller
         }
     }
 
-    public function catchDetails($tripId)
+    /**
+     * Resolve which boat the sale belongs to (defaults to the trip's only boat).
+     */
+    private function resolveBoatId(Trip $trip, $requested): int
     {
-        Trip::where('owner_id', auth()->id())->findOrFail($tripId);
+        $boatId = $trip->resolveBoatId($requested);
 
-        $catch = CatchModel::where('trip_id', $tripId)->with('details', 'details.fish')->first();
-        if ($catch) {
-            $fishQuntity = FishQuantityStock::with('fish', 'unit')
-                ->where('catch_id', $catch->id)
-                ->where('trip_id', $tripId)
-                ->where('quantity', '>', 0)
-                ->get();
-
-            return response()->json($fishQuntity);
+        if (! $boatId) {
+            throw new \Exception(__('owner.catch.choose_boat'));
         }
 
-        return response()->json([]);
+        return $boatId;
+    }
+
+    /**
+     * The catch for a given boat in the trip, falling back to the trip's single
+     * catch for legacy single-boat trips whose catch has no boat_id.
+     */
+    private function boatCatch(Trip $trip, int $boatId): ?CatchModel
+    {
+        $catch = CatchModel::where('trip_id', $trip->id)->where('boat_id', $boatId)->first();
+
+        if (! $catch && $trip->boatIds()->count() === 1) {
+            $catch = CatchModel::where('trip_id', $trip->id)->first();
+        }
+
+        return $catch;
+    }
+
+    public function catchDetails($tripId, $boat = null)
+    {
+        $trip = Trip::with('tripBoats')->where('owner_id', auth()->id())->findOrFail($tripId);
+        $boatId = $trip->resolveBoatId($boat);
+
+        $catch = $boatId ? $this->boatCatch($trip, $boatId) : CatchModel::where('trip_id', $tripId)->first();
+
+        if (! $catch) {
+            return response()->json([]);
+        }
+
+        $fishQuntity = FishQuantityStock::with('fish', 'unit')
+            ->where('catch_id', $catch->id)
+            ->where('trip_id', $tripId)
+            ->where('quantity', '>', 0)
+            ->get();
+
+        return response()->json($fishQuntity);
     }
 }

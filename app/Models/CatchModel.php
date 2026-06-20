@@ -21,4 +21,9 @@ class CatchModel extends Model
     {
         return $this->belongsTo(Trip::class, 'trip_id');
     }
+
+    public function boat()
+    {
+        return $this->belongsTo(Boat::class, 'boat_id');
+    }
 }

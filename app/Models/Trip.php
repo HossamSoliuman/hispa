@@ -86,6 +86,61 @@ class Trip extends Model
         return $this->belongsTo(Boat::class, 'boat_id');
     }
 
+    /**
+     * Boats participating in this trip, each with its own captains snapshot.
+     */
+    public function tripBoats(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TripBoat::class);
+    }
+
+    public function boats(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Boat::class, 'trip_boats')->withTimestamps();
+    }
+
+    /**
+     * Every catch recorded for this trip (one per participating boat).
+     */
+    public function catchModels(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CatchModel::class, 'trip_id');
+    }
+
+    /**
+     * Boat ids participating in this trip, falling back to the primary boat for
+     * legacy single-boat trips with no trip_boats rows.
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    public function boatIds(): \Illuminate\Support\Collection
+    {
+        $ids = $this->tripBoats->pluck('boat_id');
+
+        if ($ids->isEmpty() && $this->boat_id) {
+            $ids = collect([$this->boat_id]);
+        }
+
+        return $ids->map(fn ($id): int => (int) $id)->values();
+    }
+
+    /**
+     * Resolve which of the trip's boats a catch/sale belongs to: the requested
+     * boat when valid, the only boat for single-boat trips, or null when the
+     * trip spans several boats and none was chosen.
+     */
+    public function resolveBoatId($requested): ?int
+    {
+        $ids = $this->boatIds();
+        $requested = (int) $requested;
+
+        if ($requested && $ids->contains($requested)) {
+            return $requested;
+        }
+
+        return $ids->count() === 1 ? $ids->first() : null;
+    }
+
     public function scopeCaptainId(Builder $query): Builder
     {
         return $query->where('captain_id', request()->user()->id);

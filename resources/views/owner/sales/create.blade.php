@@ -71,6 +71,15 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label for="boat_id" class="form-label">{{ __('owner.catch.boat_name') }} <span class="text-danger">*</span></label>
+                                <select name="boat_id" id="boat_id" class="form-select" required>
+                                    <option value="">{{ __('owner.actions.choose') }}</option>
+                                </select>
+                                @error('boat_id') <span class="text-danger error">{{ $message }}</span>@enderror
+                            </div>
+                        </div>
                     </div>
 
                     <h4 class="mt-5">{{ __('owner.sales.sales_details') }}</h4>
@@ -159,7 +168,8 @@
     </script>
 
 <script>
-    const catchDetailsUrl = "{{ route('owner.catchDetails', ':id') }}";
+    const catchDetailsUrl = "{{ route('owner.catchDetails', ['id' => ':id', 'boat' => ':boat']) }}";
+    const boatsByTripUrl = "{{ route('owner.getBoatsByTrip', ['id' => ':id']) }}";
 
     function buildFishRow(detail) {
         const price = detail.price_per_kg > 0 ? detail.price_per_kg : '';
@@ -198,15 +208,15 @@
         `;
     }
 
-    function loadCatchDetails(tripId) {
+    function loadCatchDetails(tripId, boatId) {
         const wrapper = document.getElementById('fish-wrapper');
         wrapper.innerHTML = '';
-        if (!tripId) {
+        if (!tripId || !boatId) {
             calculateGrandTotal();
             return;
         }
 
-        fetch(catchDetailsUrl.replace(':id', tripId))
+        fetch(catchDetailsUrl.replace(':id', tripId).replace(':boat', boatId))
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) {
@@ -223,14 +233,48 @@
             });
     }
 
+    function loadSaleBoats(tripId, selected) {
+        const boatSelect = document.getElementById('boat_id');
+        boatSelect.innerHTML = '<option value="">{{ __('owner.actions.choose') }}</option>';
+        document.getElementById('fish-wrapper').innerHTML = '';
+        calculateGrandTotal();
+        if (!tripId) {
+            return;
+        }
+
+        fetch(boatsByTripUrl.replace(':id', tripId))
+            .then(res => res.json())
+            .then(data => {
+                (data || []).forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b.boat_id;
+                    opt.textContent = b.boat_name;
+                    if (selected && String(b.boat_id) === String(selected)) {
+                        opt.selected = true;
+                    }
+                    boatSelect.appendChild(opt);
+                });
+                if (data && data.length === 1) {
+                    boatSelect.value = data[0].boat_id;
+                }
+                if (boatSelect.value) {
+                    loadCatchDetails(tripId, boatSelect.value);
+                }
+            });
+    }
+
     document.getElementById('trip_id').addEventListener('change', function () {
-        loadCatchDetails(this.value);
+        loadSaleBoats(this.value, null);
+    });
+
+    document.getElementById('boat_id').addEventListener('change', function () {
+        loadCatchDetails(document.getElementById('trip_id').value, this.value);
     });
 
     document.addEventListener('DOMContentLoaded', function () {
         const initialTrip = document.getElementById('trip_id').value;
         if (initialTrip) {
-            loadCatchDetails(initialTrip);
+            loadSaleBoats(initialTrip, '{{ old('boat_id') }}');
         }
     });
 </script>
@@ -271,23 +315,6 @@
                         });
                     });
                 }
-            });
-
-            $('#trip_id').change(function() {
-                let tripId = $(this).val();
-
-                if (!tripId) {
-                    $('[name="boat_id"], [name="boat_name"]').val('');
-                    return;
-                }
-
-                let url = `${baseUrl}/owner/getBoatInfoByTrip/${tripId}`;
-                $.get(url, function(data) {
-                    $('[name="boat_id"]').val(data.boat_id);
-                    $('[name="boat_name"]').val(data.boat_name);
-                }).fail(function() {
-                    console.error('Failed to load boat info');
-                });
             });
 
             // عند تحميل الصفحة إذا في old value للمنطقة والمحافظة والمدينة

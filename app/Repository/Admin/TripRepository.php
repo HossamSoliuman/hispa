@@ -78,13 +78,22 @@ class TripRepository implements CRUD
                 $data['end_date'] = $request->end_date;
             }
             $data['owner_id'] = $request->owner_id;
-            $data['captain_id'] = $request->captain_id;
             $data['notes'] = $request->notes;
             $guard = $request->guard ?? 'web';
             $data['created_by'] = Auth::guard($guard)->user()->name ?? 'Admin';
-            $data = fillBoatAndCrewData($data, $request->boat_id, $request->captain_id);
+
+            $boatService = app(\App\Service\Owner\TripBoatService::class);
+            $boats = $this->resolveBoats($request, $boatService);
+
+            $primaryBoatId = $boats[0]['boat_id'] ?? $request->boat_id;
+            $primaryCaptainId = $boats[0]['captain_ids'][0] ?? $request->captain_id;
+
+            $data['captain_id'] = $primaryCaptainId;
+            $data = fillBoatAndCrewData($data, $primaryBoatId, $primaryCaptainId);
 
             $trip = Trip::create($data);
+
+            $boatService->sync($trip, $boats);
 
             if ($guard === 'owner' && $request->filled('quick_expenses')) {
                 app(\App\Repository\Owner\ExpenseRepository::class)->createQuickExpensesForTrip(
@@ -148,7 +157,14 @@ class TripRepository implements CRUD
             $data['notes'] = $request->notes;
             $guard = $request->guard ?? 'web';
             $data['updated_by'] = Auth::guard($guard)->user()->name ?? 'Admin';
-            $data = fillBoatAndCrewData($data, $request->boat_id, $request->captain_id);
+
+            $boatService = app(\App\Service\Owner\TripBoatService::class);
+            $boats = $this->resolveBoats($request, $boatService);
+
+            $primaryBoatId = $boats[0]['boat_id'] ?? $request->boat_id;
+            $primaryCaptainId = $boats[0]['captain_ids'][0] ?? $request->captain_id;
+            $data['captain_id'] = $primaryCaptainId;
+            $data = fillBoatAndCrewData($data, $primaryBoatId, $primaryCaptainId);
 
             if ($request->hasFile('license_attachment')) {
                 if (! is_null($trip->getRawOriginal('license_attachment'))) {
@@ -160,6 +176,9 @@ class TripRepository implements CRUD
             }
 
             $trip->update($data);
+
+            $boatService->sync($trip, $boats);
+
             DB::commit();
             session()->flash('success', 'تم تحديث البيانات بنجاح');
 
@@ -180,6 +199,26 @@ class TripRepository implements CRUD
             return redirect()->back()->with(['error' => 'حدث خطأ ما']);
 
         }
+    }
+
+    /**
+     * Resolve the boats payload from the request, falling back to the legacy
+     * single boat_id/captain_id pair (admin form) when no boats array is sent.
+     *
+     * @return array<int, array{boat_id: int, captain_ids: array<int, int>}>
+     */
+    private function resolveBoats($request, \App\Service\Owner\TripBoatService $boatService): array
+    {
+        $boats = $boatService->fromRequest($request);
+
+        if (empty($boats) && $request->filled('boat_id')) {
+            $boats = [[
+                'boat_id' => (int) $request->boat_id,
+                'captain_ids' => array_values(array_filter([(int) $request->captain_id])),
+            ]];
+        }
+
+        return $boats;
     }
 
     public function deleteData($id)

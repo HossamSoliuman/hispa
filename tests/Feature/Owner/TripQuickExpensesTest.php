@@ -63,8 +63,9 @@ class TripQuickExpensesTest extends TestCase
             'license_number' => 'LIC-1',
             'start_date' => now()->format('Y-m-d\TH:i'),
             'owner_id' => $owner->id,
-            'captain_id' => $captain->id,
-            'boat_id' => $boat->id,
+            'boats' => [
+                ['boat_id' => $boat->id, 'captain_ids' => [$captain->id]],
+            ],
         ];
     }
 

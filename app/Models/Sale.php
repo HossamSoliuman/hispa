@@ -20,6 +20,8 @@ class Sale extends Model
         'payment_status',
         'status',
         'trip_id',
+        'boat_id',
+        'catch_id',
         'customer_id',
         'customer_name',
         'payment_method_id',
@@ -68,6 +70,11 @@ class Sale extends Model
     public function trip()
     {
         return $this->belongsTo(Trip::class)->withDefault();
+    }
+
+    public function boat()
+    {
+        return $this->belongsTo(Boat::class, 'boat_id')->withDefault();
     }
 
     public function details()
