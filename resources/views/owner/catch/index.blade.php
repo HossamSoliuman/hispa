@@ -154,11 +154,13 @@
                 </div>
 
             </div>
-            <div class="text-end mt-3">
-                <button class="btn btn-success sm me-2"><i class="bi bi-search"></i>
+            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mt-3">
+                <button type="button" id="searchBtn" class="btn btn-success btn-sm"><i class="bi bi-search"></i>
                     {{ __('owner.catch.filters.search') }}</button>
-                <button class="btn btn-light btn-sm me-2"><i class="bi bi-x-circle"></i>
+                <button type="button" id="clearBtn" class="btn btn-light btn-sm"><i class="bi bi-x-circle"></i>
                     {{ __('owner.catch.filters.clear') }}</button>
+                <a href="#" id="printReportBtn" target="_blank" class="btn btn-dark btn-sm"><i class="bi bi-printer"></i>
+                    {{ __('owner.catch.filters.print_report') }}</a>
             </div>
         </div>
     </div>
@@ -435,6 +437,25 @@
                 $('#boat_id').val('');
                 $('input[type=date]').val('');
                 table.ajax.reload();
+            });
+
+            // طباعة تقرير بالمصيد المعروض حسب الفلاتر المطبقة
+            $('#printReportBtn').on('click', function(e) {
+                e.preventDefault();
+                const params = new URLSearchParams();
+                const fishId = $('#fish_id').val();
+                const boatId = $('#boat_id').val();
+                const hasCatch = $('#has_catch').val();
+                const fromDate = $('input[type=date]').eq(0).val();
+                const toDate = $('input[type=date]').eq(1).val();
+                if (fishId) params.append('fish_id', fishId);
+                if (boatId) params.append('boat_id', boatId);
+                if (hasCatch) params.append('has_catch', hasCatch);
+                if (fromDate) params.append('from_date', fromDate);
+                if (toDate) params.append('to_date', toDate);
+                const query = params.toString();
+                const url = "{{ route('owner.printCatchesReport') }}" + (query ? ('?' + query) : '');
+                window.open(url, '_blank');
             });
         });
     </script>
@@ -713,5 +734,39 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        function deleteRecord(recordId) {
+            Swal.fire({
+                title: '{{ __('owner.swal.confirm_title') }}',
+                text: "{{ __('owner.swal.confirm_text') }}",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                cancelButtonText: '{{ __('owner.swal.cancel') }}'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('owner.catch.destroy', 'RECORD_ID') }}".replace('RECORD_ID', recordId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success');
+                            $('#datatableDefault').DataTable().ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            let message = xhr.responseJSON?.message ||
+                                '{{ __('owner.swal.unexpected_error') }}';
+                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endsection

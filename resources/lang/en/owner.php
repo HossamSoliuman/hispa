@@ -1495,6 +1495,7 @@ return [
             'search' => 'Search',
             'clear' => 'Clear',
             'has_catch' => 'Has Catch',
+            'print_report' => 'Print Report',
         ],
         'tabs' => [
             'records' => 'Records',
@@ -1560,6 +1561,7 @@ return [
         'all_boats_report' => 'All Boats Report',
         'catch_report' => 'Catch Report',
         'all_catchs_report' => 'All Catches Report',
+        'trips_with_catch' => 'Trips With Catch',
         'total_boats' => 'Total Boats',
         'trip_report' => 'Trip Report',
         'all_trips_report' => 'All Trips Report',

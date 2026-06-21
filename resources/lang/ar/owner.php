@@ -1495,6 +1495,7 @@ return [
             'search' => 'بحث',
             'clear' => 'مسح',
             'has_catch' => 'المصيد',
+            'print_report' => 'طباعة التقرير',
         ],
         'tabs' => [
             'records' => 'السجلات',
@@ -1560,6 +1561,7 @@ return [
         'all_boats_report' => 'تقرير جميع القوارب',
         'catch_report' => 'تقرير المصيد',
         'all_catchs_report' => 'تقرير جميع المصيد',
+        'trips_with_catch' => 'رحلات بها مصيد',
         'total_boats' => 'إجمالي القوارب',
         'trip_report' => 'تقرير الرحلة',
         'all_trips_report' => 'تقرير جميع الرحلات',

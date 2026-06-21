@@ -80,8 +80,11 @@ class CatchDataTable extends DataTables
                                     <a href="'.route('owner.catch.edit', $row->catches?->id).'" class="btn btn-sm btn-outline-warning mx-1" title="'.__('owner.actions.edit').'">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="'.route('owner.printCatchReport', ['id' => $row->catches?->id]).'"  target="_blank" class="btn btn-sm btn-outline-danger" title="طباعه">
+                                    <a href="'.route('owner.printCatchReport', ['id' => $row->catches?->id]).'"  target="_blank" class="btn btn-sm btn-outline-secondary mx-1" title="طباعه">
                                         <i class="bi bi-printer"></i>
+                                    </a>
+                                    <a href="#" onclick="deleteRecord('.$row->catches?->id.')" class="btn btn-sm btn-outline-danger" title="'.__('owner.actions.delete').'">
+                                        <i class="bi bi-trash"></i>
                                     </a>';
 
                         if ($remaining > 0) {

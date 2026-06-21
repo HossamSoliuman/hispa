@@ -11,6 +11,7 @@ use App\Models\CatchDetail;
 use App\Models\CatchModel;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
+use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\Unit;
@@ -269,5 +270,106 @@ class CatchController extends Controller
         $filename = 'catch-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) $tripNumber)), '-').'.pdf';
 
         return pdf_report(view('owner.reports.print.catch-report', compact('catch', 'settings')), [], $filename);
+    }
+
+    /**
+     * Print the currently filtered catch records as a single PDF report.
+     * Mirrors the filters applied on the catch management listing.
+     */
+    public function printCatchesReport(Request $request): \Illuminate\Http\Response
+    {
+        $ownerId = auth()->id();
+
+        $query = Trip::with(['boat', 'catches.details.fish', 'catches.details.unit'])
+            ->whereNotNull('end_date')
+            ->where('owner_id', $ownerId)
+            ->when($request->filled('from_date'), fn ($q) => $q->whereDate('start_date', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($q) => $q->whereDate('end_date', '<=', $request->to_date))
+            ->when($request->filled('boat_id'), fn ($q) => $q->where('boat_id', $request->boat_id))
+            ->when($request->filled('fish_id'), fn ($q) => $q->whereHas('catches.details', fn ($d) => $d->where('fish_id', $request->fish_id)));
+
+        if ($request->filled('has_catch')) {
+            if ($request->has_catch == '1') {
+                $query->whereHas('catches');
+            } elseif ($request->has_catch == '0') {
+                $query->whereDoesntHave('catches');
+            }
+        }
+
+        $trips = $query->orderBy('start_date', 'desc')->get();
+
+        $totalWeight = $trips->sum(fn (Trip $trip) => $trip->catches?->total_weight ?? 0);
+        $totalRevenue = $trips->sum(fn (Trip $trip) => $trip->catches?->details->sum('total_price') ?? 0);
+        $tripsWithCatch = $trips->filter(fn (Trip $trip) => $trip->catches)->count();
+
+        $statistics = [
+            'total_trips' => $trips->count(),
+            'trips_with_catch' => $tripsWithCatch,
+            'total_weight' => $totalWeight,
+            'total_revenue' => $totalRevenue,
+            'avg_price_per_kg' => $totalWeight > 0 ? $totalRevenue / $totalWeight : 0,
+        ];
+
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $settings = [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ];
+
+        $filters = [
+            'from_date' => $request->filled('from_date') ? $request->from_date : null,
+            'to_date' => $request->filled('to_date') ? $request->to_date : null,
+            'boat_id' => $request->filled('boat_id') ? $request->boat_id : null,
+            'fish_id' => $request->filled('fish_id') ? $request->fish_id : null,
+        ];
+
+        $filename = 'catches-report-'.($filters['from_date'] ?? 'all').'-to-'.($filters['to_date'] ?? 'all').'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.catches-report', compact(
+            'trips',
+            'statistics',
+            'settings',
+            'filters'
+        )), [], $filename, $disposition);
+    }
+
+    public function destroy($id): \Illuminate\Http\JsonResponse
+    {
+        $catch = $this->ownerCatchQuery()->with('trip')->findOrFail($id);
+
+        if (Sale::where('catch_id', $catch->id)->exists()) {
+            return response()->json([
+                'message' => 'لا يمكن حذف المصيد لارتباطه بفواتير بيع. يرجى حذف فواتير البيع المرتبطة أولاً.',
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $trip = $catch->trip;
+
+            CatchDetail::where('catch_id', $catch->id)->delete();
+            FishQuantityStock::where('catch_id', $catch->id)->delete();
+            $catch->delete();
+
+            if ($trip && in_array($trip->status, [TripStatus::ReadyToSell, TripStatus::Counted], true)) {
+                $trip->update(['status' => TripStatus::Finished]);
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'تم حذف المصيد بنجاح']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }
