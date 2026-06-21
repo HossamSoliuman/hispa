@@ -4,7 +4,6 @@ namespace App\DataTable\Owner;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class CustomerDataTable extends DataTables
@@ -13,48 +12,53 @@ class CustomerDataTable extends DataTables
     {
         if ($request->ajax()) {
             $owner = auth()->user();
-            $owner_id = $owner->id;
 
-            $query = Customer::where('owner_id', $owner_id)
-                ->withCount([
-                    'sales as total_sales' => function ($q) {
-                        $q->select(DB::raw('COALESCE(SUM(remaining_total),0)'));
-                    },
-                    'sales',  // عدد الطلبات
-                ])
-                ->withMax('sales', 'created_at')
+            $query = Customer::where('owner_id', $owner->id)
+                ->withCount('sales')
+                ->withSum('sales as total_purchases', 'total_price')
+                ->withSum('sales as total_remaining', 'remaining_total')
+                ->withMax('sales as last_order_at', 'sale_datetime')
                 ->orderBy('created_at', 'desc');
 
             $data = $query->get();
 
             $customer_count = $data->count();
             $customer_count_active = $data->where('status', 1)->count();
-            //            $total_sales = $data->sum('total_sales');
-            $total_sales = $data->sum(function ($customer) {
-                return $customer->sales->sum('total_price');
-            });
-            $total_orders = $data->sum('sales_count'); // مجموع الطلبات لجميع العملاء
+            $total_sales = $data->sum('total_purchases');
+            $total_orders = $data->sum('sales_count');
 
             return Datatables::of($data)
                 ->addIndexColumn()
+                ->editColumn('type', function ($data) {
+                    return $data->type ?: '—';
+                })
                 ->addColumn('total_sales', function ($data) {
-                    $total_sales = $data->sales->sum('total_price');
+                    return number_format($data->total_purchases ?? 0, 2);
+                })
+                ->addColumn('total_remaining', function ($data) {
+                    $remaining = $data->total_remaining ?? 0;
+                    $class = $remaining > 0 ? 'text-danger fw-bold' : 'text-success';
 
-                    return number_format($total_sales ?? 0, 2);
+                    return '<span class="'.$class.'">'.number_format($remaining, 2).'</span>';
                 })
                 ->addColumn('order_count', function ($data) {
-                    return $data->sales_count;  // عدد الطلبات لكل عميل
+                    return $data->sales_count;
                 })
                 ->addColumn('last_order', function ($data) {
-                    return $data->sales_max_created_at ? date('Y-m-d', strtotime($data->sales_max_created_at)) : '-';
+                    return $data->last_order_at ? date('Y-m-d', strtotime($data->last_order_at)) : '—';
                 })
                 ->addColumn('status', function ($row) {
                     return $row->status == 1
-                        ? '<span class="badge bg-success">مفعل</span>'
-                        : '<span class="badge bg-danger">غير مفعل</span>';
+                        ? '<span class="badge bg-success">'.__('owner.status.active').'</span>'
+                        : '<span class="badge bg-danger">'.__('owner.status.inactive').'</span>';
                 })
                 ->addColumn('action', function (Customer $customer) {
-                    $btn = '<a data-bs-effect="effect-scale" data-bs-toggle="modal" href="#modelEdit"
+                    $btn = '<a href="'.route('owner.customers.show', $customer->id).'"
+                            class="btn btn-outline-info btn-sm mx-1" title="'.__('owner.actions.show').'">
+                            <i class="bi bi-eye"></i>
+                        </a>';
+
+                    $btn .= '<a data-bs-effect="effect-scale" data-bs-toggle="modal" href="#modelEdit"
                             data-id="'.$customer->id.'"
                             data-name="'.e($customer->name).'"
                             data-status="'.e($customer->status).'"
@@ -62,11 +66,11 @@ class CustomerDataTable extends DataTables
                             data-email="'.e($customer->email).'"
                             data-type="'.e($customer->type).'"
                             data-notes="'.e($customer->notes).'"
-                            class="edit btn btn-outline-primary mx-1 btn-sm editBtn">
+                            class="edit btn btn-outline-primary btn-sm editBtn" title="'.__('owner.actions.edit').'">
                             <i class="bi bi-pencil"></i>
                         </a>';
 
-                    $btn .= '<a href="#" onclick="deleteRecord('.$customer->id.')" class="edit btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>';
+                    $btn .= '<a href="#" onclick="deleteRecord('.$customer->id.')" class="edit btn btn-outline-danger btn-sm mx-1" title="'.__('owner.actions.delete').'"><i class="bi bi-trash"></i></a>';
 
                     return $btn;
                 })
@@ -76,7 +80,7 @@ class CustomerDataTable extends DataTables
                     'total_sales' => number_format($total_sales, 2),
                     'total_orders' => $total_orders,
                 ])
-                ->rawColumns(['action', 'status'])
+                ->rawColumns(['action', 'status', 'total_remaining'])
                 ->make(true);
         }
     }

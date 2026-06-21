@@ -171,6 +171,7 @@ Route::group([
         // customer print reports
         Route::get('/reports/print/customers', [CustomersController::class, 'printCustomersReport'])->name('reports.print.customers');
         Route::get('/reports/print/customer-sales', [CustomersController::class, 'printSalesReport'])->name('reports.print.sales');
+        Route::get('/customers/{id}/statement/print', [CustomersController::class, 'printStatement'])->name('customers.statement.print');
 
         // vendor print report
         Route::get('/reports/print/vendor/{id}', [VendorsController::class, 'printVendorReport'])->name('reports.print.vendor');

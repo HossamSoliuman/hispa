@@ -40,6 +40,7 @@
                     <th>{{ __('owner.customers.table.type') }}</th>
                     <th>{{ __('owner.customers.table.order_count') }}</th>
                     <th>{{ __('owner.customers.table.total_sales') }}</th>
+                    <th>{{ __('owner.customers.table.total_remaining') }}</th>
                     <th>{{ __('owner.customers.table.last_order') }}</th>
                     <th>{{ __('owner.customers.table.status') }}</th>
                     <th>{{ __('owner.customers.table.actions') }}</th>

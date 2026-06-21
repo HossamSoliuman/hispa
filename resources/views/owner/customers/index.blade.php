@@ -234,6 +234,10 @@
                         name: 'total_sales'
                     },
                     {
+                        data: 'total_remaining',
+                        name: 'total_remaining'
+                    },
+                    {
                         data: 'last_order',
                         name: 'last_order'
                     },

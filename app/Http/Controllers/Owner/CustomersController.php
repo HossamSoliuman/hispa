@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CustomerRequest;
 use App\Models\Customer;
 use App\Models\Sale;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,91 @@ class CustomersController extends Controller
     {
 
         return $this->datatable->getData($request);
+    }
+
+    public function show($id)
+    {
+        $customer = Customer::where('owner_id', auth()->id())
+            ->with([
+                'sales' => fn ($q) => $q->orderByDesc('sale_datetime'),
+                'sales.paymentMethod',
+                'sales.details',
+                'sales.details.fish',
+                'sales.details.unit',
+            ])
+            ->findOrFail($id);
+
+        $statistics = $this->customerStatistics($customer);
+
+        return view('owner.customers.show', compact('customer', 'statistics'));
+    }
+
+    public function printStatement(Request $request, $id): \Illuminate\Http\Response
+    {
+        $customer = Customer::where('owner_id', auth()->id())
+            ->with([
+                'sales' => fn ($q) => $q->orderByDesc('sale_datetime'),
+                'sales.paymentMethod',
+                'sales.details',
+                'sales.details.unit',
+            ])
+            ->findOrFail($id);
+
+        $statistics = $this->customerStatistics($customer);
+        $settings = $this->reportSettings();
+
+        $filename = 'customer-statement-'.$customer->id.'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.customer-statement', compact(
+            'customer',
+            'statistics',
+            'settings'
+        )), [], $filename, $disposition);
+    }
+
+    /**
+     * Aggregate a customer's dealing figures from their sales.
+     *
+     * @return array{total_orders:int, total_purchases:float, total_paid:float, total_remaining:float, total_weight:float, last_order:?string}
+     */
+    private function customerStatistics(Customer $customer): array
+    {
+        $sales = $customer->sales;
+
+        $totalPurchases = (float) $sales->sum('total_price');
+        $totalRemaining = (float) $sales->sum('remaining_total');
+        $totalWeight = (float) $sales->sum(fn (Sale $sale) => $sale->details->sum('weight'));
+
+        return [
+            'total_orders' => $sales->count(),
+            'total_purchases' => $totalPurchases,
+            'total_paid' => $totalPurchases - $totalRemaining,
+            'total_remaining' => $totalRemaining,
+            'total_weight' => $totalWeight,
+            'last_order' => $sales->max('sale_datetime')?->format('Y-m-d'),
+        ];
+    }
+
+    /**
+     * Build the company settings array shared by the customer PDF reports.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
+    {
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+
+        return [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ];
     }
 
     public function store(CustomerRequest $request)
