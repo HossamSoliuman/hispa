@@ -54,8 +54,12 @@ class BoatDataTable extends DataTables
                 })
                 ->addColumn('action', function ($row) {
                     $showUrl = route('owner.boats.show', $row->id);
+                    $editUrl = route('owner.boats.edit', $row->id);
 
-                    return '<a href="'.$showUrl.'" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>';
+                    $btn = '<a href="'.$showUrl.'" class="btn btn-sm btn-outline-primary mx-1" title="'.__('owner.actions.show').'"><i class="bi bi-eye"></i></a>';
+                    $btn .= '<a href="'.$editUrl.'" class="btn btn-sm btn-outline-warning mx-1" title="'.__('owner.actions.edit').'"><i class="bi bi-pencil"></i></a>';
+
+                    return $btn;
                 })
                 ->with([
                     'boat_active_count' => $boat_active_count,
