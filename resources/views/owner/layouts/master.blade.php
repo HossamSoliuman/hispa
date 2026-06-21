@@ -421,6 +421,17 @@
         [data-bs-theme=dark] .bg-warning .text-dark,
         [data-bs-theme=dark] .bg-info.text-dark,
         [data-bs-theme=dark] .bg-info .text-dark { color: #000 !important; }
+
+        /* native <select> popup: browsers render <option> on the OS default
+           (white) unless explicitly themed — match the dark form palette */
+        [data-bs-theme=dark] .form-select option,
+        [data-bs-theme=dark] select option,
+        [data-bs-theme=dark] .form-control option,
+        [data-bs-theme=dark] .form-select optgroup,
+        [data-bs-theme=dark] select optgroup {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
     </style>
 
     {{-- Make ApexCharts (dashboard, analytics, sales, expenses, …) follow the theme --}}
