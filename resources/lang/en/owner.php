@@ -1355,6 +1355,7 @@ return [
             'to_date' => 'To Date',
             'search' => 'Search',
             'clear' => 'Clear All',
+            'print_report' => 'Print Report',
         ],
         'tabs' => [
             'records' => 'Records',
@@ -1437,6 +1438,7 @@ return [
         ],
         'print' => [
             'title' => 'Expense Report',
+            'report_title' => 'Expenses Report',
             'equipment_details' => 'Fishing Equipment Details',
             'equipment_name' => 'Equipment',
             'quantity' => 'Quantity',

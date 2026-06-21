@@ -1355,6 +1355,7 @@ return [
             'to_date' => 'إلى تاريخ',
             'search' => 'بحث',
             'clear' => 'مسح الكل',
+            'print_report' => 'طباعة التقرير',
         ],
         'tabs' => [
             'records' => 'السجلات',
@@ -1437,6 +1438,7 @@ return [
         ],
         'print' => [
             'title' => 'تقرير المصروف',
+            'report_title' => 'تقرير المصاريف',
             'equipment_details' => 'تفاصيل معدات الصيد',
             'equipment_name' => 'المعدة',
             'quantity' => 'الكمية',

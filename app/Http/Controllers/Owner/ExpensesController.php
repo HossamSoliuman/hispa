@@ -9,6 +9,7 @@ use App\Http\Requests\Owner\Expense\UpdateExpenseRequest;
 use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\Setting;
 use App\Repository\Owner\ExpenseRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,6 +92,60 @@ class ExpensesController extends Controller
         }
 
         return view('owner.expenses.show', compact('expense'));
+    }
+
+    /**
+     * Print the currently filtered expenses listing as a single PDF report.
+     * Mirrors the filters applied on the expenses management listing.
+     */
+    public function printReport(Request $request): \Illuminate\Http\Response
+    {
+        $expenses = Expense::with(['boat', 'category.parent', 'vendor', 'paymentMethod'])
+            ->when($request->filled('boat_id'), fn ($q) => $q->where('boat_id', $request->boat_id))
+            ->when($request->filled('category_id'), function ($q) use ($request) {
+                $q->whereHas('category', function ($query) use ($request) {
+                    $query->where('id', $request->category_id)
+                        ->orWhere('parent_id', $request->category_id);
+                });
+            })
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when($request->filled('from_date'), fn ($q) => $q->whereDate('date', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($q) => $q->whereDate('date', '<=', $request->to_date))
+            ->orderByDesc('date')
+            ->get();
+
+        $totalAmount = $expenses->sum('final_price');
+
+        $statistics = [
+            'total_count' => $expenses->count(),
+            'total_amount' => $totalAmount,
+            'paid_amount' => $expenses->where('status', 'paid')->sum('final_price'),
+            'pending_amount' => $expenses->where('status', 'pending')->sum('final_price'),
+        ];
+
+        $filters = [
+            'category' => $request->filled('category_id')
+                ? optional(Category::find($request->category_id))->name
+                : null,
+            'boat' => $request->filled('boat_id')
+                ? optional(Boat::where('owner_id', auth()->id())->find($request->boat_id))->name
+                : null,
+            'status' => $request->filled('status') ? $request->status : null,
+            'from_date' => $request->filled('from_date') ? $request->from_date : null,
+            'to_date' => $request->filled('to_date') ? $request->to_date : null,
+        ];
+
+        $settings = $this->reportSettings();
+
+        $filename = 'expenses-report-'.($filters['from_date'] ?? 'all').'-to-'.($filters['to_date'] ?? 'all').'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.expenses-report', compact(
+            'expenses',
+            'statistics',
+            'filters',
+            'settings'
+        )), [], $filename, $disposition);
     }
 
     public function store(StoreExpenseRequest $request)
@@ -189,6 +244,27 @@ class ExpensesController extends Controller
         $maintenances = $this->expenseRepository->availableMaintenances($boatId, auth()->id());
 
         return response()->json($maintenances);
+    }
+
+    /**
+     * Build the company settings array shared by the expenses PDF reports.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
+    {
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+
+        return [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ];
     }
 
     // reuse simple company settings & QR helpers (kept local to controller for convenience)

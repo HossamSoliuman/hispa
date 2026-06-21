@@ -332,6 +332,7 @@ Route::group([
         Route::resource('/expenses', ExpensesController::class);
 
         Route::prefix('/expenses')->name('expenses.')->group(function () {
+            Route::get('report/print', [ExpensesController::class, 'printReport'])->name('report.print');
             Route::get('{expense}/print', [ExpensesController::class, 'print'])->name('print');
             Route::patch('{expense}/status', [ExpensesController::class, 'changeStatus'])->name('status');
         });

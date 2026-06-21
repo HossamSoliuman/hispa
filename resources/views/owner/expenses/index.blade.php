@@ -127,13 +127,18 @@
                 <label class="form-label">{{ __('owner.expenses.filters.to_date') }}</label>
                 <input type="date" id="filterToDate" class="form-control">
             </div>
-            <div class="col-md-2">
-                <button id="applyFilters" class="btn btn-primary btn-sm me-2">
-                    <i class="bi bi-search"></i> {{ __('owner.expenses.filters.search') }}
-                </button>
-                <button id="clearFilters" class="btn btn-light btn-sm me-2">
-                    <i class="bi bi-x-circle"></i> {{ __('owner.expenses.filters.clear') }}
-                </button>
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                    <button id="applyFilters" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search"></i> {{ __('owner.expenses.filters.search') }}
+                    </button>
+                    <button id="clearFilters" class="btn btn-light btn-sm">
+                        <i class="bi bi-x-circle"></i> {{ __('owner.expenses.filters.clear') }}
+                    </button>
+                    <a href="#" id="printReportBtn" target="_blank" class="btn btn-dark btn-sm">
+                        <i class="bi bi-printer"></i> {{ __('owner.expenses.filters.print_report') }}
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -202,6 +207,7 @@
         expensesDestroy: "{{ route('owner.expenses.destroy', ':id') }}",
         expensesStatus: "{{ route('owner.expenses.status', ':id') }}",
         expensesPrint: "{{ route('owner.expenses.print', ':id') }}",
+        expensesReportPrint: "{{ route('owner.expenses.report.print') }}",
     };
 </script>
 <script>
@@ -224,6 +230,28 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script src="{{ asset('dashboard/assets/js/owner/expenses/index.js') }}"></script>
+<script>
+    // طباعة المصاريف المعروضة حسب الفلاتر المطبقة
+    $(function () {
+        $('#printReportBtn').on('click', function (e) {
+            e.preventDefault();
+            const params = new URLSearchParams();
+            const categoryId = $('#filterCategory').val();
+            const boatId = $('#filterBoat').val();
+            const status = $('#filterStatus').val();
+            const fromDate = $('#filterFromDate').val();
+            const toDate = $('#filterToDate').val();
+            if (categoryId) params.append('category_id', categoryId);
+            if (boatId) params.append('boat_id', boatId);
+            if (status) params.append('status', status);
+            if (fromDate) params.append('from_date', fromDate);
+            if (toDate) params.append('to_date', toDate);
+            const query = params.toString();
+            const url = window.routes.expensesReportPrint + (query ? ('?' + query) : '');
+            window.open(url, '_blank');
+        });
+    });
+</script>
 
 
 @endsection
