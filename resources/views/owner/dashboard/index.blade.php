@@ -289,7 +289,7 @@
                         </div>
 
                         {{-- تكوين المصيد (Catch Composition - Redesigned) --}}
-                        <div class="col-lg-4 mb-3">
+                        <div class="col-lg-3 mb-3">
                             <div class="card shadow-sm">
                                 @include('owner.partials._card_arrow')
                                 <div class="card-body">
@@ -322,7 +322,7 @@
                         </div>
 
                         {{-- الأنشطة الأخيرة (Recent Activities - Redesigned) --}}
-                        <div class="col-lg-3 mb-3">
+                        <div class="col-lg-4 mb-3">
                             <div class="card shadow-sm">
                                 @include('owner.partials._card_arrow')
                                 <div class="card-body">
