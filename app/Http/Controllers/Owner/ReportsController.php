@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Boat;
+use App\Models\CatchDetail;
 use App\Models\Fish;
-use App\Models\FishQuantityStock;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,30 +30,28 @@ class ReportsController extends Controller
         $tripId = $request->input('trip_id');
         $fishId = $request->input('fish_id');
 
-        $ownerBoatIds = $boats->pluck('id');
-        $ownerTripIds = $trips->pluck('id');
-
-        $stock = FishQuantityStock::query()
+        $catches = CatchDetail::query()
             ->with(['fish', 'unit'])
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
-            ->where(function ($q) use ($ownerBoatIds, $ownerTripIds) {
-                $q->whereIn('boat_id', $ownerBoatIds)
-                    ->orWhereIn('trip_id', $ownerTripIds);
+            ->whereHas('catch', function ($q) use ($ownerId, $from, $to, $boatId, $tripId) {
+                $q->where('owner_id', $ownerId)
+                    ->whereBetween(DB::raw('DATE(catch_date)'), [$from, $to]);
+
+                if ($tripId) {
+                    $q->where('trip_id', $tripId);
+                }
+
+                if ($boatId) {
+                    $q->whereHas('trip', function ($trip) use ($boatId) {
+                        $trip->where('boat_id', $boatId);
+                    });
+                }
             });
 
-        if ($boatId) {
-            $stock->where('boat_id', $boatId);
-        }
-
-        if ($tripId) {
-            $stock->where('trip_id', $tripId);
-        }
-
         if ($fishId) {
-            $stock->where('fish_id', $fishId);
+            $catches->where('fish_id', $fishId);
         }
 
-        $stocks = $stock->get();
+        $stocks = $catches->get();
 
         return view('owner.reports.fish_quntity', compact('stocks', 'from', 'to', 'boatId', 'boats', 'fishId', 'fishs', 'tripId', 'trips'));
     }

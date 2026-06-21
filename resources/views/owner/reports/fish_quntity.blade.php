@@ -100,10 +100,10 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $stock->fish->scientific_name }}</td>
-                            <td>{{ number_format($stock->quantity, 2) }}</td>
+                            <td>{{ number_format($stock->weight, 2) }}</td>
                             <td>{{ $stock->unit->name ?? '—' }}</td>
                             <td>{{ number_format($stock->price_per_kg, 2) }}</td>
-                            @php $fish_total_price = ($stock->quantity * $stock->price_per_kg); @endphp
+                            @php $fish_total_price = ($stock->weight * $stock->price_per_kg); @endphp
                             @php $total_price += $fish_total_price; @endphp
                             <td>{{ number_format($fish_total_price, 2) }}</td>
                         </tr>
@@ -113,7 +113,7 @@
                     @foreach($stocks->groupBy(fn ($s) => $s->unit->name ?? '—') as $unitName => $group)
                         <tr>
                             <th colspan="2">{{ __('owner.catch.total') }} ({{ $unitName }})</th>
-                            <th>{{ number_format($group->sum('quantity'), 2) }}</th>
+                            <th>{{ number_format($group->sum('weight'), 2) }}</th>
                             <th colspan="3">{{ $unitName }}</th>
                         </tr>
                     @endforeach
