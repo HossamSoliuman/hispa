@@ -179,6 +179,8 @@ Route::group([
         Route::get('/reports/print/dalal/{id}', [DalalSalesController::class, 'printDalalReport'])->name('reports.print.dalal');
 
         // sales in customers
+        Route::get('/sales/report/print', [SalesController::class, 'printReport'])->name('sales.report.print');
+        Route::get('/sales/{id}/print', [SalesController::class, 'printInvoice'])->name('sales.print');
         Route::resource('/sales', SalesController::class);
         Route::get('/getSalesData', [SalesController::class, 'getSalesData'])->name('getSalesData');
         Route::get('/catchDetails/{id}', [SalesController::class, 'catchDetails'])->name('catchDetails');

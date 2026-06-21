@@ -15,6 +15,7 @@ use App\Models\FishQuantityStock;
 use App\Models\PaymentMethod;
 use App\Models\Sale;
 use App\Models\SaleDetail;
+use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -70,6 +71,91 @@ class SalesController extends Controller
             ->findOrFail($id);
 
         return view('owner.sales.show', compact('sales'));
+    }
+
+    /**
+     * Print the currently filtered sales listing as a single PDF report.
+     * Mirrors the filters applied on the sales management listing.
+     */
+    public function printReport(Request $request): \Illuminate\Http\Response
+    {
+        $sales = Sale::where('seller_type', 'owner')
+            ->where('seller_id', auth()->id())
+            ->with(['customer', 'paymentMethod', 'details', 'details.unit'])
+            ->when($request->filled('from_date'), fn ($q) => $q->whereDate('sale_datetime', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($q) => $q->whereDate('sale_datetime', '<=', $request->to_date))
+            ->when($request->filled('fish_id'), fn ($q) => $q->whereHas('details', fn ($d) => $d->where('fish_id', $request->fish_id)))
+            ->orderByDesc('sale_datetime')
+            ->get();
+
+        $totalWeight = $sales->sum(fn (Sale $sale) => $sale->details->sum('weight'));
+        $totalRevenue = $sales->sum('total_price');
+        $netOwnerAmount = $sales->sum('net_owner_amount');
+
+        $statistics = [
+            'total_sales' => $sales->count(),
+            'total_weight' => $totalWeight,
+            'total_revenue' => $totalRevenue,
+            'net_owner_amount' => $netOwnerAmount,
+            'avg_price_per_kg' => $totalWeight > 0 ? $totalRevenue / $totalWeight : 0,
+        ];
+
+        $settings = $this->reportSettings();
+
+        $filters = [
+            'from_date' => $request->filled('from_date') ? $request->from_date : null,
+            'to_date' => $request->filled('to_date') ? $request->to_date : null,
+            'fish_id' => $request->filled('fish_id') ? $request->fish_id : null,
+        ];
+
+        $filename = 'sales-report-'.($filters['from_date'] ?? 'all').'-to-'.($filters['to_date'] ?? 'all').'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.sales-report', compact(
+            'sales',
+            'statistics',
+            'settings',
+            'filters'
+        )), [], $filename, $disposition);
+    }
+
+    /**
+     * Print a single sale invoice as a PDF document.
+     */
+    public function printInvoice(Request $request, $id): \Illuminate\Http\Response
+    {
+        $sale = Sale::where('seller_type', 'owner')
+            ->where('seller_id', auth()->id())
+            ->with(['customer', 'paymentMethod', 'details', 'details.fish', 'details.unit'])
+            ->findOrFail($id);
+
+        $settings = $this->reportSettings();
+
+        $filename = 'sale-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) $sale->number)), '-').'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.sale-invoice', compact('sale', 'settings')), [], $filename, $disposition);
+    }
+
+    /**
+     * Build the company settings array shared by the sales PDF reports.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
+    {
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+
+        return [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ];
     }
 
     public function create()

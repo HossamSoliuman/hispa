@@ -125,11 +125,13 @@
                 </div>
 
             </div>
-            <div class="text-end mt-3">
-                <button type="button" id="searchBtn" class="btn btn-success sm me-2"><i class="bi bi-search"></i>
+            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mt-3">
+                <button type="button" id="searchBtn" class="btn btn-success btn-sm"><i class="bi bi-search"></i>
                     {{ __('owner.catch.filters.search') }}</button>
-                <button type="button" id="clearBtn" class="btn btn-light btn-sm me-2"><i class="bi bi-x-circle"></i>
+                <button type="button" id="clearBtn" class="btn btn-light btn-sm"><i class="bi bi-x-circle"></i>
                     {{ __('owner.catch.filters.clear') }}</button>
+                <a href="#" id="printReportBtn" target="_blank" class="btn btn-dark btn-sm"><i class="bi bi-printer"></i>
+                    {{ __('owner.sales.print_report') }}</a>
             </div>
         </div>
     </div>
@@ -308,6 +310,21 @@
                 $('#from_date').val('');
                 $('#to_date').val('');
                 table.draw();
+            });
+
+            // طباعة المبيعات المعروضة حسب الفلاتر المطبقة
+            $('#printReportBtn').on('click', function(e) {
+                e.preventDefault();
+                const params = new URLSearchParams();
+                const fishId = $('#fish_id').val();
+                const fromDate = $('#from_date').val();
+                const toDate = $('#to_date').val();
+                if (fishId) params.append('fish_id', fishId);
+                if (fromDate) params.append('from_date', fromDate);
+                if (toDate) params.append('to_date', toDate);
+                const query = params.toString();
+                const url = "{{ route('owner.sales.report.print') }}" + (query ? ('?' + query) : '');
+                window.open(url, '_blank');
             });
         });
     </script>

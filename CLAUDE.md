@@ -268,3 +268,26 @@ protected function isAccessible(User $user, ?string $path = null): bool
 | decoration-slice | box-decoration-slice |
 | decoration-clone | box-decoration-clone |
 </laravel-boost-guidelines>
+
+=== project rules ===
+
+## Printable Reports (mPDF)
+
+All owner-facing printable/PDF reports must follow one shared standard. The canonical reference implementation is `resources/views/owner/reports/print/trip-report.blade.php`. When building or editing any report, mirror it.
+
+### Standard
+- Reports are rendered to PDF via the `pdf_report($view, [], $filename, $disposition)` helper (mPDF under the hood). They are **not** Blade pages with the dashboard layout.
+- Default to inline preview (`$disposition = 'inline'`); honor `?download=1` to force `'attachment'`. The controller decides via `$request->boolean('download')`.
+- Wrap every report in `<x-report-layout>` with `:title`, `title-en`, `:document-number`, `:settings`, and `:qr-code`. Then render `<x-report-header>` with the same title/settings.
+- Use the existing report Blade components — `<x-report-stats>` for KPI cards, `<x-riyal-icon />` (or `<x-money-inline>`) for currency. Reuse before writing new markup.
+- Layout is the dense, **bordered "grid"** style designed for mPDF (no flex/grid — tables only): copy the `<style>` block from `trip-report.blade.php` verbatim (`.info-bar`, `.report-table`, `.report-stats`, `.dual`, `.report-footer`, `.col-text`, `.col-num`, `.section-title`).
+  - Key facts go in a horizontal `table.info-bar` (one bordered cell per fact).
+  - Data tables use `table.report-table`: solid black header bar, hairline row separators, heavier rule above the `tfoot` totals row.
+  - Put two tables side-by-side with `table.dual` (top-aligned columns + `td.dual-gap` spacer).
+  - Numbers use `.col-num` (end-aligned), text labels use `.col-text` (start-aligned); both flip with `app()->getLocale()`.
+  - Close with `table.report-footer` (company name + rights + year).
+- Build the company `$settings` array (name/title/company_name/address/phone/email/logo/qr_code) in the controller; generate the QR via `App\Service\Owner\ReportQrService::dataUri(...)`. Keep a private `reportSettings()` helper rather than duplicating the array.
+- Print views stay light-only — never add `dark:` variants or dashboard chrome to a report.
+- All labels must use translation keys present in both `resources/lang/ar/owner.php` and `resources/lang/en/owner.php`.
+
+Existing examples to match: `trip-report`, `catches-report`, `sales-report`, `sale-invoice`, `boat-report` (all under `resources/views/owner/reports/print/`).

@@ -1868,6 +1868,12 @@ return [
         'price_per_kilo' => 'Price per Kilo',
         'price_per_unit' => 'Price per Unit',
         'fish_quntity' => 'Fish Stock Report',
+        'print_report' => 'Print Report',
+        'print' => 'Print',
+        'invoice_title' => 'Sale Invoice',
+        'payment_status_label' => 'Payment Status',
+        'remaining' => 'Remaining',
+        'paid_amount' => 'Paid',
     ],
     'assets' => [
         'title' => 'Assets',

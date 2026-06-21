@@ -1866,6 +1866,12 @@ return [
         'price_per_kilo' => 'سعر الكيلو',
         'price_per_unit' => 'سعر الوحدة',
         'fish_quntity' => 'تقرير مخزون الأسماك',
+        'print_report' => 'طباعة التقرير',
+        'print' => 'طباعة',
+        'invoice_title' => 'فاتورة بيع',
+        'payment_status_label' => 'حالة الدفع',
+        'remaining' => 'المتبقي',
+        'paid_amount' => 'المدفوع',
     ],
     'assets' => [
         'title' => 'الاصول',
