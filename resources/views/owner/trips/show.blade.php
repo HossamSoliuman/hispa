@@ -39,8 +39,8 @@
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.depreciation') . ' (' . number_format($financials['depreciation_percent'], 2) . '%)',
-            'value'    => number_format($financials['depreciation'], 2),
+            'title'    => __('owner.reports.total_costs'),
+            'value'    => number_format($financials['total_costs'], 2),
             'icon'     => 'fas fa-receipt',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
@@ -168,11 +168,7 @@
                                 <td>{{ number_format($financials['total_income'], 2) }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('owner.reports.depreciation_percent') }}</th>
-                                <td>{{ number_format($financials['depreciation_percent'], 2) }}%</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('owner.reports.total_expenses') }}</th>
+                                <th>{{ __('owner.reports.total_costs') }}</th>
                                 <td>{{ number_format($financials['total_expenses'], 2) }}</td>
                             </tr>
                             <tr>

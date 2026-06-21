@@ -51,6 +51,7 @@ class TripReportController extends Controller
             'catches.details.fish',
             'catches.details.unit',
             'sales.details',
+            'expenses.category',
         ])->where('owner_id', $owner_id);
 
         // Filter by specific trip if provided
@@ -152,6 +153,8 @@ class TripReportController extends Controller
             ? 'trip-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) ($trips->first()?->number ?? $trip_id))), '-').'.pdf'
             : 'trips-report-'.($fromDate ?? 'all').'-to-'.($toDate ?? 'all').'.pdf';
 
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
         return pdf_report(view('owner.reports.print.trip-report', compact(
             'trips',
             'statistics',
@@ -163,7 +166,7 @@ class TripReportController extends Controller
             'trip',
             'owner_id',
             'filters'
-        )), [], $filename);
+        )), [], $filename, $disposition);
     }
 
     public function printAllTripsReport(Request $request)

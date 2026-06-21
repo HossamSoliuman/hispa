@@ -11,10 +11,9 @@ use Illuminate\Support\Collection;
  * printed trip report always show identical numbers.
  *
  * Model (per the owner's definition):
- * - الإهلاك (depreciation) is every paid cost neither the owner nor the crew keep
- *   — i.e. commission + labor (العمولة + النولة). Its percentage is that amount
- *   over total sales.
- * - net profit = total income (gross sales) − total expenses (depreciation).
+ * - إجمالي التكاليف (total costs) is the sum of the real expenses recorded against
+ *   the trip (the `expenses.trip_id` relation), computed dynamically.
+ * - net profit = total income (gross sales) − total costs.
  * - net profit is split in half: owner 50% / crew 50%.
  * - the crew share is distributed across the boat's percentage crew (captain
  *   included), honouring any custom percentage, via {@see MonthlyFinancialsService::crewDistribution()}.
@@ -27,27 +26,23 @@ class TripFinancialsService
 
     /**
      * @return array{
-     *     catch_weight: float, gross_revenue: float, depreciation: float,
-     *     depreciation_percent: float, total_costs: float, total_income: float,
-     *     total_expenses: float, net_profit: float, owner_share: float,
-     *     crew_share: float, crew_count: int, per_crew: float,
+     *     catch_weight: float, gross_revenue: float, total_costs: float,
+     *     total_income: float, total_expenses: float, net_profit: float,
+     *     owner_share: float, crew_share: float, crew_count: int, per_crew: float,
      *     outstanding: float,
      *     catch_weight_by_unit: \Illuminate\Support\Collection<string, float>,
+     *     expenses: \Illuminate\Support\Collection<int, \App\Models\Expense>,
      *     crew_members: \Illuminate\Support\Collection<int, array<string, mixed>>
      * }
      */
     public function compute(Trip $trip): array
     {
         $grossRevenue = (float) $trip->sales->sum('total_price');
-        $commission = (float) $trip->sales->sum('commission_amount');
-        $labor = (float) $trip->sales->sum('labor_amount');
 
-        $depreciation = $commission + $labor;
-        $depreciationPercent = $grossRevenue > 0
-            ? round($depreciation / $grossRevenue * 100, 2)
-            : 0.0;
+        $expenses = $trip->relationLoaded('expenses') ? $trip->expenses : $trip->expenses()->get();
+        $totalExpenses = (float) $expenses->sum('final_price');
 
-        $netProfit = $grossRevenue - $depreciation;
+        $netProfit = $grossRevenue - $totalExpenses;
         $ownerShare = round($netProfit * (self::OWNER_PERCENT / 100), 2);
         $crewShare = round($netProfit - $ownerShare, 2);
 
@@ -69,10 +64,9 @@ class TripFinancialsService
             'catch_weight_by_unit' => $catchWeightByUnit,
             'gross_revenue' => round($grossRevenue, 2),
             'total_income' => round($grossRevenue, 2),
-            'depreciation' => round($depreciation, 2),
-            'depreciation_percent' => $depreciationPercent,
-            'total_costs' => round($depreciation, 2),
-            'total_expenses' => round($depreciation, 2),
+            'total_costs' => round($totalExpenses, 2),
+            'total_expenses' => round($totalExpenses, 2),
+            'expenses' => $expenses,
             'net_profit' => round($netProfit, 2),
             'owner_share' => $ownerShare,
             'crew_share' => $crewShare,

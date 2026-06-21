@@ -246,15 +246,18 @@ function display_string(mixed $value, string $empty = '—'): string
 }
 
 /**
- * Render a report blade view as a downloadable PDF response.
+ * Render a report blade view as a PDF response.
  *
  * Wraps the existing report views (the ones built on <x-report-layout>) with
- * mPDF so reports download as a PDF instead of opening a separate print page.
+ * mPDF. Defaults to an inline disposition so the report opens as an in-browser
+ * preview the user can review before downloading; pass 'attachment' (or use the
+ * `?download=1` convention in controllers) to force a download instead.
  *
  * @param  \Illuminate\Contracts\View\View|string  $view
  * @param  array<string, mixed>  $data
+ * @param  'inline'|'attachment'  $disposition
  */
-function pdf_report($view, array $data = [], string $filename = 'report.pdf'): \Illuminate\Http\Response
+function pdf_report($view, array $data = [], string $filename = 'report.pdf', string $disposition = 'inline'): \Illuminate\Http\Response
 {
-    return app(\App\Service\Owner\PdfReportService::class)->download($view, $data, $filename);
+    return app(\App\Service\Owner\PdfReportService::class)->download($view, $data, $filename, $disposition);
 }

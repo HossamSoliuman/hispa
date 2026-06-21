@@ -161,6 +161,7 @@ class ExpenseRepository
                     'notes' => __('owner.trips.quick_expenses.title').' - '.$trip->number,
                     'owner_id' => $trip->owner_id,
                     'boat_id' => $trip->boat_id,
+                    'trip_id' => $trip->id,
                     'category_id' => ! empty($row['category_id']) ? (int) $row['category_id'] : null,
                     'vendor_id' => ! empty($row['vendor_id']) ? (int) $row['vendor_id'] : null,
                     'total_price' => $amount,

@@ -18,21 +18,24 @@ use Mpdf\Output\Destination;
 class PdfReportService
 {
     /**
-     * Render a view (or pre-built View instance) to a PDF download response.
+     * Render a view (or pre-built View instance) to a PDF response.
      *
      * @param  array<string, mixed>  $data
+     * @param  'inline'|'attachment'  $disposition  inline opens an in-browser preview; attachment forces a download
      */
-    public function download(View|string $view, array $data = [], string $filename = 'report.pdf'): Response
+    public function download(View|string $view, array $data = [], string $filename = 'report.pdf', string $disposition = 'attachment'): Response
     {
         $html = $view instanceof View ? $view->render() : view($view, $data)->render();
 
-        return $this->fromHtml($html, $filename);
+        return $this->fromHtml($html, $filename, $disposition);
     }
 
     /**
-     * Build a PDF download response from raw HTML.
+     * Build a PDF response from raw HTML.
+     *
+     * @param  'inline'|'attachment'  $disposition
      */
-    public function fromHtml(string $html, string $filename = 'report.pdf'): Response
+    public function fromHtml(string $html, string $filename = 'report.pdf', string $disposition = 'attachment'): Response
     {
         // Safety net: if mPDF is not installed yet, fall back to rendering the
         // report as an HTML page so reports keep working instead of erroring.
@@ -76,7 +79,7 @@ class PdfReportService
             200,
             [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
             ]
         );
     }

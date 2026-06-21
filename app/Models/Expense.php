@@ -19,6 +19,7 @@ class Expense extends Model
         'notes',
         'owner_id',
         'boat_id',
+        'trip_id',
         'total_price',
         'discount_type',
         'discount_value',
@@ -56,6 +57,11 @@ class Expense extends Model
     public function boat()
     {
         return $this->belongsTo(Boat::class);
+    }
+
+    public function trip(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Trip::class);
     }
 
     public function vendor()

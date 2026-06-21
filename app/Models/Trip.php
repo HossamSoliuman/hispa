@@ -163,6 +163,11 @@ class Trip extends Model
         return $this->hasMany(Sale::class);
     }
 
+    public function expenses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
     public function getNameAttribute()
     {
         if (app()->getLocale() == 'ar') {

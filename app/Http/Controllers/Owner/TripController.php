@@ -56,6 +56,7 @@ class TripController extends Controller
             'catches.details.fish',
             'catches.details.unit',
             'sales.details',
+            'expenses.category',
             'boat',
             'captain',
             'owner',
