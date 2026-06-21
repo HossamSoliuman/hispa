@@ -69,7 +69,7 @@
     </style>
 @endsection
 @section('content')
-    <!-- dashboard-build: 2026-06-21 layout-v2 -->
+    <!-- dashboard-build: 2026-06-21 layout-v3 top-five-cards -->
     <div class="dashboard-tight">
         <div class="row">
             <!-- BEGIN page header -->

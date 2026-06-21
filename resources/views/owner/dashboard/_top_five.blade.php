@@ -6,8 +6,8 @@
 </div>
 <div class="row g-3 mb-3">
     {{-- 1. Month profit --}}
-    <div class="col-xl col-md-6">
-        <div class="card shadow-sm h-100 border-0">
+    <div class="col-xl-3 col-md-6">
+        <div class="card shadow-sm border-0">
             <div class="card-body d-flex flex-column gap-2">
                 <div class="text-muted small">{{ __('owner.dashboard.top_five.month_profit') }}</div>
                 <div class="h4 fw-bold mb-0 {{ $tf['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
@@ -26,8 +26,8 @@
     </div>
 
     {{-- 2. Crew dues --}}
-    <div class="col-xl col-md-6">
-        <div class="card shadow-sm h-100 border-0">
+    <div class="col-xl-3 col-md-6">
+        <div class="card shadow-sm border-0">
             <div class="card-body d-flex flex-column gap-2">
                 <div class="text-muted small">{{ __('owner.dashboard.top_five.crew_dues') }}</div>
                 <div class="h4 fw-bold mb-0 text-warning">
@@ -49,8 +49,8 @@
     </div>
 
     {{-- 3. Boat profitability (bar list) --}}
-    <div class="col-xl-4 col-md-6">
-        <div class="card shadow-sm h-100 border-0">
+    <div class="col-xl-3 col-md-6">
+        <div class="card shadow-sm border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="small fw-bold">{{ __('owner.dashboard.top_five.boat_profitability') }}</span>
@@ -75,8 +75,8 @@
     </div>
 
     {{-- 4. Trip profitability (top 5 table) --}}
-    <div class="col-xl-5 col-md-6">
-        <div class="card shadow-sm h-100 border-0">
+    <div class="col-xl-3 col-md-6">
+        <div class="card shadow-sm border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="small fw-bold">{{ __('owner.dashboard.top_five.trip_profitability') }}</span>
@@ -105,7 +105,7 @@
 
     {{-- 5. Production by species --}}
     <div class="col-xl-3 col-md-6">
-        <div class="card shadow-sm h-100 border-0">
+        <div class="card shadow-sm border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="small fw-bold">{{ __('owner.dashboard.top_five.production_species') }}</span>
