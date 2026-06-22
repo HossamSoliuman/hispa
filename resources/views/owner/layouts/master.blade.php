@@ -397,6 +397,14 @@
         /* corner L-brackets: light strokes on dark */
         [data-bs-theme=dark] .card:after { --brk-color: rgba(255, 255, 255, .5); }
 
+        /* top navbar: the hardcoded bright blue (#3675c2) clashes with the dark
+           navy page — drop to a deep, muted ocean-blue that blends in, and add a
+           thin accent rule so it still reads as a distinct bar */
+        [data-bs-theme=dark] .app-header {
+            background: #14304f;
+            border-bottom: 1px solid rgba(var(--hud-accent-rgb), .4);
+        }
+
         /* HUD typography that hardcodes near-black / translucent-black */
         [data-bs-theme=dark] .hud-stat-value,
         [data-bs-theme=dark] .hud-sc-value,
