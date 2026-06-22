@@ -230,26 +230,33 @@ class CustomersController extends Controller
         return pdf_report(view('owner.reports.customers', compact('customers', 'owner', 'totalCustomers', 'activeCustomers', 'totalRevenue', 'totalOrders', 'settings', 'qrCode')), [], 'customers-report.pdf');
     }
 
-    public function printSalesReport()
+    public function printSalesReport(Request $request): \Illuminate\Http\Response
     {
         $owner = auth()->user();
 
-        // Try to fetch sales for this owner (seller_id)
-        try {
-            $sales = Sale::where('seller_id', $owner->id)
-                ->orderBy('sale_datetime', 'desc')
-                ->get();
-        } catch (\Throwable $e) {
-            $sales = collect();
-        }
+        $sales = Sale::where('seller_id', $owner->id)
+            ->with(['paymentMethod', 'details', 'customer'])
+            ->orderByDesc('sale_datetime')
+            ->get();
 
-        $totalRevenue = $sales->sum('total_price');
+        $statistics = [
+            'total_sales' => $sales->count(),
+            'total_revenue' => (float) $sales->sum('total_price'),
+            'total_remaining' => (float) $sales->sum('remaining_total'),
+            'total_weight' => (float) $sales->sum(fn (Sale $sale) => $sale->details->sum('weight')),
+        ];
 
-        // Get settings and QR code for header
-        $settings = $this->getCompanySettings();
-        $qrCode = $this->generateQRCodeImage(route('owner.reports.print.sales'));
+        $filters = ['from_date' => null, 'to_date' => null];
+        $settings = $this->reportSettings();
 
-        return pdf_report(view('owner.reports.customer-sales', compact('owner', 'sales', 'totalRevenue', 'settings', 'qrCode')), [], 'customer-sales.pdf');
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(
+            view('owner.reports.print.customer-sales', compact('sales', 'statistics', 'filters', 'settings')),
+            [],
+            'customer-sales.pdf',
+            $disposition
+        );
     }
 
     /**

@@ -39,6 +39,9 @@ This application is a Laravel application and its main Laravel ecosystems packag
 ## Documentation Files
 - You must only create documentation files if explicitly requested by the user.
 
+## Git Commits & Pushes
+- Never commit or push to GitHub on behalf of the user. When a commit or push is needed, instruct the user to run the git commands themselves so all commits appear under their account.
+
 === boost rules ===
 
 ## Laravel Boost
