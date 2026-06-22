@@ -15,6 +15,7 @@ class MonthClosing extends Model
         return [
             'year' => 'integer',
             'month' => 'integer',
+            'boat_id' => 'integer',
             'gross_sales' => 'decimal:2',
             'net_sales' => 'decimal:2',
             'net_owner_revenue' => 'decimal:2',
@@ -41,6 +42,11 @@ class MonthClosing extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function boat(): BelongsTo
+    {
+        return $this->belongsTo(Boat::class, 'boat_id');
     }
 
     public function isClosed(): bool

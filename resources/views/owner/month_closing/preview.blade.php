@@ -7,6 +7,7 @@
         9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
     ];
     $monthLabel = ($arabicMonths[$month] ?? $month) . ' ' . $year;
+    $boatLabel = $boatId ? optional($boats->firstWhere('id', $boatId))->name : __('owner.profit_loss.all_boats');
 @endphp
 
 @section('title', __('owner.month_closing.preview_title').' '.$monthLabel)
@@ -17,6 +18,7 @@
     <div class="d-flex align-items-center mb-3">
         <div>
             <h2 class="mb-1">{{ __('owner.month_closing.preview_title') }} {{ $monthLabel }}</h2>
+            <span class="badge bg-secondary"><i class="fa fa-ship me-1"></i>{{ $boatLabel }}</span>
         </div>
         <div class="ms-auto">
             <a href="{{ route('owner.month-closing.index') }}" class="btn btn-outline-secondary">
@@ -118,6 +120,7 @@
             @csrf
             <input type="hidden" name="year" value="{{ $year }}">
             <input type="hidden" name="month" value="{{ $month }}">
+            <input type="hidden" name="boat_id" value="{{ $boatId }}">
             <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#closeMonthModal">
                 <i class="fa fa-lock me-2"></i>{{ __('owner.month_closing.close_btn') }}
             </button>

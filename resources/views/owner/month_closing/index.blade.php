@@ -25,11 +25,11 @@
         <div class="card-body">
             <form method="GET" action="{{ route('owner.month-closing.preview') }}">
                 <div class="row align-items-end gy-2">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">{{ __('owner.month_closing.year') }}</label>
                         <input type="number" name="year" class="form-control" value="{{ $year }}" min="2000" max="2100" required>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">{{ __('owner.month_closing.month') }}</label>
                         <select name="month" class="form-select" required>
                             @for ($m = 1; $m <= 12; $m++)
@@ -37,7 +37,18 @@
                             @endfor
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ __('owner.profit_loss.boat') }}</label>
+                        <select name="boat_id" class="form-select">
+                            <option value="">{{ __('owner.profit_loss.all_boats') }}</option>
+                            @foreach ($boats as $boat)
+                                <option value="{{ $boat->id }}" {{ $boatId == $boat->id ? 'selected' : '' }}>
+                                    {{ $boat->name ?? $boat->name_ar }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="fa fa-search me-2"></i>{{ __('owner.month_closing.preview_btn') }}
                         </button>
@@ -58,6 +69,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>{{ __('owner.month_closing.columns.period') }}</th>
+                            <th>{{ __('owner.profit_loss.boat') }}</th>
                             <th>{{ __('owner.month_closing.columns.net_profit') }}</th>
                             <th>{{ __('owner.profit_loss.crew_share') }}</th>
                             <th>{{ __('owner.month_closing.closed_at') }}</th>
@@ -68,6 +80,7 @@
                         @forelse ($closings as $closing)
                             <tr>
                                 <td>{{ sprintf('%02d/%d', $closing->month, $closing->year) }}</td>
+                                <td>{{ $closing->boat?->name ?? __('owner.profit_loss.all_boats') }}</td>
                                 <td>{{ number_format($closing->net_profit, 2) }}</td>
                                 <td>{{ number_format($closing->crew_share, 2) }}</td>
                                 <td>{{ optional($closing->closed_at)->format('Y-m-d H:i') }}</td>
@@ -93,7 +106,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted">{{ __('owner.month_closing.no_closings') }}</td>
+                                <td colspan="6" class="text-center text-muted">{{ __('owner.month_closing.no_closings') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

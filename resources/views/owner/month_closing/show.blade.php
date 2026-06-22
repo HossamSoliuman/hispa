@@ -6,6 +6,7 @@
     <div class="d-flex align-items-center mb-3">
         <div>
             <h2 class="mb-1">{{ __('owner.month_closing.report_title') }} {{ sprintf('%02d/%d', $closing->month, $closing->year) }}</h2>
+            <span class="badge bg-secondary"><i class="fa fa-ship me-1"></i>{{ $closing->boat?->name ?? __('owner.profit_loss.all_boats') }}</span>
             <span class="badge bg-success">{{ __('owner.month_closing.status_closed') }}</span>
             <small class="text-muted ms-2">{{ __('owner.month_closing.closed_at') }}: {{ optional($closing->closed_at)->format('Y-m-d H:i') }}</small>
         </div>

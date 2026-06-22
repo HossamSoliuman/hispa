@@ -29,7 +29,7 @@ class MonthClosingService
      * Build (but do not persist) the distribution for a month.
      *
      * @return array{
-     *     year: int, month: int, from: string, to: string,
+     *     year: int, month: int, boat_id: int|null, from: string, to: string,
      *     financials: array<string, mixed>,
      *     dues: array<int, array<string, mixed>>,
      *     total_shares: float, share_value: float,
@@ -37,13 +37,13 @@ class MonthClosingService
      *     warnings: array<int, string>
      * }
      */
-    public function preview(int $ownerId, int $year, int $month): array
+    public function preview(int $ownerId, int $year, int $month, ?int $boatId = null): array
     {
         [$from, $to] = $this->monthRange($year, $month);
 
-        $financials = $this->financials->compute($ownerId, $from, $to);
+        $financials = $this->financials->compute($ownerId, $from, $to, $boatId);
 
-        $distribution = $this->financials->crewDistribution($ownerId, $financials['crew_share']);
+        $distribution = $this->financials->crewDistribution($ownerId, $financials['crew_share'], $boatId);
 
         $dues = $distribution['members']->map(function (array $member) use ($distribution, $ownerId, $from, $to) {
             $due = (float) $member['due'];
@@ -69,14 +69,15 @@ class MonthClosingService
         return [
             'year' => $year,
             'month' => $month,
+            'boat_id' => $boatId,
             'from' => $from,
             'to' => $to,
             'financials' => $financials,
             'dues' => $dues,
             'total_shares' => $distribution['total_shares'],
             'share_value' => $distribution['share_value'],
-            'existing' => $this->find($ownerId, $year, $month),
-            'warnings' => $this->warnings($ownerId, $from, $to),
+            'existing' => $this->find($ownerId, $year, $month, $boatId),
+            'warnings' => $this->warnings($ownerId, $from, $to, $boatId),
         ];
     }
 
@@ -85,20 +86,21 @@ class MonthClosingService
      *
      * @throws \DomainException when the month is already closed.
      */
-    public function close(int $ownerId, int $year, int $month, ?int $closedBy = null): MonthClosing
+    public function close(int $ownerId, int $year, int $month, ?int $closedBy = null, ?int $boatId = null): MonthClosing
     {
-        if ($this->find($ownerId, $year, $month)) {
+        if ($this->find($ownerId, $year, $month, $boatId)) {
             throw new \DomainException(__('owner.month_closing.errors.already_closed'));
         }
 
-        $preview = $this->preview($ownerId, $year, $month);
+        $preview = $this->preview($ownerId, $year, $month, $boatId);
         $f = $preview['financials'];
 
-        return DB::transaction(function () use ($ownerId, $year, $month, $closedBy, $preview, $f) {
+        return DB::transaction(function () use ($ownerId, $year, $month, $boatId, $closedBy, $preview, $f) {
             $closing = MonthClosing::create([
                 'owner_id' => $ownerId,
                 'year' => $year,
                 'month' => $month,
+                'boat_id' => $boatId,
                 'status' => 'closed',
                 'gross_sales' => $f['gross_sales'],
                 'net_sales' => $f['net_sales'],
@@ -168,14 +170,16 @@ class MonthClosingService
     {
         [$from, $to] = $this->monthRange($closing->year, $closing->month);
 
-        return $this->financials->details($closing->owner_id, $from, $to);
+        return $this->financials->details($closing->owner_id, $from, $to, $closing->boat_id);
     }
 
-    public function find(int $ownerId, int $year, int $month): ?MonthClosing
+    public function find(int $ownerId, int $year, int $month, ?int $boatId = null): ?MonthClosing
     {
         return MonthClosing::where('owner_id', $ownerId)
             ->where('year', $year)
             ->where('month', $month)
+            ->when($boatId !== null, fn ($query) => $query->where('boat_id', $boatId))
+            ->when($boatId === null, fn ($query) => $query->whereNull('boat_id'))
             ->where('status', 'closed')
             ->first();
     }
@@ -193,13 +197,14 @@ class MonthClosingService
     /**
      * @return array<int, string>
      */
-    private function warnings(int $ownerId, string $from, string $to): array
+    private function warnings(int $ownerId, string $from, string $to, ?int $boatId = null): array
     {
         $warnings = [];
 
         $openTrips = Trip::where('owner_id', $ownerId)
             ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
             ->whereNotIn('status', [TripStatus::Sold->value, TripStatus::Cancelled->value])
+            ->when($boatId, fn ($query) => $query->where('boat_id', $boatId))
             ->count();
 
         if ($openTrips > 0) {
@@ -209,6 +214,7 @@ class MonthClosingService
         $unpaid = Sale::where('seller_type', 'owner')
             ->where('seller_id', $ownerId)
             ->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to])
+            ->when($boatId, fn ($query) => $query->whereIn('trip_id', Trip::where('boat_id', $boatId)->pluck('id')))
             ->where('remaining_total', '>', 0)
             ->sum('remaining_total');
 

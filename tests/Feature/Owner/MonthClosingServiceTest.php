@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Owner;
 
+use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use App\Models\Sale;
+use App\Models\Trip;
 use App\Models\User;
 use App\Service\Owner\MonthClosingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -137,6 +139,59 @@ class MonthClosingServiceTest extends TestCase
         // Snapshot must not change when sales are later edited.
         Sale::where('seller_id', $owner->id)->update(['total_price' => 999, 'net_owner_amount' => 999]);
         $this->assertSame('240000.00', $closing->fresh()->net_profit);
+    }
+
+    public function test_close_scopes_figures_and_crew_to_the_selected_boat(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        $boatA = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب أ', 'number' => 'B-A']);
+        $boatB = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب ب', 'number' => 'B-B']);
+
+        $tripA = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boatA->id, 'start_date' => '2026-06-01']);
+        $tripB = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boatB->id, 'start_date' => '2026-06-01']);
+
+        foreach ([[$tripA, 100000], [$tripB, 40000]] as [$trip, $amount]) {
+            Sale::create([
+                'number' => 'S-'.uniqid(),
+                'seller_type' => 'owner',
+                'seller_id' => $owner->id,
+                'trip_id' => $trip->id,
+                'total_price' => $amount,
+                'net_owner_amount' => $amount,
+                'sale_datetime' => '2026-06-15 10:00:00',
+                'status' => 1,
+            ]);
+        }
+
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'boat_id' => $boatA->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'boat_id' => $boatB->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+
+        $closing = $this->service->close($owner->id, 2026, 6, null, $boatA->id);
+
+        $this->assertSame($boatA->id, $closing->boat_id);
+        $this->assertSame('100000.00', $closing->net_sales); // only boat A's sale
+        $this->assertCount(1, $closing->dues); // only boat A's crew
+
+        // The same boat cannot be closed twice, but other scopes remain open.
+        $this->assertNotNull($this->service->find($owner->id, 2026, 6, $boatA->id));
+        $this->assertNull($this->service->find($owner->id, 2026, 6, $boatB->id));
+        $this->assertNull($this->service->find($owner->id, 2026, 6)); // whole-fleet scope untouched
+
+        $fleetClosing = $this->service->close($owner->id, 2026, 6, null, null);
+        $this->assertNull($fleetClosing->boat_id);
+        $this->assertSame('140000.00', $fleetClosing->net_sales); // both boats
+    }
+
+    public function test_cannot_close_same_boat_twice(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-1']);
+
+        $this->service->close($owner->id, 2026, 6, null, $boat->id);
+
+        $this->expectException(\DomainException::class);
+        $this->service->close($owner->id, 2026, 6, null, $boat->id);
     }
 
     public function test_cannot_close_twice(): void

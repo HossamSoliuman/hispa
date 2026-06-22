@@ -20,6 +20,10 @@
 
     <x-report-info :settings="$settings ?? []" />
 
+    <p style="text-align:center; margin-top:10px; font-weight:700;">
+        {{ __('owner.profit_loss.boat') }}: {{ $closing->boat?->name ?? __('owner.profit_loss.all_boats') }}
+    </p>
+
     <x-report-stats :items="[
         ['label' => __('owner.profit_loss.net_sales'), 'value' => number_format($closing->net_sales, 2), 'color' => '#16a34a', 'accent' => '#16a34a'],
         ['label' => __('owner.profit_loss.total_expenses'), 'value' => number_format($closing->total_expenses, 2), 'color' => '#dc2626', 'accent' => '#dc2626'],
