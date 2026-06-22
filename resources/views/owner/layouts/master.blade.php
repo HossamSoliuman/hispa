@@ -434,6 +434,25 @@
         }
     </style>
 
+    {{-- ── Glassy panels: make every card (and the tables inside them) translucent
+         so the page background shows through, exactly like the top KPI stat cards.
+         The accent-tint fill is the same one used by .hud-stat-card above. ── --}}
+    <style>
+        /* all cards adopt the translucent fill of the top stat cards */
+        .card {
+            background: rgba(var(--hud-accent-rgb), .07) !important;
+        }
+        .card-header {
+            background: rgba(var(--hud-accent-rgb), .12) !important;
+        }
+        /* tables must not paint an opaque fill over the now-translucent card */
+        .card .table,
+        .card table {
+            --bs-table-bg: transparent;
+            background-color: transparent !important;
+        }
+    </style>
+
     {{-- Make ApexCharts (dashboard, analytics, sales, expenses, …) follow the theme --}}
     <script>
         window.Apex = window.Apex || {};
