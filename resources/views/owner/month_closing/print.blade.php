@@ -1,192 +1,222 @@
+@php
+    $isRtl = app()->getLocale() === 'ar';
+    $reportTitle = __('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year);
+    $closedAt = optional($closing->closed_at)->format('Y-m-d') ?? now()->format('Y-m-d');
+
+    $fmt = fn ($value) => number_format((float) $value, 2);
+
+    $returns = max((float) $closing->gross_sales - (float) $closing->net_sales, 0);
+    $totalEarned = $closing->dues->sum('due_amount');
+    $totalAdvances = $closing->dues->sum('advances');
+    $totalNetDue = $closing->dues->sum('remaining');
+
+    $r = 'owner.month_closing.report';
+    // mPDF reverses table-column order for RTL, so order the footer cells per
+    // direction to keep the closing summary on the start side everywhere.
+    $footerCells = $isRtl ? ['summary', 'gap', 'signoff', 'gap', 'notes'] : ['notes', 'gap', 'signoff', 'gap', 'summary'];
+@endphp
+
 <x-report-layout
-    :title="__('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year)"
-    :titleEn="app()->getLocale() === 'ar' ? 'Monthly Profit Distribution' : ''"
+    :title="$reportTitle"
     :documentNumber="'MC-'.$closing->year.str_pad($closing->month, 2, '0', STR_PAD_LEFT)"
     :settings="$settings ?? []"
 >
-    <x-slot name="extraStyles">
-        .dues-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .dues-table th, .dues-table td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; font-size: 12px; }
-        .dues-table th { background: #f1f5f9; }
-        .dues-table tfoot td { font-weight: 700; background: #f8f9fa; }
-    </x-slot>
+    <x-report-masthead
+        :title="$reportTitle"
+        :subtitle="__('owner.month_closing.subtitle')"
+        :settings="$settings ?? []" />
 
-    <x-report-header
-        :documentNumber="'MC-'.$closing->year.str_pad($closing->month, 2, '0', STR_PAD_LEFT)"
-        :title="__('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year)"
-        :titleEn="app()->getLocale() === 'ar' ? 'Monthly Profit Distribution' : ''"
-        :settings="$settings ?? []"
-    />
-
-    <x-report-info :settings="$settings ?? []" />
-
-    <p style="text-align:center; margin-top:10px; font-weight:700;">
-        {{ __('owner.profit_loss.boat') }}: {{ $closing->boat?->name ?? __('owner.profit_loss.all_boats') }}
-    </p>
-
-    <x-report-stats :items="[
-        ['label' => __('owner.profit_loss.net_sales'), 'value' => number_format($closing->net_sales, 2), 'color' => '#16a34a', 'accent' => '#16a34a'],
-        ['label' => __('owner.profit_loss.total_expenses'), 'value' => number_format($closing->total_expenses, 2), 'color' => '#dc2626', 'accent' => '#dc2626'],
-        ['label' => __('owner.profit_loss.net_profit'), 'value' => number_format($closing->net_profit, 2)],
-        ['label' => __('owner.generated.owner_ratio'), 'value' => number_format($closing->owner_share, 2), 'color' => '#2563eb', 'accent' => '#2563eb'],
-        ['label' => __('owner.profit_loss.crew_share'), 'value' => number_format($closing->crew_share, 2), 'color' => '#d97706', 'accent' => '#d97706'],
-    ]" />
-
-    <h3 style="margin-top:25px;">{{ __('owner.month_closing.revenue_details.title') }}</h3>
-    <table class="dues-table">
-        <thead>
-            <tr>
-                <th>{{ __('owner.month_closing.revenue_details.date') }}</th>
-                <th>{{ __('owner.month_closing.revenue_details.number') }}</th>
-                <th>{{ __('owner.month_closing.revenue_details.customer') }}</th>
-                <th>{{ __('owner.month_closing.revenue_details.total') }}</th>
-                <th>{{ __('owner.month_closing.revenue_details.commission_labor') }}</th>
-                <th>{{ __('owner.month_closing.revenue_details.net_owner') }}</th>
-                <th>{{ __('owner.month_closing.revenue_details.remaining') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($details['sales'] as $sale)
-                <tr>
-                    <td>{{ optional($sale->sale_datetime)->format('Y-m-d') }}</td>
-                    <td>{{ $sale->number }}</td>
-                    <td>{{ $sale->customer_name ?: $sale->customer->name }}</td>
-                    <td>{{ number_format((float) $sale->total_price, 2) }}</td>
-                    <td>{{ number_format((float) $sale->commission_amount + (float) $sale->labor_amount, 2) }}</td>
-                    <td>{{ number_format((float) $sale->net_owner_amount, 2) }}</td>
-                    <td>{{ number_format((float) $sale->remaining_total, 2) }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7">{{ __('owner.month_closing.revenue_details.no_data') }}</td>
-                </tr>
-            @endforelse
-        </tbody>
-        @if ($details['sales']->isNotEmpty())
-            <tfoot>
-                <tr>
-                    <td colspan="3">{{ __('owner.month_closing.revenue_details.total_label') }}</td>
-                    <td>{{ number_format((float) $details['sales']->sum('total_price'), 2) }}</td>
-                    <td>{{ number_format($details['sales']->sum(fn ($s) => (float) $s->commission_amount + (float) $s->labor_amount), 2) }}</td>
-                    <td>{{ number_format((float) $details['sales']->sum('net_owner_amount'), 2) }}</td>
-                    <td>{{ number_format((float) $details['sales']->sum('remaining_total'), 2) }}</td>
-                </tr>
-            </tfoot>
-        @endif
+    {{-- Filter badges --}}
+    <table class="info-bar">
+        <tr>
+            <td>
+                <span class="ib-label">{{ __("$r.filter_month") }}</span>
+                <span class="ib-value">{{ sprintf('%02d', $closing->month) }}</span>
+            </td>
+            <td>
+                <span class="ib-label">{{ __("$r.filter_year") }}</span>
+                <span class="ib-value">{{ $closing->year }}</span>
+            </td>
+            <td>
+                <span class="ib-label">{{ __("$r.filter_closing_date") }}</span>
+                <span class="ib-value">{{ $closedAt }}</span>
+            </td>
+            <td>
+                <span class="ib-label">{{ __("$r.filter_boat") }}</span>
+                <span class="ib-value">{{ $closing->boat?->name ?? __("$r.all_boats") }}</span>
+            </td>
+        </tr>
     </table>
 
-    <h3 style="margin-top:25px;">{{ __('owner.month_closing.expense_details.title') }}</h3>
-    <table class="dues-table">
-        <thead>
-            <tr>
-                <th>{{ __('owner.month_closing.expense_details.date') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.number') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.category') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.vendor') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.total') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.discount') }}</th>
-                <th>{{ __('owner.month_closing.expense_details.final') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($details['expenses'] as $expense)
-                <tr>
-                    <td>{{ \Illuminate\Support\Carbon::parse($expense->date)->format('Y-m-d') }}</td>
-                    <td>{{ $expense->number }}</td>
-                    <td>{{ $expense->category->name }}</td>
-                    <td>{{ optional($expense->vendor)->name ?: '-' }}</td>
-                    <td>{{ number_format((float) $expense->total_price, 2) }}</td>
-                    <td>{{ number_format((float) $expense->calculated_discount, 2) }}</td>
-                    <td>{{ number_format((float) $expense->final_price, 2) }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7">{{ __('owner.month_closing.expense_details.no_data') }}</td>
-                </tr>
-            @endforelse
-        </tbody>
-        @if ($details['expenses']->isNotEmpty())
-            <tfoot>
-                <tr>
-                    <td colspan="4">{{ __('owner.month_closing.expense_details.total_label') }}</td>
-                    <td>{{ number_format((float) $details['expenses']->sum('total_price'), 2) }}</td>
-                    <td>{{ number_format($details['expenses']->sum(fn ($e) => (float) $e->calculated_discount), 2) }}</td>
-                    <td>{{ number_format((float) $details['expenses']->sum('final_price'), 2) }}</td>
-                </tr>
-            </tfoot>
-        @endif
+    {{-- Summary cards --}}
+    @php
+        $summaryCards = [
+            [
+                'head' => __("$r.cards.total_sales"),
+                'rows' => [
+                    [__("$r.rows.gross_sales"), $fmt($closing->gross_sales)],
+                    [__("$r.rows.returns"), $fmt($returns)],
+                ],
+                'total' => [__("$r.rows.net_sales"), $fmt($closing->net_sales)],
+            ],
+            [
+                'head' => __("$r.cards.total_expenses"),
+                'rows' => [
+                    [__("$r.rows.trip_expenses"), $fmt($closing->trip_expenses)],
+                    [__("$r.rows.operational_expenses"), $fmt($closing->general_expenses)],
+                    [__("$r.rows.depreciation"), $fmt($closing->depreciation)],
+                ],
+                'total' => [__("$r.rows.total_expenses"), $fmt($closing->total_expenses)],
+            ],
+            [
+                'head' => __("$r.cards.profit_before"),
+                'rows' => [
+                    [__("$r.rows.net_owner_revenue"), $fmt($closing->net_owner_revenue)],
+                    [__("$r.rows.total_expenses"), $fmt($closing->total_expenses)],
+                ],
+                'total' => [__("$r.rows.profit_before"), $fmt($closing->net_profit)],
+            ],
+            [
+                'head' => __("$r.cards.owner_deductions"),
+                'rows' => [
+                    [__("$r.rows.profit_before"), $fmt($closing->net_profit)],
+                    [__("$r.rows.owner_percent"), $fmt($closing->owner_percent).'%'],
+                ],
+                'total' => [__("$r.rows.total_deductions"), $fmt($closing->owner_share)],
+            ],
+            [
+                'head' => __("$r.cards.net_distributable"),
+                'rows' => [
+                    [__("$r.rows.profit_before"), $fmt($closing->net_profit)],
+                    [__("$r.rows.total_deductions"), $fmt($closing->owner_share)],
+                ],
+                'total' => [__("$r.rows.final_distributable"), $fmt($closing->crew_share)],
+            ],
+        ];
+        // Equal-height cards: pad every body to the tallest card's row count so
+        // the bordered boxes match and the total rows align along the bottom.
+        $maxRows = max(array_map(fn ($card) => count($card['rows']), $summaryCards));
+    @endphp
+    <table class="sum-cards">
+        <tr>
+            @foreach ($summaryCards as $card)
+                <td class="sum-head">{{ $card['head'] }}</td>
+            @endforeach
+        </tr>
+        <tr>
+            @foreach ($summaryCards as $card)
+                <td class="sum-card">
+                    <table class="sum-body">
+                        @foreach ($card['rows'] as [$label, $value])
+                            <tr><td class="sum-k">{{ $label }}</td><td class="sum-v">{{ $value }}</td></tr>
+                        @endforeach
+                        @for ($i = count($card['rows']); $i < $maxRows; $i++)
+                            <tr><td class="sum-k">&nbsp;</td><td class="sum-v">&nbsp;</td></tr>
+                        @endfor
+                        <tr class="sum-total"><td class="sum-k">{{ $card['total'][0] }}</td><td class="sum-v">{{ $card['total'][1] }}</td></tr>
+                    </table>
+                </td>
+            @endforeach
+        </tr>
     </table>
 
-    <h3 style="margin-top:25px;">{{ __('owner.month_closing.distribution') }}</h3>
-    <table class="dues-table">
+    {{-- Sailor profit distribution --}}
+    <div class="section-bar">{{ __("$r.distribution_title") }}</div>
+    <table class="report-table">
         <thead>
             <tr>
-                <th>{{ __('owner.month_closing.columns.member') }}</th>
-                <th>{{ __('owner.month_closing.columns.role') }}</th>
-                <th>{{ __('owner.month_closing.columns.shares') }}</th>
-                <th>{{ __('owner.month_closing.columns.custom_percent') }}</th>
-                <th>{{ __('owner.month_closing.columns.share_value') }}</th>
-                <th>{{ __('owner.month_closing.columns.due') }}</th>
-                <th>{{ __('owner.month_closing.columns.advances') }}</th>
-                <th>{{ __('owner.month_closing.columns.paid') }}</th>
-                <th>{{ __('owner.month_closing.columns.remaining') }}</th>
+                <th style="width:5%;">{{ __("$r.dist.index") }}</th>
+                <th class="col-text" style="width:22%;">{{ __("$r.dist.name") }}</th>
+                <th style="width:13%;">{{ __("$r.dist.role") }}</th>
+                <th style="width:12%;">{{ __("$r.dist.share") }}</th>
+                <th class="col-num" style="width:13%;">{{ __("$r.dist.earned") }}</th>
+                <th class="col-num" style="width:12%;">{{ __("$r.dist.advance") }}</th>
+                <th class="col-num" style="width:13%;">{{ __("$r.dist.net_due") }}</th>
+                <th style="width:10%;">{{ __("$r.dist.signature") }}</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($closing->dues as $due)
+            @foreach ($closing->dues as $i => $due)
                 <tr>
-                    <td>{{ $due->member_name }}</td>
+                    <td>{{ $i + 1 }}</td>
+                    <td class="col-text">{{ $due->member_name }}</td>
                     <td>{{ $due->role }}</td>
-                    <td>{{ $due->custom_share_percent !== null ? '-' : number_format($due->shares, 2) }}</td>
-                    <td>{{ $due->custom_share_percent !== null ? number_format($due->custom_share_percent, 2) . '%' : '-' }}</td>
-                    <td>{{ number_format($due->share_value, 2) }}</td>
-                    <td>{{ number_format($due->due_amount, 2) }}</td>
-                    <td>{{ number_format($due->advances, 2) }}</td>
-                    <td>{{ number_format($due->paid_amount, 2) }}</td>
-                    <td>{{ number_format($due->remaining, 2) }}</td>
+                    <td>{{ $due->custom_share_percent !== null ? $fmt($due->custom_share_percent).'%' : $fmt($due->shares) }}</td>
+                    <td class="col-num">{{ $fmt($due->due_amount) }}</td>
+                    <td class="col-num">{{ $fmt($due->advances) }}</td>
+                    <td class="col-num">{{ $fmt($due->remaining) }}</td>
+                    <td>&nbsp;</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2">{{ __('owner.month_closing.status_closed') }}</td>
-                <td>{{ number_format($closing->total_shares, 2) }}</td>
-                <td></td>
-                <td>{{ number_format($closing->share_value, 2) }}</td>
-                <td>{{ number_format($closing->dues->sum('due_amount'), 2) }}</td>
-                <td>{{ number_format($closing->dues->sum('advances'), 2) }}</td>
-                <td>{{ number_format($closing->dues->sum('paid_amount'), 2) }}</td>
-                <td>{{ number_format($closing->dues->sum('remaining'), 2) }}</td>
+                <th colspan="3" class="col-text">{{ __("$r.dist.total") }}</th>
+                <th>{{ $fmt($closing->total_shares) }}</th>
+                <th class="col-num">{{ $fmt($totalEarned) }}</th>
+                <th class="col-num">{{ $fmt($totalAdvances) }}</th>
+                <th class="col-num">{{ $fmt($totalNetDue) }}</th>
+                <th>&nbsp;</th>
             </tr>
         </tfoot>
     </table>
 
-    @isset($payrollSummary)
-        <h3 style="margin-top:25px;">{{ __('owner.month_closing.payroll_summary.title') }}</h3>
-        <table class="dues-table">
-            <thead>
-                <tr>
-                    <th>{{ __('owner.month_closing.payroll_summary.type') }}</th>
-                    <th>{{ __('owner.month_closing.payroll_summary.people') }}</th>
-                    <th>{{ __('owner.month_closing.payroll_summary.net_total') }}</th>
-                    <th>{{ __('owner.month_closing.payroll_summary.paid') }}</th>
-                    <th>{{ __('owner.month_closing.payroll_summary.status') }}</th>
-                    <th>{{ __('owner.month_closing.payroll_summary.paid_at') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (['percentage' => 'percentage'] as $key => $label)
-                    @php $row = $payrollSummary[$key]; @endphp
-                    <tr>
-                        <td>{{ __('owner.month_closing.payroll_summary.'.$label) }}</td>
-                        <td>{{ $row['paid_count'] }} / {{ $row['count'] }}</td>
-                        <td>{{ number_format($row['net_total'], 2) }}</td>
-                        <td>{{ number_format($row['paid_amount'], 2) }}</td>
-                        <td>{{ __('owner.month_closing.payroll_summary.'.$row['status']) }}</td>
-                        <td>{{ optional($row['paid_at'])->format('Y-m-d') ?? '-' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endisset
+    {{-- Closing footer: summary grid / sign-off / notes --}}
+    <table class="close-footer">
+        <tr>
+            @foreach ($footerCells as $cell)
+                @if ($cell === 'gap')
+                    <td class="cf-gap"></td>
+                @elseif ($cell === 'summary')
+                    <td class="cf-col">
+                        <div class="cf-card">
+                            <div class="cf-head">{{ __("$r.closing_summary_title") }}</div>
+                            <div class="cf-body">
+                                <table class="cf-kv">
+                                    <tr><td class="cf-k">{{ __("$r.rows.net_sales") }}</td><td class="cf-v">{{ $fmt($closing->net_sales) }}</td></tr>
+                                    <tr><td class="cf-k">{{ __("$r.rows.total_expenses") }}</td><td class="cf-v">{{ $fmt($closing->total_expenses) }}</td></tr>
+                                    <tr><td class="cf-k">{{ __("$r.rows.profit_before") }}</td><td class="cf-v">{{ $fmt($closing->net_profit) }}</td></tr>
+                                    <tr><td class="cf-k">{{ __("$r.rows.owner_share") }}</td><td class="cf-v">{{ $fmt($closing->owner_share) }}</td></tr>
+                                    <tr><td class="cf-k">{{ __("$r.rows.final_distributable") }}</td><td class="cf-v">{{ $fmt($closing->crew_share) }}</td></tr>
+                                    <tr class="cf-total"><td class="cf-k">{{ __("$r.total_net_due") }}</td><td class="cf-v">{{ $fmt($totalNetDue) }}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                @elseif ($cell === 'signoff')
+                    <td class="cf-col">
+                        <div class="cf-card">
+                            <div class="cf-head">{{ __("$r.signoff_title") }}</div>
+                            <div class="cf-body">
+                                <div class="cf-signoff-label">{{ __('owner.reports.sig_responsible_manager') }}</div>
+                                <div class="cf-signoff-line">.............................</div>
+                                <div class="cf-signoff-label">{{ __('owner.reports.signature') }}</div>
+                                <div class="cf-signoff-line">.............................</div>
+                                <div class="cf-signoff-date">{{ __('owner.reports.date_label') }}: {{ $closedAt }}</div>
+                            </div>
+                        </div>
+                    </td>
+                @else
+                    <td class="cf-col">
+                        <div class="cf-card">
+                            <div class="cf-head">{{ __("$r.notes_title") }}</div>
+                            <div class="cf-body">
+                                <ul class="cf-notes">
+                                    @foreach (__("$r.notes") as $note)
+                                        <li>{{ $note }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                @endif
+            @endforeach
+        </tr>
+    </table>
+
+    <table class="report-footer">
+        <tr>
+            <td>{{ $settings['title'] ?? $settings['company_name'] ?? '' }} — {{ __('owner.reports.all_rights_reserved') }} © {{ date('Y') }}</td>
+        </tr>
+    </table>
 </x-report-layout>

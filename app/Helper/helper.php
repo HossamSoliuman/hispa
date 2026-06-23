@@ -297,3 +297,107 @@ function pdf_report($view, array $data = [], string $filename = 'report.pdf', st
 {
     return app(\App\Service\Owner\PdfReportService::class)->download($view, $data, $filename, $disposition);
 }
+
+/**
+ * Spell a monetary amount as Arabic words for printed invoices, e.g.
+ * "ثلاثة عشر ألف وسبعمائة وثلاثون ريال سعودي فقط لا غير". Halalas are appended
+ * only when non-zero. Falls back to a plain English rendering for non-Arabic.
+ */
+function amount_to_words(float $amount, ?string $locale = null): string
+{
+    $locale ??= app()->getLocale();
+    $amount = round($amount, 2);
+    $riyals = (int) floor($amount);
+    $halalas = (int) round(($amount - $riyals) * 100);
+
+    if ($locale !== 'ar') {
+        $words = number_format($riyals).' SAR';
+        if ($halalas > 0) {
+            $words .= ' and '.$halalas.' Halalas';
+        }
+
+        return $words.' only';
+    }
+
+    $words = arabic_integer_to_words($riyals).' ريال سعودي';
+    if ($halalas > 0) {
+        $words .= ' و'.arabic_integer_to_words($halalas).' هللة';
+    }
+
+    return $words.' فقط لا غير';
+}
+
+/**
+ * Convert a non-negative integer (0 .. 999,999,999,999) to Arabic words.
+ */
+function arabic_integer_to_words(int $number): string
+{
+    if ($number === 0) {
+        return 'صفر';
+    }
+
+    $ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة',
+        'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+    $tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+    $hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+
+    $threeDigits = function (int $n) use ($ones, $tens, $hundreds): string {
+        $parts = [];
+        $h = intdiv($n, 100);
+        $rest = $n % 100;
+        if ($h > 0) {
+            $parts[] = $hundreds[$h];
+        }
+        if ($rest > 0) {
+            if ($rest < 20) {
+                $parts[] = $ones[$rest];
+            } else {
+                $u = $rest % 10;
+                $t = intdiv($rest, 10);
+                $parts[] = $u > 0 ? $ones[$u].' و'.$tens[$t] : $tens[$t];
+            }
+        }
+
+        return implode(' و', $parts);
+    };
+
+    $scales = [
+        ['', '', ''],
+        ['ألف', 'ألفان', 'آلاف'],
+        ['مليون', 'مليونان', 'ملايين'],
+        ['مليار', 'ملياران', 'مليارات'],
+    ];
+
+    $groups = [];
+    while ($number > 0) {
+        $groups[] = $number % 1000;
+        $number = intdiv($number, 1000);
+    }
+
+    $parts = [];
+    for ($i = count($groups) - 1; $i >= 0; $i--) {
+        $g = $groups[$i];
+        if ($g === 0) {
+            continue;
+        }
+
+        if ($i === 0) {
+            $parts[] = $threeDigits($g);
+
+            continue;
+        }
+
+        [$singular, $dual, $plural] = $scales[$i];
+        if ($g === 1) {
+            $parts[] = $singular;
+        } elseif ($g === 2) {
+            $parts[] = $dual;
+        } elseif ($g >= 3 && $g <= 10) {
+            $parts[] = $threeDigits($g).' '.$plural;
+        } else {
+            $parts[] = $threeDigits($g).' '.$singular;
+        }
+    }
+
+    return implode(' و', $parts);
+}

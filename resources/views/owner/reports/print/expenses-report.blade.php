@@ -5,40 +5,6 @@
     :settings="$settings"
     :qr-code="$settings['qr_code'] ?? null">
 
-<style>
-    /* ── Report standard: dense, bordered, horizontal "grid" layout ──
-       Designed for mPDF (no flex/grid): tables, bordered cells, tight spacing. */
-    body { font-size: 9pt; line-height: 1.5; }
-
-    table.info-bar { width: 100%; border-collapse: collapse; margin: 0 0 10px; }
-    table.info-bar td { border: 1px solid #e0e0e0; padding: 3px 6px; vertical-align: middle; text-align: center; }
-    .ib-label { font-size: 8pt; color: #95a5a6; display: block; margin-bottom: 2px; }
-    .ib-value { font-size: 9.5pt; font-weight: 700; color: #2c3e50; }
-
-    table.report-table { table-layout: fixed; width: 100%; border-collapse: collapse; margin: 0; }
-    table.report-table th, table.report-table td {
-        border: none; border-bottom: 1px solid #e5e5e5; padding: 4px 5px; font-size: 8.5pt;
-        word-wrap: break-word; overflow-wrap: break-word; vertical-align: middle; text-align: center;
-    }
-    table.report-table thead th { background: #1a1a1a; color: #fff; font-weight: 700; border-bottom: none; }
-    table.report-table tfoot td, table.report-table tfoot th {
-        background: transparent; font-weight: 700; color: #1a1a1a;
-        border-top: 2px solid #1a1a1a; border-bottom: none;
-    }
-    .col-text { text-align: {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}; }
-    .col-num  { text-align: {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}; white-space: nowrap; }
-
-    .report-stats { border-spacing: 6px 0; margin: 0 0 10px; }
-    .report-stats td.report-stat-card { border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px 6px; }
-    .report-stat-value { font-size: 13pt; }
-    .report-stat-label { margin-bottom: 4px; font-size: 8.5pt; }
-
-    .block { margin: 0 0 10px; }
-
-    table.report-footer { width: 100%; border-collapse: collapse; margin: 6px 0 0; border-top: 1px solid #e0e0e0; }
-    table.report-footer td { border: none; padding: 8px 4px 0; vertical-align: middle; }
-    td.rf-text { text-align: {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}; font-size: 8pt; color: #95a5a6; }
-</style>
 
     <x-report-header
         :document-number="'#' . str_pad($statistics['total_count'], 8, '0', STR_PAD_LEFT)"

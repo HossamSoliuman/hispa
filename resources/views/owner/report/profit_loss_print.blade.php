@@ -1,137 +1,186 @@
+@php
+    $cur = __('owner.reports.report_currency');
+    $netProfit = (float) $f['net_profit'];
+
+    $selectedBoat = ($boatId && isset($boats)) ? $boats->firstWhere('id', $boatId) : null;
+    $boatLabel = $selectedBoat ? ($selectedBoat->name ?? $selectedBoat->name_ar) : __('owner.profit_loss.all_boats');
+
+    $subtitle = __('owner.reports.from_date').' '.$from.' '.__('owner.reports.to_date').' '.$to.' — '.__('owner.profit_loss.boat').': '.$boatLabel;
+
+    $pct = fn ($value, $base) => $base > 0 ? number_format($value / $base * 100, 2).' %' : '—';
+    $revenueBase = (float) $f['gross_sales'];
+    $expenseBase = (float) $f['total_expenses'];
+@endphp
+
 <x-report-layout
     :title="__('owner.profit_loss.title')"
-    :titleEn="'Profit & Loss Report'"
     :documentNumber="'PL-' . now()->format('YmdHis')"
     :settings="$settings ?? []"
 >
-    <x-slot name="extraStyles">
-        .currency-symbol { display: inline-flex; align-items: center; gap: 3px; }
-        .currency-symbol svg { width: 14px; height: 14px; fill: currentColor; }
-        .period-info { background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 15px 0; }
-        .period-info strong { color: #1e293b; }
-    </x-slot>
-
-    <x-report-header
-        :documentNumber="'PL-' . now()->format('YmdHis')"
+    <x-report-masthead
         :title="__('owner.profit_loss.title')"
-        :titleEn="'Profit & Loss Report'"
-        :settings="$settings ?? []"
-    />
+        :subtitle="$subtitle"
+        :settings="$settings ?? []" />
 
-    <x-report-info :settings="$settings ?? []">
-        <x-slot name="additionalInfo">
-            <div class="period-info">
-                <strong>{{ __('owner.profit_loss.from_date') }}:</strong> {{ $from }} <small class="text-muted">(@hijri($from))</small>
-                <strong style="margin-inline-start: 20px;">{{ __('owner.profit_loss.to_date') }}:</strong> {{ $to }} <small class="text-muted">(@hijri($to))</small>
-                @if($boatId && isset($boats))
-                    @php $selectedBoat = $boats->firstWhere('id', $boatId); @endphp
-                    @if($selectedBoat)
-                        <br><strong>{{ __('owner.profit_loss.boat') }}:</strong> {{ $selectedBoat->name ?? $selectedBoat->name_ar }}
-                    @endif
-                @endif
-            </div>
-        </x-slot>
-    </x-report-info>
-
-    {{-- Summary Cards --}}
-    @php $netProfit = (float) $f['net_profit']; @endphp
+    {{-- KPI cards --}}
     <x-report-stats :items="[
-        ['label' => __('owner.profit_loss.net_sales'), 'value' => number_format($f['net_sales'], 2), 'color' => '#16a34a', 'accent' => '#16a34a'],
-        ['label' => __('owner.profit_loss.total_expenses'), 'value' => number_format($f['total_expenses'], 2), 'color' => '#dc2626', 'accent' => '#dc2626'],
-        ['label' => __('owner.profit_loss.crew_share'), 'value' => number_format($f['crew_share'], 2), 'color' => '#d97706', 'accent' => '#d97706'],
-        ['label' => __('owner.profit_loss.net_profit_loss'), 'value' => number_format($netProfit, 2), 'color' => $netProfit >= 0 ? '#16a34a' : '#dc2626', 'accent' => $netProfit >= 0 ? '#16a34a' : '#dc2626'],
+        ['label' => __('owner.profit_loss.total_sales'), 'value' => number_format($f['gross_sales'], 2)],
+        ['label' => __('owner.profit_loss.net_owner_revenue'), 'value' => number_format($f['net_owner_revenue'], 2)],
+        ['label' => __('owner.profit_loss.total_expenses'), 'value' => number_format($f['total_expenses'], 2)],
+        ['label' => __('owner.profit_loss.net_profit_loss'), 'value' => number_format($netProfit, 2)],
+        ['label' => __('owner.profit_loss.owner_share'), 'value' => number_format($f['owner_share'], 2)],
+        ['label' => __('owner.profit_loss.crew_share'), 'value' => number_format($f['crew_share'], 2)],
     ]" />
 
-    {{-- Summary Table --}}
-    <x-report-summary :qr-code="$settings['qr_code'] ?? null">
-        <x-report-summary-row
-            :label="__('owner.profit_loss.total_sales')"
-            :value="$f['gross_sales']"
-            valueClass="text-success"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('owner.profit_loss.net_owner_revenue')"
-            :value="$f['net_owner_revenue']"
-            valueClass="text-success"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('owner.profit_loss.trip_expenses')"
-            :value="$f['trip_expenses'] * -1"
-            valueClass="text-danger"
-            :showMinus="true"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('owner.profit_loss.general_expenses')"
-            :value="$f['general_expenses'] * -1"
-            valueClass="text-danger"
-            :showMinus="true"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('owner.profit_loss.depreciation')"
-            :value="$f['depreciation'] * -1"
-            valueClass="text-danger"
-            :showMinus="true"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('owner.profit_loss.net_profit_loss')"
-            :value="$netProfit"
-            :valueClass="$netProfit >= 0 ? 'text-success' : 'text-danger'"
-            :showCurrency="true"
-            isBold
-        />
-        <x-report-summary-row
-            :label="__('owner.generated.owner_ratio')"
-            :value="$f['owner_share']"
-            valueClass="text-success"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('owner.profit_loss.crew_share')"
-            :value="$f['crew_share']"
-            valueClass="text-warning"
-            :showCurrency="true"
-        />
-    </x-report-summary>
+    {{-- Revenues (start side) + Costs (end side) --}}
+    <table class="dual">
+        <tr>
+            <td class="dual-col" style="width:50%;">
+                <div class="section-bar">{{ __('owner.month_summary.revenue') }}</div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th style="width:8%;">#</th>
+                            <th class="col-text" style="width:52%;">{{ __('owner.reports.expense_category') }}</th>
+                            <th class="col-num" style="width:24%;">{{ __('owner.reports.amount') }} ({{ $cur }})</th>
+                            <th style="width:16%;">{{ __('owner.reports.percentage') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td class="col-text">{{ __('owner.profit_loss.total_sales') }}</td>
+                            <td class="col-num">{{ number_format($f['gross_sales'], 2) }}</td>
+                            <td>{{ $pct($f['gross_sales'], $revenueBase) }}</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td class="col-text">{{ __('owner.profit_loss.commission_labor') }}</td>
+                            <td class="col-num">({{ number_format($f['commission_labor'], 2) }})</td>
+                            <td>{{ $pct($f['commission_labor'], $revenueBase) }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" class="col-text">{{ __('owner.profit_loss.net_owner_revenue') }}</th>
+                            <th class="col-num">{{ number_format($f['net_owner_revenue'], 2) }}</th>
+                            <th>{{ $pct($f['net_owner_revenue'], $revenueBase) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </td>
+            <td class="dual-gap"></td>
+            <td class="dual-col" style="width:50%;">
+                <div class="section-bar">{{ __('owner.profit_loss.total_expenses') }}</div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th style="width:8%;">#</th>
+                            <th class="col-text" style="width:52%;">{{ __('owner.reports.expense_category') }}</th>
+                            <th class="col-num" style="width:24%;">{{ __('owner.reports.amount') }} ({{ $cur }})</th>
+                            <th style="width:16%;">{{ __('owner.reports.percentage') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td class="col-text">{{ __('owner.profit_loss.trip_expenses') }}</td>
+                            <td class="col-num">{{ number_format($f['trip_expenses'], 2) }}</td>
+                            <td>{{ $pct($f['trip_expenses'], $expenseBase) }}</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td class="col-text">{{ __('owner.profit_loss.general_expenses') }}</td>
+                            <td class="col-num">{{ number_format($f['general_expenses'], 2) }}</td>
+                            <td>{{ $pct($f['general_expenses'], $expenseBase) }}</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td class="col-text">{{ __('owner.profit_loss.depreciation') }}</td>
+                            <td class="col-num">{{ number_format($f['depreciation'], 2) }}</td>
+                            <td>{{ $pct($f['depreciation'], $expenseBase) }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" class="col-text">{{ __('owner.profit_loss.total_expenses') }}</th>
+                            <th class="col-num">{{ number_format($f['total_expenses'], 2) }}</th>
+                            <th>100.00 %</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    {{-- Profit summary --}}
+    <div class="section-bar">{{ __('owner.profit_loss.profit_loss_title') }}</div>
+    <table class="report-table" style="width:60%;">
+        <tbody>
+            <tr>
+                <th class="col-text" style="width:60%;">{{ __('owner.profit_loss.net_owner_revenue') }}</th>
+                <td class="col-num">{{ number_format($f['net_owner_revenue'], 2) }} {{ $cur }}</td>
+            </tr>
+            <tr>
+                <th class="col-text">{{ __('owner.profit_loss.total_expenses') }}</th>
+                <td class="col-num">({{ number_format($f['total_expenses'], 2) }}) {{ $cur }}</td>
+            </tr>
+            <tr class="net-row">
+                <th class="col-text">{{ __('owner.profit_loss.net_profit_loss') }}</th>
+                <td class="col-num">{{ number_format($netProfit, 2) }} {{ $cur }}</td>
+            </tr>
+            <tr>
+                <th class="col-text">{{ __('owner.profit_loss.owner_share') }} ({{ rtrim(rtrim(number_format($f['owner_percent'], 2), '0'), '.') }}%)</th>
+                <td class="col-num">{{ number_format($f['owner_share'], 2) }} {{ $cur }}</td>
+            </tr>
+            <tr>
+                <th class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
+                <td class="col-num">{{ number_format($f['crew_share'], 2) }} {{ $cur }}</td>
+            </tr>
+        </tbody>
+    </table>
 
     @if (!empty($f['crew_distribution']) && count($f['crew_distribution']) > 0)
-        <h3 style="margin-top: 25px;">{{ __('owner.profit_loss.crew_distribution_title') }}</h3>
-        <table class="dues-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+        <div class="section-bar">{{ __('owner.profit_loss.crew_distribution_title') }}</div>
+        <table class="report-table">
             <thead>
                 <tr>
-                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.member') }}</th>
-                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.role') }}</th>
-                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.custom_percent') }}</th>
-                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.shares') }}</th>
-                    <th style="border:1px solid #e2e8f0; padding:8px; background:#f1f5f9;">{{ __('owner.month_closing.columns.due') }}</th>
+                    <th class="col-text" style="width:34%;">{{ __('owner.month_closing.columns.member') }}</th>
+                    <th style="width:18%;">{{ __('owner.month_closing.columns.role') }}</th>
+                    <th style="width:16%;">{{ __('owner.month_closing.columns.custom_percent') }}</th>
+                    <th style="width:14%;">{{ __('owner.month_closing.columns.shares') }}</th>
+                    <th class="col-num" style="width:18%;">{{ __('owner.month_closing.columns.due') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($f['crew_distribution'] as $member)
                     <tr>
-                        <td style="border:1px solid #e2e8f0; padding:8px;">{{ $member['name'] }}</td>
-                        <td style="border:1px solid #e2e8f0; padding:8px;">{{ $member['role'] }}</td>
-                        <td style="border:1px solid #e2e8f0; padding:8px; text-align:center;">{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}</td>
-                        <td style="border:1px solid #e2e8f0; padding:8px; text-align:center;">{{ $member['custom_percent'] !== null ? '-' : number_format($member['shares'], 2) }}</td>
-                        <td style="border:1px solid #e2e8f0; padding:8px; text-align:end;">{{ number_format($member['due'], 2) }}</td>
+                        <td class="col-text">{{ $member['name'] }}</td>
+                        <td>{{ $member['role'] }}</td>
+                        <td>{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}</td>
+                        <td>{{ $member['custom_percent'] !== null ? '-' : number_format($member['shares'], 2) }}</td>
+                        <td class="col-num">{{ number_format($member['due'], 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" style="border:1px solid #e2e8f0; padding:8px; font-weight:700; background:#f8f9fa;">{{ __('owner.profit_loss.crew_share') }}</td>
-                    <td style="border:1px solid #e2e8f0; padding:8px; text-align:end; font-weight:700; background:#f8f9fa;">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</td>
+                    <th colspan="4" class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
+                    <th class="col-num">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }} {{ $cur }}</th>
                 </tr>
             </tfoot>
         </table>
     @endif
 
-    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
-        <small style="color: #64748b; font-weight: 500;">{{ __('owner.profit_loss.formula_note') }}</small>
-    </div>
+    <x-report-signatures :items="[
+        __('owner.reports.sig_accountant'),
+        __('owner.reports.sig_financial_manager'),
+        __('owner.reports.sig_general_manager'),
+    ]" />
 
+    <table class="report-footer">
+        <tr>
+            <td>{{ $settings['title'] ?? $settings['company_name'] ?? '' }} — {{ __('owner.reports.all_rights_reserved') }} © {{ date('Y') }}</td>
+        </tr>
+    </table>
 </x-report-layout>

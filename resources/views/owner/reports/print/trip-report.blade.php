@@ -25,36 +25,14 @@
     :qr-code="$qrCode">
 
 <style>
-    body { font-size: 9pt; line-height: 1.5; color: #2c3e50; }
-
-    /* Clean key-fact line — no boxes, no fill */
-    table.facts { width: 100%; border-collapse: collapse; margin: 0 0 14px; }
+    /* Clean key-fact line — no boxes, no fill (data tables inherit the shared grid) */
+    table.facts { width: 100%; border-collapse: collapse; margin: 0 0 12px; }
     table.facts td { border: none; padding: 1px 14px 1px 0; vertical-align: top; }
-    .fact-label { font-size: 8pt; color: #95a5a6; display: block; margin-bottom: 1px; }
+    .fact-label { font-size: 8pt; color: #888; display: block; margin-bottom: 1px; }
     .fact-value { font-size: 9.5pt; font-weight: 700; color: #1a1a1a; }
 
-    .section-title { font-size: 10.5pt; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
-    .block { margin: 0 0 16px; }
-
-    /* Reference data table: solid black header, hairline rows, heavier total rule */
-    table.report-table { table-layout: fixed; width: 100%; border-collapse: collapse; margin: 0; }
-    table.report-table th, table.report-table td {
-        border: none; border-bottom: 1px solid #e5e5e5; padding: 5px 8px; font-size: 9pt;
-        word-wrap: break-word; overflow-wrap: break-word; vertical-align: middle; text-align: center;
-    }
-    table.report-table thead th { background: #1a1a1a; color: #fff; font-weight: 700; border-bottom: none; padding: 6px 8px; }
-    table.report-table tbody th { font-weight: 700; color: #2c3e50; }
-    table.report-table tfoot td, table.report-table tfoot th {
-        font-weight: 700; color: #1a1a1a; border-top: 1.5px solid #1a1a1a; border-bottom: none;
-    }
-    table.report-table tr.net-row th, table.report-table tr.net-row td {
-        color: #1a1a1a; font-weight: 700; border-top: 1.5px solid #1a1a1a; border-bottom: none;
-    }
-
-    .col-text { text-align: {{ $startAlign }}; }
-    .col-num  { text-align: {{ $endAlign }}; white-space: nowrap; }
     .summary-table { width: 60%; }
-    .empty { color: #95a5a6; }
+    .empty { color: #888; }
 </style>
 
     <x-report-masthead

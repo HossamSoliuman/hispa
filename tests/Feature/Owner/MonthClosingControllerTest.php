@@ -124,4 +124,32 @@ class MonthClosingControllerTest extends TestCase
         $this->assertSame(30000.0, (float) $due->paid_amount);
         $this->assertSame(20000.0, (float) $due->remaining); // 50000 due - 0 advances - 30000 paid
     }
+
+    public function test_owner_can_print_month_closing_report(): void
+    {
+        $owner = $this->makeOwner();
+        User::factory()->create([
+            'role' => 'captain',
+            'owner_id' => $owner->id,
+            'salary_type' => 'percentage',
+            'profit_shares' => 1.0,
+        ]);
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 80000,
+            'net_owner_amount' => 80000,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        $closing = app(MonthClosingService::class)->close($owner->id, 2026, 6);
+
+        $response = $this->actingAs($owner, 'owner')
+            ->get(route('owner.month-closing.print', $closing));
+
+        $response->assertOk();
+        $this->assertSame('application/pdf', $response->headers->get('content-type'));
+    }
 }

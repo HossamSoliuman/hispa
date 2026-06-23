@@ -276,21 +276,22 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Printable Reports (mPDF)
 
-All owner-facing printable/PDF reports must follow one shared standard. The canonical reference implementation is `resources/views/owner/reports/print/trip-report.blade.php`. When building or editing any report, mirror it.
+All owner-facing printable/PDF reports follow one shared standard. The design (dense bordered "grid" matching the printed reference set) is **centralized** in the shared components — `resources/views/components/report-layout.blade.php` (all CSS classes) and `report-masthead.blade.php` (the page header). Do NOT copy a `<style>` block into report views anymore; just use the shared classes/components and the look is inherited everywhere.
 
 ### Standard
 - Reports are rendered to PDF via the `pdf_report($view, [], $filename, $disposition)` helper (mPDF under the hood). They are **not** Blade pages with the dashboard layout.
 - Default to inline preview (`$disposition = 'inline'`); honor `?download=1` to force `'attachment'`. The controller decides via `$request->boolean('download')`.
-- Wrap every report in `<x-report-layout>` with `:title`, `title-en`, `:document-number`, `:settings`, and `:qr-code`. Then render `<x-report-header>` with the same title/settings.
-- Use the existing report Blade components — `<x-report-stats>` for KPI cards, `<x-riyal-icon />` (or `<x-money-inline>`) for currency. Reuse before writing new markup.
-- Layout is the dense, **bordered "grid"** style designed for mPDF (no flex/grid — tables only): copy the `<style>` block from `trip-report.blade.php` verbatim (`.info-bar`, `.report-table`, `.report-stats`, `.dual`, `.report-footer`, `.col-text`, `.col-num`, `.section-title`).
-  - Key facts go in a horizontal `table.info-bar` (one bordered cell per fact).
-  - Data tables use `table.report-table`: solid black header bar, hairline row separators, heavier rule above the `tfoot` totals row.
-  - Put two tables side-by-side with `table.dual` (top-aligned columns + `td.dual-gap` spacer).
-  - Numbers use `.col-num` (end-aligned), text labels use `.col-text` (start-aligned); both flip with `app()->getLocale()`.
+- Wrap every report in `<x-report-layout>` with `:title`, `:document-number`, `:settings`, and `:qr-code`. Render the header with `<x-report-masthead :title :subtitle :settings>` (preferred) or `<x-report-header>` (a thin alias that delegates to the masthead). The masthead is an mPDF running page header (company name + address + logo + VAT number + page count + a rule) that repeats on every page, with the centered title/subtitle below it.
+- Use the shared report components — `<x-report-stats>` for KPI cards, `<x-report-signatures :items=[...]>` for sign-off rows, `<x-report-amount-words :words="amount_to_words($total)">` for the written amount, `<x-riyal-icon />` for currency. Reuse before writing new markup.
+- All design CSS lives in `report-layout`. Use these classes directly (no per-view `<style>`):
+  - Section headings: a black bar via `<div class="section-bar">` or a bare `<h3>` (both render as the white-on-black bar). A plain bold label is `.section-title`.
+  - Key facts go in a horizontal `table.info-bar` (one bordered cell per fact: `.ib-label` + `.ib-value`).
+  - Data tables use `table.report-table`: solid black header bar, full bordered grid cells, `tfoot` totals row, `tr.net-row` for the inverted (black) emphasis row. An info box = a `report-table` whose `<thead>` is a single black title cell.
+  - Put two tables side-by-side with `table.dual` (top-aligned `td.dual-col` + `td.dual-gap` spacer).
+  - Numbers use `.col-num` (end-aligned), text labels use `.col-text` (start-aligned); both flip with locale automatically.
   - Close with `table.report-footer` (company name + rights + year).
 - Build the company `$settings` array (name/title/company_name/address/phone/email/logo/qr_code) in the controller; generate the QR via `App\Service\Owner\ReportQrService::dataUri(...)`. Keep a private `reportSettings()` helper rather than duplicating the array.
 - Print views stay light-only — never add `dark:` variants or dashboard chrome to a report.
 - All labels must use translation keys present in both `resources/lang/ar/owner.php` and `resources/lang/en/owner.php`.
 
-Existing examples to match: `trip-report`, `catches-report`, `sales-report`, `sale-invoice`, `boat-report` (all under `resources/views/owner/reports/print/`).
+Existing examples to match: `owner/report/profit_loss_print`, `owner/month_closing/print`, and `owner/reports/print/sale-invoice` are the closest matches to the printed reference set (section bars, KPI cards, dual grids, signatures, amount-in-words). The `owner/reports/print/*` set (trip-report, catches-report, sales-report, boat-report, etc.) all inherit the same shared look.
