@@ -6,7 +6,6 @@ use App\DataTable\Owner\Report\TripReportDataTable;
 use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Fish;
-use App\Models\Setting;
 use App\Models\Trip;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -124,16 +123,7 @@ class TripReportController extends Controller
         ];
 
         // Get settings for report header
-        $owner = auth()->user();
-        $settings = [
-            'title' => Setting::where('key', 'site_name')->value('value') ?? '',
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'vat_number' => $owner?->vat_number ?? '',
-            'cr_number' => $owner?->cr_number ?? '',
-        ];
+        $settings = ownerCompanySettings();
 
         // Generate QR code payload (TLV) and image using Dalal controller pattern
         $qrPayload = [

@@ -7,7 +7,6 @@ use App\Http\Requests\Admin\PortRequest;
 use App\Models\BoatType;
 use App\Models\Governorate;
 use App\Models\Port;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -55,16 +54,10 @@ class PortController extends Controller
         $total = $ports->count();
         $active = $ports->where('status', 1)->count();
 
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
-        $settings = [
-            'name' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        $companyName = currentCompany()?->name ?: 'حسبة';
+        $settings = ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
 
         return pdf_report(view('owner.report.port_print', compact('ports', 'total', 'active', 'settings')), [], 'ports-report.pdf');
     }

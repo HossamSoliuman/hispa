@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
 use App\Models\MonthClosing;
-use App\Models\Setting;
 use App\Service\Owner\MonthClosingService;
 use App\Service\Owner\PayrollService;
 use App\Service\Owner\ReportQrService;
@@ -199,17 +198,10 @@ class MonthClosingController extends Controller
      */
     private function companySettings(): array
     {
-        $owner = Auth::guard('owner')->user();
-        $companyName = $owner->name ?? 'N/A';
+        $companyName = currentCompany()?->name ?: 'N/A';
 
-        return [
-            'name' => $companyName,
-            'company_name' => $companyName,
-            'phone' => $owner->phone ?? 'N/A',
-            'email' => $owner->email ?? 'N/A',
-            'address' => $owner->address ?? 'N/A',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        return ownerCompanySettings([
             'qr_code' => app(ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
     }
 }

@@ -6,7 +6,6 @@ use App\DataTable\Owner\Report\StockReportDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\Fish;
 use App\Models\FishStock;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class StockReportController extends Controller
@@ -104,17 +103,9 @@ class StockReportController extends Controller
      */
     private function getCompanySettings()
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
-
-        return [
-            'name' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        return ownerCompanySettings([
             'qr_code' => $this->generateQRCodeImage(),
-        ];
+        ]);
     }
 
     /**
@@ -122,7 +113,7 @@ class StockReportController extends Controller
      */
     private function generateQRCodeImage()
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $companyName = currentCompany()?->name ?: 'حسبة';
 
         $qrData = "Company: {$companyName}";
 

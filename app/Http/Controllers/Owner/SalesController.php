@@ -15,7 +15,6 @@ use App\Models\FishQuantityStock;
 use App\Models\PaymentMethod;
 use App\Models\Sale;
 use App\Models\SaleDetail;
-use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -144,18 +143,11 @@ class SalesController extends Controller
      */
     private function reportSettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $companyName = currentCompany()?->name ?: 'حسبة';
 
-        return [
-            'name' => $companyName,
-            'title' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        return ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
     }
 
     public function create()

@@ -2718,6 +2718,7 @@ return [
         'website' => 'الموقع الإلكتروني',
         'company_logo' => 'شعار الشركة',
         'current_logo' => 'الشعار الحالي',
+        'default_logo' => 'الشعار الافتراضي',
         'logo_updated' => 'تم تحديث شعار الشركة بنجاح',
         'recommended_size' => 'الحجم الموصى به: 200',
         'pixels_200' => '200 بكسل',

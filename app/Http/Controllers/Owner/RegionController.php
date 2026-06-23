@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RegionRequest;
 use App\Models\Region;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -49,16 +48,10 @@ class RegionController extends Controller
         $active = $regions->where('status', 1)->count();
 
         // get basic company settings for report header
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
-        $settings = [
-            'name' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        $companyName = currentCompany()?->name ?: 'حسبة';
+        $settings = ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
 
         return pdf_report(view('owner.report.region_print', compact('regions', 'total', 'active', 'settings')), [], 'regions-report.pdf');
     }

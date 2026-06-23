@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Owner\CompanyLogoRequest;
+use App\Http\Requests\Owner\CompanyRequest;
 use App\Models\BoatType;
 use App\Models\Category;
 use App\Models\Fish;
 use App\Models\Governorate;
 use App\Models\Port;
 use App\Models\Region;
-use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 
@@ -30,27 +29,33 @@ class SettingsController extends Controller
             ->select('id', 'name')
             ->get();
 
-        return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents', 'captains', 'categories'));
+        $company = currentCompany();
+
+        return view('owner.settings.index', compact('data', 'regions', 'governorates', 'boatTypes', 'ports', 'parents', 'captains', 'categories', 'company'));
     }
 
     /**
-     * Store the company logo used across the panel and printable reports.
+     * Store the per-owner company profile (name, registration numbers, contact
+     * details and logo) used across the panel and printable reports.
      */
-    public function updateCompany(CompanyLogoRequest $request): RedirectResponse
+    public function updateCompany(CompanyRequest $request): RedirectResponse
     {
-        $setting = Setting::firstOrNew(['key' => 'logo']);
+        $company = currentCompany();
 
-        if ($setting->exists && $setting->getRawOriginal('value')) {
-            deleteFile($setting->getRawOriginal('value'));
+        $data = $request->safe()->except('logo');
+
+        if ($request->hasFile('logo')) {
+            if ($company->logo) {
+                deleteFile($company->logo);
+            }
+
+            $data['logo'] = UploadFile($request->file('logo'), 'uploads/companies');
         }
 
-        $setting->fill([
-            'value' => UploadFile($request->file('logo'), 'uploads/settings'),
-            'type' => 'image',
-        ])->save();
+        $company->update($data);
 
         return redirect()
-            ->route('owner.settings.index')
+            ->route('owner.settings.index', ['tab' => 'company'])
             ->with('success', __('owner.generated.logo_updated'));
     }
 }

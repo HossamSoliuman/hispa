@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Owner\Report;
 
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class BoatReportController extends Controller
@@ -38,10 +37,7 @@ class BoatReportController extends Controller
             'total_payload' => $totalPayload,
         ];
 
-        $settings = [
-            'title' => Setting::where('key', 'site_name')->value('value') ?? 'حسبة',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-        ];
+        $settings = ownerCompanySettings();
 
         // QR payload and image using same TLV approach as other reports
         $qrPayload = [

@@ -12,7 +12,6 @@ use App\Models\CatchModel;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
 use App\Models\Sale;
-use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\Unit;
 use App\Services\TripTransitionService;
@@ -255,16 +254,10 @@ class CatchController extends Controller
             ->with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
             ->findOrFail($id);
 
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
-        $settings = [
-            'name' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        $companyName = currentCompany()?->name ?: 'حسبة';
+        $settings = ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
 
         $tripNumber = $catch->trip?->number ?? $id;
         $filename = 'catch-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) $tripNumber)), '-').'.pdf';
@@ -310,17 +303,10 @@ class CatchController extends Controller
             'avg_price_per_kg' => $totalWeight > 0 ? $totalRevenue / $totalWeight : 0,
         ];
 
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
-        $settings = [
-            'name' => $companyName,
-            'title' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        $companyName = currentCompany()?->name ?: 'حسبة';
+        $settings = ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
 
         $filters = [
             'from_date' => $request->filled('from_date') ? $request->from_date : null,

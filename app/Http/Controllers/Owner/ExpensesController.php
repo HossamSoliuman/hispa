@@ -9,7 +9,6 @@ use App\Http\Requests\Owner\Expense\UpdateExpenseRequest;
 use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Expense;
-use App\Models\Setting;
 use App\Repository\Owner\ExpenseRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -253,35 +252,19 @@ class ExpensesController extends Controller
      */
     private function reportSettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $companyName = currentCompany()?->name ?: 'حسبة';
 
-        return [
-            'name' => $companyName,
-            'title' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        return ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
     }
 
     // reuse simple company settings & QR helpers (kept local to controller for convenience)
     private function getCompanySettings()
     {
-        $user = auth()->user();
-        $logoPath = public_path('default-logo.png');
-
-        return [
-            'title' => $user->company_name ?? $user->name ?? config('app.name'),
-            'company_name' => $user->company_name ?? $user->name ?? config('app.name'),
-            'logo' => $logoPath,
-            'watermark' => $logoPath,
-            'phone' => $user->phone ?? '',
-            'email' => $user->email ?? '',
-            'address' => $user->address ?? '',
-        ];
+        return ownerCompanySettings([
+            'watermark' => public_path('default-logo.png'),
+        ]);
     }
 
     private function generateQRCodeImage($url)

@@ -1,7 +1,8 @@
 <?php
 
+use App\Models\Company;
 use App\Models\Sale;
-use App\Models\Setting;
+use App\Models\Scopes\OwnerScope;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -206,22 +207,57 @@ function formatHijriDate($date, $pattern = 'dd/MM/yyyy')
 }
 
 /**
- * Public URL of the uploaded company logo, or null when none has been set.
- * Used for the panel brand/header where an <img src> URL is needed.
+ * Resolve the company profile for the current owner context, creating an empty
+ * row on first access so callers always get a model. Returns null only when
+ * there is no owner context (admin/guest), in which case company data is not
+ * applicable.
  */
-function companyLogoUrl(): ?string
+function currentCompany(): ?Company
 {
-    $path = Setting::where('key', 'logo')->value('value');
+    $ownerId = OwnerScope::resolveOwnerId();
 
-    if (empty($path)) {
+    if ($ownerId === null) {
         return null;
     }
 
-    if (Str::startsWith($path, ['http://', 'https://', '/'])) {
-        return $path;
-    }
+    return Company::withoutGlobalScope(OwnerScope::class)
+        ->firstOrCreate(['owner_id' => $ownerId]);
+}
 
-    return Storage::disk('public')->url($path);
+/**
+ * Public URL of the current owner's company logo, or null when none has been
+ * set. Used for the panel where an <img src> URL is needed.
+ */
+function companyLogoUrl(): ?string
+{
+    return currentCompany()?->logo_url;
+}
+
+/**
+ * Build the company header settings array consumed by the printable report
+ * components (<x-report-layout>, <x-report-header>). Sourced from the current
+ * owner's company profile so each owner's reports carry their own identity.
+ *
+ * @param  array<string, mixed>  $overrides  Extra/overriding keys (e.g. qr_code)
+ * @return array<string, mixed>
+ */
+function ownerCompanySettings(array $overrides = []): array
+{
+    $company = currentCompany();
+    $name = $company?->name ?: '';
+
+    return array_merge([
+        'title' => $name,
+        'title_en' => $company?->name_en ?? '',
+        'name' => $name,
+        'company_name' => $name,
+        'address' => $company?->address ?? '',
+        'phone' => $company?->phone ?? '',
+        'email' => $company?->email ?? '',
+        'logo' => $company?->logo ?? '',
+        'cr_number' => $company?->cr_number ?? '',
+        'vat_number' => $company?->vat_number ?? '',
+    ], $overrides);
 }
 
 /**

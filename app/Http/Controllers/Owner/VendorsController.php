@@ -182,18 +182,9 @@ class VendorsController extends Controller
     // reuse simple company settings & QR helpers
     private function getCompanySettings()
     {
-        $user = auth()->user();
-        $logoPath = public_path('default-logo.png');
-
-        return [
-            'title' => $user->company_name ?? $user->name ?? config('app.name'),
-            'company_name' => $user->company_name ?? $user->name ?? config('app.name'),
-            'logo' => $logoPath,
-            'watermark' => $logoPath,
-            'phone' => $user->phone ?? '',
-            'email' => $user->email ?? '',
-            'address' => $user->address ?? '',
-        ];
+        return ownerCompanySettings([
+            'watermark' => public_path('default-logo.png'),
+        ]);
     }
 
     private function generateQRCodeImage($url)

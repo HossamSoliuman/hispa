@@ -6,7 +6,6 @@ use App\DataTable\Owner\Report\FishHistoryReportDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\Fish;
 use App\Models\FishStockHistory;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -119,17 +118,11 @@ class FishHistoryReportController extends Controller
 
     private function getCompanySettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $companyName = currentCompany()?->name ?: 'حسبة';
 
-        return [
-            'name' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        return ownerCompanySettings([
             'qr_code' => $this->generateQRCodeImage($companyName),
-        ];
+        ]);
     }
 
     private function generateQRCodeImage(string $companyName): string

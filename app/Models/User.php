@@ -7,6 +7,7 @@ use App\Traits\CheckRelationShip;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -182,6 +183,15 @@ class User extends Authenticatable
     public function captain()
     {
         return $this->belongsTo(User::class, 'captain_id')->withDefault();
+    }
+
+    /**
+     * The owner's company profile (name, registration numbers, logo) shown on
+     * printable reports. Owner-scoped, so each owner has at most one.
+     */
+    public function company(): HasOne
+    {
+        return $this->hasOne(Company::class, 'owner_id');
     }
 
     public function scopeCrewRole(Builder $query): Builder

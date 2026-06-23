@@ -2720,6 +2720,7 @@ return [
         'website' => 'Website',
         'company_logo' => 'Company Logo',
         'current_logo' => 'Current Logo',
+        'default_logo' => 'Default Logo',
         'logo_updated' => 'Company logo updated successfully',
         'recommended_size' => 'Recommended Size',
         'pixels_200' => 'Pixels 200',

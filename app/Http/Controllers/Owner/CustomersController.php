@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CustomerRequest;
 use App\Models\Customer;
 use App\Models\Sale;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -103,18 +102,11 @@ class CustomersController extends Controller
      */
     private function reportSettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $companyName = currentCompany()?->name ?: 'حسبة';
 
-        return [
-            'name' => $companyName,
-            'title' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+        return ownerCompanySettings([
             'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        ]);
     }
 
     public function store(CustomerRequest $request)
