@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BoatType extends Model
 {
-    protected $fillable = ['name_ar', 'name_en', 'status'];
+    use BelongsToOwner;
+
+    protected $fillable = ['name_ar', 'name_en', 'status', 'owner_id'];
 
     protected $appends = ['name'];
 

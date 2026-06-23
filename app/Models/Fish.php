@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Fish extends Model
 {
-    use SoftDeletes;
+    use BelongsToOwner, SoftDeletes;
 
     protected $table = 'fish';
 
@@ -24,6 +25,7 @@ class Fish extends Model
         'arabian_gulf_name',
         'region_id',
         'governorate_id',
+        'owner_id',
     ];
 
     protected $casts = [

@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Region extends Model
 {
+    use BelongsToOwner;
+
     protected $table = 'regions';
 
-    protected $fillable = ['id', 'name', 'name_en', 'status'];
+    protected $fillable = ['id', 'name', 'name_en', 'status', 'owner_id'];
 
     protected $appends = ['name_ar'];
 

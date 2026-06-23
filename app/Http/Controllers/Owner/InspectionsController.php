@@ -23,7 +23,7 @@ class InspectionsController extends Controller
 
     public function index(Request $request)
     {
-        $boats = Boat::all();
+        $boats = Boat::where('owner_id', auth()->id())->get();
         $categories = Category::all();
 
         return view('owner.inspection.index', compact('boats', 'categories'));

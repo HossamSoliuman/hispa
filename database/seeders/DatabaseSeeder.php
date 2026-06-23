@@ -19,9 +19,10 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(PermitTypeSeeder::class);
         $this->call(PageSeeder::class);
-        $this->call(LocationSeeder::class);
-        $this->call(DefaultMasterSeeder::class);
-        $this->call(CategorySeeder::class);
+
+        // Per-owner master data (ports, regions, fish, units, payment methods,
+        // boat types, expense categories). Each owner gets an isolated copy.
+        $this->call(OwnerMasterDataSeeder::class);
 
         // Minimal working setup (boat, vendor, crew people) with no financial
         // data — a clean starting point for testing the financial workflow.

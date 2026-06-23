@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,13 +10,14 @@ use Illuminate\Support\Facades\Storage;
 
 class PaymentMethod extends Model
 {
-    use SoftDeletes;
+    use BelongsToOwner, SoftDeletes;
 
     protected $fillable = [
         'name',
         'name_en',
         'icon',
         'status',
+        'owner_id',
     ];
 
     protected $appends = ['name_ar'];

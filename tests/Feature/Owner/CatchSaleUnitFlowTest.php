@@ -36,12 +36,15 @@ class CatchSaleUnitFlowTest extends TestCase
         $owner = User::factory()->create(['role' => 'owner']);
         $owner->assignRole('owner');
 
+        // Each owner controls its own master data (units, fish, payment methods, ...).
+        app(\App\Services\Owner\OwnerMasterDataService::class)->seedFor($owner);
+
         return $owner;
     }
 
-    private function fish(): Fish
+    private function fish(User $owner): Fish
     {
-        return Fish::create(['scientific_name' => 'Test Fish', 'status' => 1]);
+        return Fish::create(['scientific_name' => 'Test Fish', 'status' => 1, 'owner_id' => $owner->id]);
     }
 
     public function test_catch_stores_separate_stock_rows_per_unit(): void
@@ -49,7 +52,7 @@ class CatchSaleUnitFlowTest extends TestCase
         $owner = $this->owner();
         $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-1']);
         $trip = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boat->id]);
-        $fish = $this->fish();
+        $fish = $this->fish($owner);
 
         $kg = Unit::where('is_default', 1)->firstOrFail();
         $box = Unit::where('name_en', 'Box')->firstOrFail();
@@ -84,9 +87,9 @@ class CatchSaleUnitFlowTest extends TestCase
         $owner = $this->owner();
         $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-2']);
         $trip = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boat->id]);
-        $fish = $this->fish();
+        $fish = $this->fish($owner);
         $customer = Customer::create(['name' => 'عميل', 'status' => 1, 'owner_id' => $owner->id]);
-        $paymentMethod = PaymentMethod::create(['name' => 'كاش', 'status' => 1]);
+        $paymentMethod = PaymentMethod::create(['name' => 'كاش', 'status' => 1, 'owner_id' => $owner->id]);
 
         $kg = Unit::where('is_default', 1)->firstOrFail();
         $box = Unit::where('name_en', 'Box')->firstOrFail();
@@ -140,9 +143,9 @@ class CatchSaleUnitFlowTest extends TestCase
         $owner = $this->owner();
         $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-3']);
         $trip = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boat->id]);
-        $fish = $this->fish();
+        $fish = $this->fish($owner);
         $customer = Customer::create(['name' => 'عميل', 'status' => 1, 'owner_id' => $owner->id]);
-        $paymentMethod = PaymentMethod::create(['name' => 'كاش', 'status' => 1]);
+        $paymentMethod = PaymentMethod::create(['name' => 'كاش', 'status' => 1, 'owner_id' => $owner->id]);
 
         $kg = Unit::where('is_default', 1)->firstOrFail();
 

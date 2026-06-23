@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Port extends Model
 {
+    use BelongsToOwner;
+
     protected $table = 'ports';
 
     protected $fillable = [
@@ -23,6 +26,7 @@ class Port extends Model
         'long',
         'status',
         'governorate_id',
+        'owner_id',
     ];
 
     protected $appends = ['name_ar'];

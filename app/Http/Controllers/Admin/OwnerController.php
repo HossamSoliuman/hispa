@@ -13,6 +13,7 @@ use App\Models\Region;
 use App\Models\SubscriptionPackage;
 use App\Models\User;
 use App\Services\CouponService;
+use App\Services\Owner\OwnerMasterDataService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,8 @@ class OwnerController extends Controller
     public function __construct(
         private readonly OwnerDataTable $ownerDataTable,
         private readonly SubscriptionService $subscriptionService,
-        private readonly CouponService $couponService
+        private readonly CouponService $couponService,
+        private readonly OwnerMasterDataService $masterDataService
     ) {}
 
     /**
@@ -70,6 +72,9 @@ class OwnerController extends Controller
                 'governorate_id' => $validated['governorate_id'] ?? null,
                 'port_id' => $validated['port_id'] ?? null,
             ]);
+
+            // Give the new owner their own isolated copy of the default master data.
+            $this->masterDataService->seedFor($owner);
 
             if (! empty($validated['add_subscription']) && ! empty($validated['package_id']) && ! empty($validated['start_date'])) {
                 $subscription = $this->subscriptionService->create([

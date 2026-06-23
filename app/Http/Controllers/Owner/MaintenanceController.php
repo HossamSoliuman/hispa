@@ -22,7 +22,7 @@ class MaintenanceController extends Controller
 
     public function index(Request $request)
     {
-        $boats = Boat::all();
+        $boats = Boat::where('owner_id', auth()->id())->get();
         $categories = Category::all();
 
         return view('owner.maintenance.index', compact('boats', 'categories'));

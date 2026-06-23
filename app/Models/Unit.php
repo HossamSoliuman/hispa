@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Unit extends Model
 {
-    use SoftDeletes;
+    use BelongsToOwner, SoftDeletes;
 
     protected $fillable = [
         'name_ar',
         'name_en',
         'is_default',
         'status',
+        'owner_id',
     ];
 
     protected $appends = ['name'];

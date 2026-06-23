@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,12 +21,8 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        $now = now();
-        DB::table('units')->insert([
-            ['name_ar' => 'كجم', 'name_en' => 'Kg', 'is_default' => true, 'status' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['name_ar' => 'شكه', 'name_en' => 'Shaka', 'is_default' => false, 'status' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['name_ar' => 'بوكس', 'name_en' => 'Box', 'is_default' => false, 'status' => true, 'created_at' => $now, 'updated_at' => $now],
-        ]);
+        // Default units are seeded per-owner via OwnerMasterDataService so each
+        // owner controls an isolated set (see OwnerMasterDataSeeder / registration).
     }
 
     /**

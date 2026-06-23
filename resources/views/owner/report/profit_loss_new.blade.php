@@ -278,19 +278,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.profit_loss.commission_labor') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['commission_labor'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-            <small class="text-muted d-block mt-2 px-2">{{ __('owner.profit_loss.formula_note') }}</small>
 
             {{-- Crew share distribution (custom percentages + shares) --}}
             @if (!empty($f['crew_distribution']) && count($f['crew_distribution']) > 0)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Owner\OwnerMasterDataService;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -80,6 +81,12 @@ class RegisterController extends Controller
         // لو بتستخدم spatie/laravel-permission
         if (method_exists($user, 'assignRole')) {
             $user->assignRole($role);
+        }
+
+        // Seed the new owner's own copy of the default master data (ports, fish,
+        // units, payment methods, ...) so each owner controls isolated data.
+        if ($role === 'owner') {
+            app(OwnerMasterDataService::class)->seedFor($user);
         }
 
         return $user;

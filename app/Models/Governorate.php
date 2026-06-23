@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Governorate extends Model
 {
+    use BelongsToOwner;
+
     protected $table = 'governorates';
 
-    protected $fillable = ['id', 'name', 'name_en', 'region_id', 'status'];
+    protected $fillable = ['id', 'name', 'name_en', 'region_id', 'status', 'owner_id'];
 
     protected $appends = ['name_ar'];
 

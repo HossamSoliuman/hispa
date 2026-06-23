@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use SoftDeletes;
+    use BelongsToOwner, SoftDeletes;
 
     protected $fillable = [
         'name_ar',
@@ -17,6 +18,7 @@ class Category extends Model
         'type',
         'status',
         'parent_id',
+        'owner_id',
     ];
 
     protected $appends = ['name'];
@@ -35,7 +37,6 @@ class Category extends Model
     {
         return $this->hasMany(Expense::class);
     }
-
 
     // علاقة بالمستخدمين (كمورد)
     public function users()
