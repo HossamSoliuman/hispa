@@ -31,7 +31,7 @@ class Maintenance extends Model
     {
         static::addGlobalScope('owner', function ($query) {
             if (auth()->check() && auth()->user()->role === 'owner') {
-                $query->where('owner_id', auth()->id());
+                $query->where($query->qualifyColumn('owner_id'), auth()->id());
             }
         });
     }
