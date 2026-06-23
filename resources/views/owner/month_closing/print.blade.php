@@ -1,222 +1,175 @@
-@php
-    $isRtl = app()->getLocale() === 'ar';
-    $reportTitle = __('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year);
-    $closedAt = optional($closing->closed_at)->format('Y-m-d') ?? now()->format('Y-m-d');
+<x-report-layout :title="'الإقفال الشهري'" :document-number="''" :settings="$settings" :qr-code="$settings['qr_code'] ?? ''">
+    <x-report-masthead :title="'الإقفال الشهري'" :subtitle="'إقفال شهر الصيد وتوزيع أرباح البحارة'" :settings="$settings" />
 
-    $fmt = fn ($value) => number_format((float) $value, 2);
+    {{-- Meta strip --}}
+    <div class="meta-row">
+        <span class="meta-item">
+            <span class="lbl">الشهر:</span>
+            <span class="val-box">يونيو</span>
+        </span>
+        <span class="meta-item">
+            <span class="lbl">السنة:</span>
+            <span class="val-box">2026</span>
+        </span>
+        <span class="meta-item">
+            <span class="lbl">تاريخ الإقفال:</span>
+            <span class="val-box">30/06/2026</span>
+        </span>
+    </div>
 
-    $returns = max((float) $closing->gross_sales - (float) $closing->net_sales, 0);
-    $totalEarned = $closing->dues->sum('due_amount');
-    $totalAdvances = $closing->dues->sum('advances');
-    $totalNetDue = $closing->dues->sum('remaining');
-
-    $r = 'owner.month_closing.report';
-    // mPDF reverses table-column order for RTL, so order the footer cells per
-    // direction to keep the closing summary on the start side everywhere.
-    $footerCells = $isRtl ? ['summary', 'gap', 'signoff', 'gap', 'notes'] : ['notes', 'gap', 'signoff', 'gap', 'summary'];
-@endphp
-
-<x-report-layout
-    :title="$reportTitle"
-    :documentNumber="'MC-'.$closing->year.str_pad($closing->month, 2, '0', STR_PAD_LEFT)"
-    :settings="$settings ?? []"
->
-    <x-report-masthead
-        :title="$reportTitle"
-        :subtitle="__('owner.month_closing.subtitle')"
-        :settings="$settings ?? []" />
-
-    {{-- Filter badges --}}
-    <table class="info-bar">
-        <tr>
-            <td>
-                <span class="ib-label">{{ __("$r.filter_month") }}</span>
-                <span class="ib-value">{{ sprintf('%02d', $closing->month) }}</span>
-            </td>
-            <td>
-                <span class="ib-label">{{ __("$r.filter_year") }}</span>
-                <span class="ib-value">{{ $closing->year }}</span>
-            </td>
-            <td>
-                <span class="ib-label">{{ __("$r.filter_closing_date") }}</span>
-                <span class="ib-value">{{ $closedAt }}</span>
-            </td>
-            <td>
-                <span class="ib-label">{{ __("$r.filter_boat") }}</span>
-                <span class="ib-value">{{ $closing->boat?->name ?? __("$r.all_boats") }}</span>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Summary cards --}}
-    @php
-        $summaryCards = [
-            [
-                'head' => __("$r.cards.total_sales"),
-                'rows' => [
-                    [__("$r.rows.gross_sales"), $fmt($closing->gross_sales)],
-                    [__("$r.rows.returns"), $fmt($returns)],
-                ],
-                'total' => [__("$r.rows.net_sales"), $fmt($closing->net_sales)],
-            ],
-            [
-                'head' => __("$r.cards.total_expenses"),
-                'rows' => [
-                    [__("$r.rows.trip_expenses"), $fmt($closing->trip_expenses)],
-                    [__("$r.rows.operational_expenses"), $fmt($closing->general_expenses)],
-                    [__("$r.rows.depreciation"), $fmt($closing->depreciation)],
-                ],
-                'total' => [__("$r.rows.total_expenses"), $fmt($closing->total_expenses)],
-            ],
-            [
-                'head' => __("$r.cards.profit_before"),
-                'rows' => [
-                    [__("$r.rows.net_owner_revenue"), $fmt($closing->net_owner_revenue)],
-                    [__("$r.rows.total_expenses"), $fmt($closing->total_expenses)],
-                ],
-                'total' => [__("$r.rows.profit_before"), $fmt($closing->net_profit)],
-            ],
-            [
-                'head' => __("$r.cards.owner_deductions"),
-                'rows' => [
-                    [__("$r.rows.profit_before"), $fmt($closing->net_profit)],
-                    [__("$r.rows.owner_percent"), $fmt($closing->owner_percent).'%'],
-                ],
-                'total' => [__("$r.rows.total_deductions"), $fmt($closing->owner_share)],
-            ],
-            [
-                'head' => __("$r.cards.net_distributable"),
-                'rows' => [
-                    [__("$r.rows.profit_before"), $fmt($closing->net_profit)],
-                    [__("$r.rows.total_deductions"), $fmt($closing->owner_share)],
-                ],
-                'total' => [__("$r.rows.final_distributable"), $fmt($closing->crew_share)],
-            ],
-        ];
-        // Equal-height cards: pad every body to the tallest card's row count so
-        // the bordered boxes match and the total rows align along the bottom.
-        $maxRows = max(array_map(fn ($card) => count($card['rows']), $summaryCards));
-    @endphp
+    {{-- 5 Summary cards --}}
     <table class="sum-cards">
         <tr>
-            @foreach ($summaryCards as $card)
-                <td class="sum-head">{{ $card['head'] }}</td>
-            @endforeach
+            <td class="sum-head">1. إجمالي المبيعات</td>
+            <td class="sum-head">2. إجمالي المصروفات</td>
+            <td class="sum-head">3. الربح قبل التوزيع</td>
+            <td class="sum-head">4. الاحتياطيات والاستقطاعات</td>
+            <td class="sum-head">5. الربح القابل للتوزيع</td>
         </tr>
         <tr>
-            @foreach ($summaryCards as $card)
-                <td class="sum-card">
-                    <table class="sum-body">
-                        @foreach ($card['rows'] as [$label, $value])
-                            <tr><td class="sum-k">{{ $label }}</td><td class="sum-v">{{ $value }}</td></tr>
-                        @endforeach
-                        @for ($i = count($card['rows']); $i < $maxRows; $i++)
-                            <tr><td class="sum-k">&nbsp;</td><td class="sum-v">&nbsp;</td></tr>
-                        @endfor
-                        <tr class="sum-total"><td class="sum-k">{{ $card['total'][0] }}</td><td class="sum-v">{{ $card['total'][1] }}</td></tr>
-                    </table>
-                </td>
-            @endforeach
+            <td class="sum-card">
+                <table class="sum-body">
+                    <tr><td class="sum-k">إجمالي المبيعات</td><td class="sum-v">126,044.00</td></tr>
+                    <tr><td class="sum-k">مرتجعات المبيعات</td><td class="sum-v">0.00</td></tr>
+                    <tr class="sum-total"><td class="sum-k">صافي المبيعات</td><td class="sum-v">126,044.00</td></tr>
+                </table>
+            </td>
+            <td class="sum-card">
+                <table class="sum-body">
+                    <tr><td class="sum-k">مصاريف الرحلات</td><td class="sum-v">78,560.00</td></tr>
+                    <tr><td class="sum-k">مصاريف تشغيلية وإدارية</td><td class="sum-v">6,350.00</td></tr>
+                    <tr class="sum-total"><td class="sum-k">إجمالي المصروفات</td><td class="sum-v">84,910.00</td></tr>
+                </table>
+            </td>
+            <td class="sum-card">
+                <table class="sum-body">
+                    <tr><td class="sum-k">صافي المبيعات</td><td class="sum-v">126,044.00</td></tr>
+                    <tr><td class="sum-k">إجمالي المصروفات</td><td class="sum-v">84,910.00</td></tr>
+                    <tr class="sum-total"><td class="sum-k">الربح قبل التوزيع</td><td class="sum-v">41,134.00</td></tr>
+                </table>
+            </td>
+            <td class="sum-card">
+                <table class="sum-body">
+                    <tr><td class="sum-k">احتياطي صيانة القوارب</td><td class="sum-v">2,056.70</td></tr>
+                    <tr><td class="sum-k">احتياطي طوارئ (3%)</td><td class="sum-v">1,234.02</td></tr>
+                    <tr><td class="sum-k">استقطاع صندوق معدات</td><td class="sum-v">1,000.00</td></tr>
+                    <tr class="sum-total"><td class="sum-k">إجمالي الاستقطاعات</td><td class="sum-v">4,290.72</td></tr>
+                </table>
+            </td>
+            <td class="sum-card">
+                <table class="sum-body">
+                    <tr><td class="sum-k">الربح قبل التوزيع</td><td class="sum-v">41,134.00</td></tr>
+                    <tr><td class="sum-k">إجمالي الاستقطاعات</td><td class="sum-v">4,290.72</td></tr>
+                    <tr class="sum-total"><td class="sum-k">الربح القابل للتوزيع</td><td class="sum-v">36,843.28</td></tr>
+                </table>
+            </td>
         </tr>
     </table>
 
-    {{-- Sailor profit distribution --}}
-    <div class="section-bar">{{ __("$r.distribution_title") }}</div>
-    <table class="report-table">
+    {{-- Distribution table --}}
+    <div class="section-bar">6. توزيع أرباح البحارة</div>
+    <table class="report-table" style="margin-bottom:14px;">
         <thead>
             <tr>
-                <th style="width:5%;">{{ __("$r.dist.index") }}</th>
-                <th class="col-text" style="width:22%;">{{ __("$r.dist.name") }}</th>
-                <th style="width:13%;">{{ __("$r.dist.role") }}</th>
-                <th style="width:12%;">{{ __("$r.dist.share") }}</th>
-                <th class="col-num" style="width:13%;">{{ __("$r.dist.earned") }}</th>
-                <th class="col-num" style="width:12%;">{{ __("$r.dist.advance") }}</th>
-                <th class="col-num" style="width:13%;">{{ __("$r.dist.net_due") }}</th>
-                <th style="width:10%;">{{ __("$r.dist.signature") }}</th>
+                <th style="width:5%">#</th>
+                <th style="width:18%">اسم البحار</th>
+                <th>الوظيفة</th>
+                <th>نسبة المشاركة</th>
+                <th>الربح المستحق</th>
+                <th>الدفعة المقدمة</th>
+                <th>الصافي المستحق</th>
+                <th style="width:10%">التوقيع</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($closing->dues as $i => $due)
-                <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td class="col-text">{{ $due->member_name }}</td>
-                    <td>{{ $due->role }}</td>
-                    <td>{{ $due->custom_share_percent !== null ? $fmt($due->custom_share_percent).'%' : $fmt($due->shares) }}</td>
-                    <td class="col-num">{{ $fmt($due->due_amount) }}</td>
-                    <td class="col-num">{{ $fmt($due->advances) }}</td>
-                    <td class="col-num">{{ $fmt($due->remaining) }}</td>
-                    <td>&nbsp;</td>
-                </tr>
-            @endforeach
+            <tr>
+                <td>1</td>
+                <td class="col-text">أحمد سالم</td>
+                <td>نخاذ</td>
+                <td>30%</td>
+                <td class="col-num">11,052.98</td>
+                <td class="col-num">2,000.00</td>
+                <td class="col-num">9,052.98</td>
+                <td style="color:#bbb;letter-spacing:2px;">................</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="col-text">فهد علي</td>
+                <td>مساعد نخاد</td>
+                <td>25%</td>
+                <td class="col-num">9,210.82</td>
+                <td class="col-num">1,500.00</td>
+                <td class="col-num">7,710.82</td>
+                <td style="color:#bbb;letter-spacing:2px;">................</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="col-text">محمد سعيد</td>
+                <td>بحار</td>
+                <td>20%</td>
+                <td class="col-num">7,368.66</td>
+                <td class="col-num">1,200.00</td>
+                <td class="col-num">6,168.66</td>
+                <td style="color:#bbb;letter-spacing:2px;">................</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="col-text">سعيد الزهراني</td>
+                <td>بحار</td>
+                <td>15%</td>
+                <td class="col-num">5,526.49</td>
+                <td class="col-num">1,000.00</td>
+                <td class="col-num">4,526.49</td>
+                <td style="color:#bbb;letter-spacing:2px;">................</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="col-text">خالد حسن</td>
+                <td>بحار</td>
+                <td>10%</td>
+                <td class="col-num">3,684.33</td>
+                <td class="col-num">800.00</td>
+                <td class="col-num">2,884.33</td>
+                <td style="color:#bbb;letter-spacing:2px;">................</td>
+            </tr>
         </tbody>
         <tfoot>
             <tr>
-                <th colspan="3" class="col-text">{{ __("$r.dist.total") }}</th>
-                <th>{{ $fmt($closing->total_shares) }}</th>
-                <th class="col-num">{{ $fmt($totalEarned) }}</th>
-                <th class="col-num">{{ $fmt($totalAdvances) }}</th>
-                <th class="col-num">{{ $fmt($totalNetDue) }}</th>
-                <th>&nbsp;</th>
+                <td colspan="3" class="col-text">الإجمالي</td>
+                <td>100%</td>
+                <td class="col-num">36,843.28</td>
+                <td class="col-num">6,500.00</td>
+                <td class="col-num">30,343.28</td>
+                <td></td>
             </tr>
         </tfoot>
     </table>
 
-    {{-- Closing footer: summary grid / sign-off / notes --}}
+    {{-- Closing summary --}}
     <table class="close-footer">
         <tr>
-            @foreach ($footerCells as $cell)
-                @if ($cell === 'gap')
-                    <td class="cf-gap"></td>
-                @elseif ($cell === 'summary')
-                    <td class="cf-col">
-                        <div class="cf-card">
-                            <div class="cf-head">{{ __("$r.closing_summary_title") }}</div>
-                            <div class="cf-body">
-                                <table class="cf-kv">
-                                    <tr><td class="cf-k">{{ __("$r.rows.net_sales") }}</td><td class="cf-v">{{ $fmt($closing->net_sales) }}</td></tr>
-                                    <tr><td class="cf-k">{{ __("$r.rows.total_expenses") }}</td><td class="cf-v">{{ $fmt($closing->total_expenses) }}</td></tr>
-                                    <tr><td class="cf-k">{{ __("$r.rows.profit_before") }}</td><td class="cf-v">{{ $fmt($closing->net_profit) }}</td></tr>
-                                    <tr><td class="cf-k">{{ __("$r.rows.owner_share") }}</td><td class="cf-v">{{ $fmt($closing->owner_share) }}</td></tr>
-                                    <tr><td class="cf-k">{{ __("$r.rows.final_distributable") }}</td><td class="cf-v">{{ $fmt($closing->crew_share) }}</td></tr>
-                                    <tr class="cf-total"><td class="cf-k">{{ __("$r.total_net_due") }}</td><td class="cf-v">{{ $fmt($totalNetDue) }}</td></tr>
-                                </table>
-                            </div>
-                        </div>
-                    </td>
-                @elseif ($cell === 'signoff')
-                    <td class="cf-col">
-                        <div class="cf-card">
-                            <div class="cf-head">{{ __("$r.signoff_title") }}</div>
-                            <div class="cf-body">
-                                <div class="cf-signoff-label">{{ __('owner.reports.sig_responsible_manager') }}</div>
-                                <div class="cf-signoff-line">.............................</div>
-                                <div class="cf-signoff-label">{{ __('owner.reports.signature') }}</div>
-                                <div class="cf-signoff-line">.............................</div>
-                                <div class="cf-signoff-date">{{ __('owner.reports.date_label') }}: {{ $closedAt }}</div>
-                            </div>
-                        </div>
-                    </td>
-                @else
-                    <td class="cf-col">
-                        <div class="cf-card">
-                            <div class="cf-head">{{ __("$r.notes_title") }}</div>
-                            <div class="cf-body">
-                                <ul class="cf-notes">
-                                    @foreach (__("$r.notes") as $note)
-                                        <li>{{ $note }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    </td>
-                @endif
-            @endforeach
+            <td class="cf-col" style="width:48%;">
+                <div class="cf-card">
+                    <div class="cf-head" style="background:#fff;color:#1a1a1a;border-bottom:1px solid #cfcfcf;">ملخص الإقفال</div>
+                    <div class="cf-body">
+                        <table class="cf-kv">
+                            <tr><td class="cf-k">الربح القابل للتوزيع</td><td class="cf-v">36,843.28</td></tr>
+                            <tr><td class="cf-k">إجمالي الدفعات المقدمة</td><td class="cf-v">6,500.00</td></tr>
+                            <tr><td class="cf-k">إجمالي الصافي للبحارة</td><td class="cf-v">30,343.28</td></tr>
+                            <tr><td class="cf-k">رصيد احتياطي الصيانة</td><td class="cf-v">2,056.70</td></tr>
+                            <tr><td class="cf-k">رصيد احتياطي الطوارئ</td><td class="cf-v">1,234.02</td></tr>
+                            <tr><td class="cf-k">رصيد صندوق المعدات</td><td class="cf-v">1,000.00</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </td>
+            <td class="cf-gap"></td>
+            <td class="cf-col"></td>
         </tr>
     </table>
 
-    <table class="report-footer">
-        <tr>
-            <td>{{ $settings['title'] ?? $settings['company_name'] ?? '' }} — {{ __('owner.reports.all_rights_reserved') }} © {{ date('Y') }}</td>
-        </tr>
-    </table>
+    {{-- Document footer --}}
+    <div style="border-top: 1px solid #cfcfcf; margin-top: 18px; padding-top: 10px; text-align: center; font-size: 8pt; color: #888;">
+        مؤسسة دار الحوت التجارية — جميع الحقوق محفوظة © 2026
+    </div>
 </x-report-layout>

@@ -50,6 +50,14 @@
         .ib-label { font-size: 8pt; color: #888; display: block; margin-bottom: 2px; }
         .ib-value { font-size: 9.5pt; font-weight: 700; color: #1a1a1a; }
 
+        /* Centered meta strip — inline "label: [boxed value]" facts, centered
+           under the title (the printed reference "top part"). mPDF-safe: inline
+           blocks, no flex. */
+        .meta-row { text-align: center; margin: 0 0 16px; }
+        .meta-row .meta-item { display: inline-block; margin: 0 9px; font-size: 9.5pt; vertical-align: middle; }
+        .meta-row .meta-item .lbl { font-weight: 700; color: #1a1a1a; }
+        .meta-row .meta-item .val-box { display: inline-block; border: 1px solid #cfcfcf; background: #fafafa; padding: 3px 14px; margin: 0 4px; min-width: 64px; text-align: center; font-weight: 700; color: #1a1a1a; }
+
         /* Two sections side-by-side — fixed geometry so dual rows line up */
         table.dual { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 0 0 10px; }
         table.dual > tbody > tr > td.dual-col, table.dual > tbody > tr > td.dual-gap { vertical-align: top; padding: 0; border: none; }
@@ -62,13 +70,13 @@
             border: 1px solid #cfcfcf; padding: 4px 6px; font-size: 8.5pt;
             word-wrap: break-word; overflow-wrap: break-word; vertical-align: middle; text-align: center; color: #1a1a1a;
         }
-        table.report-table thead th { background: #1a1a1a; color: #fff; font-weight: 700; }
+        table.report-table thead th { background: #1a1a1a; color: #fff; font-weight: 700; border-color: #fff; }
         table.report-table tbody th { font-weight: 700; color: #1a1a1a; }
         table.report-table tfoot td, table.report-table tfoot th {
             background: #f2f2f2; font-weight: 700; color: #1a1a1a; border-top: 1.5px solid #1a1a1a;
         }
         table.report-table tr.net-row th, table.report-table tr.net-row td {
-            background: #1a1a1a; color: #fff; font-weight: 700;
+            background: #1a1a1a; color: #fff; font-weight: 700; border-color: #fff;
         }
 
         /* Column alignment: text labels start-aligned, numbers end-aligned */
@@ -121,7 +129,7 @@
 
         /* Generic tables (legacy reports) — bordered grid with black header bar */
         table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 8.5pt; }
-        thead th { background: #1a1a1a; padding: 5px 6px; font-weight: 700; text-align: center; color: #fff; border: 1px solid #1a1a1a; }
+        thead th { background: #1a1a1a; padding: 5px 6px; font-weight: 700; text-align: center; color: #fff; border: 1px solid #fff; }
         tbody td { padding: 4px 6px; text-align: center; color: #1a1a1a; border: 1px solid #cfcfcf; }
         tfoot td, tfoot th { padding: 4px 6px; text-align: center; font-weight: 700; color: #1a1a1a; background: #f2f2f2; border: 1px solid #cfcfcf; border-top: 1.5px solid #1a1a1a; }
 
