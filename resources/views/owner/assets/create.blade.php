@@ -82,13 +82,13 @@
 
     <div class="col-md-4">
         <label class="form-label">{{ __('owner.generated.purchase_cost') }}</label>
-        <input type="number" step="0.01" name="purchase_cost" class="form-control"
+        <input type="number" step="0.01" name="purchase_cost" id="purchase_cost" class="form-control"
                value="{{ old('purchase_cost',$asset->purchase_cost ?? '') }}" required>
     </div>
 
     <div class="col-md-4">
         <label class="form-label">{{ __('owner.generated.scrap_value') }}</label>
-        <input type="number" step="0.01" name="salvage_value" class="form-control"
+        <input type="number" step="0.01" name="salvage_value" id="salvage_value" class="form-control"
                value="{{ old('salvage_value',$asset->salvage_value ?? 0) }}">
     </div>
 </div>
@@ -97,27 +97,25 @@
 
 <div class="row mb-3">
     <div class="col-md-4">
-        <label class="form-label">{{ __('owner.generated.depreciation_method') }}</label>
-        <select name="depreciation_method" id="depreciation_method" class="form-control" required>
-            <option value="straight_line"
-                @selected(old('depreciation_method',$asset->depreciation_method ?? '')=='straight_line')>
-                {{ __('owner.generated.useful_life') }}</option>
-            <option value="percentage"
-                @selected(old('depreciation_method',$asset->depreciation_method ?? '')=='percentage')>
-                {{ __('owner.generated.percentage') }}</option>
-        </select>
+        <label class="form-label">{{ __('owner.generated.useful_life_span') }} ({{ __('owner.generated.year') }})</label>
+        <input type="number" min="1" step="1" name="useful_life_years" id="useful_life_years" class="form-control"
+               value="{{ old('useful_life_years',$asset->useful_life_years ?? '') }}" required>
     </div>
 
-    <div class="col-md-4 d-none" id="life-wrapper">
-        <label class="form-label">{{ __('owner.generated.useful_life_span') }}({{ __('owner.generated.year') }})</label>
-        <input type="number" name="useful_life_years" class="form-control"
-               value="{{ old('useful_life_years',$asset->useful_life_years ?? '') }}">
+    <div class="col-md-4">
+        <label class="form-label">{{ __('owner.generated.annual_depreciation') }}</label>
+        <input type="text" id="annual_depreciation" class="form-control bg-light" readonly value="0.00">
     </div>
 
-    <div class="col-md-4 d-none" id="rate-wrapper">
-        <label class="form-label">{{ __('owner.generated.depreciation_rate') }}(%)</label>
-        <input type="number" step="0.01" name="depreciation_rate" class="form-control"
-               value="{{ old('depreciation_rate',$asset->depreciation_rate ?? '') }}">
+    <div class="col-md-4">
+        <label class="form-label">{{ __('owner.generated.monthly_depreciation') }}</label>
+        <input type="text" id="monthly_depreciation" class="form-control bg-light" readonly value="0.00">
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <small class="text-muted">{{ __('owner.generated.depreciation_formula_hint') }}</small>
     </div>
 </div>
 
@@ -242,17 +240,29 @@
             .classList.toggle('d-none', document.getElementById('asset_type').value !== 'boat');
     }
 
-    function toggleDepreciation() {
-        const method = document.getElementById('depreciation_method').value;
-        document.getElementById('life-wrapper').classList.toggle('d-none', method !== 'straight_line');
-        document.getElementById('rate-wrapper').classList.toggle('d-none', method !== 'percentage');
+    function computeDepreciation() {
+        const cost = parseFloat(document.getElementById('purchase_cost').value) || 0;
+        const salvage = parseFloat(document.getElementById('salvage_value').value) || 0;
+        const years = parseInt(document.getElementById('useful_life_years').value) || 0;
+
+        let annual = 0;
+        let monthly = 0;
+        if (years > 0 && cost - salvage > 0) {
+            annual = (cost - salvage) / years;
+            monthly = annual / 12;
+        }
+
+        document.getElementById('annual_depreciation').value = annual.toFixed(2);
+        document.getElementById('monthly_depreciation').value = monthly.toFixed(2);
     }
 
     document.getElementById('asset_type').addEventListener('change', toggleAssetType);
-    document.getElementById('depreciation_method').addEventListener('change', toggleDepreciation);
+    ['purchase_cost', 'salvage_value', 'useful_life_years'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', computeDepreciation);
+    });
 
     toggleAssetType();
-    toggleDepreciation();
+    computeDepreciation();
 </script>
 
 @endsection

@@ -23,6 +23,7 @@ class MonthClosing extends Model
             'general_expenses' => 'decimal:2',
             'fixed_salaries' => 'decimal:2',
             'depreciation' => 'decimal:2',
+            'asset_depreciation_breakdown' => 'array',
             'total_expenses' => 'decimal:2',
             'net_profit' => 'decimal:2',
             'owner_percent' => 'decimal:2',

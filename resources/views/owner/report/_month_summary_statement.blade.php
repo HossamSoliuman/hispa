@@ -5,7 +5,6 @@
     $netOwnerRevenue = (float) $f['net_owner_revenue'];
     $tripExpenses = (float) $f['trip_expenses'];
     $generalExpenses = (float) $f['general_expenses'];
-    $depreciation = (float) $f['depreciation'];
     $totalExpenses = (float) $f['total_expenses'];
 @endphp
 
@@ -74,13 +73,6 @@
             <td class="ms-label">{{ __('owner.month_summary.total_general_expenses') }}</td>
             <td class="ms-amount">{{ number_format($generalExpenses, 2) }}</td>
         </tr>
-
-        @if ($depreciation > 0)
-            <tr class="ms-line">
-                <td class="ms-label">{{ __('owner.month_summary.depreciation') }}</td>
-                <td class="ms-amount ms-neg">{{ number_format($depreciation, 2) }}</td>
-            </tr>
-        @endif
 
         <tr class="ms-subtotal">
             <td class="ms-label">{{ __('owner.month_summary.total_expenses') }}</td>

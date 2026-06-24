@@ -43,9 +43,11 @@
     {{-- Waterfall summary --}}
     <div class="row g-3 mb-4">
         @php
+            $operatingExpenses = (float) $f['total_expenses'] - (float) $f['depreciation'];
             $cards = [
                 ['owner.profit_loss.net_sales', $f['net_sales'], 'success'],
-                ['owner.profit_loss.total_expenses', $f['total_expenses'], 'danger'],
+                ['owner.month_closing.expenses', $operatingExpenses, 'danger'],
+                ['owner.profit_loss.depreciation', $f['depreciation'], 'secondary'],
                 ['owner.profit_loss.net_profit', $f['net_profit'], $f['net_profit'] >= 0 ? 'success' : 'danger'],
                 ['owner.generated.owner_ratio', $f['owner_share'], 'primary'],
                 ['owner.profit_loss.crew_share', $f['crew_share'], 'warning'],
@@ -64,6 +66,11 @@
             </div>
         @endforeach
     </div>
+
+    @include('owner.month_closing._assets_table', [
+        'assets' => $preview['asset_depreciation']['assets'],
+        'total' => $preview['asset_depreciation']['total'],
+    ])
 
     {{-- Crew dues --}}
     <div class="card shadow-sm border-0 mb-4">

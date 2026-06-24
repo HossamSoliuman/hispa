@@ -85,26 +85,33 @@ class AssetController extends Controller
         return response()->json(['message' => 'تم حذف الأصل بنجاح'], 200);
     }
 
-    protected function validateData(Request $request)
+    /**
+     * @return array<string, mixed>
+     */
+    protected function validateData(Request $request): array
     {
         $ownerId = $this->ownerId();
 
-        return $request->validate([
+        $data = $request->validate([
             'asset_type' => 'required|in:boat,fishing_equipment,other',
             'boat_id' => [
                 'nullable',
                 Rule::exists('boats', 'id')->where('owner_id', $ownerId),
             ],
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'purchase_date' => 'required|date',
             'purchase_cost' => 'required|numeric|min:0',
-            'salvage_value' => 'nullable|numeric|min:0',
-            'depreciation_method' => 'required|in:straight_line,percentage',
-            'useful_life_years' => 'nullable|required_if:depreciation_method,straight_line|integer|min:1',
-            'depreciation_rate' => 'nullable|required_if:depreciation_method,percentage|numeric|min:0|max:100',
+            'salvage_value' => 'nullable|numeric|min:0|lte:purchase_cost',
+            'useful_life_years' => 'required|integer|min:1',
             'status' => 'required|in:active,sold,damaged',
             'notes' => 'nullable|string',
         ]);
+
+        $data['depreciation_method'] = 'straight_line';
+        $data['depreciation_rate'] = 0;
+
+        return $data;
     }
 
     public function getAssetsData(Request $request)

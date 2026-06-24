@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Owner;
 
+use App\Models\Asset;
 use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Expense;
@@ -181,6 +182,83 @@ class MonthClosingServiceTest extends TestCase
         $fleetClosing = $this->service->close($owner->id, 2026, 6, null, null);
         $this->assertNull($fleetClosing->boat_id);
         $this->assertSame('140000.00', $fleetClosing->net_sales); // both boats
+    }
+
+    public function test_close_deducts_straight_line_depreciation_before_distribution(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 100000,
+            'net_owner_amount' => 100000,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        // Boat 60,000 − 6,000 salvage ÷ 12 years ÷ 12 = 375/month.
+        Asset::create([
+            'owner_id' => $owner->id,
+            'asset_type' => 'boat',
+            'name' => 'قارب',
+            'purchase_date' => '2025-01-01',
+            'purchase_cost' => 60000,
+            'salvage_value' => 6000,
+            'depreciation_method' => 'straight_line',
+            'useful_life_years' => 12,
+            'status' => 'active',
+        ]);
+
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+
+        $preview = $this->service->preview($owner->id, 2026, 6);
+
+        $this->assertSame(375.0, $preview['asset_depreciation']['total']);
+        $this->assertSame(375.0, $preview['financials']['depreciation']);
+        $this->assertSame(99625.0, $preview['financials']['net_profit']); // 100,000 − 375
+
+        $closing = $this->service->close($owner->id, 2026, 6);
+
+        $this->assertSame('375.00', $closing->depreciation);
+        $this->assertSame('99625.00', $closing->net_profit);
+        $this->assertCount(1, $closing->asset_depreciation_breakdown);
+        $this->assertSame('قارب', $closing->asset_depreciation_breakdown[0]['name']);
+        $this->assertSame(375.0, (float) $closing->asset_depreciation_breakdown[0]['monthly']);
+    }
+
+    public function test_depreciation_stops_after_useful_life_ends(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 100000,
+            'net_owner_amount' => 100000,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        // Fully written off by 2026-06: 5-year life from 2018.
+        Asset::create([
+            'owner_id' => $owner->id,
+            'asset_type' => 'other',
+            'name' => 'معدة قديمة',
+            'purchase_date' => '2018-01-01',
+            'purchase_cost' => 60000,
+            'salvage_value' => 0,
+            'depreciation_method' => 'straight_line',
+            'useful_life_years' => 5,
+            'status' => 'active',
+        ]);
+
+        $preview = $this->service->preview($owner->id, 2026, 6);
+
+        $this->assertSame(0.0, $preview['asset_depreciation']['total']);
+        $this->assertSame(100000.0, $preview['financials']['net_profit']);
     }
 
     public function test_cannot_close_same_boat_twice(): void

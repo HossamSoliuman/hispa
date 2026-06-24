@@ -26,9 +26,11 @@
 
     <div class="row g-3 mb-4">
         @php
+            $operatingExpenses = (float) $closing->total_expenses - (float) $closing->depreciation;
             $cards = [
                 ['owner.profit_loss.net_sales', $closing->net_sales, 'success'],
-                ['owner.profit_loss.total_expenses', $closing->total_expenses, 'danger'],
+                ['owner.month_closing.expenses', $operatingExpenses, 'danger'],
+                ['owner.profit_loss.depreciation', $closing->depreciation, 'secondary'],
                 ['owner.profit_loss.net_profit', $closing->net_profit, $closing->net_profit >= 0 ? 'success' : 'danger'],
                 ['owner.generated.owner_ratio', $closing->owner_share, 'primary'],
                 ['owner.profit_loss.crew_share', $closing->crew_share, 'warning'],
@@ -146,6 +148,11 @@
             </table>
         </div>
     </div>
+
+    @include('owner.month_closing._assets_table', [
+        'assets' => $closing->asset_depreciation_breakdown ?? [],
+        'total' => $closing->depreciation,
+    ])
 
     <div class="card shadow-sm border-0">
         <div class="card-header d-flex justify-content-between align-items-center">

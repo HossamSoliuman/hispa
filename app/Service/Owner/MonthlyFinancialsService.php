@@ -22,12 +22,14 @@ class MonthlyFinancialsService
 {
     public const SETTING_OWNER_PERCENT = 'owner_profit_percent';
 
-    public const SETTING_DEPRECIATION = 'monthly_depreciation_amount';
-
     public const DEFAULT_OWNER_PERCENT = 50.0;
 
     /**
      * Compute the full monthly financial waterfall for an owner.
+     *
+     * Asset depreciation is supplied by the caller (the month close passes the
+     * straight-line monthly charge; every other consumer leaves it at 0 so it is
+     * deducted inside the monthly close only).
      *
      * @return array{
      *     from: string, to: string, owner_id: int, boat_id: int|null,
@@ -40,7 +42,7 @@ class MonthlyFinancialsService
      *     crew_distribution: \Illuminate\Support\Collection<int, array<string, mixed>>
      * }
      */
-    public function compute(int $ownerId, string $from, string $to, ?int $boatId = null): array
+    public function compute(int $ownerId, string $from, string $to, ?int $boatId = null, float $depreciation = 0.0): array
     {
         $saleIds = $this->ownerSalesQuery($ownerId, $from, $to, $boatId)->pluck('id');
 
@@ -60,7 +62,7 @@ class MonthlyFinancialsService
             ->whereIn('category_id', $this->categoryIdsForTypes(['general', 'government']))
             ->sum('final_price');
 
-        $depreciation = (float) $this->setting(self::SETTING_DEPRECIATION, 0);
+        $depreciation = round($depreciation, 2);
 
         $totalExpenses = $tripExpenses + $generalExpenses + $depreciation;
         $netProfit = $netOwnerRevenue - $totalExpenses;

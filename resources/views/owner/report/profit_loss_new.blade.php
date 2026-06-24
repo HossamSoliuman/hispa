@@ -218,15 +218,6 @@
                         </div>
                         <div class="col-md-4">
                             <div class="stat-card expense">
-                                <div class="label">{{ __('owner.profit_loss.depreciation') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['depreciation'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card expense">
                                 <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
                                 <div class="value">
                                     {{ number_format($f['total_expenses'], 2) }}
