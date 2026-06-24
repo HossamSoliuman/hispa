@@ -1088,7 +1088,7 @@ return [
         'total_payrolls' => 'Total Payroll/Crew',
         'net_profit_loss' => 'Net Profit / Loss',
         'commission_labor' => 'Commission & Labor',
-        'net_owner_revenue' => 'Net Owner Revenue',
+        'net_owner_revenue' => 'Net Revenue',
         'fixed_salaries' => 'Fixed Salaries',
         'depreciation' => 'Depreciation',
         'net_profit' => 'Net Profit',

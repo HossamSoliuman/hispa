@@ -1093,7 +1093,7 @@ return [
         'total_payrolls' => 'إجمالي الرواتب/الطاقم',
         'net_profit_loss' => 'صافي الربح / الخسارة',
         'commission_labor' => 'العمولة والعمالة',
-        'net_owner_revenue' => 'صافي إيراد المالك',
+        'net_owner_revenue' => 'صافي الإيرادات',
         'fixed_salaries' => 'الرواتب الثابتة',
         'depreciation' => 'الإهلاك',
         'net_profit' => 'صافي الربح',
