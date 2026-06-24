@@ -172,8 +172,7 @@
                 request()->routeIs('owner.reports.*') ||
                 request()->routeIs('owner.fishQuntity') ||
                 request()->routeIs('owner.sales.index') ||
-                request()->routeIs('owner.customers.index') ||
-                request()->routeIs('owner.assetDepreciation')
+                request()->routeIs('owner.customers.index')
                     ? 'active'
                     : '' }}">
                 <a href="#" class="menu-link">
@@ -205,11 +204,6 @@
                     <div class="menu-item {{ request()->routeIs('owner.fishQuntity') ? 'active' : '' }} ">
                         <a href="{{ route('owner.fishQuntity') }}" class="menu-link">
                             <span class="menu-text">{{ __('owner.menu.fish_stock') }}</span>
-                        </a>
-                    </div>
-                    <div class="menu-item {{ request()->routeIs('owner.assetDepreciation') ? 'active' : '' }} ">
-                        <a href="{{ route('owner.assetDepreciation') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.assets') }}</span>
                         </a>
                     </div>
                     <div class="menu-item {{ request()->routeIs('owner.customers.index') ? 'active' : '' }} ">

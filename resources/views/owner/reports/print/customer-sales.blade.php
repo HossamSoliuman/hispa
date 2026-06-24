@@ -27,13 +27,6 @@
         </tr>
     </table>
 
-    <x-report-stats :items="[
-        ['label' => __('owner.sales_report.total_sales'), 'value' => $statistics['total_sales']],
-        ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeight($statistics['total_weight'])],
-        ['label' => __('owner.sales_report.total_revenue'), 'value' => number_format($statistics['total_revenue'], 2)],
-        ['label' => __('owner.customers.show.cards.remaining'), 'value' => number_format($statistics['total_remaining'], 2), 'color' => $statistics['total_remaining'] > 0 ? '#dc2626' : '#16a34a'],
-    ]" />
-
     @if($sales->isEmpty())
         <div class="alert alert-warning">
             <strong>{{ __('owner.reports.no_data_found') }}</strong>
@@ -62,8 +55,8 @@
                         <td class="col-text">{{ $sale->customer_name ?? optional($sale->customer)->name ?? '—' }}</td>
                         <td>{{ optional($sale->paymentMethod)->name ?? '—' }}</td>
                         <td>{{ formatWeight($sale->details->sum('weight')) }}</td>
-                        <td class="col-num">{{ number_format($sale->total_price, 2) }} <x-riyal-icon /></td>
-                        <td class="col-num">{{ number_format($sale->remaining_total, 2) }} <x-riyal-icon /></td>
+                        <td class="col-num">{{ number_format($sale->total_price, 2) }}</td>
+                        <td class="col-num">{{ number_format($sale->remaining_total, 2) }}</td>
                         <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '—' }}</td>
                     </tr>
                 @endforeach
@@ -72,8 +65,8 @@
                 <tr>
                     <td colspan="4" class="col-text">{{ __('owner.sales.total') }}</td>
                     <td>{{ formatWeight($statistics['total_weight']) }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['total_remaining'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }}</td>
+                    <td class="col-num">{{ number_format($statistics['total_remaining'], 2) }}</td>
                     <td></td>
                 </tr>
             </tfoot>

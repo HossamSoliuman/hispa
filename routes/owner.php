@@ -310,7 +310,6 @@ Route::group([
         Route::delete('/month-closing/{monthClosing}', [MonthClosingController::class, 'destroy'])->name('month-closing.destroy');
 
         Route::get('/fish-quntity', [ReportsController::class, 'fishQuntity'])->name('fishQuntity');
-        Route::get('/asset_depreciation', [ReportsController::class, 'assetDepreciation'])->name('assetDepreciation');
 
         Route::resource('/crew-check', CrewCheckController::class);
         Route::resource('/financial-reports', FinancialReportsController::class);

@@ -27,7 +27,6 @@ return [
         'dalal_stock_report' => 'Brokers Stock Report',
         'trip_report' => 'Trip Report',
         'fish_history_report' => 'Fish History Report',
-        'asset_depreciation' => 'Asset Depreciation',
         'fish_quantity' => 'Fish Quantities',
         'notifications' => 'Notifications',
         'profile' => 'Profile',

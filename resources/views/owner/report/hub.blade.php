@@ -45,7 +45,6 @@
                 'icon' => 'bi-gear',
                 'color' => 'secondary',
                 'items' => [
-                    ['owner.assetDepreciation', __('owner.menu.asset_depreciation')],
                     ['owner.fishQuntity', __('owner.menu.fish_quantity')],
                 ],
             ],

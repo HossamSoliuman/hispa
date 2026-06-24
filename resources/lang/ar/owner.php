@@ -28,7 +28,6 @@ return [
         'dalal_stock_report' => 'تقرير مخزون الدلالين',
         'trip_report' => 'تقرير الرحلات',
         'fish_history_report' => 'تقرير حركات الصنف',
-        'asset_depreciation' => 'إهلاك الأصول',
         'fish_quantity' => 'كميات الأسماك',
         'notifications' => 'الإشعارات',
         'profile' => 'الملف الشخصي',
