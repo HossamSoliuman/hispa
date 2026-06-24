@@ -220,17 +220,16 @@
         table.close-footer { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 16px 0 0; }
         table.close-footer td.cf-col { width: 32%; vertical-align: top; padding: 0; border: none; }
         table.close-footer td.cf-gap { width: 2%; padding: 0; border: none; }
-        .cf-card { border: 1px solid #cfcfcf; }
-        .cf-head { background: #1a1a1a; color: #fff; font-weight: 700; text-align: center; font-size: 9pt; padding: 5px 6px; }
-        .cf-body { padding: 8px 10px; }
+        .cf-card { border: none; }
+        .cf-head { font-weight: 700; text-align: {{ $startAlign }}; font-size: 9pt; padding: 0 0 4px; color: #1a1a1a; }
+        .cf-body { padding: 0; }
         table.cf-kv { width: 100%; border-collapse: collapse; }
-        table.cf-kv td { border-bottom: 1px solid #eee; padding: 4px 2px; font-size: 8.5pt; }
-        table.cf-kv tr:last-child td { border-bottom: none; }
+        table.cf-kv td { border: none; padding: 3px 2px; font-size: 8.5pt; }
         table.cf-kv td.cf-k { text-align: {{ $startAlign }}; color: #555; }
         table.cf-kv td.cf-v { text-align: {{ $endAlign }}; font-weight: 700; color: #1a1a1a; white-space: nowrap; }
-        table.cf-kv tr.cf-total td { border-top: 1.5px solid #1a1a1a; border-bottom: none; font-weight: 700; color: #1a1a1a; padding-top: 6px; }
+        table.cf-kv tr.cf-total td { border: none; font-weight: 700; color: #1a1a1a; padding-top: 4px; }
         .cf-signoff-label { font-size: 9pt; font-weight: 700; color: #1a1a1a; }
-        .cf-signoff-line { font-size: 9pt; color: #888; letter-spacing: 1px; margin: 16px 0 10px; }
+        .cf-signoff-line { font-size: 9pt; color: #888; white-space: nowrap; margin: 4px 0 10px; }
         .cf-signoff-date { font-size: 8.5pt; color: #555; }
         ul.cf-notes { margin: 0; padding-{{ $startAlign }}: 15px; list-style-type: disc; }
         ul.cf-notes li { font-size: 8pt; color: #444; margin-bottom: 5px; line-height: 1.5; }

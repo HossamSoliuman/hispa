@@ -1,175 +1,201 @@
-<x-report-layout :title="'الإقفال الشهري'" :document-number="''" :settings="$settings" :qr-code="$settings['qr_code'] ?? ''">
-    <x-report-masthead :title="'الإقفال الشهري'" :subtitle="'إقفال شهر الصيد وتوزيع أرباح البحارة'" :settings="$settings" />
+@php
+    $isRtl = app()->getLocale() === 'ar';
+
+    $arabicMonths = [
+        1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+        5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+        9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
+    ];
+    $monthLabel = $isRtl
+        ? ($arabicMonths[$closing->month] ?? $closing->month)
+        : \Illuminate\Support\Carbon::create($closing->year, $closing->month, 1)->format('F');
+    $boatLabel = $closing->boat?->name ?? __('owner.month_closing.report.all_boats');
+
+    $dues = $closing->dues;
+    $operatingExpenses = (float) $closing->general_expenses;
+    $companyName = $settings['title'] ?? ($settings['company_name'] ?? ($settings['name'] ?? ''));
+@endphp
+
+<x-report-layout :title="__('owner.month_closing.title')" :document-number="''" :settings="$settings" :qr-code="$settings['qr_code'] ?? ''">
+    <x-report-masthead :title="__('owner.month_closing.title')" :subtitle="__('owner.month_closing.subtitle')" :settings="$settings" />
 
     {{-- Meta strip --}}
     <div class="meta-row">
         <span class="meta-item">
-            <span class="lbl">الشهر:</span>
-            <span class="val-box">يونيو</span>
+            <span class="lbl">{{ __('owner.month_closing.report.filter_month') }}:</span>
+            <span class="val-box">{{ $monthLabel }}</span>
         </span>
         <span class="meta-item">
-            <span class="lbl">السنة:</span>
-            <span class="val-box">2026</span>
+            <span class="lbl">{{ __('owner.month_closing.report.filter_year') }}:</span>
+            <span class="val-box">{{ $closing->year }}</span>
         </span>
         <span class="meta-item">
-            <span class="lbl">تاريخ الإقفال:</span>
-            <span class="val-box">30/06/2026</span>
+            <span class="lbl">{{ __('owner.month_closing.report.filter_closing_date') }}:</span>
+            <span class="val-box">{{ optional($closing->closed_at)->format('d/m/Y') ?? '—' }}</span>
+        </span>
+        <span class="meta-item">
+            <span class="lbl">{{ __('owner.month_closing.report.filter_boat') }}:</span>
+            <span class="val-box">{{ $boatLabel }}</span>
         </span>
     </div>
 
-    {{-- 5 Summary cards --}}
+    {{-- 5 Summary cards — real monthly waterfall --}}
     <table class="sum-cards">
         <tr>
-            <td class="sum-head">1. إجمالي المبيعات</td>
-            <td class="sum-head">2. إجمالي المصروفات</td>
-            <td class="sum-head">3. الربح قبل التوزيع</td>
-            <td class="sum-head">4. الاحتياطيات والاستقطاعات</td>
-            <td class="sum-head">5. الربح القابل للتوزيع</td>
+            <td class="sum-head">1. {{ __('owner.month_closing.report.cards.total_sales') }}</td>
+            <td class="sum-head">2. {{ __('owner.month_closing.report.cards.total_expenses') }}</td>
+            <td class="sum-head">3. {{ __('owner.month_closing.report.cards.profit_before') }}</td>
+            <td class="sum-head">4. {{ __('owner.month_closing.report.cards.owner_deductions') }}</td>
+            <td class="sum-head">5. {{ __('owner.month_closing.report.cards.net_distributable') }}</td>
         </tr>
         <tr>
+            {{-- Card 1 — sales → net owner revenue --}}
             <td class="sum-card">
                 <table class="sum-body">
-                    <tr><td class="sum-k">إجمالي المبيعات</td><td class="sum-v">126,044.00</td></tr>
-                    <tr><td class="sum-k">مرتجعات المبيعات</td><td class="sum-v">0.00</td></tr>
-                    <tr class="sum-total"><td class="sum-k">صافي المبيعات</td><td class="sum-v">126,044.00</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</td><td class="sum-v">{{ number_format((float) $closing->gross_sales, 2) }}</td></tr>
+                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
+                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
                 </table>
             </td>
+            {{-- Card 2 — expenses --}}
             <td class="sum-card">
                 <table class="sum-body">
-                    <tr><td class="sum-k">مصاريف الرحلات</td><td class="sum-v">78,560.00</td></tr>
-                    <tr><td class="sum-k">مصاريف تشغيلية وإدارية</td><td class="sum-v">6,350.00</td></tr>
-                    <tr class="sum-total"><td class="sum-k">إجمالي المصروفات</td><td class="sum-v">84,910.00</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.trip_expenses') }}</td><td class="sum-v">{{ number_format((float) $closing->trip_expenses, 2) }}</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.operational_expenses') }}</td><td class="sum-v">{{ number_format($operatingExpenses, 2) }}</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.depreciation') }}</td><td class="sum-v">{{ number_format((float) $closing->depreciation, 2) }}</td></tr>
+                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</td><td class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</td></tr>
                 </table>
             </td>
+            {{-- Card 3 — profit before distribution --}}
             <td class="sum-card">
                 <table class="sum-body">
-                    <tr><td class="sum-k">صافي المبيعات</td><td class="sum-v">126,044.00</td></tr>
-                    <tr><td class="sum-k">إجمالي المصروفات</td><td class="sum-v">84,910.00</td></tr>
-                    <tr class="sum-total"><td class="sum-k">الربح قبل التوزيع</td><td class="sum-v">41,134.00</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.net_owner_revenue') }}</td><td class="sum-v">{{ number_format((float) $closing->net_owner_revenue, 2) }}</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</td><td class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</td></tr>
+                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
+                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</td><td class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</td></tr>
                 </table>
             </td>
+            {{-- Card 4 — owner share --}}
             <td class="sum-card">
                 <table class="sum-body">
-                    <tr><td class="sum-k">احتياطي صيانة القوارب</td><td class="sum-v">2,056.70</td></tr>
-                    <tr><td class="sum-k">احتياطي طوارئ (3%)</td><td class="sum-v">1,234.02</td></tr>
-                    <tr><td class="sum-k">استقطاع صندوق معدات</td><td class="sum-v">1,000.00</td></tr>
-                    <tr class="sum-total"><td class="sum-k">إجمالي الاستقطاعات</td><td class="sum-v">4,290.72</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</td><td class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.owner_percent') }}</td><td class="sum-v">{{ number_format((float) $closing->owner_percent, 2) }}%</td></tr>
+                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
+                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</td><td class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
                 </table>
             </td>
+            {{-- Card 5 — distributable crew share --}}
             <td class="sum-card">
                 <table class="sum-body">
-                    <tr><td class="sum-k">الربح قبل التوزيع</td><td class="sum-v">41,134.00</td></tr>
-                    <tr><td class="sum-k">إجمالي الاستقطاعات</td><td class="sum-v">4,290.72</td></tr>
-                    <tr class="sum-total"><td class="sum-k">الربح القابل للتوزيع</td><td class="sum-v">36,843.28</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</td><td class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</td><td class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
+                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
+                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.final_distributable') }}</td><td class="sum-v">{{ number_format((float) $closing->crew_share, 2) }}</td></tr>
                 </table>
             </td>
         </tr>
     </table>
 
     {{-- Distribution table --}}
-    <div class="section-bar">6. توزيع أرباح البحارة</div>
+    <div class="section-bar">6. {{ __('owner.month_closing.report.distribution_title') }}</div>
     <table class="report-table" style="margin-bottom:14px;">
         <thead>
             <tr>
-                <th style="width:5%">#</th>
-                <th style="width:18%">اسم البحار</th>
-                <th>الوظيفة</th>
-                <th>نسبة المشاركة</th>
-                <th>الربح المستحق</th>
-                <th>الدفعة المقدمة</th>
-                <th>الصافي المستحق</th>
-                <th style="width:10%">التوقيع</th>
+                <th style="width:5%">{{ __('owner.month_closing.report.dist.index') }}</th>
+                <th style="width:18%">{{ __('owner.month_closing.report.dist.name') }}</th>
+                <th>{{ __('owner.month_closing.report.dist.role') }}</th>
+                <th>{{ __('owner.month_closing.report.dist.share') }}</th>
+                <th>{{ __('owner.month_closing.report.dist.earned') }}</th>
+                <th>{{ __('owner.month_closing.report.dist.advance') }}</th>
+                <th>{{ __('owner.month_closing.report.dist.paid') }}</th>
+                <th>{{ __('owner.month_closing.report.dist.net_due') }}</th>
+                <th style="width:10%">{{ __('owner.month_closing.report.dist.signature') }}</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>1</td>
-                <td class="col-text">أحمد سالم</td>
-                <td>نخاذ</td>
-                <td>30%</td>
-                <td class="col-num">11,052.98</td>
-                <td class="col-num">2,000.00</td>
-                <td class="col-num">9,052.98</td>
-                <td style="color:#bbb;letter-spacing:2px;">................</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td class="col-text">فهد علي</td>
-                <td>مساعد نخاد</td>
-                <td>25%</td>
-                <td class="col-num">9,210.82</td>
-                <td class="col-num">1,500.00</td>
-                <td class="col-num">7,710.82</td>
-                <td style="color:#bbb;letter-spacing:2px;">................</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td class="col-text">محمد سعيد</td>
-                <td>بحار</td>
-                <td>20%</td>
-                <td class="col-num">7,368.66</td>
-                <td class="col-num">1,200.00</td>
-                <td class="col-num">6,168.66</td>
-                <td style="color:#bbb;letter-spacing:2px;">................</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td class="col-text">سعيد الزهراني</td>
-                <td>بحار</td>
-                <td>15%</td>
-                <td class="col-num">5,526.49</td>
-                <td class="col-num">1,000.00</td>
-                <td class="col-num">4,526.49</td>
-                <td style="color:#bbb;letter-spacing:2px;">................</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td class="col-text">خالد حسن</td>
-                <td>بحار</td>
-                <td>10%</td>
-                <td class="col-num">3,684.33</td>
-                <td class="col-num">800.00</td>
-                <td class="col-num">2,884.33</td>
-                <td style="color:#bbb;letter-spacing:2px;">................</td>
-            </tr>
+            @forelse ($dues as $due)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td class="col-text">{{ $due->member_name }}</td>
+                    <td>{{ $due->role }}</td>
+                    <td>{{ $due->custom_share_percent !== null ? number_format((float) $due->custom_share_percent, 2).'%' : number_format((float) $due->shares, 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $due->due_amount, 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $due->advances, 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $due->paid_amount, 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $due->remaining, 2) }}</td>
+                    <td style="color:#bbb;white-space:nowrap;">..........</td>
+                </tr>
+            @empty
+                <tr><td colspan="9" class="text-center text-muted">{{ __('owner.month_closing.revenue_details.no_data') }}</td></tr>
+            @endforelse
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3" class="col-text">الإجمالي</td>
-                <td>100%</td>
-                <td class="col-num">36,843.28</td>
-                <td class="col-num">6,500.00</td>
-                <td class="col-num">30,343.28</td>
-                <td></td>
-            </tr>
-        </tfoot>
+        @if ($dues->isNotEmpty())
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="col-text">{{ __('owner.month_closing.report.dist.total') }}</td>
+                    <td>{{ number_format((float) $closing->total_shares, 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $dues->sum('due_amount'), 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $dues->sum('advances'), 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td>
+                    <td class="col-num">{{ number_format((float) $dues->sum('remaining'), 2) }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        @endif
     </table>
 
-    {{-- Closing summary --}}
+    {{-- Closing footer: summary grid / sign-off / notes --}}
     <table class="close-footer">
         <tr>
-            <td class="cf-col" style="width:48%;">
+            <td class="cf-col">
                 <div class="cf-card">
-                    <div class="cf-head" style="background:#fff;color:#1a1a1a;border-bottom:1px solid #cfcfcf;">ملخص الإقفال</div>
+                    <div class="cf-head">{{ __('owner.month_closing.report.closing_summary_title') }}</div>
                     <div class="cf-body">
                         <table class="cf-kv">
-                            <tr><td class="cf-k">الربح القابل للتوزيع</td><td class="cf-v">36,843.28</td></tr>
-                            <tr><td class="cf-k">إجمالي الدفعات المقدمة</td><td class="cf-v">6,500.00</td></tr>
-                            <tr><td class="cf-k">إجمالي الصافي للبحارة</td><td class="cf-v">30,343.28</td></tr>
-                            <tr><td class="cf-k">رصيد احتياطي الصيانة</td><td class="cf-v">2,056.70</td></tr>
-                            <tr><td class="cf-k">رصيد احتياطي الطوارئ</td><td class="cf-v">1,234.02</td></tr>
-                            <tr><td class="cf-k">رصيد صندوق المعدات</td><td class="cf-v">1,000.00</td></tr>
+                            <tr><td class="cf-k">{{ __('owner.month_closing.report.crew_share') }}</td><td class="cf-v">{{ number_format((float) $closing->crew_share, 2) }}</td></tr>
+                            <tr><td class="cf-k">{{ __('owner.month_closing.report.owner_share') }}</td><td class="cf-v">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
+                            <tr><td class="cf-k">{{ __('owner.month_closing.report.share_value') }}</td><td class="cf-v">{{ number_format((float) $closing->share_value, 2) }}</td></tr>
+                            <tr><td class="cf-k">{{ __('owner.month_closing.report.total_advances') }}</td><td class="cf-v">{{ number_format((float) $dues->sum('advances'), 2) }}</td></tr>
+                            <tr><td class="cf-k">{{ __('owner.month_closing.report.total_paid') }}</td><td class="cf-v">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td></tr>
+                            <tr class="cf-total"><td class="cf-k">{{ __('owner.month_closing.report.total_net_due') }}</td><td class="cf-v">{{ number_format((float) $dues->sum('remaining'), 2) }}</td></tr>
                         </table>
                     </div>
                 </div>
             </td>
             <td class="cf-gap"></td>
-            <td class="cf-col"></td>
+            <td class="cf-col">
+                <div class="cf-card">
+                    <div class="cf-head">{{ __('owner.month_closing.report.signoff_title') }}</div>
+                    <div class="cf-body">
+                        <div class="cf-signoff-label">{{ __('owner.month_closing.report.signoff_prepared') }}</div>
+                        <div class="cf-signoff-line">..................</div>
+                        <div class="cf-signoff-label">{{ __('owner.month_closing.report.signoff_accountant') }}</div>
+                        <div class="cf-signoff-line">..................</div>
+                        <div class="cf-signoff-label">{{ __('owner.month_closing.report.signoff_owner') }}</div>
+                        <div class="cf-signoff-line">..................</div>
+                    </div>
+                </div>
+            </td>
+            <td class="cf-gap"></td>
+            <td class="cf-col">
+                <div class="cf-card">
+                    <div class="cf-head">{{ __('owner.month_closing.report.notes_title') }}</div>
+                    <div class="cf-body">
+                        <ul class="cf-notes">
+                            @foreach (__('owner.month_closing.report.notes') as $note)
+                                <li>{{ $note }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </td>
         </tr>
     </table>
 
     {{-- Document footer --}}
-    <div style="border-top: 1px solid #cfcfcf; margin-top: 18px; padding-top: 10px; text-align: center; font-size: 8pt; color: #888;">
-        مؤسسة دار الحوت التجارية — جميع الحقوق محفوظة © 2026
-    </div>
+    <table class="report-footer">
+        <tr>
+            <td>{{ $companyName }} — {{ __('owner.reports.all_rights_reserved') }} © {{ $closing->year }}</td>
+        </tr>
+    </table>
 </x-report-layout>
