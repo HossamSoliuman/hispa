@@ -540,100 +540,88 @@
         });
     </script>
     <script>
-        // Revenue Chart
-        // Revenue by Species - Donut
+        const catchChartLocale = '{{ app()->getLocale() === 'ar' ? 'ar-SA' : 'en-US' }}';
+
+        function formatChartMonth(yearMonth) {
+            const [year, month] = yearMonth.split('-');
+            return new Intl.DateTimeFormat(catchChartLocale, { year: 'numeric', month: 'long' })
+                .format(new Date(year, month - 1, 1));
+        }
+
+        // Revenue by Species - Doughnut
         fetch("{{ route('owner.getRevenueBySpecies') }}")
             .then(response => response.json())
             .then(data => {
-                const labels = data.map(item => item.fish_name);
-                const revenues = data.map(item => item.total_revenue);
-
-                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-                new Chart(revenueCtx, {
+                new Chart(document.getElementById('revenueChart'), {
                     type: 'doughnut',
                     data: {
-                        labels: labels,
+                        labels: data.map(item => item.fish_name),
                         datasets: [{
-                            data: revenues,
+                            data: data.map(item => item.total_revenue),
                             backgroundColor: ['#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6f42c1'],
                             borderWidth: 1
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+                            legend: { position: 'bottom' }
                         }
                     }
                 });
             });
 
-        // Weight Chart
+        // Weight by Species - Bar
         fetch("{{ route('owner.getWeightBySpecies') }}")
             .then(response => response.json())
             .then(data => {
-                const labels = data.map(item => item.fish_name);
-                const weights = data.map(item => item.total_weight_lb);
-
                 new Chart(document.getElementById('weightChart'), {
                     type: 'bar',
                     data: {
-                        labels: labels,
+                        labels: data.map(item => item.fish_name),
                         datasets: [{
                             label: '{{ __('owner.generated.item_7d3c47') }}',
-                            data: weights,
+                            data: data.map(item => item.total_weight_lb),
                             backgroundColor: '#ffc107'
                         }]
                     },
                     options: {
-                        responsive: false, scrollX: true,
+                        responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 100
-                                }
-                            }
+                            y: { beginAtZero: true }
                         },
                         plugins: {
-                            legend: {
-                                display: false
-                            }
+                            legend: { display: false }
                         }
                     }
                 });
             });
 
-
+        // Monthly Performance - Mixed Bar/Line
         fetch("{{ route('owner.getMonthlyPerformance') }}")
             .then(response => response.json())
             .then(data => {
-                const labels = data.map(item => item.month_name);
-                const catchCounts = data.map(item => item.catch_count);
-                const revenues = data.map(item => item.total_revenue);
-                const weightsLb = data.map(item => item.total_weight_lb);
-
                 new Chart(document.getElementById('monthlyChart'), {
                     type: 'bar',
                     data: {
-                        labels: labels,
+                        labels: data.map(item => formatChartMonth(item.month)),
                         datasets: [{
                                 label: '{{ __('owner.generated.catch_count') }}',
-                                data: catchCounts,
+                                data: data.map(item => item.catch_count),
                                 backgroundColor: '#0dcaf0',
                                 yAxisID: 'y',
                             },
                             {
                                 label: '{{ __('owner.generated.item_f1296c') }}',
-                                data: revenues,
+                                data: data.map(item => item.total_revenue),
                                 backgroundColor: '#198754',
                                 yAxisID: 'y1',
                             },
                             {
                                 label: '{{ __('owner.generated.item_7d3c47') }}',
-                                data: weightsLb,
+                                data: data.map(item => item.total_weight_lb),
                                 type: 'line',
                                 borderColor: '#dc3545',
                                 backgroundColor: '#dc3545',
@@ -643,48 +631,30 @@
                         ]
                     },
                     options: {
-                        responsive: false, scrollX: true,
+                        responsive: true,
                         maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                        },
+                        interaction: { mode: 'index', intersect: false },
                         stacked: false,
                         plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+                            legend: { position: 'bottom' }
                         },
                         scales: {
                             y: {
                                 type: 'linear',
                                 position: 'left',
-                                title: {
-                                    display: true,
-                                    text: '{{ __('owner.generated.catch_count') }}'
-                                }
+                                title: { display: true, text: '{{ __('owner.generated.catch_count') }}' }
                             },
                             y1: {
                                 type: 'linear',
                                 position: 'right',
-                                grid: {
-                                    drawOnChartArea: false
-                                },
-                                title: {
-                                    display: true,
-                                    text: '{{ __('owner.generated.item_cd39bd') }}'
-                                }
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: '{{ __('owner.generated.item_cd39bd') }}' }
                             },
                             y2: {
                                 type: 'linear',
                                 position: 'right',
-                                grid: {
-                                    drawOnChartArea: false
-                                },
-                                title: {
-                                    display: true,
-                                    text: '{{ __('owner.generated.item_67e19f') }}'
-                                }
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: '{{ __('owner.generated.item_67e19f') }}' }
                             }
                         }
                     }
