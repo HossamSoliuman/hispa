@@ -12,12 +12,14 @@ use App\Models\CatchModel;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
 use App\Models\Sale;
+use App\Models\SaleDetail;
 use App\Models\Trip;
 use App\Models\Unit;
 use App\Services\TripTransitionService;
 use App\Traits\CatchStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CatchController extends Controller
 {
@@ -330,16 +332,20 @@ class CatchController extends Controller
     {
         $catch = $this->ownerCatchQuery()->with('trip')->findOrFail($id);
 
-        if (Sale::where('catch_id', $catch->id)->exists()) {
-            return response()->json([
-                'message' => 'لا يمكن حذف المصيد لارتباطه بفواتير بيع. يرجى حذف فواتير البيع المرتبطة أولاً.',
-            ], 422);
-        }
-
         try {
             DB::beginTransaction();
 
             $trip = $catch->trip;
+
+            $saleIds = Sale::withTrashed()->where('catch_id', $catch->id)->pluck('id');
+
+            if ($saleIds->isNotEmpty()) {
+                if (Schema::hasTable('payments')) {
+                    DB::table('payments')->whereIn('sale_id', $saleIds)->delete();
+                }
+                SaleDetail::whereIn('sale_id', $saleIds)->delete();
+                Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
+            }
 
             CatchDetail::where('catch_id', $catch->id)->delete();
             FishQuantityStock::where('catch_id', $catch->id)->delete();
@@ -351,7 +357,7 @@ class CatchController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'تم حذف المصيد بنجاح']);
+            return response()->json(['message' => 'تم حذف المصيد والفواتير المرتبطة به بنجاح']);
         } catch (\Exception $e) {
             DB::rollBack();
 
