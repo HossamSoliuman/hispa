@@ -36,12 +36,6 @@
             margin-bottom: 8px;
         }
 
-        .stat-card .value {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
         .stat-card.revenue .value {
             color: #16a34a;
         }
@@ -87,6 +81,44 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             padding: 8px 12px;
+        }
+
+        .col-fifth {
+            flex: 0 0 auto;
+            width: 20%;
+            padding-right: calc(var(--bs-gutter-x, 1.5rem) * .5);
+            padding-left: calc(var(--bs-gutter-x, 1.5rem) * .5);
+        }
+
+        .stat-card .value {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .section-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        [data-bs-theme=dark] .section-subtitle {
+            color: var(--bs-secondary-color);
+            border-color: var(--bs-border-color);
+        }
+
+        @media (max-width: 992px) {
+            .col-fifth { width: 33.333%; }
+        }
+        @media (max-width: 576px) {
+            .col-fifth { width: 100%; }
         }
 
         @media print {
@@ -173,14 +205,19 @@
         </div>
         <hr>
         {{-- Summary Cards --}}
-        <div id="printable-area">
+        <div id="printable-area" class="p-3">
             <div class="row">
                 <div class="col-md-12">
                     <div class="row">
                         <div class="col-md-12 p-2 pb-3">
                             <h3>{{ __('owner.profit_loss.profit_loss_title') }}</h3>
                         </div>
-                        <div class="col-md-4">
+
+                        {{-- Row 1: Revenues & Profit --}}
+                        <div class="col-12 px-3 pb-1">
+                            <div class="section-subtitle">{{ __('owner.profit_loss.total_sales') }} / {{ __('owner.profit_loss.net_profit') }}</div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.total_sales') }}</div>
                                 <div class="value">
@@ -189,14 +226,37 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="stat-card revenue">
-                                <div class="label">{{ __('owner.profit_loss.net_sales') }}</div>
+                        <div class="col-md-3">
+                            <div class="stat-card {{ $f['net_profit'] >= 0 ? 'profit' : 'loss' }}">
+                                <div class="label">{{ __('owner.profit_loss.net_profit') }}</div>
                                 <div class="value">
-                                    {{ number_format($f['net_sales'], 2) }}
+                                    {{ number_format($f['net_profit'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card revenue">
+                                <div class="label">{{ __('owner.profit_loss.owner_share') }} ({{ number_format($f['owner_percent'], 0) }}%)</div>
+                                <div class="value">
+                                    {{ number_format($f['owner_share'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card payroll">
+                                <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['crew_share'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Row 2: Expenses --}}
+                        <div class="col-12 px-3 pb-1 pt-2">
+                            <div class="section-subtitle">{{ __('owner.profit_loss.total_expenses') }}</div>
                         </div>
                         <div class="col-md-4">
                             <div class="stat-card expense">
@@ -221,50 +281,6 @@
                                 <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
                                 <div class="value">
                                     {{ number_format($f['total_expenses'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card {{ $f['net_profit'] >= 0 ? 'profit' : 'loss' }}">
-                                <div class="label">{{ __('owner.profit_loss.net_profit') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['net_profit'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card revenue">
-                                <div class="label">{{ __('owner.generated.owner_ratio') }} ({{ number_format($f['owner_percent'], 0) }}%)</div>
-                                <div class="value">
-                                    {{ number_format($f['owner_share'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['crew_share'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card payroll">
-                                <div class="label">{{ __('owner.profit_loss.crew_count') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['crew_count'], 0) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card {{ $f['per_fisherman'] >= 0 ? 'profit' : 'loss' }}">
-                                <div class="label">{{ __('owner.profit_loss.per_fisherman') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['per_fisherman'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
