@@ -41,6 +41,7 @@
     const expensesByCategory = @json($analytics['expensesByCategory']);
     const expensesByBoat = @json($analytics['expensesByBoat']);
     const monthlyTrends = @json($analytics['monthlyTrends']);
+    const chartLocale = '{{ app()->getLocale() === 'ar' ? 'ar-SA' : 'en-US' }}';
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -57,7 +58,7 @@
             }]
         },
         options: {
-            responsive: false, scrollX: true,
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
@@ -78,7 +79,7 @@
             }]
         },
         options: {
-            responsive: false, scrollX: true,
+            responsive: true,
             maintainAspectRatio: false,
             scales: {
                 y: {
@@ -96,9 +97,13 @@
     new Chart(document.getElementById('monthlyExpenseChart'), {
         type: 'line',
         data: {
-            labels: monthlyTrends.map(m => m.month),
+            labels: monthlyTrends.map(m => {
+                const [year, month] = m.month.split('-');
+                return new Intl.DateTimeFormat(chartLocale, { year: 'numeric', month: 'long' })
+                    .format(new Date(year, month - 1, 1));
+            }),
             datasets: [{
-                    label: 'Amount (SAR)',
+                    label: '{{ __('owner.expenses.sections.analytics.amount_label') }}',
                     data: monthlyTrends.map(m => m.total),
                     backgroundColor: 'rgba(111, 102, 255, 0.3)',
                     borderColor: 'rgba(111, 102, 255, 1)',
@@ -107,7 +112,7 @@
                     pointRadius: 0,
                 },
                 {
-                    label: 'Count',
+                    label: '{{ __('owner.expenses.sections.analytics.count_label') }}',
                     data: monthlyTrends.map(m => m.count),
                     borderColor: 'rgba(75, 192, 192, 0.8)',
                     backgroundColor: 'transparent',
@@ -118,7 +123,7 @@
             ]
         },
         options: {
-            responsive: false, scrollX: true,
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {

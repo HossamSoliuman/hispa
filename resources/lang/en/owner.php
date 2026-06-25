@@ -1508,6 +1508,7 @@ return [
                 'by_boat' => 'Expenses by Boat',
                 'monthly_trends' => 'Monthly Expense Trends',
                 'amount_label' => 'Amount (SAR)',
+                'count_label' => 'Expense Count',
             ],
             'categories' => [
                 'title' => 'Performance by Category',
