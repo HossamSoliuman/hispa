@@ -12,6 +12,12 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $title }}</title>
+    {{-- Same web fonts the owner dashboard loads (Tajawal for Arabic, Roboto for
+         Latin) so the printed report matches the on-screen UI. Browsershot waits
+         for network idle, so these are fully fetched before the PDF renders. --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* Rendered to PDF by Browsershot (headless Chromium), so the full modern
            CSS feature set is available — flexbox, grid, web fonts — and Arabic
@@ -29,7 +35,7 @@
 
         body {
             direction: {{ $isRtl ? 'rtl' : 'ltr' }};
-            font-family: 'Tahoma', 'Segoe UI', 'Noto Naskh Arabic', 'Amiri', 'Arial', sans-serif;
+            font-family: 'Tajawal', 'Roboto', 'Chakra Petch', 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
             color: #1a1a1a;
             background: #fff;
             font-size: 9pt;
