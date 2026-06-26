@@ -4,16 +4,15 @@ namespace App\Service\Owner;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
-use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
+use Spatie\Browsershot\Browsershot;
 
 /**
- * Renders report blade views to a downloadable PDF using mPDF.
+ * Renders report blade views to a downloadable PDF using Spatie Browsershot.
  *
- * Reports were previously opened as a separate HTML page and printed via the
- * browser. They now stream a real PDF download. mPDF is configured for Arabic
- * RTL (auto script/font detection) so the existing report layout renders with
- * correct shaping and direction.
+ * Browsershot drives a headless Chromium (via Puppeteer), so reports render
+ * with the exact fidelity of a real browser: modern CSS (flexbox, grid, web
+ * fonts) and native Arabic shaping / RTL. This replaces the previous mPDF
+ * engine, which could not handle the complex layouts the reports now use.
  */
 class PdfReportService
 {
@@ -37,50 +36,55 @@ class PdfReportService
      */
     public function fromHtml(string $html, string $filename = 'report.pdf', string $disposition = 'attachment'): Response
     {
-        // Safety net: if mPDF is not installed yet, fall back to rendering the
-        // report as an HTML page so reports keep working instead of erroring.
-        if (! class_exists(Mpdf::class)) {
+        // Safety net: if Browsershot is not installed yet, fall back to rendering
+        // the report as an HTML page so reports keep working instead of erroring.
+        if (! class_exists(Browsershot::class)) {
             return response($html);
         }
 
-        $isRtl = app()->getLocale() === 'ar';
+        $pdf = $this->renderer($html)->pdf();
 
-        $tempDir = storage_path('app/mpdf');
-        if (! is_dir($tempDir)) {
-            mkdir($tempDir, 0775, true);
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
+        ]);
+    }
+
+    /**
+     * Build a configured Browsershot instance for the given HTML document.
+     *
+     * Page margins are intentionally driven from the document's own CSS
+     * (@page / the report layout) rather than overridden here, so each report
+     * controls its own geometry. Background graphics (the black section bars,
+     * KPI cells, etc.) are printed via showBackground().
+     */
+    private function renderer(string $html): Browsershot
+    {
+        $browsershot = Browsershot::html($html)
+            ->format('A4')
+            ->showBackground()
+            ->emulateMedia('print')
+            ->waitUntilNetworkIdle()
+            ->timeout((int) config('pdf.timeout', 120));
+
+        if ($nodeBinary = config('pdf.node_binary')) {
+            $browsershot->setNodeBinary($nodeBinary);
         }
 
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => 'A4',
-            'tempDir' => $tempDir,
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'margin_top' => 12,
-            'margin_bottom' => 12,
-            'margin_left' => 10,
-            'margin_right' => 10,
-        ]);
+        if ($npmBinary = config('pdf.npm_binary')) {
+            $browsershot->setNpmBinary($npmBinary);
+        }
 
-        $mpdf->SetDirectionality($isRtl ? 'rtl' : 'ltr');
-        $mpdf->showWatermarkImage = true;
+        if ($chromePath = config('pdf.chrome_path')) {
+            $browsershot->setChromePath($chromePath);
+        }
 
-        // Reports embed images (logo/watermark/QR) as base64 data URIs, so the
-        // HTML easily exceeds PHP's default pcre.backtrack_limit of 1MB. mPDF
-        // parses the whole document with PCRE and throws when that limit is hit,
-        // so raise it for the duration of this render.
-        ini_set('pcre.backtrack_limit', '5000000');
-        ini_set('pcre.recursion_limit', '5000000');
+        $browsershot->setNodeModulePath(config('pdf.node_module_path') ?: base_path('node_modules'));
 
-        $mpdf->WriteHTML($html);
+        if (config('pdf.no_sandbox')) {
+            $browsershot->noSandbox();
+        }
 
-        return response(
-            $mpdf->Output($filename, Destination::STRING_RETURN),
-            200,
-            [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
-            ]
-        );
+        return $browsershot;
     }
 }

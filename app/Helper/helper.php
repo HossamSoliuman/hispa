@@ -285,7 +285,7 @@ function display_string(mixed $value, string $empty = '—'): string
  * Render a report blade view as a PDF response.
  *
  * Wraps the existing report views (the ones built on <x-report-layout>) with
- * mPDF. Defaults to an inline disposition so the report opens as an in-browser
+ * Browsershot (headless Chromium). Defaults to an inline disposition so the report opens as an in-browser
  * preview the user can review before downloading; pass 'attachment' (or use the
  * `?download=1` convention in controllers) to force a download instead.
  *

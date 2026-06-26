@@ -13,19 +13,38 @@
     <meta charset="UTF-8">
     <title>{{ $title }}</title>
     <style>
-        /* This template is rendered to PDF by mPDF, which does not support
-           flexbox / CSS grid, remote web fonts or icon fonts. Layout therefore
-           relies on tables, inline-block and float, and uses mPDF's bundled
-           fonts (auto-selected per script for correct Arabic shaping). */
+        /* Rendered to PDF by Browsershot (headless Chromium), so the full modern
+           CSS feature set is available — flexbox, grid, web fonts — and Arabic
+           shaping / RTL is handled natively by the browser. The legacy table
+           layouts below still work; new reports may use any modern CSS. */
+        @page { size: A4; margin: 12mm 10mm; }
+
         a, a:link, a:visited, a:hover { text-decoration: none; color: inherit; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Force background graphics (black section bars, KPI cells, badges) to
+           print — Browsershot also passes printBackground, this is the belt. */
+        html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
         body {
             direction: {{ $isRtl ? 'rtl' : 'ltr' }};
+            font-family: 'Tahoma', 'Segoe UI', 'Noto Naskh Arabic', 'Amiri', 'Arial', sans-serif;
             color: #1a1a1a;
             background: #fff;
             font-size: 9pt;
             line-height: 1.5;
+        }
+
+        /* Faded full-page watermark (replaces the mPDF <watermarkimage> tag).
+           Fixed so Chromium repeats it on every printed page. */
+        .report-watermark {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            opacity: 0.06;
+            z-index: 0;
         }
 
         @php $startAlign = $isRtl ? 'right' : 'left'; $endAlign = $isRtl ? 'left' : 'right'; @endphp
@@ -245,7 +264,7 @@
         $wmData = file_exists($wmPath) ? 'data:image/png;base64,'.base64_encode(file_get_contents($wmPath)) : '';
     @endphp
     @if(!empty($wmData))
-        <watermarkimage src="{{ $wmData }}" alpha="0.06" />
+        <img class="report-watermark" src="{{ $wmData }}" alt="">
     @endif
 @endif
 
