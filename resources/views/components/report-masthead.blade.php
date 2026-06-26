@@ -39,23 +39,18 @@
 @endphp
 
 <style>
-    /* Company masthead — Chromium (Browsershot) renders this as a normal
-       in-flow block at the top of the document: bold company name + address
-       in the start corner, tax number on the opposite corner (printed
-       reference masthead). Uses flexbox now that the engine is a real browser. */
-    .rmast {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        padding-bottom: 10px;
-        margin-bottom: 4px;
-        border-bottom: 2px solid #1a1a1a;
-    }
-    .rmast-co { display: flex; align-items: center; gap: 12px; text-align: {{ $startAlign }}; }
-    .rmast-logo { max-height: 60px; max-width: 130px; object-fit: contain; }
+    /* Company masthead — table layout (mPDF: no flex/grid). Bold company name +
+       address in the start corner, CR number on the opposite corner (printed
+       reference masthead). */
+    table.rmast { width: 100%; border-collapse: collapse; border-bottom: 2px solid #1a1a1a; margin-bottom: 4px; }
+    table.rmast > tbody > tr > td { border: none; padding: 0 0 10px; vertical-align: top; }
+    td.rmast-co { text-align: {{ $startAlign }}; }
+    td.rmast-meta { text-align: {{ $endAlign }}; width: 165px; }
+    table.rmast-inner { border-collapse: collapse; }
+    table.rmast-inner td { border: none; padding: 0; vertical-align: middle; }
+    td.rmast-logo-cell { padding-{{ $endAlign }}: 12px; }
+    .rmast-logo { max-height: 60px; max-width: 130px; }
     .rmast-co-text { text-align: {{ $startAlign }}; }
-    .rmast-meta { text-align: {{ $endAlign }}; min-width: 165px; display: flex; flex-direction: column; gap: 6px; justify-content: flex-start; }
 
     .rmast-name { font-size: 15pt; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
     .rmast-line { font-size: 8.5pt; color: #555; line-height: 1.6; }
@@ -68,22 +63,28 @@
     .rsubtitle { font-size: 10pt; color: #666; }
 </style>
 
-<div class="rmast">
-    <div class="rmast-co">
-        @if($logoData)<img class="rmast-logo" src="{{ $logoData }}" alt="">@endif
-        <div class="rmast-co-text">
-            @if($companyName)<div class="rmast-name">{{ $companyName }}</div>@endif
-            @if($address)<div class="rmast-line">{!! nl2br(e($address)) !!}</div>@endif
-            @if($phone)<div class="rmast-line">{{ __('owner.reports.tel') }} {{ $phone }}</div>@endif
-        </div>
-    </div>
-    <div class="rmast-meta">
-        @if($crNumber)
-            <div class="rmast-meta-label">{{ __('owner.reports.cr_label') }}</div>
-            <div class="rmast-meta-value">{{ $crNumber }}</div>
-        @endif
-    </div>
-</div>
+<table class="rmast">
+    <tr>
+        <td class="rmast-co">
+            <table class="rmast-inner">
+                <tr>
+                    @if($logoData)<td class="rmast-logo-cell"><img class="rmast-logo" src="{{ $logoData }}" alt=""></td>@endif
+                    <td class="rmast-co-text">
+                        @if($companyName)<div class="rmast-name">{{ $companyName }}</div>@endif
+                        @if($address)<div class="rmast-line">{!! nl2br(e($address)) !!}</div>@endif
+                        @if($phone)<div class="rmast-line">{{ __('owner.reports.tel') }} {{ $phone }}</div>@endif
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td class="rmast-meta">
+            @if($crNumber)
+                <div class="rmast-meta-label">{{ __('owner.reports.cr_label') }}</div>
+                <div class="rmast-meta-value">{{ $crNumber }}</div>
+            @endif
+        </td>
+    </tr>
+</table>
 
 @if($title)
     <div class="rtitle-wrap">

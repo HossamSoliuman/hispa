@@ -4,37 +4,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | PDF Rendering (Browsershot / headless Chromium)
+    | PDF Rendering (mPDF — pure PHP)
     |--------------------------------------------------------------------------
     |
-    | Reports are rendered to PDF with Spatie Browsershot, which drives a
-    | headless Chromium through Puppeteer. Chromium gives full modern CSS
-    | (flexbox, grid, web fonts) and native Arabic shaping / RTL.
-    |
-    | Leave the binary paths null to let Browsershot use the "node" / "npm" on
-    | the system PATH and Puppeteer's own bundled Chromium. Set them explicitly
-    | when the web server runs with a restricted PATH (e.g. Herd, FPM) or when
-    | you want to pin a specific Chrome build.
+    | Reports are rendered to PDF with mPDF, a pure-PHP engine. It needs no
+    | headless browser / Node, so it runs on restricted shared hosting where a
+    | real browser cannot launch. mPDF has first-class Arabic shaping + RTL and
+    | embeds our own TTF fonts so the print matches the on-screen UI.
     |
     */
 
-    'node_binary' => env('PDF_NODE_BINARY'),
-
-    'npm_binary' => env('PDF_NPM_BINARY'),
-
-    'chrome_path' => env('PDF_CHROME_PATH'),
-
-    'node_module_path' => env('PDF_NODE_MODULE_PATH'),
+    /*
+    | Writable scratch directory mPDF uses for its font cache and temp files.
+    | Must be writable by the web server user in every environment.
+    */
+    'temp_dir' => env('PDF_TEMP_DIR', storage_path('app/mpdf')),
 
     /*
-    | Run Chromium with --no-sandbox. Required when rendering as root inside a
-    | container; leave false on a normal desktop / Herd setup.
+    | Directory holding the embedded TTF font files (Tajawal).
     */
-    'no_sandbox' => (bool) env('PDF_NO_SANDBOX', false),
+    'font_dir' => env('PDF_FONT_DIR', resource_path('fonts')),
 
     /*
-    | Hard timeout (seconds) for a single render.
+    | Default font family (must match a key registered in PdfReportService).
     */
-    'timeout' => (int) env('PDF_TIMEOUT', 120),
+    'default_font' => env('PDF_DEFAULT_FONT', 'tajawal'),
+
+    /*
+    | Page margins in millimetres.
+    */
+    'margins' => [
+        'top' => (int) env('PDF_MARGIN_TOP', 12),
+        'bottom' => (int) env('PDF_MARGIN_BOTTOM', 12),
+        'left' => (int) env('PDF_MARGIN_LEFT', 10),
+        'right' => (int) env('PDF_MARGIN_RIGHT', 10),
+    ],
 
 ];

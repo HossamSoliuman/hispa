@@ -23,7 +23,7 @@
     $salesReturns = max($grossSales - $netSales, 0);
 @endphp
 
-<x-report-layout :title="__('owner.month_closing.title')" :document-number="''" :settings="$settings" :qr-code="$settings['qr_code'] ?? ''">
+<x-report-layout :title="__('owner.month_closing.title')" :document-number="''" :settings="$settings" :qr-code="$settings['qr_code'] ?? ''" :printable="true">
     <x-report-masthead :title="__('owner.month_closing.title')" :subtitle="__('owner.month_closing.subtitle')" :settings="$settings" />
 
     {{-- Meta strip --}}

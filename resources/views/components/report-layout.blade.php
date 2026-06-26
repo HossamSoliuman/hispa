@@ -4,6 +4,7 @@
     'documentNumber' => '',
     'settings' => [],
     'qrCode' => '',
+    'printable' => true,
 ])
 
 @php $isRtl = app()->getLocale() == 'ar'; @endphp
@@ -11,18 +12,19 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
+    @if($printable)<meta name="viewport" content="width=device-width, initial-scale=1">@endif
     <title>{{ $title }}</title>
-    {{-- Same web fonts the owner dashboard loads (Tajawal for Arabic, Roboto for
-         Latin) so the printed report matches the on-screen UI. Browsershot waits
-         for network idle, so these are fully fetched before the PDF renders. --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    @if($printable)
+        {{-- Printable preview is rendered by the browser, so load the same web
+             font the dashboard uses to match the on-screen UI. --}}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
     <style>
-        /* Rendered to PDF by Browsershot (headless Chromium), so the full modern
-           CSS feature set is available — flexbox, grid, web fonts — and Arabic
-           shaping / RTL is handled natively by the browser. The legacy table
-           layouts below still work; new reports may use any modern CSS. */
+        /* Rendered on screen and printed by the browser. Bordered tables keep
+           the dense "grid" look consistent in both the screen preview and the
+           printout; Arabic shaping / RTL is handled natively by the browser. */
         @page { size: A4; margin: 12mm 10mm; }
 
         a, a:link, a:visited, a:hover { text-decoration: none; color: inherit; }
@@ -30,7 +32,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         /* Force background graphics (black section bars, KPI cells, badges) to
-           print — Browsershot also passes printBackground, this is the belt. */
+           print instead of being stripped by the browser's print dialog. */
         html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         body {
@@ -264,10 +266,59 @@
         ul.cf-notes { margin: 0; padding-{{ $startAlign }}: 15px; list-style-type: disc; }
         ul.cf-notes li { font-size: 8pt; color: #444; margin-bottom: 5px; line-height: 1.5; }
 
+        @if($printable)
+        /* ───────────────────────────────────────────────────────────────
+           Printable preview mode — the report is served as a normal HTML
+           page the user reviews on screen as an A4 sheet, then prints from
+           the browser ("Print" / "Save as PDF"). Screen styles mimic a PDF
+           viewer; print styles strip the chrome so @page owns the margins.
+           ─────────────────────────────────────────────────────────────── */
+        @media screen {
+            body { background: #525659; padding: 0 0 40px; }
+            .report-toolbar {
+                position: sticky; top: 0; z-index: 50;
+                display: flex; justify-content: center; gap: 10px;
+                padding: 11px; margin-bottom: 22px;
+                background: #fff; border-bottom: 1px solid #d9d9d9;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            }
+            .report-toolbar button {
+                font-family: inherit; font-size: 10pt; font-weight: 700;
+                cursor: pointer; border: none; border-radius: 6px; padding: 9px 24px;
+                display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease;
+            }
+            .report-toolbar .rt-print { background: #1a1a1a; color: #fff; }
+            .report-toolbar .rt-print:hover { background: #000; }
+            .report-toolbar .rt-close { background: #efefef; color: #1a1a1a; border: 1px solid #d9d9d9; }
+            .report-toolbar .rt-close:hover { background: #e3e3e3; }
+            .report-page {
+                width: 210mm; min-height: 297mm; box-sizing: border-box;
+                margin: 0 auto; padding: 12mm 10mm;
+                background: #fff; box-shadow: 0 3px 18px rgba(0, 0, 0, 0.45);
+            }
+        }
+        @media print {
+            .report-toolbar { display: none !important; }
+            .report-page { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; background: transparent; }
+            body { background: #fff; padding: 0; }
+        }
+        @endif
+
         {{ $extraStyles ?? '' }}
     </style>
 </head>
 <body>
+
+@if($printable)
+    <div class="report-toolbar">
+        <button type="button" class="rt-print" onclick="window.print()">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8v5zm4-7a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM18 3H6v4h12V3z"/></svg>
+            {{ __('owner.reports.print') }}
+        </button>
+        <button type="button" class="rt-close" onclick="window.close()">{{ __('owner.reports.close') }}</button>
+    </div>
+    <div class="report-page">
+@endif
 
 @if(!empty($settings['watermark']))
     @php
@@ -280,6 +331,10 @@
 @endif
 
 {{ $slot }}
+
+@if($printable)
+    </div>
+@endif
 
 </body>
 </html>

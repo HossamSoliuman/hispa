@@ -284,20 +284,20 @@ function display_string(mixed $value, string $empty = '—'): string
 }
 
 /**
- * Render a report blade view as a PDF response.
+ * Render a report blade view as a printable HTML response.
  *
- * Wraps the existing report views (the ones built on <x-report-layout>) with
- * Browsershot (headless Chromium). Defaults to an inline disposition so the report opens as an in-browser
- * preview the user can review before downloading; pass 'attachment' (or use the
- * `?download=1` convention in controllers) to force a download instead.
+ * Owner reports (built on <x-report-layout>) are no longer rasterised to a PDF
+ * on the server. The view is returned as a self-contained HTML page that the
+ * user previews on screen as an A4 sheet and then prints from the browser
+ * ("Print" / "Save as PDF"). The $filename / $disposition arguments are kept
+ * for call-site compatibility but are no longer used.
  *
  * @param  \Illuminate\Contracts\View\View|string  $view
  * @param  array<string, mixed>  $data
- * @param  'inline'|'attachment'  $disposition
  */
 function pdf_report($view, array $data = [], string $filename = 'report.pdf', string $disposition = 'inline'): \Illuminate\Http\Response
 {
-    return app(\App\Service\Owner\PdfReportService::class)->download($view, $data, $filename, $disposition);
+    return app(\App\Service\Owner\PdfReportService::class)->printable($view, $data);
 }
 
 /**

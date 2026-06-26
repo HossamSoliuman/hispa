@@ -1696,6 +1696,8 @@ return [
         'record_label' => 'السجل الزراعي',
         'website_label' => 'الموقع الإلكتروني',
         'tel' => 'هاتف',
+        'print' => 'طباعة',
+        'close' => 'إغلاق',
         'page_label' => 'الصفحة',
         'page_of' => 'من',
         'amount_in_words' => 'المبلغ كتابة',

@@ -93,10 +93,10 @@ class MonthClosingController extends Controller
         $monthClosing->load('dues', 'boat');
         $this->linkPayrollPayments($monthClosing);
 
-        return pdf_report(view('owner.month_closing.print', [
+        return view('owner.month_closing.print', [
             'closing' => $monthClosing,
             'settings' => $this->companySettings(),
-        ]), [], 'month-closing.pdf');
+        ]);
     }
 
     public function reopen(MonthClosing $monthClosing)

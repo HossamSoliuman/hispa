@@ -1696,6 +1696,8 @@ return [
         'record_label' => 'Agricultural Rec.',
         'website_label' => 'Website',
         'tel' => 'Tel',
+        'print' => 'Print',
+        'close' => 'Close',
         'page_label' => 'Page',
         'page_of' => 'of',
         'amount_in_words' => 'Amount in words',
