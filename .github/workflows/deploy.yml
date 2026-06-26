@@ -21,4 +21,6 @@ jobs:
             cd public_html/hispa
             git pull origin main
             composer install 
+            npm install
+            npm run build
             php artisan migrate 
