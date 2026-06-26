@@ -14,6 +14,13 @@
     $dues = $closing->dues;
     $operatingExpenses = (float) $closing->general_expenses;
     $companyName = $settings['title'] ?? ($settings['company_name'] ?? ($settings['name'] ?? ''));
+
+    $grossSales = (float) $closing->gross_sales;
+    $netSales = (float) $closing->net_sales;
+    if ($netSales <= 0 && $grossSales > 0) {
+        $netSales = $grossSales;
+    }
+    $salesReturns = max($grossSales - $netSales, 0);
 @endphp
 
 <x-report-layout :title="__('owner.month_closing.title')" :document-number="''" :settings="$settings" :qr-code="$settings['qr_code'] ?? ''">
@@ -49,12 +56,12 @@
             <td class="sum-head">5. {{ __('owner.month_closing.report.cards.net_distributable') }}</td>
         </tr>
         <tr>
-            {{-- Card 1 — sales → net owner revenue --}}
+            {{-- Card 1 — gross sales → returns → net sales --}}
             <td class="sum-card">
                 <table class="sum-body">
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</td><td class="sum-v">{{ number_format((float) $closing->gross_sales, 2) }}</td></tr>
-                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
-                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</td><td class="sum-v">{{ number_format($grossSales, 2) }}</td></tr>
+                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.returns') }}</td><td class="sum-v">{{ number_format($salesReturns, 2) }}</td></tr>
+                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.net_sales') }}</td><td class="sum-v">{{ number_format($netSales, 2) }}</td></tr>
                 </table>
             </td>
             {{-- Card 2 — expenses --}}
@@ -148,19 +155,19 @@
     <table class="close-footer">
         <tr>
             <td class="cf-col">
-                <div class="cf-card">
-                    <div class="cf-head">{{ __('owner.month_closing.report.closing_summary_title') }}</div>
-                    <div class="cf-body">
-                        <table class="cf-kv">
-                            <tr><td class="cf-k">{{ __('owner.month_closing.report.crew_share') }}</td><td class="cf-v">{{ number_format((float) $closing->crew_share, 2) }}</td></tr>
-                            <tr><td class="cf-k">{{ __('owner.month_closing.report.owner_share') }}</td><td class="cf-v">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
-                            <tr><td class="cf-k">{{ __('owner.month_closing.report.share_value') }}</td><td class="cf-v">{{ number_format((float) $closing->share_value, 2) }}</td></tr>
-                            <tr><td class="cf-k">{{ __('owner.month_closing.report.total_advances') }}</td><td class="cf-v">{{ number_format((float) $dues->sum('advances'), 2) }}</td></tr>
-                            <tr><td class="cf-k">{{ __('owner.month_closing.report.total_paid') }}</td><td class="cf-v">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td></tr>
-                            <tr class="cf-total"><td class="cf-k">{{ __('owner.month_closing.report.total_net_due') }}</td><td class="cf-v">{{ number_format((float) $dues->sum('remaining'), 2) }}</td></tr>
-                        </table>
-                    </div>
-                </div>
+                <table class="report-table info-box">
+                    <thead>
+                        <tr><th colspan="2">{{ __('owner.month_closing.report.closing_summary_title') }}</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="col-text" style="width:64%">{{ __('owner.month_closing.report.crew_share') }}</td><td class="col-num" style="width:36%">{{ number_format((float) $closing->crew_share, 2) }}</td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.owner_share') }}</td><td class="col-num">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.share_value') }}</td><td class="col-num">{{ number_format((float) $closing->share_value, 2) }}</td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.total_advances') }}</td><td class="col-num">{{ number_format((float) $dues->sum('advances'), 2) }}</td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.total_paid') }}</td><td class="col-num">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td></tr>
+                        <tr class="net-row"><td class="col-text">{{ __('owner.month_closing.report.total_net_due') }}</td><td class="col-num">{{ number_format((float) $dues->sum('remaining'), 2) }}</td></tr>
+                    </tbody>
+                </table>
             </td>
             <td class="cf-gap"></td>
             <td class="cf-col">
@@ -173,6 +180,8 @@
                         <div class="cf-signoff-line">..................</div>
                         <div class="cf-signoff-label">{{ __('owner.month_closing.report.signoff_owner') }}</div>
                         <div class="cf-signoff-line">..................</div>
+                        <div class="cf-signoff-label">{{ __('owner.month_closing.report.filter_closing_date') }}</div>
+                        <div class="cf-signoff-date">{{ optional($closing->closed_at)->format('d/m/Y') ?? '—' }}</div>
                     </div>
                 </div>
             </td>

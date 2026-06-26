@@ -89,13 +89,18 @@
             border: 1px solid #cfcfcf; padding: 4px 6px; font-size: 8.5pt;
             word-wrap: break-word; overflow-wrap: break-word; vertical-align: middle; text-align: center; color: #1a1a1a;
         }
-        table.report-table thead th { background: #1a1a1a; color: #fff; font-weight: 700; border-color: #fff; }
+        table.report-table thead th { background: #ededed; color: #1a1a1a; font-weight: 700; border-color: #cfcfcf; }
         table.report-table tbody th { font-weight: 700; color: #1a1a1a; }
         table.report-table tfoot td, table.report-table tfoot th {
             background: #f2f2f2; font-weight: 700; color: #1a1a1a; border-top: 1.5px solid #1a1a1a;
         }
         table.report-table tr.net-row th, table.report-table tr.net-row td {
             background: #1a1a1a; color: #fff; font-weight: 700; border-color: #fff;
+        }
+        /* Info box variant — swapped emphasis: black title bar, light total row */
+        table.report-table.info-box thead th { background: #1a1a1a; color: #fff; border-color: #fff; }
+        table.report-table.info-box tr.net-row th, table.report-table.info-box tr.net-row td {
+            background: #ededed; color: #1a1a1a; border-color: #cfcfcf;
         }
 
         /* Column alignment: text labels start-aligned, numbers end-aligned */
@@ -148,7 +153,7 @@
 
         /* Generic tables (legacy reports) — bordered grid with black header bar */
         table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 8.5pt; }
-        thead th { background: #1a1a1a; padding: 5px 6px; font-weight: 700; text-align: center; color: #fff; border: 1px solid #fff; }
+        thead th { background: #ededed; padding: 5px 6px; font-weight: 700; text-align: center; color: #1a1a1a; border: 1px solid #cfcfcf; }
         tbody td { padding: 4px 6px; text-align: center; color: #1a1a1a; border: 1px solid #cfcfcf; }
         tfoot td, tfoot th { padding: 4px 6px; text-align: center; font-weight: 700; color: #1a1a1a; background: #f2f2f2; border: 1px solid #cfcfcf; border-top: 1.5px solid #1a1a1a; }
 

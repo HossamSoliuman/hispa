@@ -256,7 +256,9 @@ function ownerCompanySettings(array $overrides = []): array
         'email' => $company?->email ?? '',
         'logo' => $company?->logo ?? '',
         'cr_number' => $company?->cr_number ?? '',
+        'record_number' => $company?->record_number ?? '',
         'vat_number' => $company?->vat_number ?? '',
+        'website' => $company?->website ?? '',
     ], $overrides);
 }
 

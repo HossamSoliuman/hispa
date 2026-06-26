@@ -7,14 +7,35 @@
 @php
     $isRtl = app()->getLocale() === 'ar';
 
-    $companyName = $settings['title'] ?? ($settings['company_name'] ?? '');
+    $companyName = $settings['company_name'] ?? '';
     $address = $settings['address'] ?? '';
     $phone = $settings['phone'] ?? '';
     $email = $settings['email'] ?? '';
+    $website = $settings['website'] ?? '';
+    $crNumber = $settings['cr_number'] ?? '';
+    $recordNumber = $settings['record_number'] ?? '';
     $vat = $settings['vat_number'] ?? '';
 
     $startAlign = $isRtl ? 'right' : 'left';
     $endAlign = $isRtl ? 'left' : 'right';
+
+    // Resolve the company logo to an inline data URI: Browsershot renders from
+    // an HTML string with no base URL, so relative <img src> paths cannot load.
+    // Stored logos live on the public disk; absolute URLs / data URIs pass through.
+    $logo = $settings['logo'] ?? '';
+    $logoData = '';
+    if ($logo) {
+        if (\Illuminate\Support\Str::startsWith($logo, ['data:', 'http://', 'https://'])) {
+            $logoData = $logo;
+        } else {
+            $logoPath = \Illuminate\Support\Facades\Storage::disk('public')->path($logo);
+            if (is_file($logoPath)) {
+                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                $mime = ['svg' => 'image/svg+xml', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp'][$ext] ?? 'image/jpeg';
+                $logoData = 'data:'.$mime.';base64,'.base64_encode((string) file_get_contents($logoPath));
+            }
+        }
+    }
 @endphp
 
 <style>
@@ -27,10 +48,14 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 16px;
-        padding-bottom: 12px;
+        padding-bottom: 10px;
+        margin-bottom: 4px;
+        border-bottom: 2px solid #1a1a1a;
     }
-    .rmast-co { text-align: {{ $startAlign }}; }
-    .rmast-meta { text-align: {{ $endAlign }}; min-width: 165px; }
+    .rmast-co { display: flex; align-items: center; gap: 12px; text-align: {{ $startAlign }}; }
+    .rmast-logo { max-height: 60px; max-width: 130px; object-fit: contain; }
+    .rmast-co-text { text-align: {{ $startAlign }}; }
+    .rmast-meta { text-align: {{ $endAlign }}; min-width: 165px; display: flex; flex-direction: column; gap: 6px; justify-content: flex-start; }
 
     .rmast-name { font-size: 15pt; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
     .rmast-line { font-size: 8.5pt; color: #555; line-height: 1.6; }
@@ -45,15 +70,17 @@
 
 <div class="rmast">
     <div class="rmast-co">
-        @if($companyName)<div class="rmast-name">{{ $companyName }}</div>@endif
-        @if($address)<div class="rmast-line">{!! nl2br(e($address)) !!}</div>@endif
-        @if($phone)<div class="rmast-line">{{ __('owner.reports.tel') }} {{ $phone }}</div>@endif
-        @if($email)<div class="rmast-line">{{ $email }}</div>@endif
+        @if($logoData)<img class="rmast-logo" src="{{ $logoData }}" alt="">@endif
+        <div class="rmast-co-text">
+            @if($companyName)<div class="rmast-name">{{ $companyName }}</div>@endif
+            @if($address)<div class="rmast-line">{!! nl2br(e($address)) !!}</div>@endif
+            @if($phone)<div class="rmast-line">{{ __('owner.reports.tel') }} {{ $phone }}</div>@endif
+        </div>
     </div>
     <div class="rmast-meta">
-        @if($vat)
-            <div class="rmast-meta-label">{{ __('owner.reports.vat_label') }}</div>
-            <div class="rmast-meta-value">{{ $vat }}</div>
+        @if($crNumber)
+            <div class="rmast-meta-label">{{ __('owner.reports.cr_label') }}</div>
+            <div class="rmast-meta-value">{{ $crNumber }}</div>
         @endif
     </div>
 </div>
