@@ -62,13 +62,11 @@
         </a>
     @endif
 
-    {{-- Edit trip (any non-terminal trip; allows updating the end date and other details) --}}
-    @if (! $trip->status->isTerminal())
-        <a href="{{ route('owner.trips.edit', $trip->id) }}"
-           class="btn btn-sm btn-outline-secondary" title="{{ __('owner.trips.edit_trip') }}">
-            <i class="bi bi-pencil"></i>
-        </a>
-    @endif
+    {{-- Edit trip (always available, even once done/sold; allows updating the name, end date and other details) --}}
+    <a href="{{ route('owner.trips.edit', $trip->id) }}"
+       class="btn btn-sm btn-outline-secondary" title="{{ __('owner.trips.edit_trip') }}">
+        <i class="bi bi-pencil"></i>
+    </a>
 
     {{-- Print (always visible) --}}
     <a href="{{ route('owner.reports.print.trip', $trip->id) }}" target="_blank"

@@ -150,6 +150,11 @@ class TripController extends Controller
             'notes' => $request->notes,
             'updated_by' => auth()->user()->name ?? 'Owner',
         ];
+
+        if ($trip->actual_end_datetime !== null) {
+            $data['actual_end_datetime'] = $request->actual_end_date;
+        }
+
         $data = fillBoatAndCrewData($data, $request->boat_id, $request->captain_id);
 
         $trip->update($data);

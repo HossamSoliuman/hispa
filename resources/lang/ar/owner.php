@@ -295,6 +295,7 @@ return [
         'license_number' => 'رقم التصريح',
         'start_date' => 'بدء الرحلة',
         'end_date' => 'انتهاء الرحلة',
+        'actual_end_date' => 'تاريخ الانتهاء الفعلي',
         'notes' => 'ملاحظات',
         'show' => [
             'title' => 'عرض تفاصيل الرحلة',

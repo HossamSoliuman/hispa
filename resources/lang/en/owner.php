@@ -334,6 +334,7 @@ return [
         'license_number' => 'Permit Number',
         'start_date' => 'Trip Start',
         'end_date' => 'Trip End',
+        'actual_end_date' => 'Actual End Date',
         'notes' => 'Notes',
         'create' => [
             'title' => 'Add New Trip',

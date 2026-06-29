@@ -71,6 +71,15 @@
                                 @error('end_date') <span class="text-danger error">{{ $message }}</span> @enderror
                             </div>
                         </div>
+                        @if ($trip->actual_end_datetime !== null)
+                            <div class="col-xl-3">
+                                <div class="form-group">
+                                    <label class="form-label">{{ __('owner.trips.actual_end_date') }}</label>
+                                    <input type="datetime-local" name="actual_end_date" value="{{ old('actual_end_date', optional($trip->actual_end_datetime)->format('Y-m-d\TH:i')) }}" class="form-control">
+                                    @error('actual_end_date') <span class="text-danger error">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                        @endif
                         <div class="col-xl-3">
                             <div class="form-group">
                                 <label class="form-label">{{ __('owner.trips.captain_name') }} <span class="text-danger">*</span></label>

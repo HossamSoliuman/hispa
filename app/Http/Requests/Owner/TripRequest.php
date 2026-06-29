@@ -31,6 +31,7 @@ class TripRequest extends FormRequest
             'start_date' => 'required|date_format:Y-m-d\TH:i',
             'duration' => 'nullable|integer|min:1',
             'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
+            'actual_end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'owner_id' => 'required|integer|exists:users,id',
             'captain_id' => 'required|integer|exists:users,id',
             'boat_id' => 'required|numeric|exists:boats,id',
