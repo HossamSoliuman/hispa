@@ -332,39 +332,29 @@ class CatchController extends Controller
     {
         $catch = $this->ownerCatchQuery()->with('trip')->findOrFail($id);
 
-        try {
-            DB::beginTransaction();
+        $trip = $catch->trip;
 
-            $trip = $catch->trip;
+        $saleIds = Sale::withTrashed()
+            ->where('trip_id', $trip?->id)
+            ->pluck('id');
 
-            $saleIds = Sale::withTrashed()
-                ->where('trip_id', $trip?->id)
-                ->pluck('id');
-
-            if ($saleIds->isNotEmpty()) {
-                if (Schema::hasTable('payments')) {
-                    DB::table('payments')->whereIn('sale_id', $saleIds)->delete();
-                }
-                SaleDetail::whereIn('sale_id', $saleIds)->delete();
-                Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
+        if ($saleIds->isNotEmpty()) {
+            if (Schema::hasTable('payments')) {
+                DB::table('payments')->whereIn('sale_id', $saleIds)->delete();
             }
-
-            CatchDetail::where('catch_id', $catch->id)->delete();
-            FishQuantityStock::where('catch_id', $catch->id)->delete();
-
-            $catch->delete();
-
-            if ($trip && in_array($trip->status, [TripStatus::ReadyToSell, TripStatus::Counted], true)) {
-                $trip->update(['status' => TripStatus::Finished]);
-            }
-
-            DB::commit();
-
-            return response()->json(['message' => 'تم حذف المصيد والفواتير المرتبطة به بنجاح']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json(['message' => $e->getMessage()], 500);
+            SaleDetail::whereIn('sale_id', $saleIds)->delete();
+            Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
         }
+
+        CatchDetail::where('catch_id', $catch->id)->delete();
+        FishQuantityStock::where('catch_id', $catch->id)->delete();
+
+        CatchModel::where('id', $catch->id)->delete();
+
+        if ($trip && in_array($trip->status, [TripStatus::ReadyToSell, TripStatus::Counted], true)) {
+            $trip->update(['status' => TripStatus::Finished]);
+        }
+
+        return response()->json(['message' => 'تم حذف المصيد والفواتير المرتبطة به بنجاح']);
     }
 }
