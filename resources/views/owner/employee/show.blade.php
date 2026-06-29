@@ -149,4 +149,8 @@
 
         </div>
     </div>
+
+    {{-- Advances (السلف) --}}
+    @include('owner.crew-advances._profile', ['user' => $user])
+    @include('owner.crew-advances._modal', ['people' => collect([$user]), 'selectedUserId' => $user->id])
 @endsection

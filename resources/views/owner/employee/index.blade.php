@@ -55,12 +55,16 @@
         </div>
 
 
-        <div class="ms-auto">
+        <div class="ms-auto d-flex gap-2">
+        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#addAdvanceModal"><i
+            class="fa fa-money-bill-wave fa-fw me-1"></i>{{ __('owner.crew_advances.add') }}</button>
         <a href="{{route('owner.employee.create')}}"  class="btn btn-outline-theme"><i
             class="fa fa-plus-circle btn-success fa-fw me-1"></i>{{ __('owner.employee.add_new') }}</a>
         </div>
 
     </div>
+
+    @include('owner.crew-advances._modal', ['people' => $advancePeople ?? collect()])
 
 
     <div class="row">

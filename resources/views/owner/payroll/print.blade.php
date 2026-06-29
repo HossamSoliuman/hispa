@@ -4,6 +4,7 @@
     $title = $typeLabel.' - '.$payroll->month.'/'.$payroll->year;
     $totalIncrease = (float) $payroll->details->sum('increase');
     $totalDeduction = (float) $payroll->details->sum('deduction');
+    $totalAdvances = (float) $payroll->details->sum('advances');
     $totalNet = (float) $payroll->details->sum('final_salary');
 @endphp
 <x-report-layout
@@ -79,6 +80,7 @@
                 @endif
                 <th>{{ __('owner.generated.increase') }}</th>
                 <th>{{ __('owner.generated.deduction') }}</th>
+                <th>{{ __('owner.payrolls.advances_col') }}</th>
                 <th>{{ __('owner.expenses.show.notes') }}</th>
                 <th>{{ __('owner.generated.net') }}</th>
                 <th>{{ __('owner.payrolls.payment_col') }}</th>
@@ -97,6 +99,7 @@
                     @endif
                     <td class="text-success">{{ number_format($detail->increase ?? 0, 2) }}</td>
                     <td class="text-danger">{{ number_format($detail->deduction ?? 0, 2) }}</td>
+                    <td class="text-danger">{{ number_format($detail->advances ?? 0, 2) }}</td>
                     <td>{{ $detail->note ?: '-' }}</td>
                     <td style="font-weight: bold;">{{ number_format($detail->final_salary ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
                     <td>
@@ -121,6 +124,11 @@
         <div class="summary-row">
             <span>{{ __('owner.generated.deduction') }}:</span>
             <span>- {{ number_format($totalDeduction, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
+        </div>
+
+        <div class="summary-row">
+            <span>{{ __('owner.payrolls.advances_col') }}:</span>
+            <span>- {{ number_format($totalAdvances, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
         </div>
 
         <div class="summary-row">

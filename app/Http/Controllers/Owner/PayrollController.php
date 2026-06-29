@@ -115,8 +115,32 @@ class PayrollController extends Controller
     public function edit($id)
     {
         $payroll = $this->findOwnerPayroll($id);
+        $this->refreshUnpaidAdvances($payroll);
 
         return view('owner.payroll.edit', compact('payroll'));
+    }
+
+    /**
+     * Re-sync each not-yet-paid row's advances (سلف) with the advances recorded
+     * for that month, so advances added after the payroll was generated still
+     * reflect in the net. Paid rows are frozen and left untouched.
+     */
+    private function refreshUnpaidAdvances(PayrollModel $payroll): void
+    {
+        $details = $payroll->details()->where('is_paid', false)->get();
+
+        foreach ($details as $detail) {
+            $detail->advances = $this->service->monthlyAdvancesForUser(
+                (int) $detail->user_id,
+                (int) $payroll->owner_id,
+                (int) $payroll->year,
+                (int) $payroll->month,
+            );
+            $detail->final_salary = $this->detailFinalSalary($detail, (float) $detail->increase, (float) $detail->deduction);
+            $detail->save();
+        }
+
+        $payroll->load('details', 'details.user');
     }
 
     /**
@@ -214,7 +238,7 @@ class PayrollController extends Controller
             ? (float) $detail->captins_amount / (int) $detail->captins_count
             : 0.0;
 
-        return round($base + $increase - $deduction, 2);
+        return round($base + $increase - $deduction - (float) $detail->advances, 2);
     }
 
     /**

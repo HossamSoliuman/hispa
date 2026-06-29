@@ -9,6 +9,7 @@ use App\Http\Controllers\Owner\CaptainController;
 use App\Http\Controllers\Owner\CatchController;
 use App\Http\Controllers\Owner\CategoryController;
 use App\Http\Controllers\Owner\CityController;
+use App\Http\Controllers\Owner\CrewAdvanceController;
 use App\Http\Controllers\Owner\CrewCheckController;
 use App\Http\Controllers\Owner\CrewController;
 use App\Http\Controllers\Owner\CustomersController;
@@ -156,6 +157,10 @@ Route::group([
         Route::get('/getCrewData', [CrewController::class, 'getCrewData'])->name('getCrewData');
         // Data for a single crew member (used by owner.crew.show page)
         Route::get('/crew/{id}/data', [CrewController::class, 'showCrewData'])->name('showCrewData');
+
+        // crew/captain/employee cash advances (سلف)
+        Route::post('/crew-advances', [CrewAdvanceController::class, 'store'])->name('crew-advances.store');
+        Route::delete('/crew-advances/{crewAdvance}', [CrewAdvanceController::class, 'destroy'])->name('crew-advances.destroy');
 
         // boats
         Route::get('/boats/{boat}/crew', [BoatController::class, 'crew'])->name('boats.crew');

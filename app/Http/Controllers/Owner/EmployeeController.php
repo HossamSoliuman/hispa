@@ -24,10 +24,12 @@ class EmployeeController extends Controller
 
     public function index()
     {
+        $advancePeople = User::EmployeeRole()
+            ->where('owner_id', auth()->id())
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        $request['guard'] = 'owner';
-
-        return $this->rep->getList($request);
+        return view('owner.employee.index', compact('advancePeople'));
     }
 
     public function getEmployeeData(Request $request)
@@ -53,6 +55,8 @@ class EmployeeController extends Controller
         if (! $user) {
             return redirect()->back()->with(['error' => 'الصفحة غير موجودة']);
         }
+
+        $user->load(['advances' => fn ($q) => $q->where('owner_id', auth()->id())->latest('date')]);
 
         return view('owner.employee.show', compact('user'));
     }

@@ -3,6 +3,7 @@
 namespace App\Service\Owner;
 
 use App\Models\Boat;
+use App\Models\CrewAdvance;
 use App\Models\Expense;
 use App\Models\Payroll;
 use App\Models\PayrollDetailsModel;
@@ -122,13 +123,16 @@ class PayrollService
                     ->where('salary_type', 'percentage')
                     ->where('boat_id', $user->boat_id)
                     ->count();
-                $final_salary = $total_captins > 0 ? ($total_captins_salary / $total_captins) : 0;
+                $perHead = $total_captins > 0 ? ($total_captins_salary / $total_captins) : 0;
+                $advances = $this->monthlyAdvancesForUser($user->id, $ownerId, $year, $month);
+                $final_salary = $perHead - $advances;
                 $payrollDetail = PayrollDetailsModel::create([
                     'payroll_id' => $payroll->id,
                     'user_id' => $user->id,
                     'base_salary' => $base_salary,
                     'percentage' => $percentage,
                     'sales_amount' => $sales_amount,
+                    'advances' => $advances,
                     'final_salary' => $final_salary,
                     'captins_amount' => $total_captins_salary,
                     'captins_count' => $total_captins,
@@ -137,6 +141,19 @@ class PayrollService
         }
 
         return PayrollModel::with('details', 'details.user')->find($payroll->id);
+    }
+
+    /**
+     * Total cash advances (سلف) taken by a user within a given payroll month.
+     * Deducted from the member's percentage payroll net pay.
+     */
+    public function monthlyAdvancesForUser(int $userId, int $ownerId, int $year, int $month): float
+    {
+        return (float) CrewAdvance::where('user_id', $userId)
+            ->where('owner_id', $ownerId)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->sum('amount');
     }
 
     public function calculatePercentageSalary(User $user, int $year, int $month)

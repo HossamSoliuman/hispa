@@ -37,9 +37,12 @@ class CaptainController extends Controller
 
     public function index(Request $request)
     {
-        $request['guard'] = 'owner';
+        $advancePeople = User::CaptainRole()
+            ->where('owner_id', auth()->id())
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        return $this->rep->getList($request);
+        return view('owner.captain.index', compact('advancePeople'));
     }
 
     public function getCaptainData(Request $request)
@@ -103,6 +106,8 @@ class CaptainController extends Controller
             'total_trips' => $tripCount,
             'corrected_items' => $query->boat->stocks->count(),
         ];
+
+        $user->load(['advances' => fn ($q) => $q->where('owner_id', auth()->id())->latest('date')]);
 
         return view('owner.captain.show', compact('user', 'stats'));
     }

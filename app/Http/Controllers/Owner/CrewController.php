@@ -36,10 +36,12 @@ class CrewController extends Controller
 
     public function index()
     {
+        $advancePeople = User::CrewRole()
+            ->where('owner_id', auth()->id())
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        $request['guard'] = 'owner';
-
-        return $this->rep->getList($request);
+        return view('owner.crew.index', compact('advancePeople'));
     }
 
     public function getCrewData(Request $request)
@@ -97,6 +99,8 @@ class CrewController extends Controller
         $stats = (object) [
             'total_trips' => $tripCount,
         ];
+
+        $user->load(['advances' => fn ($q) => $q->where('owner_id', auth()->id())->latest('date')]);
 
         return view('owner.crew.show', compact('user', 'stats'));
     }

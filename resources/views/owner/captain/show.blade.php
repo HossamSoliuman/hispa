@@ -201,6 +201,11 @@
     </div>
 
 
+    {{-- Advances (السلف) --}}
+    @include('owner.crew-advances._profile', ['user' => $user])
+    @include('owner.crew-advances._modal', ['people' => collect([$user]), 'selectedUserId' => $user->id])
+
+
     {{-- Sales Table --}}
     <div class="">
         <div class="card-header bg-primary text-white p-2 mb-2">

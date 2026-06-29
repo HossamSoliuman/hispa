@@ -349,6 +349,7 @@ class CatchController extends Controller
 
             CatchDetail::where('catch_id', $catch->id)->delete();
             FishQuantityStock::where('catch_id', $catch->id)->delete();
+
             $catch->delete();
 
             if ($trip && in_array($trip->status, [TripStatus::ReadyToSell, TripStatus::Counted], true)) {

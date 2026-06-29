@@ -262,6 +262,14 @@ class User extends Authenticatable
         return $this->hasMany(Contact::class);
     }
 
+    /**
+     * Cash advances (سلف) recorded against this crew member / captain / employee.
+     */
+    public function advances(): HasMany
+    {
+        return $this->hasMany(CrewAdvance::class, 'user_id');
+    }
+
     public function getRelationNames(): array
     {
         return [
