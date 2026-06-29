@@ -105,7 +105,6 @@
                                         <th>{{ __('owner.generated.fishermen_count') }}</th>
                                         <th>{{ __('owner.generated.fisherman_percentage') }}</th>
                                         <th>{{ __('owner.generated.increase') }}</th>
-                                        <th>{{ __('owner.generated.deduction') }}</th>
                                         <th>{{ __('owner.expenses.show.notes') }}</th>
                                         <th>{{ __('owner.payrolls.advances_col') }}</th>
                                         <th>{{ __('owner.generated.net') }}</th>
@@ -132,7 +131,6 @@
                                             <td>{{ (int) $d->captins_count }}</td>
                                             <td>{{ $perHead }}</td>
                                             <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
-                                            <td><input type="number" name="details[{{ $looop }}][deduction]" class="form-control deduction" value="{{ $d->deduction }}" @readonly($d->is_paid)></td>
                                             <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
                                             <td><input type="number" class="form-control advances text-danger" value="{{ (float) $d->advances }}" readonly></td>
                                             <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
@@ -158,7 +156,6 @@
                                             <th>{{ __('owner.generated.fishermen_count') }}</th>
                                             <th>{{ __('owner.generated.fisherman_percentage') }}</th>
                                             <th>{{ __('owner.generated.increase') }}</th>
-                                            <th>{{ __('owner.generated.deduction') }}</th>
                                             <th>{{ __('owner.expenses.show.notes') }}</th>
                                             <th>{{ __('owner.generated.net') }}</th>
                                             <th>{{ __('owner.payrolls.payment_col') }}</th>
@@ -183,7 +180,6 @@
                                                 <td>{{ (int) $d->captins_count }}</td>
                                                 <td>{{ $perHead }}</td>
                                                 <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
-                                                <td><input type="number" name="details[{{ $looop }}][deduction]" class="form-control deduction" value="{{ $d->deduction }}" @readonly($d->is_paid)></td>
                                                 <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
                                                 <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
                                                 <td class="payment-cell">
@@ -237,25 +233,22 @@
             },
         };
 
-        // Live net = base (+ increase - deduction) for editable rows.
+        // Live net = base (+ increase - advances) for editable rows.
         document.querySelectorAll('tbody tr').forEach(row => {
             const baseInput = row.querySelector('.base');
             const increaseInput = row.querySelector('.increase');
-            const deductionInput = row.querySelector('.deduction');
             const advancesInput = row.querySelector('.advances');
             const netSpan = row.querySelector('.net_salary');
-            if (!baseInput || !increaseInput || !deductionInput || !netSpan) return;
+            if (!baseInput || !increaseInput || !netSpan) return;
 
             const base = parseFloat(baseInput.value) || 0;
             const advances = parseFloat(advancesInput?.value) || 0;
             const updateNet = () => {
                 const increase = parseFloat(increaseInput.value) || 0;
-                const deduction = parseFloat(deductionInput.value) || 0;
-                netSpan.textContent = (base + increase - deduction - advances).toFixed(2);
+                netSpan.textContent = (base + increase - advances).toFixed(2);
             };
 
             increaseInput.addEventListener('input', updateNet);
-            deductionInput.addEventListener('input', updateNet);
         });
 
         // Per-person pay.
@@ -283,11 +276,10 @@
                     data: {
                         _token: PAYROLL.csrf,
                         increase: row.find('.increase').val() || 0,
-                        deduction: row.find('.deduction').val() || 0,
                         note: row.find('.note').val() || '',
                     },
                     success: function(res) {
-                        row.find('.increase, .deduction, .note').prop('readonly', true);
+                        row.find('.increase, .note').prop('readonly', true);
                         row.find('.net_salary').text(res.final_salary);
                         btn.closest('.payment-cell').html(
                             '<span class="badge bg-success">' + PAYROLL.txt.paid + '</span>' +
