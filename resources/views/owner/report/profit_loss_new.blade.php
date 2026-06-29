@@ -213,11 +213,8 @@
                             <h3>{{ __('owner.profit_loss.profit_loss_title') }}</h3>
                         </div>
 
-                        {{-- Row 1: Revenues & Profit --}}
-                        <div class="col-12 px-3 pb-1">
-                            <div class="section-subtitle">{{ __('owner.profit_loss.total_sales') }} / {{ __('owner.profit_loss.net_profit') }}</div>
-                        </div>
-                        <div class="col-md-3">
+                        {{-- Card 1: Total Sales --}}
+                        <div class="col-md-4">
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.total_sales') }}</div>
                                 <div class="value">
@@ -226,7 +223,31 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+
+                        {{-- Card 2: Total Expenses --}}
+                        <div class="col-md-4">
+                            <div class="stat-card expense">
+                                <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['total_expenses'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Card 3: Depreciation --}}
+                        <div class="col-md-4">
+                            <div class="stat-card expense">
+                                <div class="label">{{ __('owner.profit_loss.depreciation') }}</div>
+                                <div class="value">
+                                    {{ number_format($f['depreciation'], 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Card 4: Net Profit --}}
+                        <div class="col-md-4">
                             <div class="stat-card {{ $f['net_profit'] >= 0 ? 'profit' : 'loss' }}">
                                 <div class="label">{{ __('owner.profit_loss.net_profit') }}</div>
                                 <div class="value">
@@ -235,7 +256,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+
+                        {{-- Card 5: Owner Share --}}
+                        <div class="col-md-4">
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.owner_share') }} ({{ number_format($f['owner_percent'], 0) }}%)</div>
                                 <div class="value">
@@ -244,43 +267,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+
+                        {{-- Card 6: Crew Share --}}
+                        <div class="col-md-4">
                             <div class="stat-card payroll">
                                 <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
                                 <div class="value">
                                     {{ number_format($f['crew_share'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Row 2: Expenses --}}
-                        <div class="col-12 px-3 pb-1 pt-2">
-                            <div class="section-subtitle">{{ __('owner.profit_loss.total_expenses') }}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card expense">
-                                <div class="label">{{ __('owner.profit_loss.trip_expenses') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['trip_expenses'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card expense">
-                                <div class="label">{{ __('owner.profit_loss.general_expenses') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['general_expenses'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card expense">
-                                <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
-                                <div class="value">
-                                    {{ number_format($f['total_expenses'], 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
@@ -300,7 +293,6 @@
                                     <th>{{ __('owner.month_closing.columns.member') }}</th>
                                     <th>{{ __('owner.month_closing.columns.role') }}</th>
                                     <th>{{ __('owner.month_closing.columns.custom_percent') }}</th>
-                                    <th>{{ __('owner.month_closing.columns.shares') }}</th>
                                     <th class="text-end">{{ __('owner.month_closing.columns.due') }}</th>
                                 </tr>
                             </thead>
@@ -310,14 +302,13 @@
                                         <td>{{ $member['name'] }}</td>
                                         <td>{{ $member['role'] }}</td>
                                         <td>{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}</td>
-                                        <td>{{ $member['custom_percent'] !== null ? '-' : number_format($member['shares'], 2) }}</td>
                                         <td class="text-end fw-bold">{{ number_format($member['due'], 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr class="table-light fw-bold">
-                                    <td colspan="4">{{ __('owner.profit_loss.crew_share') }}</td>
+                                    <td colspan="3">{{ __('owner.profit_loss.crew_share') }}</td>
                                     <td class="text-end">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</td>
                                 </tr>
                             </tfoot>
