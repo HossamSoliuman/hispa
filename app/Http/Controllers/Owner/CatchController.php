@@ -337,7 +337,15 @@ class CatchController extends Controller
 
             $trip = $catch->trip;
 
-            $saleIds = Sale::withTrashed()->where('catch_id', $catch->id)->pluck('id');
+            $saleIds = Sale::withTrashed()
+                ->where(function ($query) use ($catch, $trip) {
+                    $query->where('catch_id', $catch->id);
+
+                    if ($trip) {
+                        $query->orWhere('trip_id', $trip->id);
+                    }
+                })
+                ->pluck('id');
 
             if ($saleIds->isNotEmpty()) {
                 if (Schema::hasTable('payments')) {

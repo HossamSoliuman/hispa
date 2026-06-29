@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Fish;
 use App\Models\FishQuantityStock;
 use App\Models\PaymentMethod;
+use App\Models\Sale;
 use App\Models\Trip;
 use App\Models\Unit;
 use App\Models\User;
@@ -184,6 +185,77 @@ class CatchSaleUnitFlowTest extends TestCase
             'price_per_kg' => 50,
             'total_price' => 500,
         ]);
+    }
+
+    public function test_deleting_catch_removes_its_sales_including_orphaned_ones(): void
+    {
+        $owner = $this->owner();
+        $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-4']);
+        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'boat_id' => $boat->id]);
+        $fish = $this->fish($owner);
+        $customer = Customer::create(['name' => 'عميل', 'status' => 1, 'owner_id' => $owner->id]);
+        $paymentMethod = PaymentMethod::create(['name' => 'كاش', 'status' => 1, 'owner_id' => $owner->id]);
+
+        $kg = Unit::where('is_default', 1)->firstOrFail();
+
+        $catch = CatchModel::create([
+            'trip_id' => $trip->id,
+            'owner_id' => $owner->id,
+            'catch_date' => now(),
+            'total_weight' => 10,
+            'total_amount' => 0,
+        ]);
+
+        FishQuantityStock::create([
+            'fish_id' => $fish->id,
+            'unit_id' => $kg->id,
+            'catch_id' => $catch->id,
+            'trip_id' => $trip->id,
+            'boat_id' => $boat->id,
+            'quantity' => 10,
+        ]);
+
+        // A sale properly linked to the catch.
+        $linkedSale = Sale::create([
+            'number' => 'S-LINKED',
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'customer_id' => $customer->id,
+            'payment_method_id' => $paymentMethod->id,
+            'payment_status' => 'unpaid',
+            'status' => 1,
+            'sale_datetime' => now(),
+            'trip_id' => $trip->id,
+            'catch_id' => $catch->id,
+            'boat_id' => $boat->id,
+            'total_price' => 100,
+        ]);
+
+        // A legacy/orphaned sale of the same trip whose catch_id was never stored.
+        $orphanSale = Sale::create([
+            'number' => 'S-ORPHAN',
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'customer_id' => $customer->id,
+            'payment_method_id' => $paymentMethod->id,
+            'payment_status' => 'unpaid',
+            'status' => 1,
+            'sale_datetime' => now(),
+            'trip_id' => $trip->id,
+            'catch_id' => null,
+            'boat_id' => $boat->id,
+            'total_price' => 50,
+        ]);
+
+        $this->actingAs($owner, 'owner');
+
+        $this->delete(route('owner.catch.destroy', $catch->id))->assertOk();
+
+        // The catch and both of its sales (linked and orphaned) must be gone.
+        $this->assertDatabaseMissing('catch_models', ['id' => $catch->id]);
+        $this->assertDatabaseMissing('sales', ['id' => $linkedSale->id]);
+        $this->assertDatabaseMissing('sales', ['id' => $orphanSale->id]);
+        $this->assertDatabaseMissing('fish_quantity_stocks', ['catch_id' => $catch->id]);
     }
 
     public function test_units_index_redirects_to_settings_tab(): void
