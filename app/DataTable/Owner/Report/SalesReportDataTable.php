@@ -5,7 +5,6 @@ namespace App\DataTable\Owner\Report;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class SalesReportDataTable extends DataTables
@@ -20,11 +19,11 @@ class SalesReportDataTable extends DataTables
                 ->where('seller_id', $owner_id); // فلترة حسب الصيّاد
 
             // فلترة حسب التاريخ (على عمود البيع لا الإنشاء)
-            if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween(DB::raw('DATE(sale_datetime)'), [
-                    $request->start_date,
-                    $request->end_date,
-                ]);
+            if ($request->filled('start_date')) {
+                $query->whereDate('sale_datetime', '>=', $request->start_date);
+            }
+            if ($request->filled('end_date')) {
+                $query->whereDate('sale_datetime', '<=', $request->end_date);
             }
 
             // فلترة حسب الحالة

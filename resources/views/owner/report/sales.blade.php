@@ -63,7 +63,7 @@
             'value' => '<span id="summary_total_sales" class="num">0</span>',
             'icon' => 'fas fa-file-invoice',
             'gradient' => 'linear-gradient(135deg,#0d6efd,#0b5ed7)',
-            'colClass' => 'col-md-6 col-lg-3',
+            'colClass' => 'col-md-6 col-lg-4',
         ])
 
         @include('owner.components.stat-card', [
@@ -71,7 +71,7 @@
             'value' => '<span id="summary_total_revenue" class="num">0</span> <span class="unit">'.app('view')->make('components.riyal-icon', ['size' => 'sm'])->render().'</span>',
             'icon' => 'fas fa-coins',
             'gradient' => 'linear-gradient(135deg,#10b981,#059669)',
-            'colClass' => 'col-md-6 col-lg-3',
+            'colClass' => 'col-md-6 col-lg-4',
         ])
 
         @include('owner.components.stat-card', [
@@ -79,28 +79,25 @@
             'value' => '<span id="summary_total_weight" class="num">0</span> <span class="unit">'.__('owner.sales_report.kg').'</span>',
             'icon' => 'fas fa-weight',
             'gradient' => 'linear-gradient(135deg,#f59e0b,#d97706)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-
-        @include('owner.components.stat-card', [
-            'title' => __('owner.sales_report.net_owner_amount'),
-            'value' => '<span id="summary_net_owner" class="num">0</span> <span class="unit">'.app('view')->make('components.riyal-icon', ['size' => 'sm'])->render().'</span>',
-            'icon' => 'fas fa-hand-holding-usd',
-            'gradient' => 'linear-gradient(135deg,#06b6d4,#0891b2)',
-            'colClass' => 'col-md-6 col-lg-3',
+            'colClass' => 'col-md-6 col-lg-4',
         ])
     </div>
+
+    @php
+        $monthStart = \Illuminate\Support\Carbon::now()->startOfMonth()->format('Y-m-d');
+        $monthEnd = \Illuminate\Support\Carbon::now()->endOfMonth()->format('Y-m-d');
+    @endphp
 
     <div class="tab-content py-4">
         <div class="tab-pane fade show active" id="allTab">
             <div class="row mb-3">
                 <div class="col-md-3">
                     <label for="start_date">{{ __('owner.sales_report.from_date') }}:</label>
-                    <input type="date" id="start_date" class="form-control">
+                    <input type="date" id="start_date" class="form-control" value="{{ $monthStart }}" data-default="{{ $monthStart }}">
                 </div>
                 <div class="col-md-3">
                     <label for="end_date">{{ __('owner.sales_report.to_date') }}:</label>
-                    <input type="date" id="end_date" class="form-control">
+                    <input type="date" id="end_date" class="form-control" value="{{ $monthEnd }}" data-default="{{ $monthEnd }}">
                 </div>
                 <div class="col-md-3">
                     <label for="status_filter">{{ __('owner.sales_report.status') }}:</label>
@@ -193,8 +190,8 @@
         }
 
         $('#resetBtn').on('click', function () {
-            $('#start_date').val('');
-            $('#end_date').val('');
+            $('#start_date').val($('#start_date').data('default'));
+            $('#end_date').val($('#end_date').data('default'));
             $('#status_filter').val('');
             $('#datatableDefault').DataTable().ajax.reload();
         });
@@ -211,9 +208,9 @@
                 processing: true,
                 serverSide: true,
                 dom:
-                    "<'row mb-3' " +
-                    "<'col-md-4'l>" +                   // {{ __('owner.generated.page_length') }}"<'col-md-4'f>" +                   // {{ __('owner.dalal_invoices.filters.search') }}"<'col-md-4 text-md-end'B>" +      // {{ __('owner.generated.export_buttons') }}">" +
-                    "<'row'<'col-sm-12'tr>>" +             // {{ __('owner.generated.table') }}"<'row mt-2'<'col-sm-5'i><'col-sm-7'p>>", // معلومات الجدول والترقيم
+                    "<'row mb-3'<'col-md-4'l><'col-md-4'f><'col-md-4 text-md-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row mt-2'<'col-sm-5'i><'col-sm-7'p>>",
 
                 language: {
                     url: "{{asset('dashboard/assets/js/ar.json')}}?v={{ time() }}"
