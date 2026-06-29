@@ -38,9 +38,9 @@
         @foreach ($rows as $row)
             <tr>
                 <td>{{ $row['fish_name'] }}</td>
-                <td style="text-align:end;">{{ number_format($row['caught_weight'], 2) }}</td>
+                <td style="text-align:end;">{{ number_format($row['caught_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
                 <td style="text-align:end;">{{ number_format($row['caught_value'], 2) }}</td>
-                <td style="text-align:end;">{{ number_format($row['sold_weight'], 2) }}</td>
+                <td style="text-align:end;">{{ number_format($row['sold_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
                 <td style="text-align:end;font-weight:700;">{{ number_format($row['sold_value'], 2) }}</td>
             </tr>
         @endforeach

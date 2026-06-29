@@ -32,9 +32,9 @@
                     @forelse ($rows as $row)
                         <tr>
                             <td>{{ $row['fish_name'] }}</td>
-                            <td class="text-end">{{ number_format($row['caught_weight'], 2) }}</td>
+                            <td class="text-end">{{ number_format($row['caught_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
                             <td class="text-end">{{ number_format($row['caught_value'], 2) }}</td>
-                            <td class="text-end">{{ number_format($row['sold_weight'], 2) }}</td>
+                            <td class="text-end">{{ number_format($row['sold_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
                             <td class="text-end fw-bold">{{ number_format($row['sold_value'], 2) }}</td>
                         </tr>
                     @empty
