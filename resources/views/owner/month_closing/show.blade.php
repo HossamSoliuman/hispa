@@ -8,7 +8,7 @@
             <h2 class="mb-1">{{ __('owner.month_closing.report_title') }} {{ sprintf('%02d/%d', $closing->month, $closing->year) }}</h2>
             <span class="badge bg-secondary"><i class="fa fa-ship me-1"></i>{{ $closing->boat?->name ?? __('owner.profit_loss.all_boats') }}</span>
             <span class="badge bg-success">{{ __('owner.month_closing.status_closed') }}</span>
-            <small class="text-muted ms-2">{{ __('owner.month_closing.closed_at') }}: {{ optional($closing->closed_at)->format('Y-m-d H:i') }}</small>
+            <small class="text-muted ms-2">{{ __('owner.month_closing.closed_at') }}: {{ optional($closing->closed_at)->format('Y-m-d') }}</small>
         </div>
         <div class="ms-auto d-flex gap-2">
             <a href="{{ route('owner.month-closing.print', $closing) }}" target="_blank" class="btn btn-outline-info">
@@ -23,6 +23,56 @@
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-0">
+            <table class="table table-bordered table-sm mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{ __('owner.month_closing.closed_at') }}</th>
+                        <th>{{ __('owner.actions.edit') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ optional($closing->closed_at)->format('Y-m-d') ?? '-' }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="modal" data-bs-target="#editClosedAtModal">
+                                <i class="fa fa-pencil me-1"></i>{{ __('owner.actions.edit') }}
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Modal: Edit close date --}}
+    <div class="modal fade" id="editClosedAtModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('owner.month_closing.closed_at') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('owner.month-closing.update-closed-at', $closing) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-body">
+                        <input type="date" name="closed_at" class="form-control"
+                               value="{{ optional($closing->closed_at)->format('Y-m-d') }}" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            {{ __('owner.actions.cancel') }}
+                        </button>
+                        <button type="submit" class="btn btn-primary">{{ __('owner.actions.save') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-3 mb-4">
         @php

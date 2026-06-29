@@ -1284,6 +1284,7 @@ return [
             'reopened_success' => 'Month reopened successfully.',
             'deleted_success' => 'Month closing deleted successfully.',
             'delete_confirm' => 'Are you sure you want to delete this closing? This action cannot be undone.',
+            'closed_at_updated' => 'Close date updated successfully.',
         ],
         'payroll_summary' => [
             'title' => 'Payroll Payments',

@@ -99,6 +99,20 @@ class MonthClosingController extends Controller
         ]);
     }
 
+    public function updateClosedAt(Request $request, MonthClosing $monthClosing)
+    {
+        $this->authorizeOwner($monthClosing);
+
+        $data = $request->validate([
+            'closed_at' => 'required|date',
+        ]);
+
+        $monthClosing->update(['closed_at' => $data['closed_at']]);
+
+        return redirect()->route('owner.month-closing.show', $monthClosing)
+            ->with('success', __('owner.month_closing.messages.closed_at_updated'));
+    }
+
     public function reopen(MonthClosing $monthClosing)
     {
         $this->authorizeOwner($monthClosing);

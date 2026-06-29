@@ -313,6 +313,7 @@ Route::group([
         Route::get('/month-closing/{monthClosing}', [MonthClosingController::class, 'show'])->name('month-closing.show');
         Route::get('/month-closing/{monthClosing}/print', [MonthClosingController::class, 'print'])->name('month-closing.print');
         Route::post('/month-closing/{monthClosing}/reopen', [MonthClosingController::class, 'reopen'])->name('month-closing.reopen');
+        Route::patch('/month-closing/{monthClosing}/closed-at', [MonthClosingController::class, 'updateClosedAt'])->name('month-closing.update-closed-at');
         Route::delete('/month-closing/{monthClosing}', [MonthClosingController::class, 'destroy'])->name('month-closing.destroy');
 
         Route::get('/fish-quntity', [ReportsController::class, 'fishQuntity'])->name('fishQuntity');
