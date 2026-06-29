@@ -20,6 +20,8 @@ class Sale extends Model
         'payment_status',
         'status',
         'trip_id',
+        'catch_id',
+        'boat_id',
         'customer_id',
         'customer_name',
         'payment_method_id',
