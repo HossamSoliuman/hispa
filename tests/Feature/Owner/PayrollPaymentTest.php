@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Owner;
 
+use App\Models\Asset;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use App\Models\User;
@@ -128,6 +129,51 @@ class PayrollPaymentTest extends TestCase
         $detail->refresh();
         $this->assertTrue((bool) $detail->is_paid);
         $this->assertSame(300.0, (float) $detail->paid_amount);
+    }
+
+    public function test_depreciation_deduction_is_per_head_share_of_boat_assets(): void
+    {
+        $owner = $this->makeOwner();
+        $boatId = 7;
+
+        Asset::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boatId,
+            'name' => 'Engine',
+            'purchase_cost' => 12000,
+            'salvage_value' => 0,
+            'useful_life_years' => 1,
+            'purchase_date' => '2026-01-01',
+            'depreciation_method' => 'straight_line',
+            'status' => 'active',
+        ]);
+
+        $service = new PayrollService;
+
+        // Straight-line monthly = 12000 / 1 / 12 = 1000, split across 4 heads = 250.
+        $this->assertSame(250.0, $service->depreciationDeduction($owner->id, 2026, 6, $boatId, 4, 1500.0));
+
+        // A zero/negative earner is spared so depreciation never forces a negative net.
+        $this->assertSame(0.0, $service->depreciationDeduction($owner->id, 2026, 6, $boatId, 4, 0.0));
+
+        // No boat assigned → nothing to depreciate.
+        $this->assertSame(0.0, $service->depreciationDeduction($owner->id, 2026, 6, null, 4, 1500.0));
+    }
+
+    public function test_pay_detail_withholds_depreciation_from_net(): void
+    {
+        $owner = $this->makeOwner();
+        [, $detail] = $this->makePercentagePayroll($owner, 3000);
+        $detail->update(['depreciation' => 250]);
+
+        // 3000 (per head) + 100 increase - 50 deduction - 250 depreciation = 2800.
+        $this->actingAs($owner, 'owner')
+            ->post(route('owner.payrolls.payDetail', $detail), [
+                'increase' => 100,
+                'deduction' => 50,
+            ])
+            ->assertOk()
+            ->assertJson(['final_salary' => 2800.0, 'paid_amount' => 2800.0]);
     }
 
     public function test_already_paid_detail_is_rejected(): void

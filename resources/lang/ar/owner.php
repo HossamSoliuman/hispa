@@ -1017,6 +1017,8 @@ return [
         'add_new' => 'إضافة الرواتب',
         'payment_col' => 'الدفع',
         'advances_col' => 'السلف',
+        'depreciation_col' => 'الإهلاك',
+        'depreciation_note' => 'يُخصم نصيب الصياد من إهلاك أصول القارب لهذا الشهر قبل الدفع',
         'pay_confirm_title' => 'تأكيد الدفع',
         'pay_confirm_text' => 'هل تريد تسديد مستحقات هذا الشخص؟ لا يمكن التراجع عن العملية.',
         'pay_confirm_yes' => 'نعم، تسديد الآن',

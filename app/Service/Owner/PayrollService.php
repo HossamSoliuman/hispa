@@ -125,7 +125,8 @@ class PayrollService
                     ->count();
                 $perHead = $total_captins > 0 ? ($total_captins_salary / $total_captins) : 0;
                 $advances = $this->monthlyAdvancesForUser($user->id, $ownerId, $year, $month);
-                $final_salary = $perHead - $advances;
+                $depreciation = $this->depreciationDeduction($ownerId, $year, $month, $user->boat_id, $total_captins, $perHead);
+                $final_salary = $perHead - $depreciation - $advances;
                 $payrollDetail = PayrollDetailsModel::create([
                     'payroll_id' => $payroll->id,
                     'user_id' => $user->id,
@@ -133,6 +134,7 @@ class PayrollService
                     'percentage' => $percentage,
                     'sales_amount' => $sales_amount,
                     'advances' => $advances,
+                    'depreciation' => $depreciation,
                     'final_salary' => $final_salary,
                     'captins_amount' => $total_captins_salary,
                     'captins_count' => $total_captins,
@@ -154,6 +156,26 @@ class PayrollService
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->sum('amount');
+    }
+
+    /**
+     * Per-head share of the boat's monthly asset depreciation (الإهلاك) to deduct
+     * from a percentage crew member before payout. The straight-line monthly
+     * charge for the boat's active assets is spread over the same head count the
+     * crew pool is divided by, so the whole charge is borne by the fishermen.
+     *
+     * Members with no positive share (e.g. an unconfigured pool) are spared the
+     * deduction so depreciation never pushes a zero earner into a negative net.
+     */
+    public function depreciationDeduction(int $ownerId, int $year, int $month, ?int $boatId, int $captinsCount, float $perHead): float
+    {
+        if ($boatId === null || $captinsCount <= 0 || $perHead <= 0) {
+            return 0.0;
+        }
+
+        $total = app(AssetDepreciationService::class)->forMonth($ownerId, $year, $month, $boatId)['total'];
+
+        return round($total / $captinsCount, 2);
     }
 
     public function calculatePercentageSalary(User $user, int $year, int $month)

@@ -121,13 +121,14 @@ class PayrollController extends Controller
     }
 
     /**
-     * Re-sync each not-yet-paid row's advances (سلف) with the advances recorded
-     * for that month, so advances added after the payroll was generated still
-     * reflect in the net. Paid rows are frozen and left untouched.
+     * Re-sync each not-yet-paid row's advances (سلف) and asset depreciation
+     * (الإهلاك) with the figures recorded for that month, so amounts added after
+     * the payroll was generated still reflect in the net. Paid rows are frozen
+     * and left untouched.
      */
     private function refreshUnpaidAdvances(PayrollModel $payroll): void
     {
-        $details = $payroll->details()->where('is_paid', false)->get();
+        $details = $payroll->details()->with('user')->where('is_paid', false)->get();
 
         foreach ($details as $detail) {
             $detail->advances = $this->service->monthlyAdvancesForUser(
@@ -135,6 +136,16 @@ class PayrollController extends Controller
                 (int) $payroll->owner_id,
                 (int) $payroll->year,
                 (int) $payroll->month,
+            );
+            $count = (int) $detail->captins_count;
+            $perHead = $count > 0 ? (float) $detail->captins_amount / $count : 0.0;
+            $detail->depreciation = $this->service->depreciationDeduction(
+                (int) $payroll->owner_id,
+                (int) $payroll->year,
+                (int) $payroll->month,
+                $detail->user?->boat_id,
+                $count,
+                $perHead,
             );
             $detail->final_salary = $this->detailFinalSalary($detail, (float) $detail->increase, (float) $detail->deduction);
             $detail->save();
@@ -230,7 +241,9 @@ class PayrollController extends Controller
 
     /**
      * Net pay for a detail row: percentage staff use the per-head share
-     * (captins_amount / captins_count). Increase/deduction are applied on top.
+     * (captins_amount / captins_count). Increase/deduction are applied on top,
+     * then the per-head asset depreciation (الإهلاك) and cash advances (السلف) are
+     * withheld.
      */
     private function detailFinalSalary(PayrollDetailsModel $detail, float $increase, float $deduction): float
     {
@@ -238,7 +251,7 @@ class PayrollController extends Controller
             ? (float) $detail->captins_amount / (int) $detail->captins_count
             : 0.0;
 
-        return round($base + $increase - $deduction - (float) $detail->advances, 2);
+        return round($base + $increase - $deduction - (float) $detail->depreciation - (float) $detail->advances, 2);
     }
 
     /**

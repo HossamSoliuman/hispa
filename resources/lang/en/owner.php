@@ -1017,6 +1017,8 @@ return [
         'add_new' => 'Add Payroll',
         'payment_col' => 'Payment',
         'advances_col' => 'Advances',
+        'depreciation_col' => 'Depreciation',
+        'depreciation_note' => "The fisherman's share of this month's boat asset depreciation is withheld before payout",
         'pay_confirm_title' => 'Confirm payment',
         'pay_confirm_text' => 'Mark this person as paid? This cannot be undone.',
         'pay_confirm_yes' => 'Yes, pay now',

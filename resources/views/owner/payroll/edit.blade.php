@@ -106,6 +106,7 @@
                                         <th>{{ __('owner.generated.fisherman_percentage') }}</th>
                                         <th>{{ __('owner.generated.increase') }}</th>
                                         <th>{{ __('owner.expenses.show.notes') }}</th>
+                                        <th title="{{ __('owner.payrolls.depreciation_note') }}">{{ __('owner.payrolls.depreciation_col') }}</th>
                                         <th>{{ __('owner.payrolls.advances_col') }}</th>
                                         <th>{{ __('owner.generated.net') }}</th>
                                         <th>{{ __('owner.payrolls.payment_col') }}</th>
@@ -132,6 +133,7 @@
                                             <td>{{ $perHead }}</td>
                                             <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
                                             <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
+                                            <td><input type="number" class="form-control depreciation text-danger" value="{{ (float) $d->depreciation }}" readonly></td>
                                             <td><input type="number" class="form-control advances text-danger" value="{{ (float) $d->advances }}" readonly></td>
                                             <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
                                             <td class="payment-cell">
@@ -157,6 +159,7 @@
                                             <th>{{ __('owner.generated.fisherman_percentage') }}</th>
                                             <th>{{ __('owner.generated.increase') }}</th>
                                             <th>{{ __('owner.expenses.show.notes') }}</th>
+                                            <th title="{{ __('owner.payrolls.depreciation_note') }}">{{ __('owner.payrolls.depreciation_col') }}</th>
                                             <th>{{ __('owner.generated.net') }}</th>
                                             <th>{{ __('owner.payrolls.payment_col') }}</th>
                                         </tr>
@@ -181,6 +184,7 @@
                                                 <td>{{ $perHead }}</td>
                                                 <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
                                                 <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
+                                                <td><input type="number" class="form-control depreciation text-danger" value="{{ (float) $d->depreciation }}" readonly></td>
                                                 <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
                                                 <td class="payment-cell">
                                                     @include('owner.payroll.partials.pay-cell', ['d' => $d])
@@ -238,14 +242,16 @@
             const baseInput = row.querySelector('.base');
             const increaseInput = row.querySelector('.increase');
             const advancesInput = row.querySelector('.advances');
+            const depreciationInput = row.querySelector('.depreciation');
             const netSpan = row.querySelector('.net_salary');
             if (!baseInput || !increaseInput || !netSpan) return;
 
             const base = parseFloat(baseInput.value) || 0;
             const advances = parseFloat(advancesInput?.value) || 0;
+            const depreciation = parseFloat(depreciationInput?.value) || 0;
             const updateNet = () => {
                 const increase = parseFloat(increaseInput.value) || 0;
-                netSpan.textContent = (base + increase - advances).toFixed(2);
+                netSpan.textContent = (base + increase - depreciation - advances).toFixed(2);
             };
 
             increaseInput.addEventListener('input', updateNet);
