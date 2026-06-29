@@ -738,5 +738,37 @@
                 }
             });
         }
+
+        function deleteTripRecord(tripId) {
+            Swal.fire({
+                title: '{{ __('owner.swal.confirm_title') }}',
+                text: "{{ __('owner.swal.confirm_text') }}",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                cancelButtonText: '{{ __('owner.swal.cancel') }}'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('owner.catch.destroyByTrip', 'RECORD_ID') }}".replace('RECORD_ID', tripId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success');
+                            $('#datatableDefault').DataTable().ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            let message = xhr.responseJSON?.message ||
+                                '{{ __('owner.swal.unexpected_error') }}';
+                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endsection

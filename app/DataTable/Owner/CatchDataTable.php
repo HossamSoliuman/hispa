@@ -22,12 +22,10 @@ class CatchDataTable extends DataTables
                 ->when($request->filled('from_date'), fn ($q) => $q->whereDate('start_date', '>=', $request->from_date))
                 ->when($request->filled('to_date'), fn ($q) => $q->whereDate('end_date', '<=', $request->to_date))
                 ->orderBy('start_date', 'desc');
-            if ($request->filled('has_catch')) {
-                if ($request->has_catch == '1') {
-                    $trips->whereHas('catches');
-                } elseif ($request->has_catch == '0') {
-                    $trips->whereDoesntHave('catches');
-                }
+            if ($request->has_catch === '0') {
+                $trips->whereDoesntHave('catches');
+            } else {
+                $trips->whereHas('catches');
             }
             if ($request->filled('fish_id')) {
                 $trips->whereHas('catches.details', function ($q) use ($request) {
@@ -65,6 +63,9 @@ class CatchDataTable extends DataTables
                     if (blank($row->catches)) {
                         return '<a href="'.route('owner.catch.create', ['trip_id' => $row->id]).'" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-plus"></i>'.__('owner.catch.add_catch').'
+                                </a>
+                                <a href="#" onclick="deleteTripRecord('.$row->id.')" class="btn btn-sm btn-outline-danger mx-1" title="'.__('owner.actions.delete').'">
+                                    <i class="bi bi-trash"></i>
                                 </a>';
                     } else {
                         $catch = CatchModel::where('trip_id', $row->id)->first();

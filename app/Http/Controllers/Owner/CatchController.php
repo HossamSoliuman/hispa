@@ -330,13 +330,24 @@ class CatchController extends Controller
 
     public function destroy($id): \Illuminate\Http\JsonResponse
     {
-        $catch = $this->ownerCatchQuery()->with('trip')->findOrFail($id);
+        $catch = $this->ownerCatchQuery()->findOrFail($id);
 
-        $trip = $catch->trip;
+        return $this->purgeTripCatch($catch->trip_id);
+    }
 
-        $saleIds = Sale::withTrashed()
-            ->where('trip_id', $trip?->id)
-            ->pluck('id');
+    public function destroyByTrip($trip): \Illuminate\Http\JsonResponse
+    {
+        $trip = Trip::where('owner_id', auth()->id())->findOrFail($trip);
+
+        return $this->purgeTripCatch($trip->id);
+    }
+
+    private function purgeTripCatch($tripId): \Illuminate\Http\JsonResponse
+    {
+        $trip = Trip::find($tripId);
+
+        $catchIds = CatchModel::where('trip_id', $tripId)->pluck('id');
+        $saleIds = Sale::withTrashed()->where('trip_id', $tripId)->pluck('id');
 
         if ($saleIds->isNotEmpty()) {
             if (Schema::hasTable('payments')) {
@@ -346,10 +357,12 @@ class CatchController extends Controller
             Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
         }
 
-        CatchDetail::where('catch_id', $catch->id)->delete();
-        FishQuantityStock::where('catch_id', $catch->id)->delete();
+        if ($catchIds->isNotEmpty()) {
+            CatchDetail::whereIn('catch_id', $catchIds)->delete();
+        }
 
-        CatchModel::where('id', $catch->id)->delete();
+        FishQuantityStock::where('trip_id', $tripId)->delete();
+        CatchModel::where('trip_id', $tripId)->delete();
 
         if ($trip && in_array($trip->status, [TripStatus::ReadyToSell, TripStatus::Counted], true)) {
             $trip->update(['status' => TripStatus::Finished]);

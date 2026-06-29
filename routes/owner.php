@@ -237,6 +237,7 @@ Route::group([
         Route::get('/fish_stock_history/print', [FishHistoryReportController::class, 'print'])->name('fish-history-report.print');
 
         // catch-records
+        Route::delete('/catch/trip/{trip}', [CatchController::class, 'destroyByTrip'])->name('catch.destroyByTrip');
         Route::resource('/catch', CatchController::class);
         Route::get('/getCatchData', [CatchController::class, 'getCatchData'])->name('getCatchData');
         Route::get('/printCatchReport/{id}', [CatchController::class, 'printCatchReport'])->name('printCatchReport');
