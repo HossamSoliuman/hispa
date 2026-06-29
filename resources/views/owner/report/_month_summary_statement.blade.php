@@ -1,11 +1,13 @@
 @php
-    $netProfit = (float) $f['net_profit'];
     $grossSales = (float) $f['gross_sales'];
-    $commissionLabor = (float) $f['commission_labor'];
-    $netOwnerRevenue = (float) $f['net_owner_revenue'];
     $tripExpenses = (float) $f['trip_expenses'];
     $generalExpenses = (float) $f['general_expenses'];
     $totalExpenses = (float) $f['total_expenses'];
+    $netProfit = $grossSales - $totalExpenses;
+    $ownerPercent = (float) $f['owner_percent'];
+    $ownerShare = round($netProfit * ($ownerPercent / 100), 2);
+    $crewShare = round($netProfit - $ownerShare, 2);
+    $crewCount = (int) $f['crew_count'];
 @endphp
 
 <table class="ms-statement">
@@ -24,14 +26,6 @@
         <tr class="ms-line">
             <td class="ms-label">{{ __('owner.month_summary.total_sales') }}</td>
             <td class="ms-amount ms-pos">{{ number_format($grossSales, 2) }}</td>
-        </tr>
-        <tr class="ms-line">
-            <td class="ms-label ms-indent">{{ __('owner.month_summary.less_commission_labor') }}</td>
-            <td class="ms-amount ms-neg">({{ number_format($commissionLabor, 2) }})</td>
-        </tr>
-        <tr class="ms-subtotal">
-            <td class="ms-label">{{ __('owner.month_summary.net_owner_revenue') }}</td>
-            <td class="ms-amount">{{ number_format($netOwnerRevenue, 2) }}</td>
         </tr>
 
         {{-- Operating expenses --}}
@@ -96,20 +90,20 @@
     </thead>
     <tbody>
         <tr class="ms-line">
-            <td class="ms-label">{{ __('owner.month_summary.owner_share') }} ({{ number_format($f['owner_percent'], 0) }}%)</td>
-            <td class="ms-amount ms-pos">{{ number_format($f['owner_share'], 2) }}</td>
+            <td class="ms-label">{{ __('owner.month_summary.owner_share') }} ({{ number_format($ownerPercent, 0) }}%)</td>
+            <td class="ms-amount ms-pos">{{ number_format($ownerShare, 2) }}</td>
         </tr>
         <tr class="ms-line">
-            <td class="ms-label">{{ __('owner.month_summary.crew_share') }} ({{ number_format(100 - $f['owner_percent'], 0) }}%)</td>
-            <td class="ms-amount">{{ number_format($f['crew_share'], 2) }}</td>
+            <td class="ms-label">{{ __('owner.month_summary.crew_share') }} ({{ number_format(100 - $ownerPercent, 0) }}%)</td>
+            <td class="ms-amount">{{ number_format($crewShare, 2) }}</td>
         </tr>
         <tr class="ms-line">
             <td class="ms-label">{{ __('owner.month_summary.crew_count') }}</td>
-            <td class="ms-amount">{{ number_format($f['crew_count'], 0) }}</td>
+            <td class="ms-amount">{{ number_format($crewCount, 0) }}</td>
         </tr>
         <tr class="ms-line">
             <td class="ms-label">{{ __('owner.month_summary.per_fisherman') }}</td>
-            <td class="ms-amount">{{ number_format($f['per_fisherman'], 2) }}</td>
+            <td class="ms-amount">0.00</td>
         </tr>
     </tbody>
 </table>
