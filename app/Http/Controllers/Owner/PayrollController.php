@@ -10,7 +10,10 @@ use App\Models\Payroll;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use App\Repository\Owner\PayrollRepository;
+use App\Service\Owner\AssetDepreciationService;
+use App\Service\Owner\MonthlyFinancialsService;
 use App\Service\Owner\PayrollService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -117,35 +120,74 @@ class PayrollController extends Controller
         $payroll = $this->findOwnerPayroll($id);
         $this->refreshUnpaidAdvances($payroll);
 
-        return view('owner.payroll.edit', compact('payroll'));
+        $financials = $this->monthFinancials($payroll);
+
+        return view('owner.payroll.edit', compact('payroll', 'financials'));
     }
 
     /**
-     * Re-sync each not-yet-paid row's advances (سلف) and asset depreciation
-     * (الإهلاك) with the figures recorded for that month, so amounts added after
-     * the payroll was generated still reflect in the net. Paid rows are frozen
-     * and left untouched.
+     * Accurate month-level financial summary (the same figures as the month-close
+     * report) shown as cards above the payroll: sales, revenue, depreciation and
+     * the owner/crew share split. Computed fleet-wide because a payroll spans all
+     * the owner's percentage crew, not a single boat.
+     *
+     * @return array<string, mixed>
+     */
+    private function monthFinancials(PayrollModel $payroll): array
+    {
+        $year = (int) $payroll->year;
+        $month = (int) $payroll->month;
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+
+        $depreciation = app(AssetDepreciationService::class)
+            ->forMonth((int) $payroll->owner_id, $year, $month)['total'];
+
+        return app(MonthlyFinancialsService::class)->compute(
+            (int) $payroll->owner_id,
+            $start->toDateString(),
+            $start->copy()->endOfMonth()->toDateString(),
+            null,
+            $depreciation,
+        );
+    }
+
+    /**
+     * Re-sync each not-yet-paid row's boat income pool (إجمالي أرباح الصيادين) and
+     * advances (سلف) with the figures recorded for that month, so sales or
+     * advances added after the payroll was generated still reflect in the net.
+     * Paid rows are frozen and left untouched. Asset depreciation (الإهلاك) is a
+     * fleet-level cost shown only in the summary cards — it is not withheld here.
      */
     private function refreshUnpaidAdvances(PayrollModel $payroll): void
     {
         $details = $payroll->details()->with('user')->where('is_paid', false)->get();
 
         foreach ($details as $detail) {
+            if ($detail->user) {
+                $pool = (float) $this->service->calculatePercentageSalary(
+                    $detail->user,
+                    (int) $payroll->year,
+                    (int) $payroll->month,
+                );
+                $detail->sales_amount = $pool;
+                $detail->captins_amount = $pool;
+                $detail->captins_count = $this->service->percentageCrewCount(
+                    (int) $payroll->owner_id,
+                    $detail->user->boat_id,
+                );
+                $detail->custom_share_percent = $detail->user->custom_share_percent;
+                $detail->base_salary = $this->service->percentageMemberBase(
+                    $detail->user,
+                    $pool,
+                    (int) $payroll->owner_id,
+                );
+            }
+
             $detail->advances = $this->service->monthlyAdvancesForUser(
                 (int) $detail->user_id,
                 (int) $payroll->owner_id,
                 (int) $payroll->year,
                 (int) $payroll->month,
-            );
-            $count = (int) $detail->captins_count;
-            $perHead = $count > 0 ? (float) $detail->captins_amount / $count : 0.0;
-            $detail->depreciation = $this->service->depreciationDeduction(
-                (int) $payroll->owner_id,
-                (int) $payroll->year,
-                (int) $payroll->month,
-                $detail->user?->boat_id,
-                $count,
-                $perHead,
             );
             $detail->final_salary = $this->detailFinalSalary($detail, (float) $detail->increase, (float) $detail->deduction);
             $detail->save();
@@ -240,18 +282,15 @@ class PayrollController extends Controller
     }
 
     /**
-     * Net pay for a detail row: percentage staff use the per-head share
-     * (captins_amount / captins_count). Increase/deduction are applied on top,
-     * then the per-head asset depreciation (الإهلاك) and cash advances (السلف) are
-     * withheld.
+     * Net pay for a detail row: crew take their base share (base_salary) of the
+     * boat pool — an equal per-head split, or a نسبة خاصة (custom_share_percent)
+     * member's percentage off the top. Increase/deduction are applied on top, then
+     * cash advances (السلف) are withheld. Asset depreciation (الإهلاك) is a
+     * fleet-level cost accounted for in the month close, not withheld per person.
      */
     private function detailFinalSalary(PayrollDetailsModel $detail, float $increase, float $deduction): float
     {
-        $base = (int) $detail->captins_count > 0
-            ? (float) $detail->captins_amount / (int) $detail->captins_count
-            : 0.0;
-
-        return round($base + $increase - $deduction - (float) $detail->depreciation - (float) $detail->advances, 2);
+        return round((float) $detail->base_salary + $increase - $deduction - (float) $detail->advances, 2);
     }
 
     /**

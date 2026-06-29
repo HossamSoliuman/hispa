@@ -1017,6 +1017,7 @@ return [
         'add_new' => 'Add Payroll',
         'payment_col' => 'Payment',
         'advances_col' => 'Advances',
+        'special_percent_col' => 'Special %',
         'depreciation_col' => 'Depreciation',
         'depreciation_note' => "The fisherman's share of this month's boat asset depreciation is withheld before payout",
         'pay_confirm_title' => 'Confirm payment',
@@ -1026,6 +1027,15 @@ return [
         'pay_success' => 'Payment recorded successfully',
         'pay_error' => 'Could not record the payment',
         'already_paid' => 'Already paid',
+        'crew_payroll' => 'Crew Payroll',
+        'summary' => [
+            'title' => 'Month Summary',
+            'sales' => 'Sales',
+            'revenue' => 'Revenue',
+            'depreciation' => 'Depreciation',
+            'owner_share' => "Owner's Share",
+            'crew_share' => "Crew's Share",
+        ],
         'cards' => [
             'total_payrolls' => 'Total Payrolls',
             'paid_amount' => 'Paid Amount',

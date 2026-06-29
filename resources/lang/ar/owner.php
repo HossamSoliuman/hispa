@@ -1017,6 +1017,7 @@ return [
         'add_new' => 'إضافة الرواتب',
         'payment_col' => 'الدفع',
         'advances_col' => 'السلف',
+        'special_percent_col' => 'نسبة خاصة',
         'depreciation_col' => 'الإهلاك',
         'depreciation_note' => 'يُخصم نصيب الصياد من إهلاك أصول القارب لهذا الشهر قبل الدفع',
         'pay_confirm_title' => 'تأكيد الدفع',
@@ -1026,6 +1027,15 @@ return [
         'pay_success' => 'تم تسجيل الدفع بنجاح',
         'pay_error' => 'تعذر تسجيل الدفع',
         'already_paid' => 'تم التسديد مسبقاً',
+        'crew_payroll' => 'رواتب الطاقم',
+        'summary' => [
+            'title' => 'ملخص الشهر',
+            'sales' => 'المبيعات',
+            'revenue' => 'الإيرادات',
+            'depreciation' => 'الإهلاك',
+            'owner_share' => 'نصيب المالك',
+            'crew_share' => 'نصيب الطاقم',
+        ],
         'cards' => [
             'total_payrolls' => 'إجمالي الرواتب',
             'paid_amount' => 'المبالغ المدفوعة',

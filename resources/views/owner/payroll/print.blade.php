@@ -4,7 +4,6 @@
     $title = $typeLabel.' - '.$payroll->month.'/'.$payroll->year;
     $totalIncrease = (float) $payroll->details->sum('increase');
     $totalDeduction = (float) $payroll->details->sum('deduction');
-    $totalDepreciation = (float) $payroll->details->sum('depreciation');
     $totalAdvances = (float) $payroll->details->sum('advances');
     $totalNet = (float) $payroll->details->sum('final_salary');
 @endphp
@@ -76,12 +75,12 @@
                 @if ($isPercentage)
                     <th>{{ __('owner.generated.total_fishermen_profits') }}</th>
                     <th>{{ __('owner.generated.fishermen_count') }}</th>
+                    <th>{{ __('owner.payrolls.special_percent_col') }}</th>
                 @else
                     <th>{{ __('owner.generated.basic_salary') }}</th>
                 @endif
                 <th>{{ __('owner.generated.increase') }}</th>
                 <th>{{ __('owner.generated.deduction') }}</th>
-                <th>{{ __('owner.payrolls.depreciation_col') }}</th>
                 <th>{{ __('owner.payrolls.advances_col') }}</th>
                 <th>{{ __('owner.expenses.show.notes') }}</th>
                 <th>{{ __('owner.generated.net') }}</th>
@@ -96,12 +95,12 @@
                     @if ($isPercentage)
                         <td>{{ number_format($detail->captins_amount ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
                         <td>{{ $detail->captins_count ?? 0 }}</td>
+                        <td>{{ $detail->custom_share_percent > 0 ? number_format((float) $detail->custom_share_percent, 2) . '%' : '-' }}</td>
                     @else
                         <td>{{ number_format($detail->base_salary ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
                     @endif
                     <td class="text-success">{{ number_format($detail->increase ?? 0, 2) }}</td>
                     <td class="text-danger">{{ number_format($detail->deduction ?? 0, 2) }}</td>
-                    <td class="text-danger">{{ number_format($detail->depreciation ?? 0, 2) }}</td>
                     <td class="text-danger">{{ number_format($detail->advances ?? 0, 2) }}</td>
                     <td>{{ $detail->note ?: '-' }}</td>
                     <td style="font-weight: bold;">{{ number_format($detail->final_salary ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
@@ -127,11 +126,6 @@
         <div class="summary-row">
             <span>{{ __('owner.generated.deduction') }}:</span>
             <span>- {{ number_format($totalDeduction, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
-        </div>
-
-        <div class="summary-row">
-            <span>{{ __('owner.payrolls.depreciation_col') }}:</span>
-            <span>- {{ number_format($totalDepreciation, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
         </div>
 
         <div class="summary-row">

@@ -113,28 +113,21 @@ class PayrollService
 
         foreach ($users as $user) {
             if ($user->salary_type === 'percentage') {
-                $base_salary = 0;
-                $percentage = 0;
-                $sales_amount = 0;
                 $percentage = $user->salary_amount;
                 $total_captins_salary = $sales_amount = $this->calculatePercentageSalary($user, $year, $month);
-                $total_captins = User::where('owner_id', $ownerId)
-                    ->whereIn('role', ['crew', 'captain'])
-                    ->where('salary_type', 'percentage')
-                    ->where('boat_id', $user->boat_id)
-                    ->count();
-                $perHead = $total_captins > 0 ? ($total_captins_salary / $total_captins) : 0;
+                $total_captins = $this->percentageCrewCount($ownerId, $user->boat_id);
+                $base = $this->percentageMemberBase($user, (float) $total_captins_salary, $ownerId);
                 $advances = $this->monthlyAdvancesForUser($user->id, $ownerId, $year, $month);
-                $depreciation = $this->depreciationDeduction($ownerId, $year, $month, $user->boat_id, $total_captins, $perHead);
-                $final_salary = $perHead - $depreciation - $advances;
+                $final_salary = $base - $advances;
                 $payrollDetail = PayrollDetailsModel::create([
                     'payroll_id' => $payroll->id,
                     'user_id' => $user->id,
-                    'base_salary' => $base_salary,
+                    'base_salary' => $base,
                     'percentage' => $percentage,
+                    'custom_share_percent' => $this->customSharePercent($user),
                     'sales_amount' => $sales_amount,
                     'advances' => $advances,
-                    'depreciation' => $depreciation,
+                    'depreciation' => 0,
                     'final_salary' => $final_salary,
                     'captins_amount' => $total_captins_salary,
                     'captins_count' => $total_captins,
@@ -159,28 +152,81 @@ class PayrollService
     }
 
     /**
-     * Per-head share of the boat's monthly asset depreciation (الإهلاك) to deduct
-     * from a percentage crew member before payout. The straight-line monthly
-     * charge for the boat's active assets is spread over the same head count the
-     * crew pool is divided by, so the whole charge is borne by the fishermen.
-     *
-     * Members with no positive share (e.g. an unconfigured pool) are spared the
-     * deduction so depreciation never pushes a zero earner into a negative net.
+     * Number of percentage crew/captains on a boat — the head count the boat's
+     * income pool is split across. Independent of any single member's configured
+     * percentage, so every crew member on the boat shares the same pool.
      */
-    public function depreciationDeduction(int $ownerId, int $year, int $month, ?int $boatId, int $captinsCount, float $perHead): float
+    public function percentageCrewCount(int $ownerId, ?int $boatId): int
     {
-        if ($boatId === null || $captinsCount <= 0 || $perHead <= 0) {
-            return 0.0;
+        if ($boatId === null) {
+            return 0;
         }
 
-        $total = app(AssetDepreciationService::class)->forMonth($ownerId, $year, $month, $boatId)['total'];
+        return $this->percentageCrewMembers($ownerId, $boatId)->count();
+    }
 
-        return round($total / $captinsCount, 2);
+    /**
+     * The boat's percentage crew/captains who share its income pool.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     */
+    public function percentageCrewMembers(int $ownerId, ?int $boatId): \Illuminate\Database\Eloquent\Collection
+    {
+        if ($boatId === null) {
+            return User::whereRaw('1 = 0')->get();
+        }
+
+        return User::where('owner_id', $ownerId)
+            ->whereIn('role', ['crew', 'captain'])
+            ->where('salary_type', 'percentage')
+            ->where('boat_id', $boatId)
+            ->get();
+    }
+
+    /**
+     * A boat member's base share of its income pool, honoring نسبة خاصة
+     * (custom_share_percent): a member with a positive custom percentage takes
+     * that share of the whole pool off the top; the rest of the pool is split
+     * equally among the members without one. Mirrors the month-close distribution,
+     * with the remainder split per head instead of by profit shares.
+     */
+    public function percentageMemberBase(User $member, float $pool, int $ownerId): float
+    {
+        $crew = $this->percentageCrewMembers($ownerId, $member->boat_id);
+
+        $customTotal = 0.0;
+        $plainCount = 0;
+        foreach ($crew as $person) {
+            $percent = $this->customSharePercent($person);
+            if ($percent !== null) {
+                $customTotal += round($pool * ($percent / 100), 2);
+            } else {
+                $plainCount++;
+            }
+        }
+
+        $percent = $this->customSharePercent($member);
+        if ($percent !== null) {
+            return round($pool * ($percent / 100), 2);
+        }
+
+        return $plainCount > 0 ? round(($pool - $customTotal) / $plainCount, 2) : 0.0;
+    }
+
+    /**
+     * The member's positive نسبة خاصة of the boat pool, or null when it has none
+     * (then it shares the remaining pool equally with the other crew).
+     */
+    private function customSharePercent(User $member): ?float
+    {
+        $percent = $member->custom_share_percent;
+
+        return ($percent !== null && (float) $percent > 0) ? (float) $percent : null;
     }
 
     public function calculatePercentageSalary(User $user, int $year, int $month)
     {
-        if ($user->salary_type === 'percentage' && filled($user->salary_amount)) {
+        if ($user->salary_type === 'percentage') {
 
             $startDate = Carbon::create($year, $month, 1)->startOfDay();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
