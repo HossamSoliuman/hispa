@@ -13,7 +13,7 @@ class TripReportDataTable extends DataTables
     {
         $owner_id = auth()->user()->id;
         if ($request->ajax()) {
-            $query = Trip::with(['catches.details', 'sales'])->orderBy('created_at', 'desc');
+            $query = Trip::with(['catches.details', 'sales', 'port', 'boat.port'])->orderBy('created_at', 'desc');
             $query->where('owner_id', $owner_id);
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
@@ -39,12 +39,9 @@ class TripReportDataTable extends DataTables
                 ->addColumn('captain', function (Trip $trip) {
                     return $trip->captain->name ?? '--';
                 })
-                ->addColumn('counter', function (Trip $trip) {
-                    return $trip->counter->name ?? '--';
-                })
 
                 ->addColumn('port', function (Trip $trip) {
-                    return $trip->port->name ?? '--';
+                    return $trip->port->name ?? $trip->boat?->port?->name ?? '--';
                 })
                 ->addColumn('item_count', function (Trip $trip) {
                     $count = $trip->catches?->details->count() ?? 0;
@@ -91,9 +88,12 @@ class TripReportDataTable extends DataTables
                 })
 
                 ->addColumn('time', function (Trip $trip) {
-                    if ($trip->departure_time && $trip->return_time) {
-                        $from = Carbon::parse($trip->departure_time)->format('h:i A');
-                        $to = Carbon::parse($trip->return_time)->format('h:i A');
+                    $from = $trip->departure_time ?? $trip->start_date;
+                    $to = $trip->return_time ?? $trip->end_date;
+
+                    if ($from && $to) {
+                        $from = Carbon::parse($from)->format('h:i A');
+                        $to = Carbon::parse($to)->format('h:i A');
 
                         // Optional: تحويل AM/PM إلى صباحًا/مساءً
                         $from = str_replace(['AM', 'PM'], ['صباحًا', 'مساءً'], $from);
@@ -118,7 +118,7 @@ class TripReportDataTable extends DataTables
                     'total_sales' => number_format($data->sum(fn ($trip) => (float) $trip->sales->where('seller_type', 'owner')->sum('total_price')), 2),
                 ])
 
-                ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'counter', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges
+                ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges
                 ->make(true);
 
         }

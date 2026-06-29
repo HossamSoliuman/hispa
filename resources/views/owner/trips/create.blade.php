@@ -57,7 +57,7 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-xl-4">
+                    <div class="col-xl-3">
                         <div class="form-group">
                             <label for="start_date" class="form-label">{{ __('owner.trips.start_date') }}<span class="text-danger">*</span></label>
                             <input type="datetime-local" name="start_date" value="{{ old('start_date', now()->format('Y-m-d\TH:i')) }}" class="form-control" required>
@@ -65,7 +65,15 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-4">
+                    <div class="col-xl-3">
+                        <div class="form-group">
+                            <label for="end_date" class="form-label">{{ __('owner.trips.end_date') }}</label>
+                            <input type="datetime-local" name="end_date" value="{{ old('end_date') }}" class="form-control">
+                            @error('end_date') <span class="text-danger error">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3">
                         <div class="form-group">
                             <label for="captain_id" class="form-label">{{ __('owner.trips.captain_name') }}<span class="text-danger">*</span></label>
                             <input type="hidden" name="owner_id" id="owner_id" value="{{ auth()->user()->getAuthIdentifier() }}">
@@ -83,7 +91,7 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-4">
+                    <div class="col-xl-3">
                         <div class="form-group">
                             <label for="boat_name" class="form-label">{{ __('owner.trips.boat_name') }}<span class="text-danger">*</span></label>
                             <input type="text" name="boat_name" id="boat_name" class="form-control" disabled value="{{ old('boat_name', $trip->boat_name ?? '') }}" placeholder="{{ __('owner.trips.boat_name') }}">

@@ -61,6 +61,13 @@ function fillBoatAndCrewData(array $data, $boatId, $captainId)
         ->where('role', 'crew')
         ->count();
 
+    $portName = $boat->port?->name;
+    $data['port_id'] = $data['port_id'] ?? $boat->port_id;
+    $data['region_id'] = $data['region_id'] ?? $boat->region_id;
+    $data['governorate_id'] = $data['governorate_id'] ?? $boat->governorate_id;
+    $data['departure_port'] = $data['departure_port'] ?? $portName;
+    $data['return_port'] = $data['return_port'] ?? $portName;
+
     return $data;
 }
 

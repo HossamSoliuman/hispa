@@ -134,7 +134,6 @@
                         <th>{{ __('owner.trips.status') }}</th>
                         <th>{{ __('owner.trips.show.owner') }}</th>
                         <th>{{ __('owner.trips.show.captain') }}</th>
-                        <th>{{ __('owner.trips.show.counter') }}</th>
                         <th>{{ __('owner.trips.show.total_items') }}</th>
                         <th>{{ __('owner.trips.show.total_weight') }}</th>
                         <th>{{ __('owner.trips.show.port') }}</th>
@@ -270,7 +269,6 @@
                     {data: 'status', name: 'status'},
                     {data: 'owner', name: 'owner'},
                     {data: 'captain', name: 'captain'},
-                    {data: 'counter', name: 'counter'},
                     {data: 'item_count', name: 'item_count'},
                     {data: 'item_weight', name: 'item_weight'},
                     {data: 'port', name: 'port'},
