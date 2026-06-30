@@ -303,6 +303,51 @@ class MonthClosingServiceTest extends TestCase
         $this->assertNull($this->service->find($owner->id, 2026, 6));
     }
 
+    public function test_annual_summary_rolls_up_closed_months_only(): void
+    {
+        $owner = $this->seedClientExample();
+
+        $this->service->close($owner->id, 2026, 6);
+
+        $summary = $this->service->annualSummary($owner->id, 2026);
+
+        $this->assertSame(2026, $summary['year']);
+        $this->assertNull($summary['boat_id']);
+        $this->assertSame(1, $summary['closed_count']);
+
+        // All twelve months are present; only June carries a snapshot.
+        $this->assertCount(12, $summary['months']);
+        $this->assertNotNull($summary['months'][6]);
+        $this->assertNull($summary['months'][5]);
+        $this->assertNull($summary['months'][7]);
+
+        // Year totals equal the single closed month's frozen figures.
+        $this->assertSame(300000.0, $summary['totals']['gross_sales']);
+        $this->assertSame(60000.0, $summary['totals']['total_expenses']);
+        $this->assertSame(240000.0, $summary['totals']['net_profit']);
+        $this->assertSame(120000.0, $summary['totals']['crew_share']);
+
+        // A year with no closings rolls up to nothing.
+        $this->assertSame(0, $this->service->annualSummary($owner->id, 2025)['closed_count']);
+    }
+
+    public function test_annual_summary_respects_boat_scope(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $boat = Boat::create(['owner_id' => $owner->id, 'name_ar' => 'قارب', 'number' => 'B-1']);
+
+        $this->service->close($owner->id, 2026, 3, null, $boat->id);
+
+        // The boat scope sees its closing; the fleet-wide scope does not.
+        $boatSummary = $this->service->annualSummary($owner->id, 2026, $boat->id);
+        $this->assertSame(1, $boatSummary['closed_count']);
+        $this->assertNotNull($boatSummary['months'][3]);
+
+        $fleetSummary = $this->service->annualSummary($owner->id, 2026);
+        $this->assertSame(0, $fleetSummary['closed_count']);
+        $this->assertNull($fleetSummary['months'][3]);
+    }
+
     public function test_reopen_blocked_after_linked_percentage_payment(): void
     {
         $owner = $this->seedClientExample();

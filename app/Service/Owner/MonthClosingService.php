@@ -179,6 +179,55 @@ class MonthClosingService
         return $this->financials->details($closing->owner_id, $from, $to, $closing->boat_id);
     }
 
+    /**
+     * Annual roll-up of an owner's monthly closings for a calendar year.
+     *
+     * Lists all twelve months; only months that have been closed carry a frozen
+     * {@see MonthClosing} snapshot, the rest are null. The year totals sum the
+     * closed months only. Boats follow {@see find()}: a null boat means the
+     * fleet-wide closings, otherwise a single boat's closings.
+     *
+     * @return array{
+     *     year: int, boat_id: int|null,
+     *     months: array<int, \App\Models\MonthClosing|null>,
+     *     totals: array{gross_sales: float, net_owner_revenue: float, trip_expenses: float, general_expenses: float, depreciation: float, total_expenses: float, net_profit: float, owner_share: float, crew_share: float},
+     *     closed_count: int
+     * }
+     */
+    public function annualSummary(int $ownerId, int $year, ?int $boatId = null): array
+    {
+        $closings = MonthClosing::where('owner_id', $ownerId)
+            ->where('year', $year)
+            ->where('status', 'closed')
+            ->when($boatId !== null, fn ($query) => $query->where('boat_id', $boatId))
+            ->when($boatId === null, fn ($query) => $query->whereNull('boat_id'))
+            ->get()
+            ->keyBy('month');
+
+        $months = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $months[$month] = $closings->get($month);
+        }
+
+        $fields = [
+            'gross_sales', 'net_owner_revenue', 'trip_expenses', 'general_expenses',
+            'depreciation', 'total_expenses', 'net_profit', 'owner_share', 'crew_share',
+        ];
+
+        $totals = [];
+        foreach ($fields as $field) {
+            $totals[$field] = round((float) $closings->sum(fn (MonthClosing $closing) => (float) $closing->{$field}), 2);
+        }
+
+        return [
+            'year' => $year,
+            'boat_id' => $boatId,
+            'months' => $months,
+            'totals' => $totals,
+            'closed_count' => $closings->count(),
+        ];
+    }
+
     public function find(int $ownerId, int $year, int $month, ?int $boatId = null): ?MonthClosing
     {
         return MonthClosing::where('owner_id', $ownerId)

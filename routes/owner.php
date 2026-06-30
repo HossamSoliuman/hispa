@@ -37,6 +37,7 @@ use App\Http\Controllers\Owner\PortController;
 use App\Http\Controllers\Owner\ProfileController;
 use App\Http\Controllers\Owner\ProfitLossController;
 use App\Http\Controllers\Owner\RegionController;
+use App\Http\Controllers\Owner\Report\AnnualSummaryController;
 use App\Http\Controllers\Owner\Report\DalalStockReportController;
 use App\Http\Controllers\Owner\Report\FishHistoryReportController;
 use App\Http\Controllers\Owner\Report\MonthSummaryController;
@@ -222,6 +223,10 @@ Route::group([
         // month financial summary (single-page P&L statement)
         Route::get('/reports/month-summary', [MonthSummaryController::class, 'index'])->name('reports.month-summary');
         Route::get('/reports/month-summary/print', [MonthSummaryController::class, 'print'])->name('reports.month-summary.print');
+
+        // annual summary (year-level roll-up of the monthly closings)
+        Route::get('/reports/annual-summary', [AnnualSummaryController::class, 'index'])->name('reports.annual-summary');
+        Route::get('/reports/annual-summary/print', [AnnualSummaryController::class, 'print'])->name('reports.annual-summary.print');
 
         // analysis reports (P0): trip/boat profitability, production by species
         Route::get('/reports/trip-profitability', [ProfitabilityReportController::class, 'tripProfitability'])->name('reports.trip-profitability');

@@ -38,6 +38,7 @@
                 'color' => 'warning',
                 'items' => [
                     ['owner.month-closing.index', __('owner.menu.month_closing')],
+                    ['owner.reports.annual-summary', __('owner.annual_summary.title')],
                 ],
             ],
             [
