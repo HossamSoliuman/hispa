@@ -86,7 +86,6 @@
                     <tr>
                         <th>{{ __('owner.month_closing.columns.member') }}</th>
                         <th>{{ __('owner.month_closing.columns.role') }}</th>
-                        <th>{{ __('owner.month_closing.columns.shares') }}</th>
                         <th>{{ __('owner.month_closing.columns.custom_percent') }}</th>
                         <th>{{ __('owner.month_closing.columns.due') }}</th>
                         <th>{{ __('owner.month_closing.columns.advances') }}</th>
@@ -98,21 +97,18 @@
                         <tr>
                             <td>{{ $due['member_name'] }}</td>
                             <td>{{ $due['role'] }}</td>
-                            <td>{{ $due['custom_share_percent'] !== null ? '-' : number_format($due['shares'], 2) }}</td>
                             <td>{{ $due['custom_share_percent'] !== null ? number_format($due['custom_share_percent'], 2) . '%' : '-' }}</td>
                             <td>{{ number_format($due['due_amount'], 2) }}</td>
                             <td>{{ number_format($due['advances'], 2) }}</td>
                             <td class="fw-bold">{{ number_format($due['remaining'], 2) }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="text-center text-muted">--</td></tr>
+                        <tr><td colspan="6" class="text-center text-muted">--</td></tr>
                     @endforelse
                 </tbody>
                 <tfoot>
                     <tr class="table-light fw-bold">
-                        <td colspan="2">{{ __('owner.month_closing.columns.shares') }}: {{ number_format($preview['total_shares'], 2) }}</td>
-                        <td></td>
-                        <td></td>
+                        <td colspan="3"></td>
                         <td>{{ number_format(collect($preview['dues'])->sum('due_amount'), 2) }}</td>
                         <td>{{ number_format(collect($preview['dues'])->sum('advances'), 2) }}</td>
                         <td>{{ number_format(collect($preview['dues'])->sum('remaining'), 2) }}</td>

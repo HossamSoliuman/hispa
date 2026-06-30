@@ -7,8 +7,15 @@ use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\TripRequest;
 use App\Http\Requests\Owner\TripTransitionRequest;
+use App\Models\CatchDetail;
+use App\Models\CatchModel;
 use App\Models\Category;
+use App\Models\Expense;
+use App\Models\Expenseable;
+use App\Models\FishQuantityStock;
 use App\Models\Region;
+use App\Models\Sale;
+use App\Models\SaleDetail;
 use App\Models\Trip;
 use App\Models\User;
 use App\Repository\Admin\TripRepository;
@@ -16,6 +23,10 @@ use App\Service\Owner\TripFinancialsService;
 use App\Services\TripTransitionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class TripController extends Controller
 {
@@ -162,9 +173,69 @@ class TripController extends Controller
         return redirect()->route('owner.trips.index')->with('success', __('owner.swal.success'));
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        return $this->rep->deleteData($id);
+        $trip = Trip::where('owner_id', auth()->id())->find($id);
+
+        if (! $trip) {
+            return response()->json(['message' => __('owner.swal.error')], 404);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $this->purgeTripRelations($trip);
+
+            if (! is_null($trip->getRawOriginal('license_attachment'))) {
+                deleteFile($trip->getRawOriginal('license_attachment'));
+            }
+
+            $trip->delete();
+            Cache::forget('sidebar_trip_counts');
+
+            DB::commit();
+
+            return response()->json(['message' => __('owner.trips.deleted')], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => App::environment('local') ? $e->getMessage() : __('owner.swal.error'),
+            ], 500);
+        }
+    }
+
+    /**
+     * Permanently remove every record tied to a trip so reports (sales, catches,
+     * expenses, stock and profit/loss) no longer count the deleted trip.
+     */
+    private function purgeTripRelations(Trip $trip): void
+    {
+        $saleIds = Sale::withTrashed()->where('trip_id', $trip->id)->pluck('id');
+
+        if ($saleIds->isNotEmpty()) {
+            if (Schema::hasTable('payments')) {
+                DB::table('payments')->whereIn('sale_id', $saleIds)->delete();
+            }
+            SaleDetail::whereIn('sale_id', $saleIds)->delete();
+            Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
+        }
+
+        $catchIds = CatchModel::where('trip_id', $trip->id)->pluck('id');
+
+        if ($catchIds->isNotEmpty()) {
+            CatchDetail::whereIn('catch_id', $catchIds)->delete();
+            CatchModel::whereIn('id', $catchIds)->delete();
+        }
+
+        FishQuantityStock::where('trip_id', $trip->id)->delete();
+
+        $expenseIds = Expense::withTrashed()->where('trip_id', $trip->id)->pluck('id');
+
+        if ($expenseIds->isNotEmpty()) {
+            Expenseable::withTrashed()->whereIn('expense_id', $expenseIds)->forceDelete();
+            Expense::withTrashed()->whereIn('id', $expenseIds)->forceDelete();
+        }
     }
 
     public function transition(TripTransitionRequest $request, Trip $trip, TripTransitionService $service): JsonResponse

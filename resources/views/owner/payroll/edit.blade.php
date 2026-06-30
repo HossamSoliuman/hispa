@@ -41,12 +41,15 @@
     @isset($financials)
         <div class="row g-3 mb-4">
             @php
+                $operatingExpenses = (float) ($financials['total_expenses'] ?? 0) - (float) ($financials['depreciation'] ?? 0);
+                $netProfit = (float) ($financials['net_profit'] ?? 0);
                 $summaryCards = [
-                    ['owner.payrolls.summary.sales', $financials['net_sales'] ?? 0, 'success'],
-                    ['owner.payrolls.summary.revenue', $financials['net_owner_revenue'] ?? 0, 'info'],
-                    ['owner.payrolls.summary.depreciation', $financials['depreciation'] ?? 0, 'secondary'],
-                    ['owner.payrolls.summary.owner_share', $financials['owner_share'] ?? 0, 'primary'],
-                    ['owner.payrolls.summary.crew_share', $financials['crew_share'] ?? 0, 'warning'],
+                    ['owner.profit_loss.net_sales', $financials['net_sales'] ?? 0, 'success'],
+                    ['owner.month_closing.expenses', $operatingExpenses, 'danger'],
+                    ['owner.profit_loss.depreciation', $financials['depreciation'] ?? 0, 'secondary'],
+                    ['owner.profit_loss.net_profit', $netProfit, $netProfit >= 0 ? 'success' : 'danger'],
+                    ['owner.generated.owner_ratio', $financials['owner_share'] ?? 0, 'primary'],
+                    ['owner.profit_loss.crew_share', $financials['crew_share'] ?? 0, 'warning'],
                 ];
             @endphp
             @foreach ($summaryCards as [$label, $value, $color])

@@ -73,4 +73,12 @@
        class="btn btn-sm btn-outline-primary" title="{{ __('owner.trips.print_trip') }}">
         <i class="bi bi-printer"></i>
     </a>
+
+    {{-- Delete trip (cascades to its catches, sales, expenses and stock) --}}
+    <button type="button"
+            class="btn btn-sm btn-outline-danger"
+            title="{{ __('owner.trips.delete_trip') }}"
+            onclick="deleteTrip({{ $trip->id }})">
+        <i class="bi bi-trash"></i>
+    </button>
 </div>

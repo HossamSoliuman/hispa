@@ -9,12 +9,10 @@ use App\Models\Payroll;
 use App\Models\PayrollDetailsModel;
 use App\Models\PayrollModel;
 use App\Models\Sale;
-use App\Models\Setting;
 use App\Models\Trip;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PayrollService
 {
@@ -224,36 +222,36 @@ class PayrollService
         return ($percent !== null && (float) $percent > 0) ? (float) $percent : null;
     }
 
-    public function calculatePercentageSalary(User $user, int $year, int $month)
+    /**
+     * The boat's crew pool (نصيب الطاقم) for the month: the same figure shown on
+     * the month-close report — net profit (sales − expenses − الإهلاك) times the
+     * crew percentage. Computed through {@see MonthlyFinancialsService} (the single
+     * source of truth) scoped to the member's boat, so the per-crew distribution
+     * always reconciles with the summary cards. Asset depreciation is netted out
+     * of the pool here, exactly as the month close does.
+     */
+    public function calculatePercentageSalary(User $user, int $year, int $month): float
     {
-        if ($user->salary_type === 'percentage') {
-
-            $startDate = Carbon::create($year, $month, 1)->startOfDay();
-            $endDate = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
-
-            $ownerId = $user->owner_id ?? Auth::guard('owner')->id();
-
-            $trips = Trip::where('boat_id', $user->boat_id)->pluck('id');
-            $sales = (float) Sale::whereIn('trip_id', $trips)
-                ->where('seller_type', 'owner')
-                ->where('seller_id', $ownerId)
-                ->whereBetween(DB::raw('DATE(sale_datetime)'), [$startDate->toDateString(), $endDate->toDateString()])
-                ->sum('total_price');
-
-            $expenses = (float) Expense::where('owner_id', $ownerId)
-                ->where('boat_id', $user->boat_id)
-                ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-                ->sum('final_price');
-
-            $totalIncome = $sales - $expenses;
-
-            $ownerPercent = (float) (Setting::where('key', MonthlyFinancialsService::SETTING_OWNER_PERCENT)->value('value')
-                ?? MonthlyFinancialsService::DEFAULT_OWNER_PERCENT);
-
-            return $totalIncome * ((100 - $ownerPercent) / 100);
+        if ($user->salary_type !== 'percentage' || $user->boat_id === null) {
+            return 0.0;
         }
 
-        return 0;
+        $ownerId = (int) ($user->owner_id ?? Auth::guard('owner')->id());
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+        $boatId = (int) $user->boat_id;
+
+        $depreciation = app(AssetDepreciationService::class)
+            ->forMonth($ownerId, $year, $month, $boatId)['total'];
+
+        $financials = app(MonthlyFinancialsService::class)->compute(
+            $ownerId,
+            $start->toDateString(),
+            $start->copy()->endOfMonth()->toDateString(),
+            $boatId,
+            $depreciation,
+        );
+
+        return (float) $financials['crew_share'];
     }
 
     /**

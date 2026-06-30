@@ -153,10 +153,11 @@ class PayrollController extends Controller
 
     /**
      * Re-sync each not-yet-paid row's boat income pool (إجمالي أرباح الصيادين) and
-     * advances (سلف) with the figures recorded for that month, so sales or
-     * advances added after the payroll was generated still reflect in the net.
-     * Paid rows are frozen and left untouched. Asset depreciation (الإهلاك) is a
-     * fleet-level cost shown only in the summary cards — it is not withheld here.
+     * advances (سلف) with the figures recorded for that month, so sales, expenses
+     * or advances added after the payroll was generated still reflect in the net.
+     * Paid rows are frozen and left untouched. The pool already nets out asset
+     * depreciation (الإهلاك) via the month-close calculation, so the per-head
+     * base_salary matches the crew share shown in the summary cards.
      */
     private function refreshUnpaidAdvances(PayrollModel $payroll): void
     {
@@ -285,8 +286,9 @@ class PayrollController extends Controller
      * Net pay for a detail row: crew take their base share (base_salary) of the
      * boat pool — an equal per-head split, or a نسبة خاصة (custom_share_percent)
      * member's percentage off the top. Increase/deduction are applied on top, then
-     * cash advances (السلف) are withheld. Asset depreciation (الإهلاك) is a
-     * fleet-level cost accounted for in the month close, not withheld per person.
+     * cash advances (السلف) are withheld. Asset depreciation (الإهلاك) is already
+     * netted out of the boat pool (base_salary) by the month-close calculation, so
+     * it is not withheld again per person.
      */
     private function detailFinalSalary(PayrollDetailsModel $detail, float $increase, float $deduction): float
     {

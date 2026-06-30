@@ -625,6 +625,39 @@
             });
         }
 
+        // Delete a trip together with all of its related catches, sales, expenses and stock.
+        function deleteTrip(tripId) {
+            Swal.fire({
+                title: '{{ __('owner.trips.delete_trip_title') }}',
+                text: '{{ __('owner.trips.delete_trip_warning') }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                cancelButtonText: '{{ __('owner.swal.cancel') }}'
+            }).then((result) => {
+                if (!result.isConfirmed) { return; }
+
+                $.ajax({
+                    url: "{{ route('owner.trips.destroy', ['trip' => '__ID__']) }}".replace('__ID__', tripId),
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        _method: 'DELETE'
+                    },
+                    success: function(response) {
+                        Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success');
+                        $('#datatableDefault').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        let message = xhr.responseJSON?.message || '{{ __('owner.swal.unexpected_error') }}';
+                        Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                    }
+                });
+            });
+        }
+
         function recalcQuickExpensesTotal() {
             let total = 0;
             $('.quick-expense-amount').each(function() {
