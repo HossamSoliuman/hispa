@@ -58,7 +58,7 @@
     .rmast-en { text-align: left; direction: ltr; }
     .rmast-ar { text-align: right; direction: rtl; }
     .rmast-logo-wrap { flex: 0 0 auto; text-align: center; padding: 0 6px; }
-    .rmast-logo { max-height: 62px; max-width: 132px; }
+    .rmast-logo { max-height: 92px; max-width: 190px; }
 
     .rmast-name { font-size: 13pt; font-weight: 800; color: #1a1a1a; line-height: 1.25; margin-bottom: 4px; }
 

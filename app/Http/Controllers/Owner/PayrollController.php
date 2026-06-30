@@ -349,28 +349,20 @@ class PayrollController extends Controller
     {
         abort_if($payroll->owner_id !== $this->ownerId(), 403);
 
-        // Load company settings and generate QR code (link to the printable payroll URL)
-        $settings = $this->getCompanySettings();
-        $qrCode = app(\App\Service\Owner\ReportQrService::class)
-            ->dataUri(route('owner.payrolls.print', $payroll->id));
+        $settings = $this->reportSettings();
 
-        return pdf_report(view('owner.payroll.print', compact('payroll', 'settings', 'qrCode')), [], 'payroll.pdf');
+        return pdf_report(view('owner.payroll.print', compact('payroll', 'settings')), [], 'payroll.pdf');
     }
 
-    // Local helpers reused for report generation (kept in-controller for now)
-    private function getCompanySettings()
+    /**
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
     {
-        $user = auth()->user();
-        $logoPath = public_path('default-logo.png');
+        $companyName = currentCompany()?->name ?: 'N/A';
 
-        return [
-            'title' => $user->company_name ?? $user->name ?? config('app.name'),
-            'company_name' => $user->company_name ?? $user->name ?? config('app.name'),
-            'logo' => $logoPath,
-            'watermark' => $logoPath,
-            'phone' => $user->phone ?? '',
-            'email' => $user->email ?? '',
-            'address' => $user->address ?? '',
-        ];
+        return ownerCompanySettings([
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ]);
     }
 }

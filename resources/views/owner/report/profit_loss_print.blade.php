@@ -40,10 +40,11 @@
         ['label' => __('owner.profit_loss.crew_share'), 'value' => number_format($f['crew_share'], 2)],
     ]" />
 
-    {{-- Revenues / Expenses / Profit summary — three columns on a single row --}}
+    {{-- Two 50/50 columns: Revenues stacked over the Profit summary on one side,
+         the wider Expenses table on the other (more width avoids header/word wrap). --}}
     <table class="dual">
         <tr>
-            <td class="dual-col" style="width:33%;">
+            <td class="dual-col" style="width:50%;">
                 <table class="report-table">
                     <thead>
                         <tr>
@@ -72,9 +73,33 @@
                         </tr>
                     </tfoot>
                 </table>
+                <table class="report-table" style="margin-top:10px;">
+                    <tbody>
+                        <tr>
+                            <th class="col-text" style="width:62%;">{{ __('owner.profit_loss.net_owner_revenue') }}</th>
+                            <td class="col-num">{{ number_format($f['net_owner_revenue'], 2) }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-text">{{ __('owner.profit_loss.total_expenses') }}</th>
+                            <td class="col-num">({{ number_format($f['total_expenses'], 2) }})</td>
+                        </tr>
+                        <tr class="net-row">
+                            <th class="col-text">{{ __('owner.profit_loss.net_profit_loss') }}</th>
+                            <td class="col-num">{{ number_format($netProfit, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-text">{{ __('owner.profit_loss.owner_share') }} ({{ rtrim(rtrim(number_format($f['owner_percent'], 2), '0'), '.') }})</th>
+                            <td class="col-num">{{ number_format($f['owner_share'], 2) }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
+                            <td class="col-num">{{ number_format($f['crew_share'], 2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </td>
             <td class="dual-gap"></td>
-            <td class="dual-col" style="width:33%;">
+            <td class="dual-col" style="width:50%;">
                 <table class="report-table">
                     <thead>
                         <tr>
@@ -107,33 +132,6 @@
                             <th>100.00</th>
                         </tr>
                     </tfoot>
-                </table>
-            </td>
-            <td class="dual-gap"></td>
-            <td class="dual-col" style="width:33%;">
-                <table class="report-table">
-                    <tbody>
-                        <tr>
-                            <th class="col-text" style="width:62%;">{{ __('owner.profit_loss.net_owner_revenue') }}</th>
-                            <td class="col-num">{{ number_format($f['net_owner_revenue'], 2) }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-text">{{ __('owner.profit_loss.total_expenses') }}</th>
-                            <td class="col-num">({{ number_format($f['total_expenses'], 2) }})</td>
-                        </tr>
-                        <tr class="net-row">
-                            <th class="col-text">{{ __('owner.profit_loss.net_profit_loss') }}</th>
-                            <td class="col-num">{{ number_format($netProfit, 2) }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-text">{{ __('owner.profit_loss.owner_share') }} ({{ rtrim(rtrim(number_format($f['owner_percent'], 2), '0'), '.') }})</th>
-                            <td class="col-num">{{ number_format($f['owner_share'], 2) }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
-                            <td class="col-num">{{ number_format($f['crew_share'], 2) }}</td>
-                        </tr>
-                    </tbody>
                 </table>
             </td>
         </tr>

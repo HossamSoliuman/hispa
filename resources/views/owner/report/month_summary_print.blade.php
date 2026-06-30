@@ -1,62 +1,199 @@
+@php
+    $grossSales = (float) $f['gross_sales'];
+    $tripExpenses = (float) $f['trip_expenses'];
+    $generalExpenses = (float) $f['general_expenses'];
+    $depreciation = (float) $f['depreciation'];
+    $totalExpenses = (float) $f['total_expenses'];
+    $netProfit = (float) $f['net_profit'];
+    $netOwnerRevenue = (float) ($f['net_owner_revenue'] ?? ($grossSales - $totalExpenses));
+    $ownerPercent = (float) $f['owner_percent'];
+    $ownerShare = (float) $f['owner_share'];
+    $crewShare = (float) $f['crew_share'];
+    $crewCount = (int) $f['crew_count'];
+    $perFisherman = (float) $f['per_fisherman'];
+
+    $selectedBoat = ($boatId && isset($boats)) ? $boats->firstWhere('id', $boatId) : null;
+    $boatLabel = $selectedBoat ? ($selectedBoat->name ?? $selectedBoat->name_ar) : __('owner.month_summary.all_boats');
+
+    $subtitle = __('owner.month_summary.from_date').' '.$from.' '.__('owner.month_summary.to_date').' '.$to
+        .' — '.__('owner.month_summary.boat').': '.$boatLabel;
+
+    $companyName = $settings['title'] ?? ($settings['company_name'] ?? ($settings['name'] ?? ''));
+@endphp
+
 <x-report-layout
     :title="__('owner.month_summary.title')"
-    titleEn="Monthly Financial Summary"
-    :documentNumber="'MS-' . \Illuminate\Support\Carbon::parse($from)->format('Ym')"
+    :document-number="'MS-' . \Illuminate\Support\Carbon::parse($from)->format('Ym')"
     :settings="$settings ?? []"
+    :qr-code="$settings['qr_code'] ?? ''"
 >
-    <x-slot name="extraStyles">
-        .ms-statement { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 10pt; }
-        .ms-statement th, .ms-statement td { padding: 9px 14px; }
-        .ms-statement thead th { background: #34495e; color: #fff; text-align: start; font-weight: 600; font-size: 10pt; border: none; }
-        .ms-period-cell { font-weight: 500 !important; }
-        .ms-section td { background: #f1f5f9; color: #1e293b; font-weight: 700; font-size: 10.5pt; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; }
-        .ms-line td { border-bottom: 1px solid #eef2f6; color: #475569; }
-        .ms-label { text-align: start; }
-        .ms-indent { padding-inline-start: 34px !important; }
-        .ms-amount { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
-        .ms-pos { color: #16a34a; }
-        .ms-neg { color: #dc2626; }
-        .ms-muted { color: #94a3b8; }
-        .ms-subtotal td { font-weight: 700; color: #1e293b; border-top: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; background: #fafbfc; }
-        .ms-subtotal-light td { background: #fff; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
-        .ms-total td { font-weight: 700; font-size: 12pt; padding: 13px 14px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .ms-total-profit td { background: #16a34a; color: #fff; }
-        .ms-total-loss td { background: #dc2626; color: #fff; }
-        .ms-statement-distribution { margin-top: 6px; }
-        .ms-statement-distribution thead th { background: #d97706; }
-        .ms-currency { font-size: 8.5pt; color: #94a3b8; }
-        @media print { .ms-statement { page-break-inside: avoid; } }
-    </x-slot>
-
-    <x-report-header
-        :documentNumber="'MS-' . \Illuminate\Support\Carbon::parse($from)->format('Ym')"
+    <x-report-masthead
         :title="__('owner.month_summary.title')"
-        titleEn="Monthly Financial Summary"
-        :settings="$settings ?? []"
-    />
+        :subtitle="$subtitle"
+        :settings="$settings ?? []" />
 
-    <x-report-info :settings="$settings ?? []">
-        <x-slot name="additionalInfo">
-            <div class="period-info" style="background:#f1f5f9;padding:12px;border-radius:6px;margin:15px 0;">
-                <strong>{{ __('owner.month_summary.period_label') }}:</strong>
-                {{ $from }} <small class="text-muted">(@hijri($from))</small>
-                <strong style="margin-inline-start:20px;">{{ __('owner.month_summary.to') }}:</strong>
-                {{ $to }} <small class="text-muted">(@hijri($to))</small>
-                @if ($boatId && isset($boats))
-                    @php $selectedBoat = $boats->firstWhere('id', $boatId); @endphp
-                    @if ($selectedBoat)
-                        <br><strong>{{ __('owner.month_summary.boat') }}:</strong> {{ $selectedBoat->name ?? $selectedBoat->name_ar }}
-                    @endif
-                @endif
-            </div>
-        </x-slot>
-    </x-report-info>
-
-    @include('owner.report._month_summary_statement', ['f' => $f, 'expenses' => $expenses, 'from' => $from, 'to' => $to])
-
-    <div style="margin-top:18px;padding:12px 16px;background:#f8f9fa;border-radius:8px;text-align:center;">
-        <small style="color:#64748b;font-weight:500;">
-            {{ __('owner.month_summary.currency_note') }} · {{ __('owner.profit_loss.formula_note') }}
-        </small>
+    {{-- Meta strip --}}
+    <div class="meta-row">
+        <span class="meta-item">
+            <span class="lbl">{{ __('owner.month_summary.from_date') }}:</span>
+            <span class="val-box">{{ $from }}</span>
+        </span>
+        <span class="meta-item">
+            <span class="lbl">{{ __('owner.month_summary.to_date') }}:</span>
+            <span class="val-box">{{ $to }}</span>
+        </span>
+        <span class="meta-item">
+            <span class="lbl">{{ __('owner.month_summary.boat') }}:</span>
+            <span class="val-box">{{ $boatLabel }}</span>
+        </span>
     </div>
+
+    {{-- KPI cards --}}
+    <x-report-stats :items="[
+        ['label' => __('owner.month_summary.total_sales'), 'value' => number_format($grossSales, 2)],
+        ['label' => __('owner.month_summary.net_owner_revenue'), 'value' => number_format($netOwnerRevenue, 2)],
+        ['label' => __('owner.month_summary.total_expenses'), 'value' => number_format($totalExpenses, 2)],
+        ['label' => __('owner.month_summary.net_profit_loss'), 'value' => number_format($netProfit, 2), 'color' => $netProfit < 0 ? '#dc3545' : null],
+        ['label' => __('owner.month_summary.owner_share'), 'value' => number_format($ownerShare, 2)],
+        ['label' => __('owner.month_summary.crew_share'), 'value' => number_format($crewShare, 2)],
+    ]" />
+
+    <table class="dual">
+        <tr>
+            {{-- Profit & loss statement --}}
+            <td class="dual-col" style="width:58%;">
+                <div class="section-bar">{{ __('owner.month_summary.statement_title') }}</div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th class="col-text" style="width:70%;">{{ __('owner.month_summary.item') }}</th>
+                            <th class="col-num">{{ __('owner.month_summary.amount') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="col-text" colspan="2">{{ __('owner.month_summary.revenue') }}</th>
+                        </tr>
+                        <tr>
+                            <td class="col-text" style="padding-inline-start:18px;">{{ __('owner.month_summary.total_sales') }}</td>
+                            <td class="col-num">{{ number_format($grossSales, 2) }}</td>
+                        </tr>
+
+                        <tr>
+                            <th class="col-text" colspan="2">{{ __('owner.month_summary.operating_expenses') }}</th>
+                        </tr>
+                        @forelse ($expenses['operating'] as $row)
+                            <tr>
+                                <td class="col-text" style="padding-inline-start:18px;">{{ $row['category'] }}</td>
+                                <td class="col-num">({{ number_format($row['amount'], 2) }})</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="col-text" style="padding-inline-start:18px;color:#888;">{{ __('owner.month_summary.no_expenses') }}</td>
+                                <td class="col-num" style="color:#888;">0.00</td>
+                            </tr>
+                        @endforelse
+                        <tr>
+                            <th class="col-text">{{ __('owner.month_summary.total_operating_expenses') }}</th>
+                            <th class="col-num">({{ number_format($tripExpenses, 2) }})</th>
+                        </tr>
+
+                        <tr>
+                            <th class="col-text" colspan="2">{{ __('owner.month_summary.general_expenses') }}</th>
+                        </tr>
+                        @forelse ($expenses['general'] as $row)
+                            <tr>
+                                <td class="col-text" style="padding-inline-start:18px;">{{ $row['category'] }}</td>
+                                <td class="col-num">({{ number_format($row['amount'], 2) }})</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="col-text" style="padding-inline-start:18px;color:#888;">{{ __('owner.month_summary.no_expenses') }}</td>
+                                <td class="col-num" style="color:#888;">0.00</td>
+                            </tr>
+                        @endforelse
+                        <tr>
+                            <th class="col-text">{{ __('owner.month_summary.total_general_expenses') }}</th>
+                            <th class="col-num">({{ number_format($generalExpenses, 2) }})</th>
+                        </tr>
+
+                        <tr>
+                            <th class="col-text" colspan="2">{{ __('owner.month_summary.depreciation') }}</th>
+                        </tr>
+                        <tr>
+                            <td class="col-text" style="padding-inline-start:18px;">{{ __('owner.month_summary.depreciation') }}</td>
+                            <td class="col-num">({{ number_format($depreciation, 2) }})</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="col-text">{{ __('owner.month_summary.total_expenses') }}</th>
+                            <th class="col-num">({{ number_format($totalExpenses, 2) }})</th>
+                        </tr>
+                        <tr class="net-row">
+                            <th class="col-text">{{ __('owner.month_summary.net_profit_loss') }}</th>
+                            <th class="col-num">{{ number_format($netProfit, 2) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </td>
+            <td class="dual-gap"></td>
+
+            {{-- Profit distribution --}}
+            <td class="dual-col" style="width:42%;">
+                <div class="section-bar">{{ __('owner.month_summary.distribution') }}</div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th class="col-text" style="width:62%;">{{ __('owner.month_summary.item') }}</th>
+                            <th class="col-num">{{ __('owner.month_summary.amount') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="col-text">{{ __('owner.month_summary.owner_share') }} ({{ number_format($ownerPercent, 0) }}%)</td>
+                            <td class="col-num">{{ number_format($ownerShare, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-text">{{ __('owner.month_summary.crew_share') }} ({{ number_format(100 - $ownerPercent, 0) }}%)</td>
+                            <td class="col-num">{{ number_format($crewShare, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-text">{{ __('owner.month_summary.crew_count') }}</td>
+                            <td class="col-num">{{ number_format($crewCount, 0) }}</td>
+                        </tr>
+                        <tr class="net-row">
+                            <th class="col-text">{{ __('owner.month_summary.per_fisherman') }}</th>
+                            <th class="col-num">{{ number_format($perFisherman, 2) }}</th>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="info-bar" style="margin-top:10px;">
+                    <tr>
+                        <td>
+                            <span class="ib-label">{{ __('owner.month_summary.net_owner_revenue') }}</span>
+                            <span class="ib-value">{{ number_format($netOwnerRevenue, 2) }}</span>
+                        </td>
+                        <td>
+                            <span class="ib-label">{{ __('owner.month_summary.net_profit_loss') }}</span>
+                            <span class="ib-value">{{ number_format($netProfit, 2) }}</span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <x-report-signatures :items="[
+        __('owner.reports.sig_accountant'),
+        __('owner.reports.sig_financial_manager'),
+        __('owner.reports.sig_general_manager'),
+    ]" />
+
+    <table class="report-footer">
+        <tr>
+            <td>{{ $companyName }} — {{ __('owner.reports.all_rights_reserved') }} © {{ date('Y') }} · {{ __('owner.month_summary.currency_note') }}</td>
+        </tr>
+    </table>
 </x-report-layout>
