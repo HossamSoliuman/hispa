@@ -1411,7 +1411,7 @@ return [
                 'total_sales' => 'إجمالي المبيعات',
                 'total_expenses' => 'إجمالي المصروفات',
                 'profit_before' => 'الربح قبل التوزيع',
-                'owner_deductions' => 'حصة المالك والاستقطاعات',
+                'owner_deductions' => 'حصة المالك',
                 'net_distributable' => 'صافي الربح القابل للتوزيع',
             ],
             'rows' => [
@@ -1422,12 +1422,13 @@ return [
                 'operational_expenses' => 'مصروفات تشغيلية',
                 'depreciation' => 'الإهلاك',
                 'total_expenses' => 'إجمالي المصروفات',
+                'expenses' => 'المصروفات',
                 'net_owner_revenue' => 'صافي الإيرادات',
                 'profit_before' => 'الربح قبل التوزيع',
                 'owner_percent' => 'نسبة المالك',
                 'owner_share' => 'حصة المالك',
                 'total_deductions' => 'إجمالي الاستقطاعات',
-                'final_distributable' => 'صافي الربح للتوزيع',
+                'final_distributable' => 'صافي الربح',
             ],
             'distribution_title' => 'توزيع أرباح البحارة',
             'dist' => [

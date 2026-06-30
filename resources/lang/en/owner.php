@@ -1411,7 +1411,7 @@ return [
                 'total_sales' => 'Total Sales',
                 'total_expenses' => 'Total Expenses',
                 'profit_before' => 'Profit Before Distribution',
-                'owner_deductions' => 'Owner Share & Deductions',
+                'owner_deductions' => 'Owner Share',
                 'net_distributable' => 'Net Distributable Profit',
             ],
             'rows' => [
@@ -1422,12 +1422,13 @@ return [
                 'operational_expenses' => 'Operational Expenses',
                 'depreciation' => 'Depreciation',
                 'total_expenses' => 'Total Expenses',
+                'expenses' => 'Expenses',
                 'net_owner_revenue' => 'Net Revenue',
                 'profit_before' => 'Profit Before Distribution',
                 'owner_percent' => 'Owner Percentage',
                 'owner_share' => 'Owner Share',
                 'total_deductions' => 'Total Deductions',
-                'final_distributable' => 'Final Profit for Distribution',
+                'final_distributable' => 'Net Profit',
             ],
             'distribution_title' => 'Sailor Profit Distribution',
             'dist' => [

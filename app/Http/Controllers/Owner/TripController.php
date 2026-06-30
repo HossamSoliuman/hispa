@@ -190,7 +190,7 @@ class TripController extends Controller
                 deleteFile($trip->getRawOriginal('license_attachment'));
             }
 
-            $trip->delete();
+            $trip->forceDelete();
             Cache::forget('sidebar_trip_counts');
 
             DB::commit();

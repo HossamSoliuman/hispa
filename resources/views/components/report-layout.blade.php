@@ -235,18 +235,29 @@
            ─────────────────────────────────────────────────────────────── */
 
         /* Five summary cards: black caption banner over a bordered key/value
-           body whose final row is the card's emphasized total. Heads and bodies
-           sit in two separate table rows so mPDF equalises each row's cell
-           heights — every card ends up the same height even when a head wraps
-           or a body has fewer rows (bodies are padded with blank rows). */
-        table.sum-cards { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 5px 0; margin: 0 0 12px; }
-        table.sum-cards td.sum-head { background: #1a1a1a; color: #fff; font-weight: 700; text-align: center; font-size: 8pt; padding: 5px 3px; line-height: 1.25; vertical-align: middle; border: none; }
-        table.sum-cards td.sum-card { padding: 0; vertical-align: top; border: none; background: #fff; }
-        table.sum-body { width: 100%; border-collapse: collapse; border: 1px solid #cfcfcf; border-top: none; margin: 0; }
-        table.sum-body td { padding: 3px 5px; font-size: 7.8pt; vertical-align: middle; border: none; }
-        table.sum-body td.sum-k { text-align: {{ $startAlign }}; color: #555; }
-        table.sum-body td.sum-v { text-align: {{ $endAlign }}; font-weight: 700; color: #1a1a1a; white-space: nowrap; }
-        table.sum-body tr.sum-total td { background: #f2f2f2; border-top: 1px solid #1a1a1a; font-weight: 700; color: #1a1a1a; }
+           body whose final row is the card's emphasized total. Rendered by
+           Chromium, so flexbox lays the heads and bodies out as two stretch
+           rows — every head equalises to the tallest head and every body to the
+           tallest body, while each total is pinned to the bottom of its card
+           (margin-top:auto). Result: all five total bars line up on one row
+           regardless of how many facts a card lists. */
+        .sum-cards { margin: 0 0 12px; }
+        .sum-heads, .sum-bodies { display: flex; align-items: stretch; gap: 5px; }
+        .sum-head {
+            flex: 1 1 0; min-width: 0;
+            background: #1a1a1a; color: #fff; font-weight: 700; text-align: center;
+            font-size: 8pt; line-height: 1.25; padding: 5px 4px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sum-body {
+            flex: 1 1 0; min-width: 0; display: flex; flex-direction: column;
+            border: 1px solid #cfcfcf; border-top: none;
+        }
+        .sum-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 3px 6px; font-size: 7.8pt; }
+        .sum-row .sum-k { color: #555; text-align: {{ $startAlign }}; }
+        .sum-row .sum-v { font-weight: 700; color: #1a1a1a; white-space: nowrap; text-align: {{ $endAlign }}; }
+        .sum-row.sum-total { margin-top: auto; background: #f2f2f2; border-top: 1px solid #1a1a1a; }
+        .sum-row.sum-total .sum-k { color: #1a1a1a; font-weight: 700; }
 
         /* Three-column closing footer: summary grid / sign-off / notes. */
         table.close-footer { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 16px 0 0; }

@@ -115,7 +115,7 @@ class TripDeleteTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['message']);
 
-        $this->assertSoftDeleted('trips', ['id' => $trip->id]);
+        $this->assertDatabaseMissing('trips', ['id' => $trip->id]);
 
         $this->assertDatabaseMissing('catch_models', ['trip_id' => $trip->id]);
         $this->assertSame(0, CatchDetail::count());

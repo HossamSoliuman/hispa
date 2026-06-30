@@ -8,6 +8,10 @@
     $isRtl = app()->getLocale() === 'ar';
 
     $companyName = $settings['company_name'] ?? '';
+    // Show both identities; fall back across languages so neither side is blank
+    // when an owner has only filled one name.
+    $nameAr = ($settings['name_ar'] ?? '') ?: (($settings['name_en'] ?? '') ?: $companyName);
+    $nameEn = ($settings['name_en'] ?? '') ?: (($settings['name_ar'] ?? '') ?: $companyName);
     $address = $settings['address'] ?? '';
     $phone = $settings['phone'] ?? '';
     $email = $settings['email'] ?? '';
@@ -39,23 +43,32 @@
 @endphp
 
 <style>
-    /* Company masthead — table layout (mPDF: no flex/grid). Bold company name +
-       address in the start corner, CR number on the opposite corner (printed
-       reference masthead). */
-    table.rmast { width: 100%; border-collapse: collapse; border-bottom: 2px solid #1a1a1a; margin-bottom: 4px; }
-    table.rmast > tbody > tr > td { border: none; padding: 0 0 10px; vertical-align: top; }
-    td.rmast-co { text-align: {{ $startAlign }}; }
-    td.rmast-meta { text-align: {{ $endAlign }}; width: 165px; }
-    table.rmast-inner { border-collapse: collapse; }
-    table.rmast-inner td { border: none; padding: 0; vertical-align: middle; }
-    td.rmast-logo-cell { padding-{{ $endAlign }}: 12px; }
-    .rmast-logo { max-height: 60px; max-width: 130px; }
-    .rmast-co-text { text-align: {{ $startAlign }}; }
+    /* Company masthead — three columns: English identity (left), centered logo,
+       Arabic identity (right). Rendered by Chromium, so flexbox is available.
+       A single thin rule closes the band off from the report body. */
+    .rmast {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 14px; padding-bottom: 9px; margin-bottom: 6px;
+        border-bottom: 1px solid #1a1a1a;
+        /* Pin English to the far left and Arabic to the far right regardless of
+           the report locale; without this the RTL page flips the DOM order. */
+        direction: ltr;
+    }
+    .rmast-side { flex: 1 1 0; min-width: 0; }
+    .rmast-en { text-align: left; direction: ltr; }
+    .rmast-ar { text-align: right; direction: rtl; }
+    .rmast-logo-wrap { flex: 0 0 auto; text-align: center; padding: 0 6px; }
+    .rmast-logo { max-height: 62px; max-width: 132px; }
 
-    .rmast-name { font-size: 15pt; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
-    .rmast-line { font-size: 8.5pt; color: #555; line-height: 1.6; }
-    .rmast-meta-label { font-size: 8pt; color: #888; margin-bottom: 1px; }
-    .rmast-meta-value { font-size: 9.5pt; font-weight: 700; color: #1a1a1a; }
+    .rmast-name { font-size: 13pt; font-weight: 800; color: #1a1a1a; line-height: 1.25; margin-bottom: 4px; }
+
+    /* Compact key/value facts (licence numbers, phone, email). The label sits
+       muted next to a bold value; the colon hugs the label in either script. */
+    .rmast-facts { font-size: 8pt; color: #1a1a1a; line-height: 1.55; overflow-wrap: anywhere; }
+    .rmast-facts .rf { display: block; }
+    .rmast-facts .rf-label { color: #888; font-weight: 500; }
+    .rmast-facts .rf-value { font-weight: 700; color: #1a1a1a; }
+    .rmast-facts .rf-label::after { content: ': '; }
 
     /* Centered report title. */
     .rtitle-wrap { text-align: center; margin: 6px 0 18px; }
@@ -63,28 +76,36 @@
     .rsubtitle { font-size: 10pt; color: #666; }
 </style>
 
-<table class="rmast">
-    <tr>
-        <td class="rmast-co">
-            <table class="rmast-inner">
-                <tr>
-                    @if($logoData)<td class="rmast-logo-cell"><img class="rmast-logo" src="{{ $logoData }}" alt=""></td>@endif
-                    <td class="rmast-co-text">
-                        @if($companyName)<div class="rmast-name">{{ $companyName }}</div>@endif
-                        @if($address)<div class="rmast-line">{!! nl2br(e($address)) !!}</div>@endif
-                        @if($phone)<div class="rmast-line">{{ __('owner.reports.tel') }} {{ $phone }}</div>@endif
-                    </td>
-                </tr>
-            </table>
-        </td>
-        <td class="rmast-meta">
-            @if($crNumber)
-                <div class="rmast-meta-label">{{ __('owner.reports.cr_label') }}</div>
-                <div class="rmast-meta-value">{{ $crNumber }}</div>
-            @endif
-        </td>
-    </tr>
-</table>
+<div class="rmast">
+    {{-- English identity --}}
+    <div class="rmast-side rmast-en">
+        @if($nameEn)<div class="rmast-name">{{ $nameEn }}</div>@endif
+        <div class="rmast-facts">
+            @if($crNumber)<span class="rf"><span class="rf-label">Commercial Reg.</span><span class="rf-value">{{ $crNumber }}</span></span>@endif
+            @if($recordNumber)<span class="rf"><span class="rf-label">Agri. Record</span><span class="rf-value">{{ $recordNumber }}</span></span>@endif
+            @if($vat)<span class="rf"><span class="rf-label">VAT</span><span class="rf-value">{{ $vat }}</span></span>@endif
+            @if($phone)<span class="rf"><span class="rf-label">Tel</span><span class="rf-value">{{ $phone }}</span></span>@endif
+            @if($email)<span class="rf"><span class="rf-label">Email</span><span class="rf-value">{{ $email }}</span></span>@endif
+        </div>
+    </div>
+
+    {{-- Centered logo --}}
+    @if($logoData)
+        <div class="rmast-logo-wrap"><img class="rmast-logo" src="{{ $logoData }}" alt=""></div>
+    @endif
+
+    {{-- Arabic identity --}}
+    <div class="rmast-side rmast-ar">
+        @if($nameAr)<div class="rmast-name">{{ $nameAr }}</div>@endif
+        <div class="rmast-facts">
+            @if($crNumber)<span class="rf"><span class="rf-label">السجل التجاري</span><span class="rf-value">{{ $crNumber }}</span></span>@endif
+            @if($recordNumber)<span class="rf"><span class="rf-label">السجل الزراعي</span><span class="rf-value">{{ $recordNumber }}</span></span>@endif
+            @if($vat)<span class="rf"><span class="rf-label">الرقم الضريبي</span><span class="rf-value">{{ $vat }}</span></span>@endif
+            @if($phone)<span class="rf"><span class="rf-label">الهاتف</span><span class="rf-value">{{ $phone }}</span></span>@endif
+            @if($email)<span class="rf"><span class="rf-label">البريد الإلكتروني</span><span class="rf-value">{{ $email }}</span></span>@endif
+        </div>
+    </div>
+</div>
 
 @if($title)
     <div class="rtitle-wrap">

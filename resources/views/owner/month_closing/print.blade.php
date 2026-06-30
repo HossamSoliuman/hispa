@@ -47,61 +47,48 @@
     </div>
 
     {{-- 5 Summary cards — real monthly waterfall --}}
-    <table class="sum-cards">
-        <tr>
-            <td class="sum-head">1. {{ __('owner.month_closing.report.cards.total_sales') }}</td>
-            <td class="sum-head">2. {{ __('owner.month_closing.report.cards.total_expenses') }}</td>
-            <td class="sum-head">3. {{ __('owner.month_closing.report.cards.profit_before') }}</td>
-            <td class="sum-head">4. {{ __('owner.month_closing.report.cards.owner_deductions') }}</td>
-            <td class="sum-head">5. {{ __('owner.month_closing.report.cards.net_distributable') }}</td>
-        </tr>
-        <tr>
+    <div class="sum-cards">
+        <div class="sum-heads">
+            <div class="sum-head">1. {{ __('owner.month_closing.report.cards.total_sales') }}</div>
+            <div class="sum-head">2. {{ __('owner.month_closing.report.cards.total_expenses') }}</div>
+            <div class="sum-head">3. {{ __('owner.month_closing.report.cards.profit_before') }}</div>
+            <div class="sum-head">4. {{ __('owner.month_closing.report.cards.owner_deductions') }}</div>
+            <div class="sum-head">5. {{ __('owner.month_closing.report.cards.net_distributable') }}</div>
+        </div>
+        <div class="sum-bodies">
             {{-- Card 1 — gross sales → returns → net sales --}}
-            <td class="sum-card">
-                <table class="sum-body">
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</td><td class="sum-v">{{ number_format($grossSales, 2) }}</td></tr>
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.returns') }}</td><td class="sum-v">{{ number_format($salesReturns, 2) }}</td></tr>
-                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.net_sales') }}</td><td class="sum-v">{{ number_format($netSales, 2) }}</td></tr>
-                </table>
-            </td>
+            <div class="sum-body">
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</span><span class="sum-v">{{ number_format($grossSales, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.returns') }}</span><span class="sum-v">{{ number_format($salesReturns, 2) }}</span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.net_sales') }}</span><span class="sum-v">{{ number_format($netSales, 2) }}</span></div>
+            </div>
             {{-- Card 2 — expenses --}}
-            <td class="sum-card">
-                <table class="sum-body">
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.trip_expenses') }}</td><td class="sum-v">{{ number_format((float) $closing->trip_expenses, 2) }}</td></tr>
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.operational_expenses') }}</td><td class="sum-v">{{ number_format($operatingExpenses, 2) }}</td></tr>
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.depreciation') }}</td><td class="sum-v">{{ number_format((float) $closing->depreciation, 2) }}</td></tr>
-                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</td><td class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</td></tr>
-                </table>
-            </td>
+            <div class="sum-body">
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.trip_expenses') }}</span><span class="sum-v">{{ number_format((float) $closing->trip_expenses, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.operational_expenses') }}</span><span class="sum-v">{{ number_format($operatingExpenses, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.depreciation') }}</span><span class="sum-v">{{ number_format((float) $closing->depreciation, 2) }}</span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.expenses') }}</span><span class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</span></div>
+            </div>
             {{-- Card 3 — profit before distribution --}}
-            <td class="sum-card">
-                <table class="sum-body">
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.net_owner_revenue') }}</td><td class="sum-v">{{ number_format((float) $closing->net_owner_revenue, 2) }}</td></tr>
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</td><td class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</td></tr>
-                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
-                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</td><td class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</td></tr>
-                </table>
-            </td>
+            <div class="sum-body">
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.net_owner_revenue') }}</span><span class="sum-v">{{ number_format((float) $closing->net_owner_revenue, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</span><span class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</span></div>
+            </div>
             {{-- Card 4 — owner share --}}
-            <td class="sum-card">
-                <table class="sum-body">
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</td><td class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</td></tr>
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.owner_percent') }}</td><td class="sum-v">{{ number_format((float) $closing->owner_percent, 2) }}%</td></tr>
-                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
-                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</td><td class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
-                </table>
-            </td>
+            <div class="sum-body">
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_percent') }}</span><span class="sum-v">{{ number_format((float) $closing->owner_percent, 2) }}%</span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</span><span class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</span></div>
+            </div>
             {{-- Card 5 — distributable crew share --}}
-            <td class="sum-card">
-                <table class="sum-body">
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</td><td class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</td></tr>
-                    <tr><td class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</td><td class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
-                    <tr><td class="sum-k">&nbsp;</td><td class="sum-v"></td></tr>
-                    <tr class="sum-total"><td class="sum-k">{{ __('owner.month_closing.report.rows.final_distributable') }}</td><td class="sum-v">{{ number_format((float) $closing->crew_share, 2) }}</td></tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+            <div class="sum-body">
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</span><span class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.final_distributable') }}</span><span class="sum-v">{{ number_format((float) $closing->crew_share, 2) }}</span></div>
+            </div>
+        </div>
+    </div>
 
     {{-- Distribution table --}}
     <div class="section-bar">6. {{ __('owner.month_closing.report.distribution_title') }}</div>

@@ -86,24 +86,22 @@ function getModelOrderByDesc($model)
     return $model::orderByDesc('id')->get();
 }
 
-function generateTripNumber()
+function generateTripNumber(): string
 {
     $year = date('Y');
     $prefix = 'TR-'.$year.'-';
 
-    // Get the latest trip number with this year
-    $latestTrip = \App\Models\Trip::where('number', 'like', $prefix.'%')
-        ->orderByDesc('id')
-        ->first();
+    // Take the highest sequence already used this year and increment it so a new
+    // trip can never collide, even if numbers are not in id order. Trashed trips
+    // are included because the `number` column is globally unique and any leftover
+    // soft-deleted row still occupies its number.
+    $highestNumber = \App\Models\Trip::withTrashed()
+        ->where('number', 'like', $prefix.'%')
+        ->pluck('number')
+        ->map(fn (string $number): int => (int) substr($number, strlen($prefix)))
+        ->max() ?? 0;
 
-    if ($latestTrip && preg_match('/-(\d+)$/', $latestTrip->number, $matches)) {
-        $lastNumber = intval($matches[1]);
-        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-    } else {
-        $newNumber = '001';
-    }
-
-    return $prefix.$newNumber;
+    return $prefix.str_pad($highestNumber + 1, 3, '0', STR_PAD_LEFT);
 }
 
 // function UploadFile(UploadedFile $file, $folder = null, $disk = 'ocean', $filename = null) //digitl ocean
@@ -258,6 +256,8 @@ function ownerCompanySettings(array $overrides = []): array
         'title_en' => $company?->name_en ?? '',
         'name' => $name,
         'company_name' => $name,
+        'name_ar' => $company?->name_ar ?? '',
+        'name_en' => $company?->name_en ?? '',
         'address' => $company?->address ?? '',
         'phone' => $company?->phone ?? '',
         'email' => $company?->email ?? '',
