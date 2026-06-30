@@ -135,12 +135,113 @@
                 'colClass' => 'col-sm-6',
             ])
 
-            @include('owner.components.stat-card', [
-                'title' => __('owner.dashboard.active_boats'),
-                'value' => $activeBoats,
-                'icon' => 'fas fa-ship',
-                'colClass' => 'col-sm-6',
-            ])
+            <div class="col-sm-6">
+                <div class="card hud-stat-card h-100">
+                    <div class="card-body p-3 d-flex flex-column">
+
+                        {{-- header row --}}
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1 pe-2">
+                                <div class="hud-sc-label">{{ __('owner.dashboard.active_boats') }}</div>
+                                <div class="hud-sc-value">{{ $activeBoats }}</div>
+                            </div>
+                            <div class="hud-icon-box">
+                                <i class="fas fa-ship"></i>
+                            </div>
+                        </div>
+
+                        {{-- active boats list: name + captain + crew count (incl. captain) --}}
+                        @if ($activeBoatsList->isNotEmpty())
+                            <div class="hud-boats-list mt-1">
+                                @foreach ($activeBoatsList as $boat)
+                                    <div class="hud-boat-row d-flex align-items-center justify-content-between gap-2">
+                                        <div class="hud-boat-main text-truncate">
+                                            <div class="hud-boat-name text-truncate">{{ $boat->name }}</div>
+                                            <div class="hud-boat-captain text-truncate">
+                                                <i class="bi bi-person-badge"></i>
+                                                {{ $boat->captain?->name ?? __('owner.dashboard.no_captain') }}
+                                            </div>
+                                        </div>
+                                        <span class="hud-boat-crew"
+                                            title="{{ __('owner.dashboard.crew_including_captain') }}">
+                                            <i class="bi bi-people-fill"></i>
+                                            {{ $boat->crews->count() + ($boat->captain ? 1 : 0) }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="hud-boats-empty mt-auto">{{ __('owner.dashboard.no_active_boats') }}</div>
+                        @endif
+
+                    </div>
+                </div>
+            </div>
+            @once
+                <style>
+                        .hud-boats-list {
+                            display: flex;
+                            flex-direction: column;
+                            gap: .4rem;
+                            max-height: 180px;
+                            overflow-y: auto;
+                        }
+
+                        .hud-boat-row {
+                            border-top: 1px solid rgba(0, 0, 0, .08);
+                            padding-top: .4rem;
+                        }
+
+                        .hud-boat-main {
+                            min-width: 0;
+                        }
+
+                        .hud-boat-name {
+                            font-size: .85rem;
+                            font-weight: 700;
+                            color: #1a1a2e;
+                            line-height: 1.2;
+                        }
+
+                        .hud-boat-captain {
+                            font-size: .72rem;
+                            color: rgba(0, 0, 0, .5);
+                            line-height: 1.2;
+                        }
+
+                        .hud-boat-crew {
+                            flex-shrink: 0;
+                            font-size: .78rem;
+                            font-weight: 700;
+                            color: var(--hud-accent, #3675c2);
+                            border: 1px solid rgba(54, 117, 194, .3);
+                            padding: .1rem .45rem;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: .25rem;
+                            white-space: nowrap;
+                        }
+
+                        .hud-boats-empty {
+                            font-size: .8rem;
+                            color: rgba(0, 0, 0, .45);
+                            padding-top: .5rem;
+                        }
+
+                        [data-bs-theme="dark"] .hud-boat-name {
+                            color: #e9ecef;
+                        }
+
+                        [data-bs-theme="dark"] .hud-boat-captain,
+                        [data-bs-theme="dark"] .hud-boats-empty {
+                            color: rgba(255, 255, 255, .6);
+                        }
+
+                        [data-bs-theme="dark"] .hud-boat-row {
+                            border-top-color: rgba(255, 255, 255, .12);
+                        }
+                </style>
+            @endonce
 
             @include('owner.components.stat-card', [
                 'title' => __('owner.dashboard.profit_margin'),

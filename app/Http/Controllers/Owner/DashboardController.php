@@ -115,7 +115,11 @@ class DashboardController extends Controller
         $soldWeight = (float) SaleDetail::whereIn('sale_id', $this->ownerSaleIds($ownerId, $from, $to))->sum('weight');
         $averagePricePerKg = $soldWeight > 0 ? round($currentMonthRevenue / $soldWeight, 2) : 0;
 
-        $activeBoats = Boat::where('owner_id', $ownerId)->where('status', 1)->count();
+        $activeBoatsList = Boat::where('owner_id', $ownerId)->where('status', 1)
+            ->with(['captain:id,name,boat_id', 'crews:id,name,boat_id'])
+            ->orderBy('name_ar')
+            ->get();
+        $activeBoats = $activeBoatsList->count();
         $completedTrips = Trip::where('owner_id', $ownerId)->where('status', TripStatus::Sold->value)->count();
 
         $currentMonthProfit = $this->currentMonthProfit($ownerId);
@@ -137,6 +141,7 @@ class DashboardController extends Controller
             'profitMargin',
             'profit',
             'activeBoats',
+            'activeBoatsList',
             'completedTrips',
             'topFive',
             'currentMonthLabel',
