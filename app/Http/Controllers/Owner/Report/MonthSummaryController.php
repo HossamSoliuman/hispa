@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Owner\Report;
 
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
+use App\Service\Owner\AssetDepreciationService;
 use App\Service\Owner\MonthlyFinancialsService;
 use App\Service\Owner\MonthlyReportsService;
 use App\Service\Owner\ReportQrService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -21,13 +23,14 @@ class MonthSummaryController extends Controller
     public function __construct(
         private MonthlyFinancialsService $financials,
         private MonthlyReportsService $reports,
+        private AssetDepreciationService $assetDepreciation,
     ) {}
 
     public function index(Request $request)
     {
         [$ownerId, $from, $to, $boatId, $boats] = $this->context($request);
 
-        $f = $this->financials->compute($ownerId, $from, $to, $boatId);
+        $f = $this->financials->compute($ownerId, $from, $to, $boatId, $this->depreciation($ownerId, $from, $boatId));
         $expenses = $this->groupedExpenses($ownerId, $from, $to, $boatId);
 
         return view('owner.report.month_summary', compact('from', 'to', 'boatId', 'boats', 'f', 'expenses'));
@@ -37,13 +40,26 @@ class MonthSummaryController extends Controller
     {
         [$ownerId, $from, $to, $boatId, $boats] = $this->context($request);
 
-        $f = $this->financials->compute($ownerId, $from, $to, $boatId);
+        $f = $this->financials->compute($ownerId, $from, $to, $boatId, $this->depreciation($ownerId, $from, $boatId));
         $expenses = $this->groupedExpenses($ownerId, $from, $to, $boatId);
         $settings = $this->companySettings();
 
         $filename = 'month-summary-'.$from.'-to-'.$to.'.pdf';
 
         return pdf_report(view('owner.report.month_summary_print', compact('from', 'to', 'boatId', 'boats', 'f', 'expenses', 'settings')), [], $filename);
+    }
+
+    /**
+     * Straight-line asset depreciation for the report's month, derived from the
+     * start date so the figure reconciles with the month close
+     * ({@see \App\Http\Controllers\Owner\MonthClosingController}) for the same
+     * calendar month.
+     */
+    private function depreciation(int $ownerId, string $from, ?int $boatId): float
+    {
+        $date = Carbon::parse($from);
+
+        return (float) $this->assetDepreciation->forMonth($ownerId, $date->year, $date->month, $boatId)['total'];
     }
 
     /**

@@ -2,12 +2,14 @@
     $grossSales = (float) $f['gross_sales'];
     $tripExpenses = (float) $f['trip_expenses'];
     $generalExpenses = (float) $f['general_expenses'];
+    $depreciation = (float) $f['depreciation'];
     $totalExpenses = (float) $f['total_expenses'];
-    $netProfit = $grossSales - $totalExpenses;
+    $netProfit = (float) $f['net_profit'];
     $ownerPercent = (float) $f['owner_percent'];
-    $ownerShare = round($netProfit * ($ownerPercent / 100), 2);
-    $crewShare = round($netProfit - $ownerShare, 2);
+    $ownerShare = (float) $f['owner_share'];
+    $crewShare = (float) $f['crew_share'];
     $crewCount = (int) $f['crew_count'];
+    $perFisherman = (float) $f['per_fisherman'];
 @endphp
 
 <table class="ms-statement">
@@ -26,6 +28,15 @@
         <tr class="ms-line">
             <td class="ms-label">{{ __('owner.month_summary.total_sales') }}</td>
             <td class="ms-amount ms-pos">{{ number_format($grossSales, 2) }}</td>
+        </tr>
+
+        {{-- Depreciation --}}
+        <tr class="ms-section">
+            <td colspan="2">{{ __('owner.month_summary.depreciation') }}</td>
+        </tr>
+        <tr class="ms-line">
+            <td class="ms-label ms-indent">{{ __('owner.month_summary.depreciation') }}</td>
+            <td class="ms-amount ms-neg">{{ number_format($depreciation, 2) }}</td>
         </tr>
 
         {{-- Operating expenses --}}
@@ -103,7 +114,7 @@
         </tr>
         <tr class="ms-line">
             <td class="ms-label">{{ __('owner.month_summary.per_fisherman') }}</td>
-            <td class="ms-amount">0.00</td>
+            <td class="ms-amount">{{ number_format($perFisherman, 2) }}</td>
         </tr>
     </tbody>
 </table>
