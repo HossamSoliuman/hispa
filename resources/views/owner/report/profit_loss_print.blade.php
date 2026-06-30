@@ -94,6 +94,11 @@
                             <td class="col-num">{{ number_format($f['general_expenses'], 2) }}</td>
                             <td>{{ $pct($f['general_expenses'], $expenseBase) }}</td>
                         </tr>
+                        <tr>
+                            <td class="col-text">{{ __('owner.profit_loss.depreciation') }}</td>
+                            <td class="col-num">{{ number_format($f['depreciation'], 2) }}</td>
+                            <td>{{ $pct($f['depreciation'], $expenseBase) }}</td>
+                        </tr>
                     </tbody>
                     <tfoot>
                         <tr>
