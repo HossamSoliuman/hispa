@@ -206,6 +206,11 @@
                                         title="{{ __('owner.customers.show.print_invoice') }}">
                                         <i class="bi bi-printer"></i>
                                     </a>
+                                    <a href="#" onclick="deleteSaleRecord({{ $sale->id }}); return false;"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="{{ __('owner.actions.delete') }}">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
                                 </td>
                             </tr>
                             <tr>
@@ -277,6 +282,40 @@
                             Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success')
                                 .then(() => {
                                     window.location.href = "{{ route('owner.customers.index') }}";
+                                });
+                        },
+                        error: function(xhr) {
+                            let message = xhr.responseJSON?.message ||
+                                '{{ __('owner.swal.unexpected_error') }}';
+                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function deleteSaleRecord(id) {
+            Swal.fire({
+                title: '{{ __('owner.swal.confirm_title') }}',
+                text: "{{ __('owner.swal.confirm_text') }}",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                cancelButtonText: '{{ __('owner.swal.cancel') }}'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('owner/sales') }}/" + id,
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success')
+                                .then(() => {
+                                    window.location.reload();
                                 });
                         },
                         error: function(xhr) {
