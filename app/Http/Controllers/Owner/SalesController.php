@@ -419,6 +419,33 @@ class SalesController extends Controller
         }
     }
 
+    public function destroy($id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            $sale = Sale::where('seller_type', 'owner')
+                ->where('seller_id', auth()->id())
+                ->with('details')
+                ->findOrFail($id);
+
+            foreach ($sale->details as $detail) {
+                $this->restoreStock($sale, $detail->fish_id, $detail->unit_id, (float) $detail->weight);
+            }
+
+            $sale->details()->delete();
+            $sale->delete();
+
+            DB::commit();
+
+            return response()->json(['message' => 'تم حذف الفاتورة بنجاح'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['message' => $e->getMessage()], 403);
+        }
+    }
+
     /**
      * Mirror the selling price onto the catch details so the catch/trip
      * reports show the realised price instead of zero. The catch detail's

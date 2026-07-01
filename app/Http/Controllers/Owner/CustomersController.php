@@ -177,7 +177,7 @@ class CustomersController extends Controller
 
         try {
 
-            $customer = Customer::where('id', $id)->first();
+            $customer = Customer::where('owner_id', auth()->id())->findOrFail($id);
             $customer->delete();
 
             DB::commit();

@@ -17,6 +17,11 @@
             vertical-align: middle;
         }
 
+        #datatableDefault td:last-child,
+        #datatableDefault th:last-child {
+            white-space: nowrap;
+        }
+
         /* {{ __('owner.generated.item_ed06b0') }} */
         .small-text th,
         .small-text td {
@@ -330,7 +335,7 @@
     </script>
 
     <script>
-        function deleteRecord(recordId) {
+        function deleteSaleRecord(recordId) {
             Swal.fire({
                 title: '{{ __('owner.swal.confirm_title') }}',
                 text: "{{ __('owner.swal.confirm_text') }}",

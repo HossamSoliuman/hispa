@@ -53,8 +53,10 @@ class CustomerDataTable extends DataTables
                         : '<span class="badge bg-danger">'.__('owner.status.inactive').'</span>';
                 })
                 ->addColumn('action', function (Customer $customer) {
-                    $btn = '<a href="'.route('owner.customers.show', $customer->id).'"
-                            class="btn btn-outline-info btn-sm mx-1" title="'.__('owner.actions.show').'">
+                    $btn = '<div class="d-flex justify-content-center gap-1 text-nowrap">';
+
+                    $btn .= '<a href="'.route('owner.customers.show', $customer->id).'"
+                            class="btn btn-outline-info btn-sm" title="'.__('owner.actions.show').'">
                             <i class="bi bi-eye"></i>
                         </a>';
 
@@ -70,7 +72,9 @@ class CustomerDataTable extends DataTables
                             <i class="bi bi-pencil"></i>
                         </a>';
 
-                    $btn .= '<a href="#" onclick="deleteRecord('.$customer->id.')" class="edit btn btn-outline-danger btn-sm mx-1" title="'.__('owner.actions.delete').'"><i class="bi bi-trash"></i></a>';
+                    $btn .= '<a href="#" onclick="deleteRecord('.$customer->id.')" class="edit btn btn-outline-danger btn-sm" title="'.__('owner.actions.delete').'"><i class="bi bi-trash"></i></a>';
+
+                    $btn .= '</div>';
 
                     return $btn;
                 })

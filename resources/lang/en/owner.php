@@ -788,6 +788,7 @@ return [
             'title' => 'Customer Profile',
             'back' => 'Back to Customers',
             'print_statement' => 'Print Statement',
+            'delete' => 'Delete Customer',
             'info_title' => 'Customer Details',
             'name' => 'Name',
             'phone' => 'Phone Number',

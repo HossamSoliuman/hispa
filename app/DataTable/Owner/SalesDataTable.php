@@ -134,9 +134,12 @@ class SalesDataTable extends DataTables
                 })
 
                 ->addColumn('actions', function ($row) {
-                    return '<a href="'.route('owner.sales.show', $row->id).'" class="btn btn-sm btn-outline-info" title="'.__('owner.actions.show').'"><i class="bi bi-eye"></i></a>
-                            <a href="'.route('owner.sales.edit', $row->id).'" class="btn btn-sm btn-outline-warning mx-1" title="'.__('owner.actions.edit').'"><i class="bi bi-pencil"></i></a>
-                            <a href="'.route('owner.sales.print', $row->id).'" target="_blank" class="btn btn-sm btn-outline-secondary" title="'.__('owner.sales.print').'"><i class="bi bi-printer"></i></a>';
+                    return '<div class="d-flex justify-content-center gap-1 text-nowrap">
+                            <a href="'.route('owner.sales.show', $row->id).'" class="btn btn-sm btn-outline-info" title="'.__('owner.actions.show').'"><i class="bi bi-eye"></i></a>
+                            <a href="'.route('owner.sales.edit', $row->id).'" class="btn btn-sm btn-outline-warning" title="'.__('owner.actions.edit').'"><i class="bi bi-pencil"></i></a>
+                            <a href="'.route('owner.sales.print', $row->id).'" target="_blank" class="btn btn-sm btn-outline-secondary" title="'.__('owner.sales.print').'"><i class="bi bi-printer"></i></a>
+                            <a href="#" onclick="deleteSaleRecord('.$row->id.'); return false;" class="btn btn-sm btn-outline-danger" title="'.__('owner.actions.delete').'"><i class="bi bi-trash"></i></a>
+                        </div>';
                 })
                 ->with([
                     'total_items' => $totalItems,

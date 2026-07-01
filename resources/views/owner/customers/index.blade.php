@@ -18,6 +18,13 @@
             vertical-align: middle;
         }
 
+        #datatableDefault td:last-child,
+        #datatableDefault th:last-child,
+        #datatableSales td:last-child,
+        #datatableSales th:last-child {
+            white-space: nowrap;
+        }
+
         /* {{ __('owner.generated.item_ed06b0') }} */
         .small-text th,
         .small-text td {
@@ -373,6 +380,39 @@
                         success: function(response) {
                             Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success');
                             $('#datatableDefault').DataTable().ajax.reload();
+                        },
+                        error: function(xhr) {
+                            let message = xhr.responseJSON?.message ||
+                                '{{ __('owner.swal.unexpected_error') }}';
+                            Swal.fire('{{ __('owner.swal.error') }}', message, 'error');
+                        }
+
+                    });
+                }
+            });
+        }
+
+        function deleteSaleRecord(recordId) {
+            Swal.fire({
+                title: '{{ __('owner.swal.confirm_title') }}',
+                text: "{{ __('owner.swal.confirm_text') }}",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
+                cancelButtonText: '{{ __('owner.swal.cancel') }}'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('owner/sales') }}/" + recordId,
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire('{{ __('owner.swal.deleted') }}', response.message, 'success');
+                            $('#datatableSales').DataTable().ajax.reload();
                         },
                         error: function(xhr) {
                             let message = xhr.responseJSON?.message ||
