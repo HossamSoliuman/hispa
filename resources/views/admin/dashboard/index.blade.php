@@ -289,6 +289,25 @@
     --bs-gutter-x: .9rem;
     --bs-gutter-y: .9rem;
 }
+
+/* ============================================================
+   Dark-mode token remap — keeps the HUD dashboard legible on the
+   dark navy page (light mode above is left untouched).
+   ============================================================ */
+[data-bs-theme="dark"] {
+    --hud-border:       rgba(255,255,255,.16);
+    --hud-border-inner: rgba(255,255,255,.14);
+    --hud-bg-card:      var(--bs-secondary-bg);
+    --hud-text:         var(--bs-emphasis-color);
+    --hud-text-muted:   var(--bs-secondary-color);
+    --hud-grid:         rgba(255,255,255,.07);
+}
+[data-bs-theme="dark"] .hud-table-card .table thead th {
+    background: rgba(255,255,255,.04);
+}
+[data-bs-theme="dark"] .hud-icon-box {
+    background: rgba(var(--hud-accent-rgb), .18);
+}
 </style>
 @endsection
 
@@ -536,10 +555,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const IS_DARK = document.documentElement.getAttribute('data-bs-theme') === 'dark';
     const ACCENT = '#3675c2';
     const ACCENT_MUTED = 'rgba(54,117,194,.12)';
-    const GRID   = 'rgba(0,0,0,.06)';
-    const LABEL  = 'rgba(0,0,0,.45)';
+    const GRID   = IS_DARK ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+    const LABEL  = IS_DARK ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.45)';
+    const CARD_BG = IS_DARK ? '#1b2a41' : '#fff';
 
     /* ---- MRR line chart ---- */
     @if(isset($mrrHistory) && count($mrrHistory) > 0)
@@ -624,7 +645,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     data: data.map(function (p) { return p.sales_count; }),
                     backgroundColor: palette.slice(0, data.length),
                     borderWidth: 1,
-                    borderColor: '#fff',
+                    borderColor: CARD_BG,
                 }]
             },
             options: {

@@ -28,6 +28,21 @@
         color: #6c757d; text-decoration: none; cursor: pointer; transition: all 0.15s ease;
     }
     .filter-form-btn:hover { background-color: #e9ecef; color: #495057; }
+
+    /* ── Dark-mode: remap the hardcoded light colors to the theme palette ── */
+    [data-bs-theme=dark] .filter-form-field .form-label { color: var(--bs-secondary-color); }
+    [data-bs-theme=dark] .filter-form-field .form-control,
+    [data-bs-theme=dark] .filter-form-field .form-select {
+        background-color: var(--bs-body-bg); border-color: var(--bs-border-color); color: var(--bs-body-color);
+    }
+    [data-bs-theme=dark] .filter-form-field .form-control:focus,
+    [data-bs-theme=dark] .filter-form-field .form-select:focus {
+        border-color: var(--bs-primary); background-color: var(--bs-body-bg); color: var(--bs-body-color);
+    }
+    [data-bs-theme=dark] .filter-form-btn {
+        background-color: var(--bs-secondary-bg); border-color: var(--bs-border-color); color: var(--bs-body-color);
+    }
+    [data-bs-theme=dark] .filter-form-btn:hover { background-color: var(--bs-tertiary-bg); color: var(--bs-emphasis-color); }
 </style>
 @endonce
 

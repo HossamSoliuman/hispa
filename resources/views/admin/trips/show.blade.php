@@ -78,11 +78,11 @@
                     <table class="table table-bordered table-detail m-0">
                         <tbody>
                             <tr>
-                                <th class="text-muted">{{ display_string(__('admin.trips.name'), 'الاسم') }}</th>
+                                <th class="text-muted">{{ __('admin.trips.name.0') }}</th>
                                 <td>@displaySafe($data->name)</td>
                             </tr>
                             <tr>
-                                <th class="text-muted">{{ display_string(__('admin.trips.license_number'), 'رقم الترخيص') }}</th>
+                                <th class="text-muted">{{ __('admin.trips.license_number.0') }}</th>
                                 <td>@displaySafe($data->license_number)</td>
                             </tr>
                             <tr>
@@ -96,7 +96,7 @@
                                 <td>{{ $data->start_date?->format('Y-m-d H:i') ?? '—' }}</td>
                             </tr>
                             <tr>
-                                <th class="text-muted">{{ display_string(__('admin.trips.end_date'), 'تاريخ النهاية') }}</th>
+                                <th class="text-muted">{{ __('admin.trips.end_date.0') }}</th>
                                 <td>{{ $data->end_date?->format('Y-m-d H:i') ?? '—' }}</td>
                             </tr>
                         </tbody>
@@ -113,7 +113,7 @@
                     <table class="table table-bordered table-detail m-0">
                         <tbody>
                             <tr>
-                                <th class="text-muted">{{ display_string(__('admin.trips.boat_name'), 'اسم القارب') }}</th>
+                                <th class="text-muted">{{ __('admin.trips.boat_name.0') }}</th>
                                 <td>@displaySafe($data->boat_name)</td>
                             </tr>
                             <tr>
@@ -138,7 +138,7 @@
             {{-- الملاحظات --}}
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-secondary text-white fw-bold">
-                    <i class="bi bi-sticky me-2"></i> {{ display_string(__('admin.trips.notes'), 'الملاحظات') }}
+                    <i class="bi bi-sticky me-2"></i> {{ __('admin.trips.notes.0') }}
                 </div>
                 <div class="card-body text-muted">
                     {!! nl2br(e(display_string($data->notes, display_string(__('admin.trips.no_notes'), '—')))) !!}

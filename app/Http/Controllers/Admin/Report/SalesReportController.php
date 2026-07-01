@@ -74,8 +74,10 @@ class SalesReportController extends Controller
         $to = $request->end_date ?? null;
         $status = $request->status ?? null;
 
-        // Return admin printable view
-        return view('admin.report.sales_print', compact(
+        $filename = 'sales-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
+
+        // Reuse the shared, standard-compliant printable view (x-report-layout).
+        return pdf_report(view('owner.report.sales_print', compact(
             'sales',
             'totalSales',
             'totalWeight',
@@ -85,24 +87,28 @@ class SalesReportController extends Controller
             'from',
             'to',
             'status'
-        ));
+        )), [], $filename);
     }
 
     /**
-     * Get company settings for report header (same as owner)
+     * Get platform company settings for the report header (admin oversees all owners,
+     * so these come from the global Setting table rather than a per-owner company).
+     *
+     * @return array<string, mixed>
      */
-    private function getCompanySettings()
+    private function getCompanySettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? 'حسبة';
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? config('app.name');
 
         return [
             'name' => $companyName,
+            'title' => $companyName,
             'company_name' => $companyName,
             'address' => Setting::where('key', 'address')->value('value') ?? '',
             'phone' => Setting::where('key', 'phone')->value('value') ?? '',
             'email' => Setting::where('key', 'email')->value('value') ?? '',
             'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => null, // admin prints currently don't include QR
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
         ];
     }
 }

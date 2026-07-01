@@ -1,6 +1,7 @@
+@php $adminTheme = request()->cookie('admin_theme') === 'dark' ? 'dark' : 'light'; @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
-    data-bs-theme="light">
+    data-bs-theme="{{ $adminTheme }}">
 
 <head>
     <meta charset="utf-8">
@@ -326,7 +327,128 @@
         .btn-border-radius {
             border-radius: 5px !important;
         }
+
+        /* ── Keep wide tables inside their own horizontal scroll area at every
+              screen size, instead of stretching/clipping the page ── */
+        .table-responsive,
+        .dataTables_wrapper,
+        div.dt-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .dataTables_wrapper .dataTables_scroll,
+        .dt-container .dt-scroll {
+            overflow-x: auto;
+        }
     </style>
+
+    {{-- ── Slimmer sidebar (matches owner panel) ── --}}
+    <style>
+        :root {
+            --app-sidebar-w: 12.5rem;
+        }
+        .app-sidebar {
+            width: var(--app-sidebar-w) !important;
+        }
+        @media (min-width: 768px) {
+            .app-content,
+            .app-sidebar-toggled .app-content {
+                margin-inline-start: var(--app-sidebar-w);
+                margin-inline-end: var(--app-sidebar-w);
+            }
+            .app-footer,
+            .app-sidebar-toggled .app-footer {
+                margin-inline-start: calc(var(--app-sidebar-w) + 2rem);
+                margin-inline-end: calc(var(--app-sidebar-w) + 2rem);
+            }
+        }
+    </style>
+
+    {{-- ── Dark-mode corrections ──────────────────────────────────────────
+         Light mode is left untouched. These rules only re-map the hardcoded
+         light colors (in the styles above + reused page utilities) that would
+         otherwise override the theme's native [data-bs-theme=dark] palette. --}}
+    <style>
+        /* themed border token used by the HUD cards */
+        [data-bs-theme=dark] { --hud-border: var(--bs-border-color); }
+
+        /* cards / panels that hardcode a white fill (no !important so colored
+           utility backgrounds like .bg-warning still win) */
+        [data-bs-theme=dark] .card,
+        [data-bs-theme=dark] .hud-card { background: var(--bs-secondary-bg); }
+
+        /* corner L-brackets: light strokes on dark */
+        [data-bs-theme=dark] .card:after { --brk-color: rgba(255, 255, 255, .5); }
+
+        /* top navbar: the hardcoded bright blue (#3675c2) clashes with the dark
+           navy page — drop to a deep, muted ocean-blue that blends in, and add a
+           thin accent rule so it still reads as a distinct bar */
+        [data-bs-theme=dark] .app-header {
+            background: #14304f;
+            border-bottom: 1px solid rgba(var(--hud-accent-rgb), .4);
+        }
+
+        /* HUD typography that hardcodes near-black / translucent-black */
+        [data-bs-theme=dark] .hud-stat-value,
+        [data-bs-theme=dark] .hud-sc-value,
+        [data-bs-theme=dark] .hud-sc-grid-value { color: var(--bs-emphasis-color); }
+        [data-bs-theme=dark] .hud-card-label,
+        [data-bs-theme=dark] .hud-section-head small,
+        [data-bs-theme=dark] .hud-sc-grid-label,
+        [data-bs-theme=dark] .hud-sc-footer { color: var(--bs-secondary-color); }
+        [data-bs-theme=dark] .hud-section-head .hud-line {
+            background: linear-gradient(90deg, rgba(var(--bs-emphasis-color-rgb), .18), transparent);
+        }
+        [data-bs-theme=dark] .small-text th { color: var(--bs-emphasis-color) !important; }
+
+        /* Bootstrap utility classes that pin light colors on page content */
+        [data-bs-theme=dark] .bg-white { background-color: var(--bs-secondary-bg) !important; }
+        [data-bs-theme=dark] .bg-light { background-color: var(--bs-tertiary-bg) !important; }
+        [data-bs-theme=dark] .text-dark,
+        [data-bs-theme=dark] .text-black { color: var(--bs-body-color) !important; }
+
+        /* …but keep dark text legible where it sits on a light-colored badge/box */
+        [data-bs-theme=dark] .bg-warning.text-dark,
+        [data-bs-theme=dark] .bg-warning .text-dark,
+        [data-bs-theme=dark] .bg-info.text-dark,
+        [data-bs-theme=dark] .bg-info .text-dark { color: #000 !important; }
+
+        /* native <select> popup: browsers render <option> on the OS default
+           (white) unless explicitly themed — match the dark form palette */
+        [data-bs-theme=dark] .form-select option,
+        [data-bs-theme=dark] select option,
+        [data-bs-theme=dark] .form-control option,
+        [data-bs-theme=dark] .form-select optgroup,
+        [data-bs-theme=dark] select optgroup {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+    </style>
+
+    {{-- ── Glassy panels: make every card (and the tables inside them) translucent
+         so the page background shows through, exactly like the top KPI stat cards.
+         The accent-tint fill is the same one used by .hud-stat-card above. ── --}}
+    <style>
+        .card {
+            background: rgba(var(--hud-accent-rgb), .07) !important;
+        }
+        .card-header {
+            background: rgba(var(--hud-accent-rgb), .12) !important;
+        }
+        .card .table,
+        .card table {
+            --bs-table-bg: transparent;
+            background-color: transparent !important;
+        }
+    </style>
+
+    {{-- Make ApexCharts (dashboard, reports, …) follow the theme --}}
+    <script>
+        window.Apex = window.Apex || {};
+        window.Apex.theme = Object.assign({}, window.Apex.theme || {}, { mode: '{{ $adminTheme }}' });
+        window.Apex.chart = Object.assign({}, window.Apex.chart || {}, { background: 'transparent' });
+        window.Apex.tooltip = Object.assign({}, window.Apex.tooltip || {}, { theme: '{{ $adminTheme }}' });
+    </script>
 </head>
 
 <body>
@@ -433,6 +555,23 @@
             });
         </script>
     @endif
+
+    <script>
+        /* Auto-wrap any table not already inside a scroll container so it scrolls
+           horizontally on small screens instead of overflowing the page. Runs on
+           'load' so DataTables (initialised on DOM-ready) are already wrapped. */
+        window.addEventListener('load', function() {
+            document.querySelectorAll('#content table').forEach(function(table) {
+                if (table.closest('.table-responsive, .dataTables_wrapper, .dt-container, .dataTables_scroll')) {
+                    return;
+                }
+                var wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            });
+        });
+    </script>
 
     <script>
         /* Auto-inject HUD corner brackets into every .card that doesn't have them */
