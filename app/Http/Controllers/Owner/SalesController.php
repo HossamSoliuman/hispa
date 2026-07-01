@@ -17,6 +17,7 @@ use App\Models\Sale;
 use App\Models\SaleDetail;
 use App\Models\Trip;
 use App\Models\Unit;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -424,13 +425,23 @@ class SalesController extends Controller
         try {
             DB::beginTransaction();
 
-            $sale = Sale::where('seller_type', 'owner')
-                ->where('seller_id', auth()->id())
+            $ownerId = auth()->id();
+
+            $sale = Sale::query()
+                ->where(function ($query) use ($ownerId): void {
+                    $query->where(function ($ownerSale) use ($ownerId): void {
+                        $ownerSale->where('seller_type', 'owner')->where('seller_id', $ownerId);
+                    })->orWhereHas('customer', function ($customer) use ($ownerId): void {
+                        $customer->where('owner_id', $ownerId);
+                    });
+                })
                 ->with('details')
                 ->findOrFail($id);
 
-            foreach ($sale->details as $detail) {
-                $this->restoreStock($sale, $detail->fish_id, $detail->unit_id, (float) $detail->weight);
+            if ($sale->seller_type === 'owner') {
+                foreach ($sale->details as $detail) {
+                    $this->restoreStock($sale, $detail->fish_id, $detail->unit_id, (float) $detail->weight);
+                }
             }
 
             $sale->details()->delete();
@@ -439,6 +450,10 @@ class SalesController extends Controller
             DB::commit();
 
             return response()->json(['message' => 'تم حذف الفاتورة بنجاح'], 200);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+
+            return response()->json(['message' => 'الفاتورة غير موجودة'], 404);
         } catch (\Exception $e) {
             DB::rollBack();
 
