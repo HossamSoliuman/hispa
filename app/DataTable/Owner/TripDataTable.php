@@ -29,8 +29,6 @@ class TripDataTable extends DataTables
 
             if ($request->has('status') && in_array($request->status, range(1, 8))) {
                 $query->where('status', $request->status);
-            } else {
-                $query->where('status', '!=', TripStatus::Cancelled->value);
             }
 
             $data = $query->get();
