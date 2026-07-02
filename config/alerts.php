@@ -24,6 +24,10 @@ return [
     // has been overdue by more than this many hours.
     'trip_overdue' => ['critical_hours' => 48],
 
+    // Outstanding crew/captain dues are a Warning, escalating to Critical once
+    // the oldest unpaid month closing has been settled-pending for this many days.
+    'unpaid_dues' => ['critical_days' => 30],
+
     // The dashboard card shows at most this many alerts (highest severity first).
     'max_visible' => 6,
 

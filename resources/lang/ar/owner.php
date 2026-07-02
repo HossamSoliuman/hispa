@@ -130,6 +130,10 @@ return [
             'title' => 'رحلة تجاوزت الوقت المتوقع',
             'message' => 'الرحلة :trip (:boat) تجاوزت موعد العودة :date',
         ],
+        'trip_in_progress' => [
+            'title' => 'رحلة جارية',
+            'message' => 'الرحلة :trip (:boat) في عرض البحر حالياً (العودة المتوقعة :date)',
+        ],
         'captain_fishing_license' => [
             'title' => 'رخصة صيد القبطان على وشك الانتهاء',
             'message' => 'رخصة صيد القبطان :name تنتهي بتاريخ :date',
@@ -146,6 +150,10 @@ return [
             'title' => 'إقامة البحّار على وشك الانتهاء',
             'message' => 'إقامة البحّار :name تنتهي بتاريخ :date',
         ],
+        'captain_residence' => [
+            'title' => 'إقامة القبطان على وشك الانتهاء',
+            'message' => 'إقامة القبطان :name تنتهي بتاريخ :date',
+        ],
         'boat_license' => [
             'title' => 'رخصة القارب على وشك الانتهاء',
             'message' => 'رخصة القارب :boat تنتهي بتاريخ :date',
@@ -157,6 +165,10 @@ return [
         'maintenance_due' => [
             'title' => 'صيانة القارب مستحقة',
             'message' => 'صيانة القارب :boat مستحقة بتاريخ :date',
+        ],
+        'unpaid_dues' => [
+            'title' => 'مستحقات غير مدفوعة',
+            'message' => 'مستحقات غير مدفوعة لـ :name بإجمالي :amount ريال',
         ],
     ],
 

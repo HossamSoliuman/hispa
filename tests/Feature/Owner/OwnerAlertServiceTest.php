@@ -8,6 +8,8 @@ use App\Enums\TripStatus;
 use App\Models\Boat;
 use App\Models\Inspection;
 use App\Models\Maintenance;
+use App\Models\MonthClosing;
+use App\Models\MonthClosingDue;
 use App\Models\Trip;
 use App\Models\User;
 use App\Service\Owner\OwnerAlertService;
@@ -152,6 +154,72 @@ class OwnerAlertServiceTest extends TestCase
         $this->assertCount(1, $alerts);
     }
 
+    public function test_captain_residence_expiry_fires_within_window(): void
+    {
+        $owner = $this->owner();
+        $this->captain($owner, ['residence_end_date' => now()->addDays(10)->toDateString()]); // warning
+        $this->captain($owner, ['residence_end_date' => now()->addDays(90)->toDateString()]); // outside
+
+        $alerts = $this->alertsFor($owner)->where('type', AlertType::CaptainResidence);
+
+        $this->assertCount(1, $alerts);
+        $this->assertSame(AlertSeverity::Warning, $alerts->first()->severity);
+    }
+
+    public function test_in_progress_trip_is_info_and_kept_separate_from_overdue(): void
+    {
+        $owner = $this->owner();
+        $boat = $this->boat($owner);
+
+        // At sea, not yet due -> informational.
+        $this->inProgressTrip($owner, $boat, now()->addDays(2));
+        // At sea, past due -> overdue (not counted as merely "in progress").
+        $this->overdueTrip($owner, $boat, TripStatus::InProgress, now()->subDays(2));
+
+        $alerts = $this->alertsFor($owner);
+        $inProgress = $alerts->where('type', AlertType::TripInProgress);
+
+        $this->assertCount(1, $inProgress);
+        $this->assertSame(AlertSeverity::Info, $inProgress->first()->severity);
+        $this->assertCount(1, $alerts->where('type', AlertType::TripOverdue));
+    }
+
+    public function test_unpaid_dues_aggregate_to_one_alert_per_person_and_escalate_by_age(): void
+    {
+        $owner = $this->owner();
+        $crew = $this->crew($owner);
+        $captain = $this->captain($owner);
+        $settled = $this->crew($owner);
+
+        $recent = $this->closedMonth($owner, now()->subDays(5));
+        $old = $this->closedMonth($owner, now()->subDays(60));
+
+        // Crew owes on two closings -> single alert, oldest is 60d old -> critical.
+        $this->due($recent, $crew, 300);
+        $this->due($old, $crew, 200);
+        // Captain owes on the recent closing only -> warning.
+        $this->due($recent, $captain, 150);
+        // Fully paid due never alerts.
+        $this->due($recent, $settled, 0, isPaid: true);
+
+        $alerts = $this->alertsFor($owner)->where('type', AlertType::UnpaidDues);
+
+        $this->assertCount(2, $alerts);
+        $this->assertSame(1, $alerts->where('severity', AlertSeverity::Critical)->count());
+        $this->assertSame(1, $alerts->where('severity', AlertSeverity::Warning)->count());
+        $this->assertStringContainsString('500.00', $alerts->where('severity', AlertSeverity::Critical)->first()->message);
+    }
+
+    public function test_unpaid_dues_are_scoped_to_their_owner(): void
+    {
+        $ownerA = $this->owner();
+        $ownerB = $this->owner();
+        $this->due($this->closedMonth($ownerA, now()->subDays(5)), $this->crew($ownerA), 100);
+
+        $this->assertCount(1, $this->alertsFor($ownerA)->where('type', AlertType::UnpaidDues));
+        $this->assertCount(0, $this->alertsFor($ownerB)->where('type', AlertType::UnpaidDues));
+    }
+
     public function test_alerts_sorted_by_severity_then_soonest_due(): void
     {
         $owner = $this->owner();
@@ -257,6 +325,40 @@ class OwnerAlertServiceTest extends TestCase
             'boat_id' => $boat->id,
             'status' => $status,
             'end_date' => $endDate,
+        ]);
+    }
+
+    private function inProgressTrip(User $owner, Boat $boat, \Illuminate\Support\Carbon $endDate): Trip
+    {
+        return Trip::factory()->create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat->id,
+            'status' => TripStatus::InProgress,
+            'end_date' => $endDate,
+        ]);
+    }
+
+    private function closedMonth(User $owner, \Illuminate\Support\Carbon $closedAt): MonthClosing
+    {
+        return MonthClosing::create([
+            'owner_id' => $owner->id,
+            'year' => $closedAt->year,
+            'month' => $closedAt->month,
+            'status' => 'closed',
+            'closed_at' => $closedAt,
+        ]);
+    }
+
+    private function due(MonthClosing $closing, User $user, float $remaining, bool $isPaid = false): MonthClosingDue
+    {
+        return $closing->dues()->create([
+            'user_id' => $user->id,
+            'member_name' => $user->name,
+            'role' => $user->role,
+            'due_amount' => $remaining,
+            'paid_amount' => 0,
+            'remaining' => $remaining,
+            'is_paid' => $isPaid,
         ]);
     }
 

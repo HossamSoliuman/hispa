@@ -9,6 +9,7 @@ use App\Enums\TripStatus;
 use App\Models\Boat;
 use App\Models\Inspection;
 use App\Models\Maintenance;
+use App\Models\MonthClosingDue;
 use App\Models\Trip;
 use App\Models\User;
 use App\Support\Alert;
@@ -33,13 +34,16 @@ final class OwnerAlertService
     {
         return collect()
             ->merge($this->tripOverdue($ownerId))
+            ->merge($this->tripsInProgress($ownerId))
             ->merge($this->userDateExpiring($ownerId, 'captain', 'fishing_license_expiry', AlertType::CaptainFishingLicense, 'license_expiry', 'owner.captain.show'))
             ->merge($this->userDateExpiring($ownerId, 'captain', 'driving_license_expiry', AlertType::CaptainDrivingLicense, 'license_expiry', 'owner.captain.show'))
             ->merge($this->userDateExpiring($ownerId, 'crew', 'fishing_license_expiry', AlertType::CrewFishingLicense, 'license_expiry', 'owner.crew.show'))
-            ->merge($this->residenceExpiring($ownerId))
+            ->merge($this->residenceExpiring($ownerId, 'crew', AlertType::CrewResidence, 'owner.crew.show'))
+            ->merge($this->residenceExpiring($ownerId, 'captain', AlertType::CaptainResidence, 'owner.captain.show'))
             ->merge($this->boatLicenseExpiring($ownerId))
             ->merge($this->inspectionsDue($ownerId))
             ->merge($this->maintenanceDue($ownerId))
+            ->merge($this->unpaidDues($ownerId))
             ->sort(function (Alert $a, Alert $b): int {
                 return ($b->severity->value <=> $a->severity->value)
                     ?: (($a->dueAt?->timestamp ?? PHP_INT_MAX) <=> ($b->dueAt?->timestamp ?? PHP_INT_MAX));
@@ -96,6 +100,38 @@ final class OwnerAlertService
     }
 
     /**
+     * Trips currently at sea (in progress and not yet past their expected end).
+     * Purely informational — overdue trips are handled by {@see tripOverdue()}.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Support\Alert>
+     */
+    private function tripsInProgress(int $ownerId): Collection
+    {
+        return Trip::query()
+            ->where('owner_id', $ownerId)
+            ->where('status', TripStatus::InProgress->value)
+            ->where(function ($query): void {
+                $query->whereNull('end_date')->orWhere('end_date', '>=', now());
+            })
+            ->with('boat:id,name_ar,name_en')
+            ->get()
+            ->map(function (Trip $trip): Alert {
+                return new Alert(
+                    type: AlertType::TripInProgress,
+                    severity: AlertSeverity::Info,
+                    title: AlertType::TripInProgress->title(),
+                    message: __('owner.alerts.trip_in_progress.message', [
+                        'trip' => $trip->number,
+                        'boat' => $trip->boat?->name ?: $trip->boat_name,
+                        'date' => $trip->end_date?->translatedFormat('d M Y') ?? '—',
+                    ]),
+                    url: route('owner.trips.show', $trip),
+                    dueAt: $trip->end_date,
+                );
+            });
+    }
+
+    /**
      * Reusable builder for a `date` column on owner users of a given role.
      *
      * @return \Illuminate\Support\Collection<int, \App\Support\Alert>
@@ -122,34 +158,34 @@ final class OwnerAlertService
     }
 
     /**
-     * Crew residence/iqama expiry. `residence_end_date` is a free-text string
-     * column that may hold blanks or garbage, so it is parsed defensively in PHP
-     * rather than filtered in SQL.
+     * Residence/iqama expiry for owner users of a given role (crew or captain).
+     * `residence_end_date` is a free-text string column that may hold blanks or
+     * garbage, so it is parsed defensively in PHP rather than filtered in SQL.
      *
      * @return \Illuminate\Support\Collection<int, \App\Support\Alert>
      */
-    private function residenceExpiring(int $ownerId): Collection
+    private function residenceExpiring(int $ownerId, string $role, AlertType $type, string $routeName): Collection
     {
         $boundary = today()->addDays((int) config('alerts.residence_expiry.warning_days'))->endOfDay();
 
         return User::query()
             ->where('owner_id', $ownerId)
-            ->where('role', 'crew')
+            ->where('role', $role)
             ->active()
             ->whereNotNull('residence_end_date')
             ->where('residence_end_date', '!=', '')
             ->get()
-            ->map(function (User $user): ?Alert {
+            ->map(function (User $user) use ($type, $routeName): ?Alert {
                 try {
                     $due = Carbon::parse($user->residence_end_date);
                 } catch (\Throwable) {
                     return null;
                 }
 
-                return $this->dateAlert(AlertType::CrewResidence, 'residence_expiry', $due, [
+                return $this->dateAlert($type, 'residence_expiry', $due, [
                     'name' => $user->name,
                     'date' => $due->translatedFormat('d M Y'),
-                ], route('owner.crew.show', $user->id));
+                ], route($routeName, $user->id));
             })
             ->filter(fn (?Alert $alert): bool => $alert !== null && $alert->dueAt->lte($boundary))
             ->values();
@@ -230,6 +266,63 @@ final class OwnerAlertService
                     'date' => $due->translatedFormat('d M Y'),
                 ], route('owner.maintenance.index'));
             });
+    }
+
+    /**
+     * Outstanding crew/captain dues, aggregated to one alert per person across
+     * all of their unpaid month closings. Severity escalates to Critical once
+     * the oldest unpaid closing is older than the configured threshold.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Support\Alert>
+     */
+    private function unpaidDues(int $ownerId): Collection
+    {
+        $criticalBefore = today()->subDays((int) config('alerts.unpaid_dues.critical_days'))->startOfDay();
+
+        return MonthClosingDue::query()
+            ->where('is_paid', false)
+            ->where('remaining', '>', 0)
+            ->whereHas('monthClosing', fn ($query) => $query->where('owner_id', $ownerId))
+            ->with('monthClosing:id,owner_id,closed_at')
+            ->get()
+            ->groupBy('user_id')
+            ->map(function (Collection $dues) use ($criticalBefore): Alert {
+                $first = $dues->first();
+                $total = (float) $dues->sum('remaining');
+                $oldestClosedAt = $dues
+                    ->map(fn (MonthClosingDue $due) => $due->monthClosing?->closed_at)
+                    ->filter()
+                    ->sort()
+                    ->first();
+
+                return new Alert(
+                    type: AlertType::UnpaidDues,
+                    severity: $oldestClosedAt && $oldestClosedAt->lt($criticalBefore)
+                        ? AlertSeverity::Critical
+                        : AlertSeverity::Warning,
+                    title: AlertType::UnpaidDues->title(),
+                    message: __('owner.alerts.unpaid_dues.message', [
+                        'name' => $first->member_name,
+                        'amount' => number_format($total, 2),
+                    ]),
+                    url: $this->duesUrlForRole($first->role, (int) $first->user_id),
+                    dueAt: $oldestClosedAt,
+                );
+            })
+            ->values();
+    }
+
+    /**
+     * Best link for a person's outstanding dues: their profile when the role has
+     * one, otherwise the month-closing list.
+     */
+    private function duesUrlForRole(?string $role, int $userId): string
+    {
+        return match ($role) {
+            'captain' => route('owner.captain.show', $userId),
+            'crew' => route('owner.crew.show', $userId),
+            default => route('owner.month-closing.index'),
+        };
     }
 
     /**

@@ -130,6 +130,10 @@ return [
             'title' => 'Trip past expected time',
             'message' => 'Trip :trip (:boat) is overdue since :date',
         ],
+        'trip_in_progress' => [
+            'title' => 'Trip in progress',
+            'message' => 'Trip :trip (:boat) is currently at sea (expected back :date)',
+        ],
         'captain_fishing_license' => [
             'title' => 'Captain fishing licence expiring',
             'message' => 'Fishing licence for captain :name expires :date',
@@ -146,6 +150,10 @@ return [
             'title' => 'Crew residence expiring',
             'message' => 'Residence (iqama) for crew member :name expires :date',
         ],
+        'captain_residence' => [
+            'title' => 'Captain residence expiring',
+            'message' => 'Residence (iqama) for captain :name expires :date',
+        ],
         'boat_license' => [
             'title' => 'Boat licence expiring',
             'message' => 'Licence for boat :boat expires :date',
@@ -157,6 +165,10 @@ return [
         'maintenance_due' => [
             'title' => 'Boat maintenance due',
             'message' => 'Maintenance for boat :boat is due :date',
+        ],
+        'unpaid_dues' => [
+            'title' => 'Unpaid dues',
+            'message' => 'Outstanding dues for :name: :amount SAR',
         ],
     ],
 
