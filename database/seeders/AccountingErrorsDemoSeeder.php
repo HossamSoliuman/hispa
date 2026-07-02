@@ -295,7 +295,7 @@ class AccountingErrorsDemoSeeder extends Seeder
             ]
         );
 
-        $trip = Trip::withTrashed()->where('number', 'TRIP-OWNER2-001')->first();
+        $trip = Trip::where('number', 'TRIP-OWNER2-001')->first();
         if (! $trip) {
             $trip = Trip::withoutEvents(fn () => Trip::create([
                 'name' => 'رحلة المالك الثاني',

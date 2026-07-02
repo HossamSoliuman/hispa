@@ -88,23 +88,23 @@ class SeedOwnerFinancialTestData extends Command
     {
         $this->info('🧹 Wiping existing data...');
 
-        $tripIds = Trip::withTrashed()->where('owner_id', $owner->id)->pluck('id');
+        $tripIds = Trip::where('owner_id', $owner->id)->pluck('id');
         $catchIds = CatchModel::where('owner_id', $owner->id)->pluck('id');
-        $saleIds = Sale::withTrashed()
+        $saleIds = Sale::query()
             ->where(fn ($q) => $q->whereIn('trip_id', $tripIds)->orWhere('seller_id', $owner->id))
             ->pluck('id');
 
         SaleDetail::whereIn('sale_id', $saleIds)->delete();
-        Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
+        Sale::whereIn('id', $saleIds)->delete();
 
         FishQuantityStock::whereIn('trip_id', $tripIds)->orWhereIn('catch_id', $catchIds)->delete();
         CatchDetail::whereIn('catch_id', $catchIds)->delete();
         CatchModel::whereIn('id', $catchIds)->delete();
-        Trip::withTrashed()->whereIn('id', $tripIds)->forceDelete();
+        Trip::whereIn('id', $tripIds)->delete();
 
-        $payrollIds = Payroll::withTrashed()->where('owner_id', $owner->id)->pluck('id');
+        $payrollIds = Payroll::where('owner_id', $owner->id)->pluck('id');
         PayrollDetail::whereIn('payroll_id', $payrollIds)->delete();
-        Payroll::withTrashed()->whereIn('id', $payrollIds)->forceDelete();
+        Payroll::whereIn('id', $payrollIds)->delete();
 
         $payrollModelIds = PayrollModel::where('owner_id', $owner->id)->pluck('id');
         PayrollDetailsModel::whereIn('payroll_id', $payrollModelIds)->delete();
@@ -114,8 +114,8 @@ class SeedOwnerFinancialTestData extends Command
         MonthClosingDue::whereIn('month_closing_id', $closingIds)->delete();
         MonthClosing::whereIn('id', $closingIds)->delete();
 
-        Expense::withTrashed()->where('owner_id', $owner->id)->forceDelete();
-        Maintenance::withTrashed()->where('owner_id', $owner->id)->forceDelete();
+        Expense::where('owner_id', $owner->id)->delete();
+        Maintenance::where('owner_id', $owner->id)->delete();
         CrewAdvance::where('owner_id', $owner->id)->delete();
         Customer::where('owner_id', $owner->id)->delete();
 

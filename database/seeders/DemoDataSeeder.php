@@ -390,16 +390,16 @@ class DemoDataSeeder extends Seeder
         $trips = [];
 
         foreach ($tripsData as $key => $data) {
-            $existing = Trip::withTrashed()->where('number', $data['number'])->first();
+            $existing = Trip::where('number', $data['number'])->first();
             if ($existing) {
                 Schema::disableForeignKeyConstraints();
                 foreach ($existing->sales as $sale) {
                     $sale->details()->delete();
-                    $sale->forceDelete();
+                    $sale->delete();
                 }
                 $existing->fishQuantityStocks()->delete();
                 $existing->catches()->delete();
-                $existing->forceDelete();
+                $existing->delete();
                 Schema::enableForeignKeyConstraints();
             }
 

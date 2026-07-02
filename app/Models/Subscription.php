@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'user_id',
         'package_id',
@@ -48,7 +45,7 @@ class Subscription extends Model
 
     public function isActive()
     {
-        return $this->status === 'active' && !$this->is_suspended && $this->end_date >= Carbon::today();
+        return $this->status === 'active' && ! $this->is_suspended && $this->end_date >= Carbon::today();
     }
 
     public function isExpired()

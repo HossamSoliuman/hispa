@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'subscription_id',
         'user_id',
@@ -89,6 +86,7 @@ class Invoice extends Model
             ->first();
 
         $number = $lastInvoice ? (int) substr($lastInvoice->invoice_number, -4) + 1 : 1;
-        return 'INV-' . $year . $month . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+
+        return 'INV-'.$year.$month.'-'.str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 }

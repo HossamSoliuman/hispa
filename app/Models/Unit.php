@@ -5,11 +5,10 @@ namespace App\Models;
 use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Unit extends Model
 {
-    use BelongsToOwner, SoftDeletes;
+    use BelongsToOwner;
 
     protected $fillable = [
         'name_ar',

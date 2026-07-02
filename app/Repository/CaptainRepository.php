@@ -177,7 +177,7 @@ class CaptainRepository implements CRUD
         try {
             $captain = User::findOrFail($id);
 
-            if (Trip::withTrashed()->where('captain_id', $captain->id)->exists()) {
+            if (Trip::where('captain_id', $captain->id)->exists()) {
                 DB::rollBack();
 
                 return response()->json(['message' => trans('api.captain_has_trips')], 422);

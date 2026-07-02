@@ -5,14 +5,11 @@ namespace App\Models;
 use App\Observers\SaleObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy(SaleObserver::class)]
 
 class Sale extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'number',
         'seller_type',

@@ -190,7 +190,7 @@ class TripController extends Controller
                 deleteFile($trip->getRawOriginal('license_attachment'));
             }
 
-            $trip->forceDelete();
+            $trip->delete();
             Cache::forget('sidebar_trip_counts');
 
             DB::commit();
@@ -211,14 +211,14 @@ class TripController extends Controller
      */
     private function purgeTripRelations(Trip $trip): void
     {
-        $saleIds = Sale::withTrashed()->where('trip_id', $trip->id)->pluck('id');
+        $saleIds = Sale::where('trip_id', $trip->id)->pluck('id');
 
         if ($saleIds->isNotEmpty()) {
             if (Schema::hasTable('payments')) {
                 DB::table('payments')->whereIn('sale_id', $saleIds)->delete();
             }
             SaleDetail::whereIn('sale_id', $saleIds)->delete();
-            Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
+            Sale::whereIn('id', $saleIds)->delete();
         }
 
         $catchIds = CatchModel::where('trip_id', $trip->id)->pluck('id');
@@ -230,11 +230,11 @@ class TripController extends Controller
 
         FishQuantityStock::where('trip_id', $trip->id)->delete();
 
-        $expenseIds = Expense::withTrashed()->where('trip_id', $trip->id)->pluck('id');
+        $expenseIds = Expense::where('trip_id', $trip->id)->pluck('id');
 
         if ($expenseIds->isNotEmpty()) {
-            Expenseable::withTrashed()->whereIn('expense_id', $expenseIds)->forceDelete();
-            Expense::withTrashed()->whereIn('id', $expenseIds)->forceDelete();
+            Expenseable::whereIn('expense_id', $expenseIds)->delete();
+            Expense::whereIn('id', $expenseIds)->delete();
         }
     }
 

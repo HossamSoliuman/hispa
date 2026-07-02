@@ -120,9 +120,9 @@ class TripDeleteTest extends TestCase
         $this->assertDatabaseMissing('catch_models', ['trip_id' => $trip->id]);
         $this->assertSame(0, CatchDetail::count());
         $this->assertDatabaseMissing('fish_quantity_stocks', ['trip_id' => $trip->id]);
-        $this->assertSame(0, Sale::withTrashed()->where('trip_id', $trip->id)->count());
+        $this->assertSame(0, Sale::where('trip_id', $trip->id)->count());
         $this->assertSame(0, SaleDetail::count());
-        $this->assertSame(0, Expense::withTrashed()->withoutGlobalScopes()->where('trip_id', $trip->id)->count());
+        $this->assertSame(0, Expense::withoutGlobalScopes()->where('trip_id', $trip->id)->count());
     }
 
     public function test_owner_cannot_delete_another_owners_trip(): void
@@ -135,6 +135,6 @@ class TripDeleteTest extends TestCase
 
         $this->delete(route('owner.trips.destroy', $trip->id))->assertNotFound();
 
-        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('trips', ['id' => $trip->id]);
     }
 }

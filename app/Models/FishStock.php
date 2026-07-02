@@ -6,13 +6,10 @@ use App\Observers\FishStockObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy(FishStockObserver::class)]
 class FishStock extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'fish_stocks';
 
     protected $fillable = [

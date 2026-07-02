@@ -347,14 +347,14 @@ class CatchController extends Controller
         $trip = Trip::find($tripId);
 
         $catchIds = CatchModel::where('trip_id', $tripId)->pluck('id');
-        $saleIds = Sale::withTrashed()->where('trip_id', $tripId)->pluck('id');
+        $saleIds = Sale::where('trip_id', $tripId)->pluck('id');
 
         if ($saleIds->isNotEmpty()) {
             if (Schema::hasTable('payments')) {
                 DB::table('payments')->whereIn('sale_id', $saleIds)->delete();
             }
             SaleDetail::whereIn('sale_id', $saleIds)->delete();
-            Sale::withTrashed()->whereIn('id', $saleIds)->forceDelete();
+            Sale::whereIn('id', $saleIds)->delete();
         }
 
         if ($catchIds->isNotEmpty()) {

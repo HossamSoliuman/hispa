@@ -35,7 +35,7 @@ class GenerateTripNumberTest extends TestCase
         $this->assertSame("TR-{$year}-028", generateTripNumber());
     }
 
-    public function test_it_does_not_reuse_a_soft_deleted_trip_number(): void
+    public function test_it_reuses_a_hard_deleted_trip_number(): void
     {
         $year = date('Y');
         $this->makeTrip("TR-{$year}-027");
@@ -43,8 +43,8 @@ class GenerateTripNumberTest extends TestCase
 
         $deleted->delete();
 
-        $this->assertSoftDeleted('trips', ['id' => $deleted->id]);
-        $this->assertSame("TR-{$year}-029", generateTripNumber());
+        $this->assertDatabaseMissing('trips', ['id' => $deleted->id]);
+        $this->assertSame("TR-{$year}-028", generateTripNumber());
     }
 
     public function test_it_uses_the_highest_number_even_when_ids_are_out_of_order(): void

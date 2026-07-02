@@ -4,12 +4,9 @@ namespace App\Models;
 
 use App\Casts\UnicodeArrayCast;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubscriptionPackage extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'name_ar',
         'name_en',
@@ -51,8 +48,10 @@ class SubscriptionPackage extends Model
         $list = app()->getLocale() === 'ar' ? ($this->feature_ar ?? []) : ($this->feature_en ?? []);
         if (is_string($list)) {
             $decoded = json_decode($list, true);
+
             return is_array($decoded) ? array_values(array_filter($decoded, 'strlen')) : [];
         }
+
         return is_array($list) ? array_values(array_filter($list, 'strlen')) : [];
     }
 
@@ -66,6 +65,7 @@ class SubscriptionPackage extends Model
             return '';
         }
         $strings = array_map(fn ($item) => is_string($item) ? $item : (is_array($item) ? ($item['text'] ?? $item['name'] ?? '') : ''), $items);
+
         return implode(' · ', array_slice(array_filter($strings), 0, 3));
     }
 
@@ -79,6 +79,7 @@ class SubscriptionPackage extends Model
         if ($offer !== null && $offer < $original) {
             return $offer;
         }
+
         return $original;
     }
 

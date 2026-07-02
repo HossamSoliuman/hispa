@@ -5,13 +5,11 @@ namespace App\Models;
 use App\Services\CouponService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Coupon extends Model
 {
-    use SoftDeletes;
-
     public const TYPE_PERCENTAGE = 'percentage';
+
     public const TYPE_FIXED = 'fixed';
 
     protected $fillable = [
@@ -50,6 +48,7 @@ class Coupon extends Model
     public function scopeValidNow($query)
     {
         $now = Carbon::now();
+
         return $query->where(function ($q) use ($now) {
             $q->whereNull('valid_from')->orWhere('valid_from', '<=', $now);
         })->where(function ($q) use ($now) {
@@ -77,10 +76,11 @@ class Coupon extends Model
         if (empty($this->package_ids)) {
             return true;
         }
+
         return in_array($packageId, $this->package_ids, true);
     }
 
-    public function isValidAt(Carbon $at = null): bool
+    public function isValidAt(?Carbon $at = null): bool
     {
         $at = $at ?? Carbon::now();
         if ($this->valid_from && $this->valid_from->gt($at)) {
@@ -89,6 +89,7 @@ class Coupon extends Model
         if ($this->valid_until && $this->valid_until->lt($at)) {
             return false;
         }
+
         return true;
     }
 
@@ -101,6 +102,7 @@ class Coupon extends Model
     {
         $discount = app(CouponService::class)->calculateDiscount($this, $sampleAmount);
         $final = max(0, $sampleAmount - $discount);
+
         return [
             'original' => $sampleAmount,
             'discount' => round($discount, 2),
@@ -112,8 +114,9 @@ class Coupon extends Model
     public function getFormattedValueAttribute(): string
     {
         if ($this->type === self::TYPE_PERCENTAGE) {
-            return number_format((float) $this->value, 0) . '%';
+            return number_format((float) $this->value, 0).'%';
         }
-        return number_format((float) $this->value, 2) . ' ' . (__('admin.units.sar') ?? 'ر.س');
+
+        return number_format((float) $this->value, 2).' '.(__('admin.units.sar') ?? 'ر.س');
     }
 }

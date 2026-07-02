@@ -77,7 +77,7 @@ class DashboardController extends Controller
         // ========== إحصائيات الرحلات ==========
         $totalTrips = Trip::count();
         $completedTrips = Trip::where('status', 8)->count(); // status 8 = completed
-        $activeTrips = Trip::where('status', '!=', 8)->whereNull('deleted_at')->count();
+        $activeTrips = Trip::where('status', '!=', 8)->count();
         $cancelledTrips = Trip::whereNotNull('cancel_reason')->count();
 
         // ========== إحصائيات القوارب ==========

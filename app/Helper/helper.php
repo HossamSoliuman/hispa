@@ -92,10 +92,8 @@ function generateTripNumber(): string
     $prefix = 'TR-'.$year.'-';
 
     // Take the highest sequence already used this year and increment it so a new
-    // trip can never collide, even if numbers are not in id order. Trashed trips
-    // are included because the `number` column is globally unique and any leftover
-    // soft-deleted row still occupies its number.
-    $highestNumber = \App\Models\Trip::withTrashed()
+    // trip can never collide, even if numbers are not in id order.
+    $highestNumber = \App\Models\Trip::query()
         ->where('number', 'like', $prefix.'%')
         ->pluck('number')
         ->map(fn (string $number): int => (int) substr($number, strlen($prefix)))

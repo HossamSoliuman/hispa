@@ -15,13 +15,14 @@ class UpdateCouponRequest extends FormRequest
     public function rules(): array
     {
         $coupon = $this->route('coupon');
+
         return [
             'name' => ['nullable', 'string', 'max:255'],
             'code' => [
                 'required',
                 'string',
                 'max:64',
-                Rule::unique('coupons', 'code')->ignore($coupon->id)->whereNull('deleted_at'),
+                Rule::unique('coupons', 'code')->ignore($coupon->id),
             ],
             'type' => 'required|in:percentage,fixed',
             'value' => ['required', 'numeric', 'min:0', Rule::when($this->type === 'percentage', 'max:100')],
