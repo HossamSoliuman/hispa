@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Owner;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SalesRequest extends FormRequest
 {
@@ -22,7 +23,10 @@ class SalesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => 'required|exists:customers,id',
+            'customer_id' => [
+                'required',
+                Rule::exists('customers', 'id')->where('owner_id', auth()->id()),
+            ],
             'trip_id' => 'required|exists:trips,id',
             'payment_method_id' => 'required|exists:payment_methods,id',
             'payment_status' => 'required|in:unpaid,partially_paid,paid',

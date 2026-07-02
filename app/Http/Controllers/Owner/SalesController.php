@@ -153,7 +153,7 @@ class SalesController extends Controller
 
     public function create()
     {
-        $customers = Customer::Active()->get();
+        $customers = Customer::Active()->where('owner_id', auth()->id())->get();
         $trips = Trip::where('owner_id', auth()->user()->id)->get();
         $fish = Fish::Active()->get();
         $paymentMethods = PaymentMethod::active()->get();
@@ -277,7 +277,7 @@ class SalesController extends Controller
             ->with(['details.fish', 'details.unit', 'customer'])
             ->findOrFail($id);
 
-        $customers = Customer::Active()->get();
+        $customers = Customer::Active()->where('owner_id', auth()->id())->get();
         $paymentMethods = PaymentMethod::active()->get();
 
         $rows = $sale->details->map(function (SaleDetail $detail) use ($sale) {
