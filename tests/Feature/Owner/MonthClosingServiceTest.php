@@ -261,6 +261,162 @@ class MonthClosingServiceTest extends TestCase
         $this->assertSame(100000.0, $preview['financials']['net_profit']);
     }
 
+    public function test_deficit_defers_unabsorbed_depreciation_and_floors_crew_share(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        // Only 200 of owner revenue — not enough to absorb the month's depreciation.
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 200,
+            'net_owner_amount' => 200,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        // 60,000 − 6,000 salvage ÷ 12 years ÷ 12 = 375/month.
+        Asset::create([
+            'owner_id' => $owner->id,
+            'asset_type' => 'boat',
+            'name' => 'قارب',
+            'purchase_date' => '2025-01-01',
+            'purchase_cost' => 60000,
+            'salvage_value' => 6000,
+            'depreciation_method' => 'straight_line',
+            'useful_life_years' => 12,
+            'status' => 'active',
+        ]);
+
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+
+        $preview = $this->service->preview($owner->id, 2026, 6);
+        $f = $preview['financials'];
+
+        $this->assertSame(375.0, $preview['asset_depreciation']['total']); // straight-line for the month
+        $this->assertSame(200.0, $f['depreciation']);          // charged, capped at profit before depreciation
+        $this->assertSame(175.0, $f['depreciation_deferred']); // remainder carried to next month
+        $this->assertSame(0.0, $f['net_profit']);
+        $this->assertSame(0.0, $f['crew_share']);
+        $this->assertSame(0.0, $f['owner_share']);
+
+        // Crew dues never go negative.
+        $due = collect($preview['dues'])->firstWhere('role', 'crew');
+        $this->assertSame(0.0, $due['due_amount']);
+        $this->assertSame(0.0, $due['remaining']);
+    }
+
+    public function test_operating_loss_floors_crew_share_and_defers_all_depreciation(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 100,
+            'net_owner_amount' => 100,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        $category = Category::create(['name_ar' => 'operating', 'name_en' => 'operating', 'type' => 'operating', 'status' => 1]);
+        Expense::create([
+            'owner_id' => $owner->id,
+            'category_id' => $category->id,
+            'final_price' => 500,
+            'total_price' => 500,
+            'date' => '2026-06-10',
+        ]);
+
+        Asset::create([
+            'owner_id' => $owner->id,
+            'asset_type' => 'boat',
+            'name' => 'قارب',
+            'purchase_date' => '2025-01-01',
+            'purchase_cost' => 60000,
+            'salvage_value' => 6000,
+            'depreciation_method' => 'straight_line',
+            'useful_life_years' => 12,
+            'status' => 'active',
+        ]);
+
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+
+        $preview = $this->service->preview($owner->id, 2026, 6);
+        $f = $preview['financials'];
+
+        $this->assertSame(0.0, $f['depreciation']);            // nothing charged during an operating loss
+        $this->assertSame(375.0, $f['depreciation_deferred']); // whole charge deferred
+        $this->assertSame(-400.0, $f['net_profit']);           // 100 revenue − 500 expenses
+        $this->assertSame(0.0, $f['crew_share']);              // crew never pay in
+        $this->assertSame(-400.0, $f['owner_share']);          // owner absorbs the loss
+    }
+
+    public function test_deferred_depreciation_carries_into_the_next_month(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        Asset::create([
+            'owner_id' => $owner->id,
+            'asset_type' => 'boat',
+            'name' => 'قارب',
+            'purchase_date' => '2025-01-01',
+            'purchase_cost' => 60000,
+            'salvage_value' => 6000,
+            'depreciation_method' => 'straight_line',
+            'useful_life_years' => 12,
+            'status' => 'active',
+        ]);
+
+        User::factory()->create(['role' => 'crew', 'owner_id' => $owner->id, 'salary_type' => 'percentage', 'profit_shares' => 1.0]);
+
+        // June: 200 revenue → charges 200, defers 175.
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 200,
+            'net_owner_amount' => 200,
+            'sale_datetime' => '2026-06-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        $june = $this->service->close($owner->id, 2026, 6);
+        $this->assertSame('200.00', $june->depreciation);
+        $this->assertSame('175.00', $june->depreciation_deferred);
+        $this->assertSame('0.00', $june->depreciation_brought_forward);
+
+        // July: plenty of revenue → own 375 + carried 175 = 550, all charged.
+        Sale::create([
+            'number' => 'S-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'total_price' => 100000,
+            'net_owner_amount' => 100000,
+            'sale_datetime' => '2026-07-15 10:00:00',
+            'status' => 1,
+        ]);
+
+        $preview = $this->service->preview($owner->id, 2026, 7);
+        $f = $preview['financials'];
+        $this->assertSame(175.0, $f['depreciation_brought_forward']);
+        $this->assertSame(550.0, $f['depreciation']);
+        $this->assertSame(0.0, $f['depreciation_deferred']);
+        $this->assertSame(99450.0, $f['net_profit']); // 100,000 − 550
+
+        $july = $this->service->close($owner->id, 2026, 7);
+        $this->assertSame('175.00', $july->depreciation_brought_forward);
+        $this->assertSame('550.00', $july->depreciation);
+        $this->assertSame('0.00', $july->depreciation_deferred);
+
+        // The year rolls the deferred figures up too.
+        $summary = $this->service->annualSummary($owner->id, 2026);
+        $this->assertSame(175.0, $summary['totals']['depreciation_brought_forward']);
+        $this->assertSame(175.0, $summary['totals']['depreciation_deferred']);
+    }
+
     public function test_cannot_close_same_boat_twice(): void
     {
         $owner = User::factory()->create(['role' => 'owner']);

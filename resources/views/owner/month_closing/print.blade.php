@@ -152,6 +152,12 @@
                         <tr><td class="col-text">{{ __('owner.month_closing.report.share_value') }}</td><td class="col-num">{{ number_format((float) $closing->share_value, 2) }}</td></tr>
                         <tr><td class="col-text">{{ __('owner.month_closing.report.total_advances') }}</td><td class="col-num">{{ number_format((float) $dues->sum('advances'), 2) }}</td></tr>
                         <tr><td class="col-text">{{ __('owner.month_closing.report.total_paid') }}</td><td class="col-num">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td></tr>
+                        @if ((float) $closing->depreciation_brought_forward > 0)
+                            <tr><td class="col-text">{{ __('owner.month_closing.deferral.brought_forward') }}</td><td class="col-num">{{ number_format((float) $closing->depreciation_brought_forward, 2) }}</td></tr>
+                        @endif
+                        @if ((float) $closing->depreciation_deferred > 0)
+                            <tr><td class="col-text">{{ __('owner.month_closing.deferral.deferred') }}</td><td class="col-num">{{ number_format((float) $closing->depreciation_deferred, 2) }}</td></tr>
+                        @endif
                         <tr class="net-row"><td class="col-text">{{ __('owner.month_closing.report.total_net_due') }}</td><td class="col-num">{{ number_format((float) $dues->sum('remaining'), 2) }}</td></tr>
                     </tbody>
                 </table>

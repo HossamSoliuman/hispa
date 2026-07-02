@@ -70,9 +70,10 @@
     .rmast-facts .rf-value { font-weight: 700; color: #1a1a1a; }
     .rmast-facts .rf-label::after { content: ': '; }
 
-    /* Centered report title. */
+    /* Centered report title. Kept at the company-name size (.rmast-name) so the
+       heading never dwarfs the masthead identity. */
     .rtitle-wrap { text-align: center; margin: 6px 0 18px; }
-    .rtitle { font-size: 20pt; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+    .rtitle { font-size: 13pt; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
     .rsubtitle { font-size: 10pt; color: #666; }
 </style>
 

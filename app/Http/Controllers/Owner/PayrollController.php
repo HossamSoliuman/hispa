@@ -142,12 +142,17 @@ class PayrollController extends Controller
         $depreciation = app(AssetDepreciationService::class)
             ->forMonth((int) $payroll->owner_id, $year, $month)['total'];
 
-        return app(MonthlyFinancialsService::class)->compute(
+        $financials = app(MonthlyFinancialsService::class);
+        $broughtForward = $financials->broughtForwardDepreciation((int) $payroll->owner_id, $year, $month, null);
+
+        return $financials->compute(
             (int) $payroll->owner_id,
             $start->toDateString(),
             $start->copy()->endOfMonth()->toDateString(),
             null,
             $depreciation,
+            $broughtForward,
+            true,
         );
     }
 

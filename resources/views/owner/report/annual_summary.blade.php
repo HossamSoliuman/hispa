@@ -95,6 +95,7 @@
                         <th class="text-end">{{ __('owner.annual_summary.columns.revenue') }}</th>
                         <th class="text-end">{{ __('owner.annual_summary.columns.expenses') }}</th>
                         <th class="text-end">{{ __('owner.annual_summary.columns.depreciation') }}</th>
+                        <th class="text-end">{{ __('owner.annual_summary.columns.deferred') }}</th>
                         <th class="text-end">{{ __('owner.annual_summary.columns.net_profit') }}</th>
                         <th class="text-end">{{ __('owner.annual_summary.columns.crew_share') }}</th>
                         <th class="text-end">{{ __('owner.annual_summary.columns.owner_share') }}</th>
@@ -117,6 +118,7 @@
                                 <td class="text-end">{{ number_format((float) $closing->net_owner_revenue, 2) }}</td>
                                 <td class="text-end text-danger">{{ number_format((float) $closing->total_expenses, 2) }}</td>
                                 <td class="text-end">{{ number_format((float) $closing->depreciation, 2) }}</td>
+                                <td class="text-end {{ (float) $closing->depreciation_deferred > 0 ? 'text-warning fw-semibold' : '' }}">{{ number_format((float) $closing->depreciation_deferred, 2) }}</td>
                                 <td class="text-end fw-bold {{ (float) $closing->net_profit >= 0 ? 'text-success' : 'text-danger' }}">
                                     {{ number_format((float) $closing->net_profit, 2) }}
                                 </td>
@@ -128,6 +130,7 @@
                                     </a>
                                 </td>
                             @else
+                                <td class="text-end">—</td>
                                 <td class="text-end">—</td>
                                 <td class="text-end">—</td>
                                 <td class="text-end">—</td>
@@ -147,6 +150,7 @@
                         <td class="text-end">{{ number_format($t['net_owner_revenue'], 2) }}</td>
                         <td class="text-end text-danger">{{ number_format($t['total_expenses'], 2) }}</td>
                         <td class="text-end">{{ number_format($t['depreciation'], 2) }}</td>
+                        <td class="text-end">{{ number_format($t['depreciation_deferred'], 2) }}</td>
                         <td class="text-end {{ $t['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                             {{ number_format($t['net_profit'], 2) }}
                         </td>
@@ -156,6 +160,11 @@
                     </tr>
                 </tfoot>
             </table>
+            @if ($t['depreciation_deferred'] > 0)
+                <div class="alert alert-warning mt-3 mb-0 small">
+                    <i class="fa fa-circle-info me-1"></i>{{ __('owner.annual_summary.deferred_note') }}
+                </div>
+            @endif
         </div>
     </div>
 @endsection

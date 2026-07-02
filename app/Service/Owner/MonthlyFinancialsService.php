@@ -4,6 +4,7 @@ namespace App\Service\Owner;
 
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\MonthClosing;
 use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Trip;
@@ -31,19 +32,38 @@ class MonthlyFinancialsService
      * straight-line monthly charge; every other consumer leaves it at 0 so it is
      * deducted inside the monthly close only).
      *
+     * Deficit deferral (opt-in via $deferDepreciationOnDeficit): depreciation is a
+     * non-cash charge that must never push a month into a loss. When enabled, the
+     * total depreciation to consider (this month's charge + any amount carried
+     * forward from previous deficit months) is only charged up to the profit
+     * available before depreciation; the un-absorbed remainder is deferred to the
+     * next month, and the crew share is floored at zero (crew are never paid a
+     * negative amount in an unprofitable month — the owner absorbs the loss).
+     *
      * @return array{
      *     from: string, to: string, owner_id: int, boat_id: int|null,
      *     gross_sales: float, net_sales: float,
      *     commission_labor: float, net_owner_revenue: float,
      *     trip_expenses: float, general_expenses: float,
-     *     depreciation: float, total_expenses: float, net_profit: float,
+     *     depreciation: float, depreciation_own: float,
+     *     depreciation_brought_forward: float, depreciation_charged: float,
+     *     depreciation_deferred: float, depreciation_considered: float,
+     *     profit_before_depreciation: float,
+     *     total_expenses: float, net_profit: float,
      *     owner_percent: float, owner_share: float, crew_share: float,
      *     crew_count: int, per_fisherman: float, custom_share_total: float,
      *     crew_distribution: \Illuminate\Support\Collection<int, array<string, mixed>>
      * }
      */
-    public function compute(int $ownerId, string $from, string $to, ?int $boatId = null, float $depreciation = 0.0): array
-    {
+    public function compute(
+        int $ownerId,
+        string $from,
+        string $to,
+        ?int $boatId = null,
+        float $depreciation = 0.0,
+        float $depreciationCarriedForward = 0.0,
+        bool $deferDepreciationOnDeficit = false,
+    ): array {
         $saleIds = $this->ownerSalesQuery($ownerId, $from, $to, $boatId)->pluck('id');
 
         $grossSales = (float) Sale::whereIn('id', $saleIds)->sum('total_price');
@@ -62,14 +82,28 @@ class MonthlyFinancialsService
             ->whereIn('category_id', $this->categoryIdsForTypes(['general', 'government']))
             ->sum('final_price');
 
-        $depreciation = round($depreciation, 2);
+        $ownDepreciation = round($depreciation, 2);
+        $broughtForward = round($depreciationCarriedForward, 2);
+        $consideredDepreciation = round($ownDepreciation + $broughtForward, 2);
 
-        $totalExpenses = $tripExpenses + $generalExpenses + $depreciation;
-        $netProfit = $netOwnerRevenue - $totalExpenses;
+        $profitBeforeDepreciation = round($netOwnerRevenue - $tripExpenses - $generalExpenses, 2);
+
+        $chargedDepreciation = $deferDepreciationOnDeficit
+            ? round(min($consideredDepreciation, max($profitBeforeDepreciation, 0.0)), 2)
+            : $consideredDepreciation;
+        $deferredDepreciation = round($consideredDepreciation - $chargedDepreciation, 2);
+
+        $totalExpenses = round($tripExpenses + $generalExpenses + $chargedDepreciation, 2);
+        $netProfit = round($netOwnerRevenue - $totalExpenses, 2);
 
         $ownerPercent = (float) $this->setting(self::SETTING_OWNER_PERCENT, self::DEFAULT_OWNER_PERCENT);
-        $ownerShare = $netProfit * ($ownerPercent / 100);
-        $crewShare = $netProfit - $ownerShare;
+        $ownerShare = round($netProfit * ($ownerPercent / 100), 2);
+        $crewShare = round($netProfit - $ownerShare, 2);
+
+        if ($deferDepreciationOnDeficit) {
+            $crewShare = max($crewShare, 0.0);
+            $ownerShare = round($netProfit - $crewShare, 2);
+        }
 
         $distribution = $this->crewDistribution($ownerId, $crewShare, $boatId);
         $crewCount = $distribution['members']->count();
@@ -89,17 +123,49 @@ class MonthlyFinancialsService
             'net_owner_revenue' => round($netOwnerRevenue, 2),
             'trip_expenses' => round($tripExpenses, 2),
             'general_expenses' => round($generalExpenses, 2),
-            'depreciation' => round($depreciation, 2),
-            'total_expenses' => round($totalExpenses, 2),
-            'net_profit' => round($netProfit, 2),
+            'depreciation' => $chargedDepreciation,
+            'depreciation_own' => $ownDepreciation,
+            'depreciation_brought_forward' => $broughtForward,
+            'depreciation_charged' => $chargedDepreciation,
+            'depreciation_deferred' => $deferredDepreciation,
+            'depreciation_considered' => $consideredDepreciation,
+            'profit_before_depreciation' => $profitBeforeDepreciation,
+            'total_expenses' => $totalExpenses,
+            'net_profit' => $netProfit,
             'owner_percent' => $ownerPercent,
-            'owner_share' => round($ownerShare, 2),
-            'crew_share' => round($crewShare, 2),
+            'owner_share' => $ownerShare,
+            'crew_share' => $crewShare,
             'crew_count' => $crewCount,
             'per_fisherman' => round($perFisherman, 2),
             'custom_share_total' => $distribution['custom_total'],
             'crew_distribution' => $distribution['members'],
         ];
+    }
+
+    /**
+     * Depreciation carried forward into a month from previous deficit months.
+     *
+     * Reads the most recent closed month strictly before the given period (within
+     * the same boat scope) and returns the amount it deferred. Because each closed
+     * month's deferred figure already carries the full unabsorbed depreciation as
+     * of that month, taking the latest one never double-counts.
+     */
+    public function broughtForwardDepreciation(int $ownerId, int $year, int $month, ?int $boatId = null): float
+    {
+        $priorClosing = MonthClosing::query()
+            ->where('owner_id', $ownerId)
+            ->where('status', 'closed')
+            ->when($boatId !== null, fn ($query) => $query->where('boat_id', $boatId))
+            ->when($boatId === null, fn ($query) => $query->whereNull('boat_id'))
+            ->where(function ($query) use ($year, $month) {
+                $query->where('year', '<', $year)
+                    ->orWhere(fn ($inner) => $inner->where('year', $year)->where('month', '<', $month));
+            })
+            ->orderByDesc('year')
+            ->orderByDesc('month')
+            ->first();
+
+        return $priorClosing ? round((float) $priorClosing->depreciation_deferred, 2) : 0.0;
     }
 
     /**

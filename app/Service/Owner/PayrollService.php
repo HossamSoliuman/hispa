@@ -243,15 +243,20 @@ class PayrollService
         $depreciation = app(AssetDepreciationService::class)
             ->forMonth($ownerId, $year, $month, $boatId)['total'];
 
-        $financials = app(MonthlyFinancialsService::class)->compute(
+        $financials = app(MonthlyFinancialsService::class);
+        $broughtForward = $financials->broughtForwardDepreciation($ownerId, $year, $month, $boatId);
+
+        $computed = $financials->compute(
             $ownerId,
             $start->toDateString(),
             $start->copy()->endOfMonth()->toDateString(),
             $boatId,
             $depreciation,
+            $broughtForward,
+            true,
         );
 
-        return (float) $financials['crew_share'];
+        return (float) $computed['crew_share'];
     }
 
     /**

@@ -33,6 +33,7 @@ class MonthClosingService
      *     year: int, month: int, boat_id: int|null, from: string, to: string,
      *     financials: array<string, mixed>,
      *     asset_depreciation: array{total: float, assets: array<int, array<string, mixed>>},
+     *     depreciation_brought_forward: float, depreciation_deferred: float,
      *     dues: array<int, array<string, mixed>>,
      *     total_shares: float, share_value: float,
      *     existing: \App\Models\MonthClosing|null,
@@ -44,8 +45,9 @@ class MonthClosingService
         [$from, $to] = $this->monthRange($year, $month);
 
         $depreciation = $this->assetDepreciation->forMonth($ownerId, $year, $month, $boatId);
+        $broughtForward = $this->financials->broughtForwardDepreciation($ownerId, $year, $month, $boatId);
 
-        $financials = $this->financials->compute($ownerId, $from, $to, $boatId, $depreciation['total']);
+        $financials = $this->financials->compute($ownerId, $from, $to, $boatId, $depreciation['total'], $broughtForward, true);
 
         $distribution = $this->financials->crewDistribution($ownerId, $financials['crew_share'], $boatId);
 
@@ -78,6 +80,8 @@ class MonthClosingService
             'to' => $to,
             'financials' => $financials,
             'asset_depreciation' => $depreciation,
+            'depreciation_brought_forward' => $financials['depreciation_brought_forward'],
+            'depreciation_deferred' => $financials['depreciation_deferred'],
             'dues' => $dues,
             'total_shares' => $distribution['total_shares'],
             'share_value' => $distribution['share_value'],
@@ -114,6 +118,8 @@ class MonthClosingService
                 'general_expenses' => $f['general_expenses'],
                 'depreciation' => $f['depreciation'],
                 'asset_depreciation_breakdown' => $preview['asset_depreciation']['assets'],
+                'depreciation_brought_forward' => $f['depreciation_brought_forward'],
+                'depreciation_deferred' => $f['depreciation_deferred'],
                 'total_expenses' => $f['total_expenses'],
                 'net_profit' => $f['net_profit'],
                 'owner_percent' => $f['owner_percent'],
@@ -190,7 +196,7 @@ class MonthClosingService
      * @return array{
      *     year: int, boat_id: int|null,
      *     months: array<int, \App\Models\MonthClosing|null>,
-     *     totals: array{gross_sales: float, net_owner_revenue: float, trip_expenses: float, general_expenses: float, depreciation: float, total_expenses: float, net_profit: float, owner_share: float, crew_share: float},
+     *     totals: array{gross_sales: float, net_owner_revenue: float, trip_expenses: float, general_expenses: float, depreciation: float, depreciation_brought_forward: float, depreciation_deferred: float, total_expenses: float, net_profit: float, owner_share: float, crew_share: float},
      *     closed_count: int
      * }
      */
@@ -211,7 +217,8 @@ class MonthClosingService
 
         $fields = [
             'gross_sales', 'net_owner_revenue', 'trip_expenses', 'general_expenses',
-            'depreciation', 'total_expenses', 'net_profit', 'owner_share', 'crew_share',
+            'depreciation', 'depreciation_brought_forward', 'depreciation_deferred',
+            'total_expenses', 'net_profit', 'owner_share', 'crew_share',
         ];
 
         $totals = [];

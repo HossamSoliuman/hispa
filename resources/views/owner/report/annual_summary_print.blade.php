@@ -54,6 +54,7 @@
                 <th>{{ __('owner.annual_summary.columns.trip_expenses') }}</th>
                 <th>{{ __('owner.annual_summary.columns.general_expenses') }}</th>
                 <th>{{ __('owner.annual_summary.columns.depreciation') }}</th>
+                <th>{{ __('owner.annual_summary.columns.deferred') }}</th>
                 <th>{{ __('owner.annual_summary.columns.expenses') }}</th>
                 <th>{{ __('owner.annual_summary.columns.net_profit') }}</th>
                 <th>{{ __('owner.annual_summary.columns.crew_share') }}</th>
@@ -71,12 +72,14 @@
                         <td class="col-num">{{ number_format((float) $closing->trip_expenses, 2) }}</td>
                         <td class="col-num">{{ number_format((float) $closing->general_expenses, 2) }}</td>
                         <td class="col-num">{{ number_format((float) $closing->depreciation, 2) }}</td>
+                        <td class="col-num">{{ number_format((float) $closing->depreciation_deferred, 2) }}</td>
                         <td class="col-num">{{ number_format((float) $closing->total_expenses, 2) }}</td>
                         <td class="col-num">{{ number_format((float) $closing->net_profit, 2) }}</td>
                         <td class="col-num">{{ number_format((float) $closing->crew_share, 2) }}</td>
                         <td class="col-num">{{ number_format((float) $closing->owner_share, 2) }}</td>
                     @else
                         <td style="color:#999;">{{ __('owner.annual_summary.not_closed') }}</td>
+                        <td class="col-num" style="color:#bbb;">—</td>
                         <td class="col-num" style="color:#bbb;">—</td>
                         <td class="col-num" style="color:#bbb;">—</td>
                         <td class="col-num" style="color:#bbb;">—</td>
@@ -98,6 +101,7 @@
                 <td class="col-num">{{ number_format($t['trip_expenses'], 2) }}</td>
                 <td class="col-num">{{ number_format($t['general_expenses'], 2) }}</td>
                 <td class="col-num">{{ number_format($t['depreciation'], 2) }}</td>
+                <td class="col-num">{{ number_format($t['depreciation_deferred'], 2) }}</td>
                 <td class="col-num">{{ number_format($t['total_expenses'], 2) }}</td>
                 <td class="col-num">{{ number_format($t['net_profit'], 2) }}</td>
                 <td class="col-num">{{ number_format($t['crew_share'], 2) }}</td>
@@ -105,6 +109,12 @@
             </tr>
         </tfoot>
     </table>
+
+    @if ($t['depreciation_deferred'] > 0)
+        <p style="font-size:11px;color:#555;margin:0 0 10px;">
+            {{ __('owner.annual_summary.deferred_note') }}
+        </p>
+    @endif
 
     <table class="report-footer">
         <tr>

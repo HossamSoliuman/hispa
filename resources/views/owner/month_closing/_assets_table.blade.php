@@ -1,4 +1,14 @@
-{{-- Assets & depreciation charged for the month (straight-line). --}}
+{{-- Assets & depreciation charged for the month (straight-line), plus deficit carry-forward. --}}
+@php
+    $assets = $assets ?? [];
+    $ownTotal = collect($assets)->sum(fn ($row) => (float) $row['monthly']);
+    $broughtForward = (float) ($broughtForward ?? 0);
+    $deferred = (float) ($deferred ?? 0);
+    $consideredTotal = round($ownTotal + $broughtForward, 2);
+    $charged = isset($charged) ? (float) $charged : $consideredTotal;
+    $hasDeferral = $broughtForward > 0 || $deferred > 0;
+@endphp
+
 @if (! empty($assets))
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header">
@@ -28,9 +38,44 @@
                 <tfoot>
                     <tr class="table-light fw-bold">
                         <td colspan="3">{{ __('owner.month_closing.assets.total') }}</td>
-                        <td class="text-end">{{ number_format((float) $total, 2) }} <x-riyal-icon size="sm" /></td>
+                        <td class="text-end">{{ number_format($ownTotal, 2) }} <x-riyal-icon size="sm" /></td>
                     </tr>
                 </tfoot>
+            </table>
+        </div>
+    </div>
+@endif
+
+@if ($hasDeferral)
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ __('owner.month_closing.deferral.title') }}</h5>
+            <small class="text-muted">{{ __('owner.month_closing.deferral.subtitle') }}</small>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered align-middle mb-0">
+                <tbody>
+                    <tr>
+                        <td>{{ __('owner.month_closing.deferral.brought_forward') }}</td>
+                        <td class="text-end">{{ number_format($broughtForward, 2) }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ __('owner.month_closing.deferral.own') }}</td>
+                        <td class="text-end">{{ number_format($ownTotal, 2) }}</td>
+                    </tr>
+                    <tr class="table-light fw-bold">
+                        <td>{{ __('owner.month_closing.deferral.considered') }}</td>
+                        <td class="text-end">{{ number_format($consideredTotal, 2) }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ __('owner.month_closing.deferral.charged') }}</td>
+                        <td class="text-end">{{ number_format($charged, 2) }}</td>
+                    </tr>
+                    <tr class="{{ $deferred > 0 ? 'table-warning' : 'table-light' }} fw-bold">
+                        <td>{{ __('owner.month_closing.deferral.deferred') }}</td>
+                        <td class="text-end">{{ number_format($deferred, 2) }} <x-riyal-icon size="sm" /></td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>

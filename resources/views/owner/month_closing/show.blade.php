@@ -201,7 +201,9 @@
 
     @include('owner.month_closing._assets_table', [
         'assets' => $closing->asset_depreciation_breakdown ?? [],
-        'total' => $closing->depreciation,
+        'broughtForward' => $closing->depreciation_brought_forward,
+        'charged' => $closing->depreciation,
+        'deferred' => $closing->depreciation_deferred,
     ])
 
     <div class="card shadow-sm border-0">

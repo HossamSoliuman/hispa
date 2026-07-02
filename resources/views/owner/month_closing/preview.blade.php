@@ -69,7 +69,9 @@
 
     @include('owner.month_closing._assets_table', [
         'assets' => $preview['asset_depreciation']['assets'],
-        'total' => $preview['asset_depreciation']['total'],
+        'broughtForward' => $preview['depreciation_brought_forward'],
+        'charged' => $f['depreciation'],
+        'deferred' => $preview['depreciation_deferred'],
     ])
 
     {{-- Crew dues --}}

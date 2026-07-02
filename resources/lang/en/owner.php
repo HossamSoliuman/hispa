@@ -1202,6 +1202,7 @@ return [
         'not_closed' => 'Not closed',
         'breakdown_title' => 'Monthly Breakdown',
         'currency_note' => 'All amounts in SAR · closed months only',
+        'deferred_note' => 'Unabsorbed depreciation from deficit months is carried forward to later months.',
         'stats' => [
             'closed_months' => 'Closed Months',
             'sales' => 'Total Sales',
@@ -1220,6 +1221,7 @@ return [
             'trip_expenses' => 'Trip Expenses',
             'general_expenses' => 'General Expenses',
             'depreciation' => 'Depreciation',
+            'deferred' => 'Deferred Depreciation',
             'expenses' => 'Total Expenses',
             'net_profit' => 'Net Profit',
             'crew_share' => 'Crew Share',
@@ -1405,6 +1407,15 @@ return [
             'monthly' => 'Monthly Depreciation',
             'total' => 'Total Monthly Depreciation',
             'no_data' => 'No depreciable assets this month.',
+        ],
+        'deferral' => [
+            'title' => 'Depreciation Carry-forward',
+            'subtitle' => 'Unabsorbed depreciation is carried forward to next month in a deficit',
+            'brought_forward' => 'Carried forward from previous month',
+            'own' => "This month's depreciation (straight-line)",
+            'considered' => 'Total depreciation due',
+            'charged' => 'Charged this month',
+            'deferred' => 'Carried forward to next month',
         ],
         'report' => [
             'filter_month' => 'Month',
