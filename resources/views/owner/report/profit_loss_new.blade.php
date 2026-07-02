@@ -247,18 +247,29 @@
                         </div>
 
                         {{-- Card 4: Net Profit --}}
-                        <div class="col-md-4">
-                            <div class="stat-card {{ $f['net_profit'] >= 0 ? 'profit' : 'loss' }}">
+                        <div class="col-md-3">
+                            <div class="stat-card profit">
                                 <div class="label">{{ __('owner.profit_loss.net_profit') }}</div>
                                 <div class="value">
-                                    {{ number_format($f['net_profit'], 2) }}
+                                    {{ number_format(max((float) $f['net_profit'], 0), 2) }}
                                     <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Card 5: Owner Share --}}
-                        <div class="col-md-4">
+                        {{-- Card 5: Losses --}}
+                        <div class="col-md-3">
+                            <div class="stat-card loss">
+                                <div class="label">{{ __('owner.profit_loss.losses') }}</div>
+                                <div class="value">
+                                    {{ number_format(max(-(float) $f['net_profit'], 0), 2) }}
+                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Card 6: Owner Share --}}
+                        <div class="col-md-3">
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.owner_share') }} ({{ number_format($f['owner_percent'], 0) }}%)</div>
                                 <div class="value">
@@ -268,8 +279,8 @@
                             </div>
                         </div>
 
-                        {{-- Card 6: Crew Share --}}
-                        <div class="col-md-4">
+                        {{-- Card 7: Crew Share --}}
+                        <div class="col-md-3">
                             <div class="stat-card payroll">
                                 <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
                                 <div class="value">

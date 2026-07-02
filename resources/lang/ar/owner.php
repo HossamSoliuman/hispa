@@ -1160,6 +1160,7 @@ return [
         'fixed_salaries' => 'الرواتب الثابتة',
         'depreciation' => 'الإهلاك',
         'net_profit' => 'صافي الربح',
+        'losses' => 'الخسائر',
         'owner_share' => 'حصة المالك',
         'crew_share' => 'حصة البحارة',
         'per_fisherman' => 'نصيب البحار الواحد',
@@ -1339,6 +1340,7 @@ return [
         'closed_at' => 'تاريخ الإقفال',
         'no_closings' => 'لا توجد أشهر مقفلة بعد',
         'expenses' => 'المصروفات',
+        'losses' => 'الخسائر',
         'columns' => [
             'member' => 'البحار',
             'role' => 'الصفة',

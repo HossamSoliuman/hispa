@@ -44,11 +44,14 @@
     <div class="row g-3 mb-4">
         @php
             $operatingExpenses = (float) $f['total_expenses'] - (float) $f['depreciation'];
+            $netProfit = (float) $f['net_profit'];
+            $losses = max(-$netProfit, 0);
             $cards = [
                 ['owner.profit_loss.net_sales', $f['net_sales'], 'success'],
                 ['owner.month_closing.expenses', $operatingExpenses, 'danger'],
                 ['owner.profit_loss.depreciation', $f['depreciation'], 'secondary'],
-                ['owner.profit_loss.net_profit', $f['net_profit'], $f['net_profit'] >= 0 ? 'success' : 'danger'],
+                ['owner.profit_loss.net_profit', $f['net_profit'], $netProfit >= 0 ? 'success' : 'danger'],
+                ['owner.month_closing.losses', $losses, 'danger'],
                 ['owner.generated.owner_ratio', $f['owner_share'], 'primary'],
                 ['owner.profit_loss.crew_share', $f['crew_share'], 'warning'],
             ];

@@ -1155,6 +1155,7 @@ return [
         'fixed_salaries' => 'Fixed Salaries',
         'depreciation' => 'Depreciation',
         'net_profit' => 'Net Profit',
+        'losses' => 'Losses',
         'owner_share' => 'Owner Share',
         'crew_share' => 'Crew Share',
         'per_fisherman' => 'Per Fisherman',
@@ -1339,6 +1340,7 @@ return [
         'closed_at' => 'Closed at',
         'no_closings' => 'No closed months yet',
         'expenses' => 'Expenses',
+        'losses' => 'Losses',
         'columns' => [
             'member' => 'Member',
             'role' => 'Role',

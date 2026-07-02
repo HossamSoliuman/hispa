@@ -36,6 +36,7 @@
         ['label' => __('owner.profit_loss.net_owner_revenue'), 'value' => number_format($f['net_owner_revenue'], 2)],
         ['label' => __('owner.profit_loss.total_expenses'), 'value' => number_format($f['total_expenses'], 2)],
         ['label' => __('owner.profit_loss.net_profit_loss'), 'value' => number_format($netProfit, 2)],
+        ['label' => __('owner.profit_loss.losses'), 'value' => number_format(max(-$netProfit, 0), 2)],
         ['label' => __('owner.profit_loss.owner_share'), 'value' => number_format($f['owner_share'], 2)],
         ['label' => __('owner.profit_loss.crew_share'), 'value' => number_format($f['crew_share'], 2)],
     ]" />
