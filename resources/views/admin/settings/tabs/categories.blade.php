@@ -16,10 +16,10 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>{{ __('admin.categories.name') ?? __('admin.categories.name_ar') }}</th>
-                        <th>{{ __('admin.categories.status') }}</th>
-                        <th>{{ __('admin.categories.parent') ?? __('admin.fish.parent') }}</th>
-                        <th>{{ __('admin.categories.actions') ?? __('admin.actions.edit') }}</th>
+                        <th>{{ __('admin.categories.name.0') }}</th>
+                        <th>{{ __('admin.categories.status.0') }}</th>
+                        <th>{{ __('admin.categories.parent.0') }}</th>
+                        <th>{{ __('admin.categories.actions.0') }}</th>
                     </tr>
                 </thead>
             </table>
@@ -32,7 +32,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title text-white" id="modalTitle">{{ __('admin.categories.add_new_title') ?? __('admin.regions.add_new_title') }}</h5>
+                <h5 class="modal-title text-white" id="modalTitle">{{ __('admin.categories.add_new_title.0') }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="categoryForm">
@@ -43,15 +43,15 @@
                 <input type="hidden" name="tab" value="categories">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nameAr" class="form-label">{{ __('admin.categories.name_ar') ?? __('admin.regions.name_ar') }} <span class="text-danger">*</span></label>
+                        <label for="nameAr" class="form-label">{{ __('admin.categories.name_ar.0') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nameAr" name="name_ar">
                     </div>
                     <div class="mb-3">
-                        <label for="nameEn" class="form-label">{{ __('admin.categories.name_en') ?? __('admin.regions.name_en') }} <span class="text-danger">*</span></label>
+                        <label for="nameEn" class="form-label">{{ __('admin.categories.name_en.0') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nameEn" name="name_en">
                     </div>
                     <div class="mb-3">
-                        <label for="parent_id" class="form-label">{{ __('admin.categories.parent') ?? __('admin.fish.parent') }}</label>
+                        <label for="parent_id" class="form-label">{{ __('admin.categories.parent.0') }}</label>
                         <select class="form-select" id="parent_id" name="parent_id">
                             <option value="">{{ __('admin.actions.choose') }}</option>
                             @foreach ($parents as $parent)
@@ -60,7 +60,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="statusCat" class="form-label">{{ __('admin.categories.status') }}</label>
+                        <label for="statusCat" class="form-label">{{ __('admin.categories.status.0') }}</label>
                         <select class="form-select" id="statusCat" name="status">
                             <option value="1">{{ __('admin.status.active') }}</option>
                             <option value="0">{{ __('admin.status.inactive') }}</option>
@@ -114,7 +114,7 @@
             $('#formMethod').val('POST');
             isEditMode = false;
             currentEditId = null;
-            $('#modalTitle').text('{{ __('admin.categories.add_new_title') ?? __('admin.regions.add_new_title') }}');
+            $('#modalTitle').text('{{ __('admin.categories.add_new_title.0') }}');
             $('#addCategoryModal').modal('show');
         });
 
@@ -129,7 +129,7 @@
                 success: function() {
                     $('#addCategoryModal').modal('hide');
                     if (categoriesTable) categoriesTable.ajax.reload();
-                    if (typeof toastr !== 'undefined') toastr.success(isEditMode ? '{{ __('admin.actions.updated') ?? "Updated" }}' : '{{ __('admin.actions.saved') ?? "Saved" }}');
+                    if (typeof toastr !== 'undefined') toastr.success('{{ __('admin.swal.saved_success') }}');
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
@@ -147,7 +147,7 @@
             isEditMode = true;
             currentEditId = data.id;
             $('#formMethod').val('PUT');
-            $('#modalTitle').text('{{ __('admin.categories.edit_title') ?? __('admin.regions.edit_title') }}');
+            $('#modalTitle').text('{{ __('admin.categories.edit_title.0') }}');
             $('#categoryId').val(data.id);
             $('#nameAr').val(data.name_ar);
             $('#nameEn').val(data.name_en);

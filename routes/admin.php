@@ -53,8 +53,8 @@ Route::group([
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/dashboard/statistics', [DashboardController::class, 'statistics'])->name('dashboard.statistics');
 
-            // Trips
-            Route::resource('trips', TripController::class);
+            // Trips (admin oversees + edits owner trips; trip creation lives in the owner panel)
+            Route::resource('trips', TripController::class)->except(['create', 'store']);
             Route::get('getTripData', [TripController::class, 'getTripData'])->name('getTripData');
 
             // Boats
@@ -78,11 +78,11 @@ Route::group([
             Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
             Route::post('subscriptions/{subscription}/grant-trial', [SubscriptionController::class, 'grantTrial'])->name('subscriptions.grant-trial');
 
-            // Invoices
-            Route::resource('invoices', InvoiceController::class);
+            // Invoices (static paths must precede the resource so they aren't shadowed by invoices/{invoice})
+            Route::get('invoices/tax-report', [InvoiceController::class, 'taxReport'])->name('invoices.tax-report');
             Route::get('invoices-export', [InvoiceController::class, 'export'])->name('invoices.export');
             Route::post('invoices/{invoice}/confirm-payment', [InvoiceController::class, 'confirmPayment'])->name('invoices.confirm-payment');
-            Route::get('invoices/tax-report', [InvoiceController::class, 'taxReport'])->name('invoices.tax-report');
+            Route::resource('invoices', InvoiceController::class);
 
             // Profile
             Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');

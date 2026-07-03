@@ -94,7 +94,11 @@
             </div>
 
             <div class="menu-item has-sub {{ request()->routeIs('admin.fish.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.pages.*') ? 'active' : '' }}">
-             
+                <a href="#" class="menu-link">
+                    <span class="menu-icon"><i class="bi bi-collection"></i></span>
+                    <span class="menu-text">{{ __('admin.menu.content_management') }}</span>
+                    <span class="menu-caret"><b class="caret"></b></span>
+                </a>
                 <div class="menu-submenu">
                     <div class="menu-item {{ request()->routeIs('admin.fish.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.fish.index') }}" class="menu-link">
@@ -114,12 +118,23 @@
                 </div>
             </div>
 
-            <div class="menu-item has-sub {{ request()->routeIs('admin.stocks.*') || request()->routeIs('admin.owner-stock.*') || request()->routeIs('admin.dalal-stock.*') ? 'active' : '' }}">
-                <div class="menu-item {{ request()->routeIs('admin.owner-stock.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.owner-stock.index') }}" class="menu-link">
-                        <span class="menu-icon"><i class="bi bi-people-fill"></i></span>
-                        <span class="menu-text">{{ __('admin.menu.owner_stocks') }}</span>
-                    </a>
+            <div class="menu-item has-sub {{ request()->routeIs('admin.stocks.*') || request()->routeIs('admin.owner-stock.*') ? 'active' : '' }}">
+                <a href="#" class="menu-link">
+                    <span class="menu-icon"><i class="bi bi-box2"></i></span>
+                    <span class="menu-text">{{ __('admin.menu.stock_report') }}</span>
+                    <span class="menu-caret"><b class="caret"></b></span>
+                </a>
+                <div class="menu-submenu">
+                    <div class="menu-item {{ request()->routeIs('admin.stocks.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.stocks.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.stocks') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('admin.owner-stock.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.owner-stock.index') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.owner_stocks') }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
