@@ -92,9 +92,6 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">{{ __('admin.subscriptions.invoices') }}</h5>
-                    <a href="{{ route('admin.invoices.create') }}?subscription_id={{ $subscription->id }}" class="btn btn-sm btn-success">
-                        <i class="bi bi-plus"></i> {{ __('admin.invoices.add') }}
-                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">

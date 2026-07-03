@@ -78,10 +78,9 @@ Route::group([
             Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
 
             // Invoices (static paths must precede the resource so they aren't shadowed by invoices/{invoice})
-            Route::get('invoices/tax-report', [InvoiceController::class, 'taxReport'])->name('invoices.tax-report');
             Route::get('invoices-export', [InvoiceController::class, 'export'])->name('invoices.export');
             Route::post('invoices/{invoice}/confirm-payment', [InvoiceController::class, 'confirmPayment'])->name('invoices.confirm-payment');
-            Route::resource('invoices', InvoiceController::class);
+            Route::resource('invoices', InvoiceController::class)->except(['create', 'store']);
 
             // Profile
             Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');

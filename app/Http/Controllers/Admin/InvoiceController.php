@@ -62,7 +62,6 @@ class InvoiceController extends Controller
         $pendingInvoices = Invoice::where('payment_status', 'pending')->count();
         $totalRevenue = Invoice::where('payment_status', 'paid')->sum('total_amount');
         $pendingRevenue = Invoice::where('payment_status', 'pending')->sum('total_amount');
-        $totalVAT = Invoice::where('payment_status', 'paid')->sum('vat_amount');
 
         return view('admin.invoices.index', compact(
             'invoices',
@@ -70,60 +69,8 @@ class InvoiceController extends Controller
             'paidInvoices',
             'pendingInvoices',
             'totalRevenue',
-            'pendingRevenue',
-            'totalVAT'
+            'pendingRevenue'
         ));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $subscriptions = Subscription::with(['user', 'package'])
-            ->where('status', 'active')
-            ->where('is_suspended', false)
-            ->get();
-
-        return view('admin.invoices.create', compact('subscriptions'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'subscription_id' => 'required|exists:subscriptions,id',
-            'amount' => 'required|numeric|min:0',
-            'vat_rate' => 'nullable|numeric|min:0|max:100',
-            'payment_method' => 'required|in:mada,visa,bank_transfer',
-            'payment_status' => 'required|in:pending,paid,cancelled',
-            'payment_notes' => 'nullable|string|max:500',
-            'bank_transfer_receipt' => 'nullable|string',
-        ]);
-
-        $subscription = Subscription::findOrFail($validated['subscription_id']);
-        $vatRate = $validated['vat_rate'] ?? 0;
-        $vatAmount = ($validated['amount'] * $vatRate) / 100;
-        $totalAmount = $validated['amount'] + $vatAmount;
-
-        $invoice = Invoice::create([
-            'subscription_id' => $validated['subscription_id'],
-            'user_id' => $subscription->user_id,
-            'amount' => $validated['amount'],
-            'vat_rate' => $vatRate,
-            'vat_amount' => $vatAmount,
-            'total_amount' => $totalAmount,
-            'payment_method' => $validated['payment_method'],
-            'payment_status' => $validated['payment_status'],
-            'payment_notes' => $validated['payment_notes'] ?? null,
-            'bank_transfer_receipt' => $validated['bank_transfer_receipt'] ?? null,
-            'paid_at' => $validated['payment_status'] === 'paid' ? now() : null,
-        ]);
-
-        return redirect()->route('admin.invoices.show', $invoice)
-            ->with('success', __('admin.invoices.created_successfully'));
     }
 
     /**
@@ -153,22 +100,15 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0',
-            'vat_rate' => 'nullable|numeric|min:0|max:100',
             'payment_method' => 'required|in:mada,visa,bank_transfer',
             'payment_status' => 'required|in:pending,paid,cancelled',
             'payment_notes' => 'nullable|string|max:500',
             'bank_transfer_receipt' => 'nullable|string',
         ]);
 
-        $vatRate = $validated['vat_rate'] ?? 0;
-        $vatAmount = ($validated['amount'] * $vatRate) / 100;
-        $totalAmount = $validated['amount'] + $vatAmount;
-
         $invoice->update([
             'amount' => $validated['amount'],
-            'vat_rate' => $vatRate,
-            'vat_amount' => $vatAmount,
-            'total_amount' => $totalAmount,
+            'total_amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
             'payment_status' => $validated['payment_status'],
             'payment_notes' => $validated['payment_notes'] ?? null,
@@ -222,37 +162,6 @@ class InvoiceController extends Controller
 
         return redirect()->back()
             ->with('success', __('admin.invoices.payment_confirmed_successfully'));
-    }
-
-    /**
-     * Generate tax report
-     */
-    public function taxReport(Request $request)
-    {
-        $query = Invoice::where('payment_status', 'paid');
-
-        // Date range filter
-        if ($request->has('start_date') && $request->start_date) {
-            $query->whereDate('paid_at', '>=', $request->start_date);
-        }
-        if ($request->has('end_date') && $request->end_date) {
-            $query->whereDate('paid_at', '<=', $request->end_date);
-        }
-
-        $invoices = $query->with(['user', 'subscription.package'])
-            ->orderBy('paid_at', 'desc')
-            ->get();
-
-        $totalAmount = $invoices->sum('amount');
-        $totalVAT = $invoices->sum('vat_amount');
-        $totalRevenue = $invoices->sum('total_amount');
-
-        return view('admin.invoices.tax-report', compact(
-            'invoices',
-            'totalAmount',
-            'totalVAT',
-            'totalRevenue'
-        ));
     }
 
     /**

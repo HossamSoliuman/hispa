@@ -10,8 +10,7 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping
 {
     public function __construct(
         private readonly \Illuminate\Support\Collection $invoices
-    ) {
-    }
+    ) {}
 
     public function collection(): \Illuminate\Support\Collection
     {
@@ -24,7 +23,6 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping
             __('admin.invoices.invoice_number'),
             __('admin.invoices.user'),
             __('admin.invoices.amount'),
-            __('admin.invoices.vat_amount'),
             __('admin.invoices.total_amount'),
             __('admin.invoices.payment_method'),
             __('admin.invoices.payment_status'),
@@ -42,9 +40,8 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping
             $row->invoice_number,
             $row->user?->name ?? '--',
             number_format((float) $row->amount, 2),
-            number_format((float) $row->vat_amount, 2),
             number_format((float) $row->total_amount, 2),
-            __('admin.invoices.payment_methods.' . ($row->payment_method ?? '')),
+            __('admin.invoices.payment_methods.'.($row->payment_method ?? '')),
             $row->payment_status,
             $row->paid_at?->format('Y-m-d H:i') ?? '--',
             $row->created_at?->format('Y-m-d H:i') ?? '--',
