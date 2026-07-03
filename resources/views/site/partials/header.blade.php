@@ -15,13 +15,20 @@
                 </nav>
             </div>
             <div class="flex items-center gap-4">
-                <a href="{{ route('frontend.show_register_form') }}"
-                    class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                    {{ __('site.nav.signup') }}
-                </a>
-                <a href="{{ route('frontend.show_login_form') }}" class="text-sm font-medium text-primary hover:text-primary-dark">
-                    {{ __('site.nav.login') }}
-                </a>
+                @auth('owner')
+                    <a href="{{ route('owner.dashboard') }}"
+                        class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        {{ __('site.nav.dashboard') }}
+                    </a>
+                @else
+                    <a href="{{ route('frontend.show_register_form') }}"
+                        class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        {{ __('site.nav.signup') }}
+                    </a>
+                    <a href="{{ route('frontend.show_login_form') }}" class="text-sm font-medium text-primary hover:text-primary-dark">
+                        {{ __('site.nav.login') }}
+                    </a>
+                @endauth
                 <button id="menuBtn" type="button"
                     class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                     aria-label="{{ __('site.nav.open_menu') }}" aria-expanded="false">

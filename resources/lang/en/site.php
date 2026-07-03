@@ -13,6 +13,7 @@ return [
         'features' => 'Features',
         'login' => 'Login',
         'signup' => 'Sign Up',
+        'dashboard' => 'Dashboard',
         'open_menu' => 'Open menu',
         'close_menu' => 'Close menu',
         'menu' => 'Main menu',
