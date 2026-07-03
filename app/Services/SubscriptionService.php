@@ -37,21 +37,13 @@ class SubscriptionService
         $durationType = $validated['duration_type'] ?? $package->duration_type;
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = $this->calculateEndDate($startDate, $durationType);
-        $isTrial = (bool) ($validated['is_trial'] ?? false);
-        $status = $validated['status'] ?? ($isTrial ? 'trial' : 'active');
-        $trialEndsAt = null;
-
-        if ($status === 'trial' && ! empty($validated['trial_days'])) {
-            $trialEndsAt = $startDate->copy()->addDays((int) $validated['trial_days']);
-        }
 
         return Subscription::create([
             'user_id' => $validated['user_id'],
             'package_id' => $validated['package_id'],
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'status' => $status,
-            'trial_ends_at' => $trialEndsAt,
+            'status' => $validated['status'] ?? 'active',
         ]);
     }
 
@@ -133,23 +125,7 @@ class SubscriptionService
     }
 
     /**
-     * Grant trial: set status to trial and extend by trial_days.
-     */
-    public function grantTrial(Subscription $subscription, int $trialDays): Subscription
-    {
-        $trialEndsAt = Carbon::now()->addDays($trialDays);
-        $subscription->update([
-            'status' => 'trial',
-            'trial_ends_at' => $trialEndsAt,
-            'start_date' => Carbon::now(),
-            'end_date' => $trialEndsAt,
-        ]);
-
-        return $subscription->fresh();
-    }
-
-    /**
-     * Get subscription counts for filters (active, expired, trial, suspended).
+     * Get subscription counts for filters (active, expired, pending, suspended).
      */
     public function getCounts(): array
     {
@@ -165,9 +141,9 @@ class SubscriptionService
                 });
         })->count();
 
-        $trialCount = Subscription::where('status', 'trial')->count();
+        $pendingCount = Subscription::where('status', 'pending')->count();
         $suspendedCount = Subscription::where('is_suspended', true)->count();
 
-        return compact('activeCount', 'expiredCount', 'trialCount', 'suspendedCount');
+        return compact('activeCount', 'expiredCount', 'pendingCount', 'suspendedCount');
     }
 }

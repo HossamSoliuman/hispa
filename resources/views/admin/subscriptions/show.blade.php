@@ -65,14 +65,14 @@
                             <strong>{{ __('admin.subscriptions.status') }}:</strong>
                             @if($subscription->is_suspended)
                                 <span class="badge bg-secondary">{{ __('admin.subscriptions.suspended') }}</span>
+                            @elseif($subscription->status == 'pending')
+                                <span class="badge bg-warning">{{ __('admin.subscriptions.pending') }}</span>
                             @elseif($subscription->status == 'active' && $subscription->end_date >= now()->toDateString())
                                 <span class="badge bg-success">{{ __('admin.subscriptions.active') }}</span>
                             @elseif($subscription->status == 'expired' || $subscription->end_date < now()->toDateString())
                                 <span class="badge bg-danger">{{ __('admin.subscriptions.expired') }}</span>
-                            @elseif($subscription->status == 'trial')
-                                <span class="badge bg-warning">{{ __('admin.subscriptions.trial') }}</span>
                             @else
-                                <span class="badge bg-secondary">{{ $subscription->status }}</span>
+                                <span class="badge bg-secondary">{{ __('admin.subscriptions.'.$subscription->status) }}</span>
                             @endif
                         </div>
                         <div class="col-md-6">
@@ -163,7 +163,7 @@
                                         <td>{{ $hist->package->name ?? '--' }}</td>
                                         <td>{{ $hist->start_date ? $hist->start_date->format('Y-m-d') : '--' }}</td>
                                         <td>{{ $hist->end_date ? $hist->end_date->format('Y-m-d') : '--' }}</td>
-                                        <td>{{ $hist->status }}</td>
+                                        <td>{{ __('admin.subscriptions.'.$hist->status) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -218,34 +218,7 @@
                             <i class="bi bi-arrow-repeat"></i> {{ __('admin.subscriptions.renew') }}
                         </button>
                     </form>
-
-                    <hr>
-                    <button type="button" class="btn btn-outline-info w-100" data-bs-toggle="modal" data-bs-target="#modalTrial">
-                        <i class="bi bi-gift"></i> {{ __('admin.subscriptions.grant_free_trial') }}
-                    </button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalTrial" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('admin.subscriptions.grant-trial', $subscription->id) }}" method="post">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title">{{ __('admin.subscriptions.grant_free_trial') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <label for="trial_days" class="form-label">{{ __('admin.subscriptions.trial_days') }}</label>
-                        <input type="number" name="trial_days" id="trial_days" class="form-control" min="1" max="30" value="7" required>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.actions.cancel') }}</button>
-                        <button type="submit" class="btn btn-primary">{{ __('admin.subscriptions.grant') }}</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

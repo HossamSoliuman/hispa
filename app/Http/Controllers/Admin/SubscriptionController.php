@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\GrantTrialSubscriptionRequest;
 use App\Http\Requests\Admin\RenewSubscriptionRequest;
 use App\Http\Requests\Admin\StoreSubscriptionRequest;
 use App\Http\Requests\Admin\SuspendSubscriptionRequest;
@@ -40,7 +39,7 @@ class SubscriptionController extends Controller
             'subscriptions' => $subscriptions,
             'activeCount' => $counts['activeCount'],
             'expiredCount' => $counts['expiredCount'],
-            'trialCount' => $counts['trialCount'],
+            'pendingCount' => $counts['pendingCount'],
             'suspendedCount' => $counts['suspendedCount'],
         ]);
     }
@@ -153,21 +152,18 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Grant free trial.
-     */
-    public function grantTrial(GrantTrialSubscriptionRequest $request, Subscription $subscription): RedirectResponse
-    {
-        $this->subscriptionService->grantTrial($subscription, $request->validated('trial_days'));
-
-        return redirect()->back()
-            ->with('success', __('admin.subscriptions.trial_granted_successfully'));
-    }
-
-    /**
      * Apply index filters from request.
      */
     private function applyFilters($query, Request $request)
     {
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
         if ($request->filled('status')) {
             if ($request->status === 'active') {
                 $query->where('status', 'active')

@@ -35,7 +35,7 @@
 
     {{-- Subscription statistics boxes --}}
     @php
-        $totalSubscriptions = $activeCount + $expiredCount + $trialCount + $suspendedCount;
+        $totalSubscriptions = $activeCount + $expiredCount + $pendingCount + $suspendedCount;
     @endphp
     <div class="row mb-4 g-3">
         <div class="col-6 col-md-4 col-lg">
@@ -72,10 +72,10 @@
             </a>
         </div>
         <div class="col-6 col-md-4 col-lg">
-            <a href="{{ route('admin.subscriptions.index', ['status' => 'trial']) }}" class="subscription-stat-card">
+            <a href="{{ route('admin.subscriptions.index', ['status' => 'pending']) }}" class="subscription-stat-card">
                 @include('owner.components.stat-card', [
-                    'title' => __('admin.subscriptions.trial'),
-                    'value' => $trialCount,
+                    'title' => __('admin.subscriptions.pending'),
+                    'value' => $pendingCount,
                     'icon' => 'bi bi-clock-history',
                     'gradient' => 'linear-gradient(135deg, #f39c12, #f1c40f)',
                     'colClass' => 'col-12',
@@ -100,7 +100,7 @@
             ['value' => '', 'label' => __('admin.subscriptions.all')],
             ['value' => 'active', 'label' => __('admin.subscriptions.active')],
             ['value' => 'expired', 'label' => __('admin.subscriptions.expired')],
-            ['value' => 'trial', 'label' => __('admin.subscriptions.trial')],
+            ['value' => 'pending', 'label' => __('admin.subscriptions.pending')],
         ];
         $subscriptionSuspendedOptions = [
             ['value' => '', 'label' => __('admin.filters.all')],
@@ -114,6 +114,7 @@
         :showSearchButton="true"
         :showResetButton="true"
         :filters="[
+            ['type' => 'text', 'id' => 'search', 'name' => 'search', 'label' => __('admin.filters.search'), 'placeholder' => __('admin.subscriptions.search_placeholder'), 'value' => request('search')],
             ['type' => 'select-static', 'id' => 'status', 'name' => 'status', 'label' => __('admin.subscriptions.status'), 'options' => $subscriptionStatusOptions, 'selected' => request('status')],
             ['type' => 'select-static', 'id' => 'suspended', 'name' => 'suspended', 'label' => __('admin.subscriptions.suspended'), 'options' => $subscriptionSuspendedOptions, 'selected' => request('suspended')],
         ]"
@@ -146,14 +147,14 @@
                             <td>
                                 @if($subscription->is_suspended)
                                     <span class="badge bg-secondary">{{ __('admin.subscriptions.suspended') }}</span>
+                                @elseif($subscription->status == 'pending')
+                                    <span class="badge bg-warning">{{ __('admin.subscriptions.pending') }}</span>
                                 @elseif($subscription->status == 'active' && $subscription->end_date >= \Carbon\Carbon::today())
                                     <span class="badge bg-success">{{ __('admin.subscriptions.active') }}</span>
                                 @elseif($subscription->status == 'expired' || $subscription->end_date < \Carbon\Carbon::today())
                                     <span class="badge bg-danger">{{ __('admin.subscriptions.expired') }}</span>
-                                @elseif($subscription->status == 'trial')
-                                    <span class="badge bg-warning">{{ __('admin.subscriptions.trial') }}</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ $subscription->status }}</span>
+                                    <span class="badge bg-secondary">{{ __('admin.subscriptions.'.$subscription->status) }}</span>
                                 @endif
                             </td>
                             <td>

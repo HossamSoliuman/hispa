@@ -76,7 +76,6 @@ Route::group([
             Route::post('subscriptions/{subscription}/suspend', [SubscriptionController::class, 'suspend'])->name('subscriptions.suspend');
             Route::post('subscriptions/{subscription}/unsuspend', [SubscriptionController::class, 'unsuspend'])->name('subscriptions.unsuspend');
             Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
-            Route::post('subscriptions/{subscription}/grant-trial', [SubscriptionController::class, 'grantTrial'])->name('subscriptions.grant-trial');
 
             // Invoices (static paths must precede the resource so they aren't shadowed by invoices/{invoice})
             Route::get('invoices/tax-report', [InvoiceController::class, 'taxReport'])->name('invoices.tax-report');

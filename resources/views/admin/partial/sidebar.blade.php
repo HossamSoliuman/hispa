@@ -9,7 +9,7 @@
                 </a>
             </div>
 
-            <div class="menu-item has-sub {{ request()->routeIs('admin.subscription-packages.*') || request()->routeIs('admin.subscriptions.*') || request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
+            <div class="menu-item has-sub {{ request()->routeIs('admin.subscription-packages.*') || request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
                 <a href="#" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-box-seam"></i></span>
                     <span class="menu-text">{{ __('admin.menu.subscription_packages') }}</span>
@@ -24,11 +24,6 @@
                     <div class="menu-item {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.subscriptions.index') }}" class="menu-link">
                             <span class="menu-text">{{ __('admin.menu.subscriptions') }}</span>
-                        </a>
-                    </div>
-                    <div class="menu-item {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.coupons.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('admin.menu.coupons') }}</span>
                         </a>
                     </div>
                 </div>
