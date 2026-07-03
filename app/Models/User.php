@@ -311,6 +311,43 @@ class User extends Authenticatable
             ->where('end_date', '>=', now());
     }
 
+    /**
+     * Number of boats this owner may create, driven by the active subscription's
+     * plan. No active subscription means no boats are allowed.
+     */
+    public function boatLimit(): int
+    {
+        $subscription = $this->relationLoaded('activeSubscription')
+            ? $this->activeSubscription
+            : $this->activeSubscription()->with('package')->first();
+
+        return (int) ($subscription?->package?->boats_count ?? 0);
+    }
+
+    /**
+     * How many boats the owner has already created.
+     */
+    public function boatsUsed(): int
+    {
+        return $this->boats()->count();
+    }
+
+    /**
+     * Remaining boat slots on the current plan (never negative).
+     */
+    public function remainingBoatSlots(): int
+    {
+        return max(0, $this->boatLimit() - $this->boatsUsed());
+    }
+
+    /**
+     * Whether the owner can create another boat under their plan quota.
+     */
+    public function canCreateBoat(): bool
+    {
+        return $this->boatsUsed() < $this->boatLimit();
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);

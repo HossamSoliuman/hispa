@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\DB;
 class SubscriptionService
 {
     public const DURATION_MONTHLY = 'monthly';
+
     public const DURATION_QUARTERLY = 'quarterly';
+
     public const DURATION_YEARLY = 'yearly';
 
     /**
@@ -36,10 +38,10 @@ class SubscriptionService
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = $this->calculateEndDate($startDate, $durationType);
         $isTrial = (bool) ($validated['is_trial'] ?? false);
-        $status = $isTrial ? 'trial' : 'active';
+        $status = $validated['status'] ?? ($isTrial ? 'trial' : 'active');
         $trialEndsAt = null;
 
-        if ($status === 'trial' && !empty($validated['trial_days'])) {
+        if ($status === 'trial' && ! empty($validated['trial_days'])) {
             $trialEndsAt = $startDate->copy()->addDays((int) $validated['trial_days']);
         }
 
@@ -72,8 +74,31 @@ class SubscriptionService
                 'suspension_reason' => null,
                 'renewal_count' => ($subscription->renewal_count ?? 0) + 1,
             ]);
+
             return $subscription->fresh();
         });
+    }
+
+    /**
+     * Activate a subscription after payment is confirmed: flip to active and
+     * (re)start the paid period from today for the plan's duration.
+     */
+    public function activate(Subscription $subscription): Subscription
+    {
+        $subscription->loadMissing('package');
+        $durationType = $subscription->package?->duration_type ?? self::DURATION_MONTHLY;
+        $startDate = Carbon::today();
+
+        $subscription->update([
+            'status' => 'active',
+            'is_suspended' => false,
+            'suspended_at' => null,
+            'suspension_reason' => null,
+            'start_date' => $startDate,
+            'end_date' => $this->calculateEndDate($startDate, $durationType),
+        ]);
+
+        return $subscription->fresh();
     }
 
     /**
@@ -87,6 +112,7 @@ class SubscriptionService
             'suspended_at' => now(),
             'suspension_reason' => $reason,
         ]);
+
         return $subscription->fresh();
     }
 
@@ -102,6 +128,7 @@ class SubscriptionService
             'suspended_at' => null,
             'suspension_reason' => null,
         ]);
+
         return $subscription->fresh();
     }
 
@@ -117,6 +144,7 @@ class SubscriptionService
             'start_date' => Carbon::now(),
             'end_date' => $trialEndsAt,
         ]);
+
         return $subscription->fresh();
     }
 

@@ -6,14 +6,16 @@ use App\Exports\InvoicesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Subscription;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class InvoiceController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly SubscriptionService $subscriptionService
+    ) {
         $this->middleware('auth:admin');
     }
 
@@ -82,6 +84,7 @@ class InvoiceController extends Controller
             ->where('status', 'active')
             ->where('is_suspended', false)
             ->get();
+
         return view('admin.invoices.create', compact('subscriptions'));
     }
 
@@ -129,6 +132,7 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice)
     {
         $invoice->load(['user', 'subscription.package', 'confirmedBy']);
+
         return view('admin.invoices.show', compact('invoice'));
     }
 
@@ -138,6 +142,7 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
         $subscriptions = Subscription::with(['user', 'package'])->get();
+
         return view('admin.invoices.edit', compact('invoice', 'subscriptions'));
     }
 
@@ -168,7 +173,7 @@ class InvoiceController extends Controller
             'payment_status' => $validated['payment_status'],
             'payment_notes' => $validated['payment_notes'] ?? null,
             'bank_transfer_receipt' => $validated['bank_transfer_receipt'] ?? null,
-            'paid_at' => $validated['payment_status'] === 'paid' && !$invoice->paid_at ? now() : $invoice->paid_at,
+            'paid_at' => $validated['payment_status'] === 'paid' && ! $invoice->paid_at ? now() : $invoice->paid_at,
         ]);
 
         return redirect()->route('admin.invoices.show', $invoice)
@@ -181,6 +186,7 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         $invoice->delete();
+
         return redirect()->route('admin.invoices.index')
             ->with('success', __('admin.invoices.deleted_successfully'));
     }
@@ -193,11 +199,6 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'payment_notes' => 'nullable|string|max:500',
         ]);
-
-        if ($invoice->payment_method !== 'bank_transfer') {
-            return redirect()->back()
-                ->with('error', __('admin.invoices.only_bank_transfer_can_be_confirmed'));
-        }
 
         if ($invoice->payment_status === 'paid') {
             return redirect()->back()
@@ -212,13 +213,11 @@ class InvoiceController extends Controller
             'payment_notes' => $validated['payment_notes'] ?? $invoice->payment_notes,
         ]);
 
-        // Update subscription if needed
+        // Confirming payment activates the subscription and (re)starts its paid
+        // period, which unlocks the owner's boat quota.
         $subscription = $invoice->subscription;
         if ($subscription && $subscription->status !== 'active') {
-            $subscription->update([
-                'status' => 'active',
-                'is_suspended' => false,
-            ]);
+            $this->subscriptionService->activate($subscription);
         }
 
         return redirect()->back()
@@ -282,7 +281,7 @@ class InvoiceController extends Controller
         }
 
         $invoices = $query->orderBy('created_at', 'desc')->get();
-        $filename = 'invoices-' . now()->format('Y-m-d-His') . '.xlsx';
+        $filename = 'invoices-'.now()->format('Y-m-d-His').'.xlsx';
 
         return Excel::download(new InvoicesExport($invoices), $filename);
     }

@@ -295,3 +295,13 @@ All owner-facing printable/PDF reports follow one shared standard. The design (d
 - All labels must use translation keys present in both `resources/lang/ar/owner.php` and `resources/lang/en/owner.php`.
 
 Existing examples to match: `owner/report/profit_loss_print`, `owner/month_closing/print`, and `owner/reports/print/sale-invoice` are the closest matches to the printed reference set (section bars, KPI cards, dual grids, signatures, amount-in-words). The `owner/reports/print/*` set (trip-report, catches-report, sales-report, boat-report, etc.) all inherit the same shared look.
+
+## Subscriptions & Plans (Admin — legacy rebuild)
+
+The admin **plans (`subscription_packages`) + subscriptions + invoices** area is the spine that links the admin panel to the public site: pricing pages → register → owner creation → boat quota. It is being rebuilt from legacy code. **Do not treat the existing legacy logic here as authoritative** — you are authorized to change, remove, or add freely and make the correct decision for the intended design rather than preserving what the old code did.
+
+The current intended model (source of truth):
+- A **plan** is essentially **a boat quota + a price**. Key field is `boats_count` (the enforced number of boats the owner may create). Plans also have `name_ar/name_en`, `original_price`, offer `price`, `duration_type` (monthly/quarterly/yearly), `is_active`, `is_featured` (highlight one card), `sort_order`. The old free-text `features`/`feature_ar`/`feature_en` bullet lists were **removed** — do not reintroduce them.
+- **Boat quota is enforced**: an owner can create at most their active subscription's `boats_count` boats (owner AND admin panels hard-block on create). No active subscription = 0 boats allowed. Enforcement lives in `App\Repository\BoatRepository::saveData` via `User::canCreateBoat()` / `User::boatLimit()`.
+- **Public register → plan**: visitor picks a plan on the pricing/order-review page, which carries `package_id` into signup. Registering an owner creates a **`pending`** subscription (status enum: active/expired/trial/suspended/**pending**) plus an **unpaid** invoice. Payment is **manual/cash — an admin confirms the invoice** (`InvoiceController::confirmPayment`), which calls `SubscriptionService::activate()` to flip the subscription to `active` (start = today, end = today + duration) and unlock the boat quota. There is no online payment gateway.
+- All new labels must exist in both `resources/lang/{ar,en}/*.php`.

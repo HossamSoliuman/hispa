@@ -11,27 +11,17 @@
                 <article class="rounded-3xl bg-white p-5 shadow-sm border border-slate-50 {{ $package->is_featured ? 'relative border-blue-600 bg-blue-600 text-white shadow-md -translate-y-5 md:col-span-1' : '' }}">
                     <div class="text-start {{ $package->is_featured ? 'text-right' : '' }}">
                         <p class="text-2xl font-bold {{ $package->is_featured ? '!text-white' : 'text-primary' }}">{{ $package->name }}</p>
-                        <p class="mt-1 text-xs {{ $package->is_featured ? 'text-white/90' : 'text-[#959595]' }}">{{ $package->description ?: ($package->boats_count ? ($package->boats_count == 1 ? __('site.pricing.boats_count', ['count' => 1]) : ($package->boats_count == 2 ? 'قاربان' : $package->boats_count . ' قوارب')) : '') }}</p>
+                        <p class="mt-1 text-xs {{ $package->is_featured ? 'text-white/90' : 'text-[#959595]' }}">{{ $package->boatsLabel() }}</p>
                     </div>
                     <ul class="mt-4 space-y-2 text-start text-sm {{ $package->is_featured ? 'text-white/95' : 'text-[#3C74BE]' }}">
-                        @if($package->boats_count)
-                            <li class="flex items-start gap-2">
-                                <span class="mt-1 {{ $package->is_featured ? 'text-white' : 'text-primary' }}"><iconify-icon icon="entypo:check" style="font-size: 16px;"></iconify-icon></span>
-                                <span>{{ $package->boats_count == 1 ? 'قارب واحد' : ($package->boats_count == 2 ? 'قاربان' : $package->boats_count . ' قوارب') }}</span>
-                            </li>
-                        @endif
-                        @foreach(array_slice($package->features ?? [], 0, 5) as $feature)
-                            <li class="flex items-start gap-2">
-                                <span class="mt-1 {{ $package->is_featured ? 'text-white' : 'text-primary' }}"><iconify-icon icon="entypo:check" style="font-size: 16px;"></iconify-icon></span>
-                                <span>{{ is_string($feature) ? $feature : (is_array($feature) ? ($feature['text'] ?? $feature['name'] ?? '') : '') }}</span>
-                            </li>
-                        @endforeach
-                        @if(empty($package->features) && $package->description)
-                            <li class="flex items-start gap-2">
-                                <span class="mt-1 {{ $package->is_featured ? 'text-white' : 'text-primary' }}"><iconify-icon icon="entypo:check" style="font-size: 16px;"></iconify-icon></span>
-                                <span>{{ Str::limit($package->description, 80) }}</span>
-                            </li>
-                        @endif
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 {{ $package->is_featured ? 'text-white' : 'text-primary' }}"><iconify-icon icon="entypo:check" style="font-size: 16px;"></iconify-icon></span>
+                            <span>{{ $package->boatsLabel() }}</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 {{ $package->is_featured ? 'text-white' : 'text-primary' }}"><iconify-icon icon="entypo:check" style="font-size: 16px;"></iconify-icon></span>
+                            <span>{{ __('site.pricing.durations.' . $package->duration_type) }}</span>
+                        </li>
                     </ul>
                     <div class="mt-5 text-right">
                         @if($package->original_price !== null || $package->price !== null)
@@ -40,9 +30,9 @@
                                     <span class="line-through">{{ number_format((float) $package->original_price, 0) }}</span>
                                     <span class="mr-1">{{ __('site.pricing.currency', ['default' => 'ر.س']) }}</span>
                                 </p>
-                                <p class="text-3xl font-extrabold {{ $package->is_featured ? 'text-white' : 'text-primary' }}">{{ number_format((float) $package->effective_price, 0) }} <span class="text-sm font-semibold {{ $package->is_featured ? 'text-white/90' : 'text-[#3C74BE]' }}">{{ $package->duration_type === 'year' ? __('site.pricing.per_year') : ($package->duration_type === 'month' ? __('site.pricing.per_month', ['default' => '/شهر']) : __('site.pricing.per_year')) }}</span></p>
+                                <p class="text-3xl font-extrabold {{ $package->is_featured ? 'text-white' : 'text-primary' }}">{{ number_format((float) $package->effective_price, 0) }} <span class="text-sm font-semibold {{ $package->is_featured ? 'text-white/90' : 'text-[#3C74BE]' }}">{{ __('site.pricing.per.' . $package->duration_type) }}</span></p>
                             @else
-                                <p class="text-3xl font-extrabold {{ $package->is_featured ? 'text-white' : 'text-primary' }}">{{ number_format((float) $package->effective_price, 0) }} <span class="text-sm font-semibold {{ $package->is_featured ? 'text-white/90' : 'text-[#3C74BE]' }}">{{ $package->duration_type === 'year' ? __('site.pricing.per_year') : ($package->duration_type === 'month' ? __('site.pricing.per_month', ['default' => '/شهر']) : __('site.pricing.per_year')) }}</span></p>
+                                <p class="text-3xl font-extrabold {{ $package->is_featured ? 'text-white' : 'text-primary' }}">{{ number_format((float) $package->effective_price, 0) }} <span class="text-sm font-semibold {{ $package->is_featured ? 'text-white/90' : 'text-[#3C74BE]' }}">{{ __('site.pricing.per.' . $package->duration_type) }}</span></p>
                             @endif
                         @else
                             <p class="text-sm {{ $package->is_featured ? 'text-white/90' : 'text-[#3C74BE]' }}">{{ __('site.pricing.custom_price') }}</p>

@@ -127,4 +127,8 @@ return [
     'employee_updated' => 'Employee updated successfully',
     'employee_deleted' => 'Employee deleted successfully',
     'employee_not_found' => 'Employee not found',
+
+    // Boat quota (subscription plan)
+    'boat_limit_reached' => 'You have reached the maximum number of boats in your plan (:limit). Please upgrade your subscription to add more.',
+    'no_active_subscription' => 'No active subscription. You cannot add boats until your subscription is activated.',
 ];

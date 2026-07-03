@@ -110,7 +110,7 @@
             </div>
         </div>
 
-        @if($invoice->payment_method === 'bank_transfer' && $invoice->payment_status === 'pending')
+        @if($invoice->payment_status === 'pending')
             <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header">

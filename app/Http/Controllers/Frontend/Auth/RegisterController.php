@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
+use App\Models\SubscriptionPackage;
 use App\Models\User;
 use App\Services\Owner\OwnerMasterDataService;
+use App\Services\SubscriptionService;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
@@ -45,7 +47,12 @@ class RegisterController extends Controller
     {
         $guard = $this->normalizeGuard($guard ?? request('guard'));
 
-        return view('site.signup', compact('guard'));
+        $selectedPackage = null;
+        if (request()->filled('package_id')) {
+            $selectedPackage = SubscriptionPackage::where('is_active', true)->find(request('package_id'));
+        }
+
+        return view('site.signup', compact('guard', 'selectedPackage'));
     }
 
     protected function validator(array $data)
@@ -56,6 +63,7 @@ class RegisterController extends Controller
             'phone' => ['required', 'string', 'max:255', 'unique:users,phone'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'guard' => ['nullable', 'in:'.implode(',', $this->allowedGuards)],
+            'package_id' => ['nullable', 'integer', 'exists:subscription_packages,id'],
         ]);
     }
 
@@ -87,9 +95,70 @@ class RegisterController extends Controller
         // units, payment methods, ...) so each owner controls isolated data.
         if ($role === 'owner') {
             app(OwnerMasterDataService::class)->seedFor($user);
+
+            if (! empty($data['package_id'])) {
+                $this->attachPendingSubscription($user, (int) $data['package_id']);
+            }
         }
 
         return $user;
+    }
+
+    /**
+     * Create a pending subscription + unpaid invoice for a newly registered
+     * owner who picked a plan. It stays pending until an admin confirms payment.
+     */
+    protected function attachPendingSubscription(User $user, int $packageId): void
+    {
+        $package = SubscriptionPackage::where('is_active', true)->find($packageId);
+        if (! $package) {
+            return;
+        }
+
+        $subscription = app(SubscriptionService::class)->create([
+            'user_id' => $user->id,
+            'package_id' => $package->id,
+            'start_date' => now()->toDateString(),
+            'status' => 'pending',
+        ]);
+
+        $amount = (float) $package->effective_price;
+
+        Invoice::create([
+            'subscription_id' => $subscription->id,
+            'user_id' => $user->id,
+            'amount' => $amount,
+            'vat_rate' => 0,
+            'vat_amount' => 0,
+            'total_amount' => $amount,
+            'discount_amount' => 0,
+            'payment_method' => 'cash',
+            'payment_status' => 'pending',
+        ]);
+    }
+
+    /**
+     * After registering, send owners who selected a plan to the "request
+     * received" page which explains the pending-confirmation status.
+     */
+    protected function registered(\Illuminate\Http\Request $request, $user)
+    {
+        if ($user->role === 'owner') {
+            $subscription = $user->subscriptions()->with('package')->latest('id')->first();
+
+            if ($subscription && $subscription->isPending()) {
+                session()->flash('pending_subscription', [
+                    'package' => $subscription->package?->name,
+                    'duration' => $subscription->package?->duration_type,
+                    'boats_count' => $subscription->package?->boats_count,
+                    'invoice_number' => $subscription->invoices()->latest('id')->value('invoice_number'),
+                ]);
+
+                return redirect()->route('site.processing');
+            }
+        }
+
+        return null;
     }
 
     protected function redirectTo()

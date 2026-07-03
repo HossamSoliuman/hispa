@@ -57,4 +57,9 @@ class Subscription extends Model
     {
         return $this->status === 'trial';
     }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
 }

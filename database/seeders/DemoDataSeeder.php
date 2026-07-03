@@ -289,8 +289,6 @@ class DemoDataSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => false,
                 'sort_order' => 1,
-                'feature_ar' => json_encode(['إدارة قارب واحد', 'تسجيل الرحلات', 'متابعة المصروفات', 'دعم فني عبر الإيميل'], JSON_UNESCAPED_UNICODE),
-                'feature_en' => json_encode(['Manage 1 boat', 'Trip tracking', 'Expense management', 'Email support']),
             ]
         );
 
@@ -305,8 +303,6 @@ class DemoDataSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'sort_order' => 2,
-                'feature_ar' => json_encode(['إدارة 5 قوارب', 'تقارير متقدمة', 'إدارة المبيعات', 'إدارة المصروفات', 'إدارة الصيانة', 'دعم فني على مدار الساعة'], JSON_UNESCAPED_UNICODE),
-                'feature_en' => json_encode(['Manage 5 boats', 'Advanced reports', 'Sales management', 'Expense management', 'Maintenance tracking', '24/7 support']),
             ]
         );
 
@@ -321,8 +317,6 @@ class DemoDataSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => false,
                 'sort_order' => 3,
-                'feature_ar' => json_encode(['إدارة 20 قارب', 'جميع مميزات الاحترافية', 'API مخصص', 'مدير حساب مخصص', 'تدريب الفريق'], JSON_UNESCAPED_UNICODE),
-                'feature_en' => json_encode(['Manage 20 boats', 'All Pro features', 'Custom API access', 'Dedicated account manager', 'Team training']),
             ]
         );
 

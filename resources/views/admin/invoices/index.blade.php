@@ -148,6 +148,14 @@
                                 <a href="{{ route('admin.invoices.edit', $invoice->id) }}" class="btn btn-sm btn-outline-success">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                @if($invoice->payment_status === 'pending')
+                                <form action="{{ route('admin.invoices.confirm-payment', $invoice->id) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('admin.swal.confirm_text') }}');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="{{ __('admin.invoices.confirm_payment') }}">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                </form>
+                                @endif
                             </td>
                         </tr>
                         @empty

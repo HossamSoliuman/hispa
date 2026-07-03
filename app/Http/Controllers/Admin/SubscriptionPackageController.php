@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSubscriptionPackageRequest;
 use App\Http\Requests\Admin\UpdateSubscriptionPackageRequest;
-use App\Models\SubscriptionPackage;
 use App\Models\Subscription;
+use App\Models\SubscriptionPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -73,8 +73,6 @@ class SubscriptionPackageController extends Controller
     public function store(StoreSubscriptionPackageRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['feature_ar'] = $request->input('feature_ar', []);
-        $data['feature_en'] = $request->input('feature_en', []);
         $data['is_featured'] = $request->boolean('is_featured');
 
         $data['price'] = $request->filled('price') && $request->input('price') !== ''
@@ -95,6 +93,7 @@ class SubscriptionPackageController extends Controller
     public function show(SubscriptionPackage $subscriptionPackage): View
     {
         $subscriptionPackage->load('subscriptions.user');
+
         return view('admin.subscription-packages.show', compact('subscriptionPackage'));
     }
 
@@ -106,8 +105,6 @@ class SubscriptionPackageController extends Controller
     public function update(UpdateSubscriptionPackageRequest $request, SubscriptionPackage $subscriptionPackage): RedirectResponse
     {
         $data = $request->validated();
-        $data['feature_ar'] = $request->input('feature_ar', []);
-        $data['feature_en'] = $request->input('feature_en', []);
         $data['is_featured'] = $request->boolean('is_featured');
 
         $data['price'] = $request->filled('price') && $request->input('price') !== ''
