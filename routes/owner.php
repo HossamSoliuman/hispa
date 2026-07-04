@@ -246,6 +246,8 @@ Route::group([
         Route::resource('/catch', CatchController::class);
         Route::get('/getCatchData', [CatchController::class, 'getCatchData'])->name('getCatchData');
         Route::get('/printCatchReport/{id}', [CatchController::class, 'printCatchReport'])->name('printCatchReport');
+        Route::get('/catch/{id}/delivery-note', [CatchController::class, 'printDeliveryNote'])->name('catch.deliveryNote');
+        Route::get('/catch/{id}/product-card', [CatchController::class, 'printProductCard'])->name('catch.productCard');
         Route::get('/printCatchesReport', [CatchController::class, 'printCatchesReport'])->name('printCatchesReport');
         Route::get('/getFishStats', [CatchController::class, 'getFishStats'])->name('getFishStats');
         Route::get('/revenue-by-species', [CatchController::class, 'getRevenueBySpecies'])->name('getRevenueBySpecies');

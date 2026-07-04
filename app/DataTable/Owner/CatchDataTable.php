@@ -84,6 +84,12 @@ class CatchDataTable extends DataTables
                                     <a href="'.route('owner.printCatchReport', ['id' => $row->catches?->id]).'"  target="_blank" class="btn btn-sm btn-outline-secondary mx-1" title="طباعه">
                                         <i class="bi bi-printer"></i>
                                     </a>
+                                    <a href="'.route('owner.catch.deliveryNote', ['id' => $row->catches?->id]).'" target="_blank" class="btn btn-sm btn-outline-info mx-1" title="'.__('owner.reports.delivery_note').'">
+                                        <i class="bi bi-truck"></i>
+                                    </a>
+                                    <a href="'.route('owner.catch.productCard', ['id' => $row->catches?->id]).'" target="_blank" class="btn btn-sm btn-outline-dark mx-1" title="'.__('owner.reports.product_card').'">
+                                        <i class="bi bi-tag"></i>
+                                    </a>
                                     <a href="#" onclick="deleteRecord('.$row->catches?->id.')" class="btn btn-sm btn-outline-danger" title="'.__('owner.actions.delete').'">
                                         <i class="bi bi-trash"></i>
                                     </a>';

@@ -128,6 +128,11 @@ class CatchController extends Controller
 
             $catch->update([
                 'trip_id' => $request->trip_id,
+                'car_type' => $request->car_type,
+                'driver_name' => $request->driver_name,
+                'car_plate_number' => $request->car_plate_number,
+                'fish_source' => $request->fish_source,
+                'temperature' => $request->temperature,
             ]);
 
             $defaultUnitId = Unit::defaultId();
@@ -194,6 +199,11 @@ class CatchController extends Controller
                 'catch_date' => now()->format('Y-m-d H:i:s'),
                 'total_weight' => 0,
                 'total_amount' => 0,
+                'car_type' => $request->car_type,
+                'driver_name' => $request->driver_name,
+                'car_plate_number' => $request->car_plate_number,
+                'fish_source' => $request->fish_source,
+                'temperature' => $request->temperature,
             ]);
 
             $defaultUnitId = Unit::defaultId();
@@ -265,6 +275,48 @@ class CatchController extends Controller
         $filename = 'catch-'.trim(preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower((string) $tripNumber)), '-').'.pdf';
 
         return pdf_report(view('owner.reports.print.catch-report', compact('catch', 'settings')), [], $filename);
+    }
+
+    /**
+     * Print the road/transport delivery note (إيصال التسليم): car + driver
+     * details plus the list of catch quantities with their weight units.
+     */
+    public function printDeliveryNote(Request $request, $id): \Illuminate\Http\Response
+    {
+        $catch = $this->ownerCatchQuery()
+            ->with(['trip', 'trip.boat', 'details.fish', 'details.unit'])
+            ->findOrFail($id);
+
+        $companyName = currentCompany()?->name ?: 'حسبة';
+        $settings = ownerCompanySettings([
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Delivery Note: {$companyName} #{$catch->id}"),
+        ]);
+
+        $filename = 'delivery-note-'.$catch->id.'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.delivery-note', compact('catch', 'settings')), [], $filename, $disposition);
+    }
+
+    /**
+     * Print the product sticker card (بطاقة المنتج) glued on the cold box.
+     */
+    public function printProductCard(Request $request, $id): \Illuminate\Http\Response
+    {
+        $catch = $this->ownerCatchQuery()
+            ->with(['details.fish', 'details.unit'])
+            ->findOrFail($id);
+
+        $companyName = currentCompany()?->name ?: 'حسبة';
+        $settings = ownerCompanySettings();
+
+        $seasonStart = now()->startOfYear();
+        $seasonEnd = now()->endOfYear();
+
+        $filename = 'product-card-'.$catch->id.'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.product-card', compact('catch', 'settings', 'seasonStart', 'seasonEnd')), [], $filename, $disposition);
     }
 
     /**

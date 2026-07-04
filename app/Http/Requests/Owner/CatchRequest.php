@@ -32,6 +32,12 @@ class CatchRequest extends FormRequest
 
             'weight' => 'required|array|min:1',
             'weight.*' => 'required|numeric|min:0.1',
+
+            'car_type' => 'nullable|string|max:255',
+            'driver_name' => 'nullable|string|max:255',
+            'car_plate_number' => 'nullable|string|max:255',
+            'fish_source' => 'nullable|string|max:255',
+            'temperature' => 'nullable|string|max:255',
         ];
     }
 
