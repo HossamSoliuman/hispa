@@ -122,18 +122,48 @@
                 'colClass' => 'col-sm-6',
             ])
 
+            @php
+                $catchValue = $catchByUnit->isEmpty()
+                    ? '<span class="hud-catch-line">0 <span class="hud-catch-unit">' . e(__('owner.units.kg')) . '</span></span>'
+                    : $catchByUnit
+                        ->map(function ($u) {
+                            $w = rtrim(rtrim(number_format($u['weight'], 2), '0'), '.');
+                            return '<span class="hud-catch-line">' . e($w) .
+                                ' <span class="hud-catch-unit">' . e($u['unit']) . '</span></span>';
+                        })
+                        ->implode('');
+            @endphp
             @include('owner.components.stat-card', [
                 'title' => __('owner.dashboard.total_catch'),
-                'value' =>
-                    $totalCatch >= 1000
-                        ? number_format($totalCatch / 1000, 2) .
-                            ' ' .
-                            (__('owner.units.ton') !== 'owner.units.ton' ? __('owner.units.ton') : 't')
-                        : number_format($totalCatch, 0) . ' ' . __('owner.units.kg'),
+                'value' => new \Illuminate\Support\HtmlString(
+                    '<span class="hud-catch-units">' . $catchValue . '</span>'),
                 'icon' => 'bi bi-basket2-fill',
                 'footer' => $monthPeriodFooter,
                 'colClass' => 'col-sm-6',
             ])
+            @once
+                <style>
+                    .hud-catch-units {
+                        display: flex;
+                        flex-direction: column;
+                        gap: .1rem;
+                    }
+
+                    .hud-catch-line {
+                        line-height: 1.2;
+                    }
+
+                    .hud-catch-unit {
+                        font-size: .8rem;
+                        font-weight: 600;
+                        color: rgba(0, 0, 0, .5);
+                    }
+
+                    [data-bs-theme="dark"] .hud-catch-unit {
+                        color: rgba(255, 255, 255, .6);
+                    }
+                </style>
+            @endonce
 
             <div class="col-sm-6">
                 <div class="card hud-stat-card h-100">
@@ -162,6 +192,17 @@
                                                 {{ $boat->captain?->name ?? __('owner.dashboard.no_captain') }}
                                             </div>
                                         </div>
+                                        @if ($sailingBoatIds->has($boat->id))
+                                            <span class="hud-boat-sail hud-boat-sail-on">
+                                                <i class="bi bi-water"></i>
+                                                {{ __('owner.status.sailing') }}
+                                            </span>
+                                        @else
+                                            <span class="hud-boat-sail hud-boat-sail-off">
+                                                <i class="bi bi-slash-circle"></i>
+                                                {{ __('owner.status.not_sailing') }}
+                                            </span>
+                                        @endif
                                         <span class="hud-boat-crew"
                                             title="{{ __('owner.dashboard.crew_including_captain') }}">
                                             <i class="bi bi-people-fill"></i>
@@ -220,6 +261,35 @@
                             align-items: center;
                             gap: .25rem;
                             white-space: nowrap;
+                        }
+
+                        .hud-boat-sail {
+                            flex-shrink: 0;
+                            font-size: .72rem;
+                            font-weight: 700;
+                            padding: .1rem .45rem;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: .25rem;
+                            white-space: nowrap;
+                        }
+
+                        .hud-boat-sail-on {
+                            color: #16a34a;
+                            border: 1px solid rgba(22, 163, 74, .35);
+                        }
+
+                        .hud-boat-sail-off {
+                            color: #dc3545;
+                            border: 1px solid rgba(220, 53, 69, .3);
+                        }
+
+                        [data-bs-theme="dark"] .hud-boat-sail-on {
+                            color: #4ade80;
+                        }
+
+                        [data-bs-theme="dark"] .hud-boat-sail-off {
+                            color: #f87171;
                         }
 
                         .hud-boats-empty {

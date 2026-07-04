@@ -47,6 +47,8 @@ return [
     'status' => [
         'active' => 'نشط',
         'inactive' => 'غير نشط',
+        'sailing' => 'مبحر',
+        'not_sailing' => 'غير مبحر',
         'paid' => 'مدفوع',
         'unpaid' => 'غير مدفوع',
         'pending' => 'معلق',

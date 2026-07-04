@@ -47,6 +47,8 @@ return [
     'status' => [
         'active' => 'Active',
         'inactive' => 'Inactive',
+        'sailing' => 'Sailing',
+        'not_sailing' => 'Not Sailing',
         'paid' => 'Paid',
         'unpaid' => 'Unpaid',
         'pending' => 'Pending',
