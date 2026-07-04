@@ -106,6 +106,37 @@ class CrewController extends Controller
     }
 
     /**
+     * Render the crew member's data card as a printable PDF (government-facing).
+     */
+    public function print(Request $request, $id): \Illuminate\Http\Response
+    {
+        $user = User::CrewRole()->where('owner_id', auth()->id())
+            ->with(['boat', 'region', 'governorate', 'port'])
+            ->findOrFail($id);
+
+        $settings = $this->reportSettings();
+        $title = __('owner.reports.personnel_crew_title');
+        $filename = 'crew-'.$user->id.'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.personnel-card', compact('user', 'settings', 'title')), [], $filename, $disposition);
+    }
+
+    /**
+     * Build the company settings array shared by the personnel PDF report.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
+    {
+        $companyName = currentCompany()?->name ?: 'حسبة';
+
+        return ownerCompanySettings([
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id

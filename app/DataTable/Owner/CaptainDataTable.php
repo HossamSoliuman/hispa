@@ -67,6 +67,12 @@ class CaptainDataTable extends DataTables
             ->addColumn('action', function (User $user) {
                 $btn = '';
 
+                // زر عرض البيانات وطباعتها
+                $btn .= '<a href="'.route('owner.captain.print', $user->id).'" target="_blank"
+        class="btn btn-outline-secondary btn-sm" title="عرض البيانات وطباعتها">
+        <i class="bi bi-printer"></i>
+    </a> ';
+
                 // زر التعديل
                 $btn .= '<a  href="'.route('owner.captain.edit', $user->id).'"
         class="edit btn btn-outline-primary btn-sm editBtn" title="تعديل">

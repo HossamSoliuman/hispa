@@ -149,11 +149,13 @@ Route::group([
         Route::resource('/units', UnitController::class)->only(['index', 'store', 'update', 'destroy']);
 
         // captains
+        Route::get('/captain/{id}/print', [CaptainController::class, 'print'])->name('captain.print');
         Route::resource('/captain', CaptainController::class);
         Route::get('/getCaptainData', [CaptainController::class, 'getCaptainData'])->name('getCaptainData');
         Route::get('/showCaptainData/{id}', [CaptainController::class, 'showCaptainData'])->name('showCaptainData');
 
         // crew
+        Route::get('/crew/{id}/print', [CrewController::class, 'print'])->name('crew.print');
         Route::resource('/crew', CrewController::class);
         Route::get('/getCrewData', [CrewController::class, 'getCrewData'])->name('getCrewData');
         // Data for a single crew member (used by owner.crew.show page)
@@ -362,6 +364,7 @@ Route::group([
         Route::resource('/fishing-equipments', FishingEquipmentController::class);
 
         Route::get('boats_crew/{boat}', [BoatController::class, 'crew']);
+        Route::get('/employee/{id}/print', [EmployeeController::class, 'print'])->name('employee.print');
         Route::resource('/employee', EmployeeController::class);
         Route::get('/getEmployeeData', [EmployeeController::class, 'getEmployeeData'])->name('getEmployeeData');
 

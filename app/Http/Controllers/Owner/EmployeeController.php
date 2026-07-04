@@ -61,6 +61,37 @@ class EmployeeController extends Controller
         return view('owner.employee.show', compact('user'));
     }
 
+    /**
+     * Render the employee's data card as a printable PDF (government-facing).
+     */
+    public function print(Request $request, $id): \Illuminate\Http\Response
+    {
+        $user = User::EmployeeRole()->where('owner_id', auth()->id())
+            ->with(['boat', 'region', 'governorate', 'port'])
+            ->findOrFail($id);
+
+        $settings = $this->reportSettings();
+        $title = __('owner.reports.personnel_employee_title');
+        $filename = 'employee-'.$user->id.'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.personnel-card', compact('user', 'settings', 'title')), [], $filename, $disposition);
+    }
+
+    /**
+     * Build the company settings array shared by the personnel PDF report.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
+    {
+        $companyName = currentCompany()?->name ?: 'حسبة';
+
+        return ownerCompanySettings([
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ]);
+    }
+
     public function edit($id)
     {
         $boats = Boat::Active()->select('id', 'name_ar', 'name_en')->get();

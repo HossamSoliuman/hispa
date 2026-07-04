@@ -29,9 +29,9 @@ class EmployeeDataTable extends DataTables
                     $profileUrl = route('owner.employee.show', $user->id);
 
                     return '<div class="d-flex align-items-center">
-        <a href="' . $profileUrl . '" class="d-flex align-items-center text-decoration-none">
-            <img src="' . $logoUrl . '" alt="logo" width="30" height="30" class="rounded-circle me-2">
-            <span>' . e($user->name) . '</span>
+        <a href="'.$profileUrl.'" class="d-flex align-items-center text-decoration-none">
+            <img src="'.$logoUrl.'" alt="logo" width="30" height="30" class="rounded-circle me-2">
+            <span>'.e($user->name).'</span>
         </a>
     </div>';
                 })
@@ -52,12 +52,17 @@ class EmployeeDataTable extends DataTables
                 ->addColumn('action', function (User $user) {
                     $btn = '';
 
-                    $btn .= '<a  href="' . route('owner.employee.edit', $user->id) . '"
+                    $btn .= '<a href="'.route('owner.employee.print', $user->id).'" target="_blank"
+        class="btn btn-outline-secondary btn-sm" title="عرض البيانات وطباعتها">
+        <i class="bi bi-printer"></i>
+    </a> ';
+
+                    $btn .= '<a  href="'.route('owner.employee.edit', $user->id).'"
         class="edit btn btn-outline-primary btn-sm editBtn" title="تعديل">
         <i class="bi bi-pencil"></i>
     </a> ';
 
-                    $btn .= '<a href="#" onclick="deleteRecord(' . $user->id . ')"
+                    $btn .= '<a href="#" onclick="deleteRecord('.$user->id.')"
         class="btn btn-outline-danger btn-sm" title="حذف">
         <i class="bi bi-trash"></i>
     </a>';

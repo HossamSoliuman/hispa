@@ -68,6 +68,12 @@ class CrewDataTable extends DataTables
 
                     $btn = '';
 
+                    // زر عرض البيانات وطباعتها
+                    $btn .= '<a href="'.route('owner.crew.print', $user->id).'" target="_blank"
+        class="btn btn-outline-secondary btn-sm" title="عرض البيانات وطباعتها">
+        <i class="bi bi-printer"></i>
+    </a> ';
+
                     // زر التعديل
                     $btn .= '<a  href="'.route('owner.crew.edit', $user->id).'"
         class="edit btn btn-outline-primary btn-sm editBtn" title="تعديل">
