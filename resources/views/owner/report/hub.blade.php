@@ -33,12 +33,12 @@
                 ],
             ],
             [
-                'title' => __('owner.analysis_reports.group_crew'),
-                'icon' => 'bi-people',
+                'title' => __('owner.analysis_reports.group_closing'),
+                'icon' => 'bi-lock',
                 'color' => 'warning',
                 'items' => [
                     ['owner.month-closing.index', __('owner.menu.month_closing')],
-                    ['owner.reports.annual-summary', __('owner.annual_summary.title')],
+                    ['owner.reports.annual-summary', __('owner.annual_summary.menu_title')],
                 ],
             ],
             [

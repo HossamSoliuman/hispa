@@ -5,9 +5,15 @@
     'settings' => [],
     'qrCode' => '',
     'printable' => true,
+    'orientation' => 'portrait',
 ])
 
-@php $isRtl = app()->getLocale() == 'ar'; @endphp
+@php
+    $isRtl = app()->getLocale() == 'ar';
+    $isLandscape = $orientation === 'landscape';
+    $pageWidth = $isLandscape ? '297mm' : '210mm';
+    $pageHeight = $isLandscape ? '210mm' : '297mm';
+@endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 <head>
@@ -25,7 +31,7 @@
         /* Rendered on screen and printed by the browser. Bordered tables keep
            the dense "grid" look consistent in both the screen preview and the
            printout; Arabic shaping / RTL is handled natively by the browser. */
-        @page { size: A4; margin: 12mm 10mm; }
+        @page { size: A4 {{ $isLandscape ? 'landscape' : '' }}; margin: 12mm 10mm; }
 
         a, a:link, a:visited, a:hover { text-decoration: none; color: inherit; }
 
@@ -70,6 +76,21 @@
             font-size: 10pt; padding: 5px 8px; margin: 14px 0 0;
         }
         .section-title { font-size: 10pt; font-weight: 700; color: #1a1a1a; margin: 0 0 5px; }
+
+        /* Multi-page reports — force a page break and give continuation pages a
+           slim running head so each printed sheet identifies itself. */
+        .page-break { break-before: page; page-break-before: always; padding-top: 2px; }
+        .page-head {
+            display: flex; align-items: baseline; justify-content: space-between;
+            gap: 12px; border-bottom: 1.5px solid #1a1a1a; padding-bottom: 5px; margin-bottom: 12px;
+        }
+        .page-head .ph-title { font-size: 11pt; font-weight: 800; color: #1a1a1a; }
+        .page-head .ph-meta { font-size: 8.5pt; color: #666; white-space: nowrap; }
+
+        /* Horizontal magnitude bar (monthly trend, share splits): a light track
+           with a coloured fill sized inline by the caller. */
+        .bar-track { background: #f0f0f0; height: 11px; width: 100%; border: 1px solid #e2e2e2; }
+        .bar-fill { height: 100%; }
 
         /* Horizontal key-fact strip — one bordered cell per fact */
         table.info-bar { width: 100%; border-collapse: collapse; margin: 0 0 10px; }
@@ -303,7 +324,7 @@
             .report-toolbar .rt-close { background: #efefef; color: #1a1a1a; border: 1px solid #d9d9d9; }
             .report-toolbar .rt-close:hover { background: #e3e3e3; }
             .report-page {
-                width: 210mm; min-height: 297mm; box-sizing: border-box;
+                width: {{ $pageWidth }}; min-height: {{ $pageHeight }}; box-sizing: border-box;
                 margin: 0 auto; padding: 12mm 10mm;
                 background: #fff; box-shadow: 0 3px 18px rgba(0, 0, 0, 0.45);
             }
