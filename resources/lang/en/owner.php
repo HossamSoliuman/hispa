@@ -1258,7 +1258,7 @@ return [
         'column' => 'Custom %',
     ],
     'analysis_reports' => [
-        'hub_title' => 'Reports',
+        'hub_title' => 'Detailed Reports',
         'hub_subtitle' => 'All reports are month-based with an optional boat filter',
         'group_operational' => 'Operational Reports',
         'group_financial' => 'Financial Reports',

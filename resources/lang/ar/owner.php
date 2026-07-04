@@ -1258,7 +1258,7 @@ return [
         'column' => 'نسبة خاصة',
     ],
     'analysis_reports' => [
-        'hub_title' => 'التقارير',
+        'hub_title' => 'التقارير المفصلة',
         'hub_subtitle' => 'كل التقارير على أساس الشهر مع إمكانية التصفية بالقارب',
         'group_operational' => 'تقارير تشغيلية',
         'group_financial' => 'تقارير مالية',
