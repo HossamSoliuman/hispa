@@ -29,14 +29,17 @@ class CaptainDataTable extends DataTables
                 $profileUrl = route('owner.captain.show', $user->id);
 
                 return '<div class="d-flex align-items-center">
-        <a href="' . $profileUrl . '" class="d-flex align-items-center text-decoration-none">
-            <img src="' . $logoUrl . '" alt="logo" width="30" height="30" class="rounded-circle me-2">
-            <span>' . e($user->name) . '</span>
+        <a href="'.$profileUrl.'" class="d-flex align-items-center text-decoration-none">
+            <img src="'.$logoUrl.'" alt="logo" width="30" height="30" class="rounded-circle me-2">
+            <span>'.e($user->name).'</span>
         </a>
     </div>';
             })
             ->addColumn('boat_name', function (User $user) {
                 return $user->boat->name ?? '--';
+            })
+            ->addColumn('id_number', function (User $user) {
+                return $user->id_number ?: ($user->passport_number ?: '--');
             })
             ->addColumn('owner', function (User $user) {
                 return $user->owner->name ?? '--';
@@ -65,13 +68,13 @@ class CaptainDataTable extends DataTables
                 $btn = '';
 
                 // زر التعديل
-                $btn .= '<a  href="' . route('owner.captain.edit', $user->id) . '"
+                $btn .= '<a  href="'.route('owner.captain.edit', $user->id).'"
         class="edit btn btn-outline-primary btn-sm editBtn" title="تعديل">
         <i class="bi bi-pencil"></i>
     </a> ';
 
                 // زر الحذف
-                $btn .= '<a href="#" onclick="deleteRecord(' . $user->id . ')"
+                $btn .= '<a href="#" onclick="deleteRecord('.$user->id.')"
         class="btn btn-outline-danger btn-sm" title="حذف">
         <i class="bi bi-trash"></i>
     </a>';
@@ -92,9 +95,9 @@ class CaptainDataTable extends DataTables
 
         return DataTables::of($query->boat->stocks)
             ->addIndexColumn()
-            ->addColumn('trip_name', fn($row) => optional($row->trip)->name ?? '---')
-            ->addColumn('fish_name', fn($row) => optional($row->fish)->scientific_name ?? '---')
-            ->addColumn('weight', fn($row) => $row->quantity ?? '---')
+            ->addColumn('trip_name', fn ($row) => optional($row->trip)->name ?? '---')
+            ->addColumn('fish_name', fn ($row) => optional($row->fish)->scientific_name ?? '---')
+            ->addColumn('weight', fn ($row) => $row->quantity ?? '---')
 
             ->make(true);
     }

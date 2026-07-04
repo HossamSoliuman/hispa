@@ -152,7 +152,6 @@
                         <th>{{ __('owner.captain.table.phone') }}</th>
                         <th>{{ __('owner.captain.table.id_number') }}</th>
                         <th>{{ __('owner.captain.table.boat_name') }}</th>
-                        <th>{{ __('owner.captain.table.crew_count') }}</th>
                         <th>{{ __('owner.captain.table.region') }}</th>
                         <th>{{ __('owner.captain.table.governorate') }}</th>
                         <th>{{ __('owner.captain.table.status') }}</th>
@@ -265,7 +264,6 @@
                     {data: 'phone', name: 'phone'},
                     {data: 'id_number', name: 'id_number'},
                     {data: 'boat_name', name: 'boat_name'},
-                    {data: 'crew_count', name: 'crew_count'},
                     {data: 'region', name: 'region'},
                     {data: 'governorate', name: 'governorate'},
                     {data: 'status', name: 'status'},
