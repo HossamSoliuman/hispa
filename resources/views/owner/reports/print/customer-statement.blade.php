@@ -72,9 +72,9 @@
                     <td>{{ optional($sale->sale_datetime)->format('Y-m-d') ?? '—' }}</td>
                     <td>{{ optional($sale->paymentMethod)->name ?: '—' }}</td>
                     <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
-                    <td class="col-num">{{ number_format($sale->total_price, 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($paid, 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($sale->remaining_total, 2) }} <x-riyal-icon /></td>
+                    <td class="col-num">{{ number_format($sale->total_price, 2) }}</td>
+                    <td class="col-num">{{ number_format($paid, 2) }}</td>
+                    <td class="col-num">{{ number_format($sale->remaining_total, 2) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="8" style="color:#95a5a6;">{{ __('owner.customers.show.no_invoices') }}</td></tr>
@@ -84,9 +84,9 @@
             <tfoot>
                 <tr>
                     <td colspan="5" class="col-text">{{ __('owner.sales.total') }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_purchases'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['total_paid'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['total_remaining'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num">{{ number_format($statistics['total_purchases'], 2) }}</td>
+                    <td class="col-num">{{ number_format($statistics['total_paid'], 2) }}</td>
+                    <td class="col-num">{{ number_format($statistics['total_remaining'], 2) }}</td>
                 </tr>
             </tfoot>
         @endif

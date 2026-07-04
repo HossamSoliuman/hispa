@@ -64,7 +64,7 @@
                         <td>{{ optional($trip->start_date)->format('Y-m-d') ?? '-' }}</td>
                         <td>{{ optional($trip->end_date)->format('Y-m-d') ?? '-' }}</td>
                         <td>{{ number_format($tripWeight, 2) }} {{ __('owner.units.kg') }}</td>
-                        <td class="col-num">{{ number_format($tripRevenue, 2) }} <x-riyal-icon /></td>
+                        <td class="col-num">{{ number_format($tripRevenue, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -72,7 +72,7 @@
                 <tr>
                     <td colspan="5">{{ __('owner.catch.total') }}</td>
                     <td>{{ number_format($statistics['total_weight'], 2) }} {{ __('owner.units.kg') }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }}</td>
                 </tr>
             </tfoot>
         </table>

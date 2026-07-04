@@ -33,9 +33,6 @@
                 <span class="minus">-</span>
             @endif
             {{ $displayValue }}
-            @if($showCurrency)
-                <x-riyal-icon size="sm" />
-            @endif
         </td>
     </tr>
 </table>

@@ -1810,7 +1810,7 @@ return [
             'total_weight' => 'Total Weight (kg)',
             'remaining_weight' => 'Remaining Weight (kg)',
             'sold_weight' => 'Sold Weight (kg)',
-            'total_revenue' => 'Total Revenue (SAR)',
+            'total_revenue' => 'Total Revenue',
             'details' => 'Operation Details',
         ],
     ],

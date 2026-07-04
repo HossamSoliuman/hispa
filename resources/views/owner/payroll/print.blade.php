@@ -99,7 +99,7 @@
                     <th class="col-num">{{ number_format($totalIncrease, 2) }}</th>
                     <th class="col-num">{{ number_format($totalAdvances, 2) }}</th>
                     <th></th>
-                    <th class="col-num">{{ number_format($totalNet, 2) }} {{ $cur }}</th>
+                    <th class="col-num">{{ number_format($totalNet, 2) }}</th>
                     <th></th>
                 </tr>
             </tfoot>

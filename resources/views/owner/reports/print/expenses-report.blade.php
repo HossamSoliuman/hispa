@@ -70,8 +70,8 @@
                         <td class="col-text">{{ optional($expense->category->parent)->name ? optional($expense->category->parent)->name . ' / ' : '' }}{{ $expense->category->name ?? '---' }}</td>
                         <td class="col-text">{{ $expense->boat->name ?? __('owner.general') }}</td>
                         <td class="col-text">{{ $expense->vendor->name ?? '---' }}</td>
-                        <td class="col-num">{{ number_format($expense->total_price, 2) }} <x-riyal-icon /></td>
-                        <td class="col-num">{{ number_format($expense->final_price, 2) }} <x-riyal-icon /></td>
+                        <td class="col-num">{{ number_format($expense->total_price, 2) }}</td>
+                        <td class="col-num">{{ number_format($expense->final_price, 2) }}</td>
                         <td>{{ $expense->status === 'paid' ? __('owner.paid') : __('owner.pending') }}</td>
                     </tr>
                 @endforeach
@@ -80,7 +80,7 @@
                 <tr>
                     <td colspan="6">{{ __('owner.expenses.print.total') }}</td>
                     <td class="col-num"></td>
-                    <td class="col-num">{{ number_format($statistics['total_amount'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num">{{ number_format($statistics['total_amount'], 2) }}</td>
                     <td></td>
                 </tr>
             </tfoot>

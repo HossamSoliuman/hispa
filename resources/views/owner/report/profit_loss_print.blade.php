@@ -163,7 +163,7 @@
             <tfoot>
                 <tr>
                     <th colspan="4" class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
-                    <th class="col-num">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }} {{ $cur }}</th>
+                    <th class="col-num">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</th>
                 </tr>
             </tfoot>
         </table>

@@ -59,8 +59,8 @@
                         <td class="col-text">{{ $sale->customer_name ?? optional($sale->customer)->name ?? '---' }}</td>
                         <td>{{ optional($sale->paymentMethod)->name ?? '---' }}</td>
                         <td>{{ formatWeight($sale->details->sum('weight')) }}</td>
-                        <td class="col-num">{{ number_format($sale->total_price, 2) }} <x-riyal-icon /></td>
-                        <td class="col-num">{{ number_format($sale->net_owner_amount, 2) }} <x-riyal-icon /></td>
+                        <td class="col-num">{{ number_format($sale->total_price, 2) }}</td>
+                        <td class="col-num">{{ number_format($sale->net_owner_amount, 2) }}</td>
                         <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '---' }}</td>
                     </tr>
                 @endforeach
@@ -69,8 +69,8 @@
                 <tr>
                     <td colspan="4">{{ __('owner.sales.total') }}</td>
                     <td>{{ formatWeight($statistics['total_weight']) }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['net_owner_amount'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }}</td>
+                    <td class="col-num">{{ number_format($statistics['net_owner_amount'], 2) }}</td>
                     <td></td>
                 </tr>
             </tfoot>
