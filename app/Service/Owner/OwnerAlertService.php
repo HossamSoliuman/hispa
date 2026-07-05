@@ -246,18 +246,25 @@ final class OwnerAlertService
     }
 
     /**
+     * Maintenance due, using the most recent maintenance record per boat (mirrors
+     * {@see inspectionsDue()}). Only the latest record's `next_maintenance_date`
+     * can fire, so logging fresh maintenance with a later date clears the alert.
+     *
      * @return \Illuminate\Support\Collection<int, \App\Support\Alert>
      */
     private function maintenanceDue(int $ownerId): Collection
     {
-        $warningDays = (int) config('alerts.maintenance_due.warning_days');
+        $boundary = today()->addDays((int) config('alerts.maintenance_due.warning_days'))->endOfDay();
 
         return Maintenance::query()
             ->where('owner_id', $ownerId)
-            ->whereNotNull('next_maintenance_date')
-            ->whereDate('next_maintenance_date', '<=', today()->addDays($warningDays)->toDateString())
             ->with('boat:id,name_ar,name_en')
+            ->orderByDesc('date')
+            ->orderByDesc('id')
             ->get()
+            ->unique('boat_id')
+            ->filter(fn (Maintenance $maintenance): bool => $maintenance->next_maintenance_date !== null
+                && $maintenance->next_maintenance_date->lte($boundary))
             ->map(function (Maintenance $maintenance): Alert {
                 $due = $maintenance->next_maintenance_date;
 
@@ -265,7 +272,8 @@ final class OwnerAlertService
                     'boat' => $maintenance->boat?->name ?? '-',
                     'date' => $due->translatedFormat('d M Y'),
                 ], route('owner.maintenance.index'));
-            });
+            })
+            ->values();
     }
 
     /**

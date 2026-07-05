@@ -131,6 +131,41 @@ class OwnerAlertServiceTest extends TestCase
         $this->assertSame(AlertSeverity::Critical, $alerts->first()->severity);
     }
 
+    public function test_maintenance_due_uses_latest_maintenance_record_per_boat(): void
+    {
+        $owner = $this->owner();
+        $boat = $this->boat($owner);
+
+        // Old maintenance is overdue, but the latest one pushed the next date out.
+        Maintenance::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat->id,
+            'date' => now()->subDays(200)->toDateString(),
+            'next_maintenance_date' => now()->subDays(2)->toDateString(),
+        ]);
+        Maintenance::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat->id,
+            'date' => now()->subDay()->toDateString(),
+            'next_maintenance_date' => now()->addDays(120)->toDateString(),
+        ]);
+
+        $this->assertCount(0, $this->alertsFor($owner)->where('type', AlertType::MaintenanceDue));
+
+        // A boat whose latest maintenance is imminent still fires.
+        $boat2 = $this->boat($owner);
+        Maintenance::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat2->id,
+            'date' => now()->subDays(180)->toDateString(),
+            'next_maintenance_date' => now()->addDays(2)->toDateString(),
+        ]);
+
+        $alerts = $this->alertsFor($owner)->where('type', AlertType::MaintenanceDue);
+        $this->assertCount(1, $alerts);
+        $this->assertSame(AlertSeverity::Critical, $alerts->first()->severity);
+    }
+
     public function test_alerts_are_scoped_to_their_owner(): void
     {
         $ownerA = $this->owner();
