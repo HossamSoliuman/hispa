@@ -6,6 +6,7 @@ use App\DataTable\Owner\CaptainDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\CaptainRequest;
 use App\Models\Boat;
+use App\Models\PayrollDetailsModel;
 use App\Models\Region;
 use App\Models\Trip;
 use App\Models\User;
@@ -102,12 +103,18 @@ class CaptainController extends Controller
 
         $query = User::where('id', $id)->with(['boat', 'boat.stocks'])->first();
 
+        $user->load(['advances' => fn ($q) => $q->where('owner_id', auth()->id())->latest('date')]);
+
+        $unpaidDues = (float) PayrollDetailsModel::statementFor((int) $id, (int) auth()->id())
+            ->where('is_paid', false)
+            ->sum('final_salary');
+
         $stats = (object) [
             'total_trips' => $tripCount,
-            'corrected_items' => $query->boat->stocks->count(),
+            'corrected_items' => $query->boat?->stocks->count() ?? 0,
+            'unpaid_dues' => $unpaidDues,
+            'total_advances' => (float) $user->advances->sum('amount'),
         ];
-
-        $user->load(['advances' => fn ($q) => $q->where('owner_id', auth()->id())->latest('date')]);
 
         return view('owner.captain.show', compact('user', 'stats'));
     }
@@ -127,6 +134,26 @@ class CaptainController extends Controller
         $disposition = $request->boolean('download') ? 'attachment' : 'inline';
 
         return pdf_report(view('owner.reports.print.personnel-card', compact('user', 'settings', 'title')), [], $filename, $disposition);
+    }
+
+    /**
+     * Render a special payroll statement for the captain: every monthly payroll
+     * entry with its net due, split into paid and unpaid, plus running totals.
+     */
+    public function payrollStatement(Request $request, $id): \Illuminate\Http\Response
+    {
+        $user = User::CaptainRole()->where('owner_id', auth()->id())
+            ->with('boat')
+            ->findOrFail($id);
+
+        $details = PayrollDetailsModel::statementFor((int) $user->id, (int) auth()->id());
+
+        $settings = $this->reportSettings();
+        $title = __('owner.payrolls.statement.title', ['name' => $user->name]);
+        $filename = 'payroll-statement-'.$user->id.'.pdf';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return pdf_report(view('owner.reports.print.payroll-statement', compact('user', 'details', 'settings', 'title')), [], $filename, $disposition);
     }
 
     /**

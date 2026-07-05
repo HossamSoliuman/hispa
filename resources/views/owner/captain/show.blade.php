@@ -17,17 +17,13 @@
             vertical-align: middle;
         }
 
-        /* {{ __('owner.generated.item_ed06b0') }} */
         .small-text th,
         .small-text td {
             font-size: 12px;
-            /* {{ __('owner.generated.or') }} 13px {{ __('owner.generated.item_4cc9e8') }} */
             text-align: center !important;
             vertical-align: middle;
             font-weight: bold;
-
         }
-
 
         label.error {
             color: red;
@@ -35,184 +31,78 @@
             margin-top: 5px;
             display: block;
         }
-
-        .profile-card {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-        }
-
-        [data-bs-theme=dark] .profile-card { background-color: var(--bs-secondary-bg); box-shadow: none; }
-
-        .profile-logo {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #0d6efd;
-        }
-
-        .stat-card {
-            min-height: 150px;
-            height: 100%;
-            border-radius: 12px;
-        }
-
-        .stat-icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
-        }
     </style>
 @endsection
 @section('content')
-    <div class="d-flex align-items-center mb-3">
+    @php
+        $sarIcon = view('components.riyal-icon', [
+            'size' => 'sm',
+            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-inline-start:.2rem;',
+        ])->render();
+    @endphp
+
+    {{-- Page header --}}
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
         <div>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#"> {{ __('owner.generated.view_captain') }}</a></li>
-                <li class="breadcrumb-item active"> {{ __('owner.generated.view_captain') }}</li>
+            <ul class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{{ route('owner.captain.index') }}">{{ __('owner.generated.captains_management') }}</a></li>
+                <li class="breadcrumb-item active">{{ __('owner.generated.view_captain') }}</li>
             </ul>
-            <h1 class="page-header mb-0"> {{ __('owner.generated.view_captain') }}- {{ $user->name }}</h1>
-        </div>
-
-
-    </div>
-
-    <!-- Modal -->
-
-    {{-- Profile Section --}}
-    <div class="row mb-3">
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center bg-primary text-white p-5 h-80">
-                    <div class="mb-4">
-                        @if ($user->logo)
-                            <img src="{{ asset($user->logo) }}" class="rounded-circle shadow" width="120" height="120"
-                                alt="Logo">
-                        @else
-                            <img src="{{ asset('default-avatar.png') }}" class="rounded-circle shadow" width="120"
-                                height="120" alt="Default Logo">
-                        @endif
-                    </div>
-
-                    <h5 class="mb-1 text-white">{{ $user->name }}</h5>
-                    <p class="mb-2 text-white">{{ $user->role }}</p>
-                    <p>
-                        @if (auth()->user()->status)
-                            <span class="badge bg-success p-2"><i class="fa fa-clock"></i>
-                                {{ __('owner.assets.active') }}</span>
-                        @else
-                            <span class="badge bg-danger p-2">{{ __('owner.fish.status_inactive') }}</span>
-                        @endif
-                    </p>
-                </div>
-                <div class="text-center h-20">
-                    <a href="{{ route('owner.captain.edit', $user->id) }}" class="btn btn-primary rounded-4 m-4">
-                        <i class="bi bi-pencil"></i> {{ __('owner.actions.edit') }}</a>
-                </div>
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body p-5 text-start h-100">
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <i
-                                    class="bi bi-envelope  d-inline-block bg-primary-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-primary"></i>
-                            </div>
-                            <div class="col-md-10">
-                                <p class="my-2">{{ __('owner.generated.email_address') }}</p>
-                                <p class="m-0"><strong>{{ $user->email }}</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mt-3">
-                                <i
-                                    class="bi bi-telephone d-inline-block  bg-success-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-success"></i>
-                            </div>
-                            <div class="col-md-10 mt-3">
-                                <p class="my-2">{{ __('owner.generated.phone_number_1') }}</p>
-                                <p class="m-0"><strong>{{ $user->phone ?? '-----' }}</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mt-3">
-                                <i
-                                    class="bi bi-pin-fill d-inline-block  bg-warning-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-warning"></i>
-                            </div>
-                            <div class="col-md-10 mt-3">
-                                <p class="my-2">{{ __('owner.generated.region') }}</p>
-                                <p class="m-0"><strong>{{ $user->region?->name ?? '-----' }}</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mt-3">
-                                <i
-                                    class="bi bi-pin-map d-inline-block  bg-default-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-default"></i>
-                            </div>
-                            <div class="col-md-10 mt-3">
-                                <p class="my-2">{{ __('owner.generated.governorate') }}</p>
-                                <p class="m-0"><strong>{{ $user->governorate?->name ?? '-----' }}</strong>
-                                </p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
-            </div>
-
+            <h1 class="h3 fw-bold mb-0">
+                <i class="bi bi-person-badge text-primary me-2"></i>{{ $user->name }}
+            </h1>
         </div>
     </div>
 
+    {{-- Profile hero --}}
+    @include('owner.partials._person_profile', [
+        'user' => $user,
+        'editRoute' => route('owner.captain.edit', $user->id),
+        'statementRoute' => route('owner.captain.payroll-statement', $user->id),
+    ])
 
-
-    {{-- Statistics Cards --}}
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="stat-card bg-primary text-white p-4 text-center shadow rounded-0">
-                <i class="bi bi-basket3  mt-2 stat-icon"></i>
-                <h5 class="my-2 text-white">{{ __('owner.generated.trips_count') }}</h5>
-                <h3 class="text-white m-0">{{ $stats->total_trips ?? 0 }}</h3>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="stat-card bg-success text-white p-4 text-center shadow rounded-0">
-                <i class="bi bi-box-seam mt-2 stat-icon"></i>
-                <h5 class="my-2 text-white">{{ __('owner.generated.added_items_count') }}</h5>
-                <h3 class="text-white m-0">{{ $stats->corrected_items ?? 0 }}</h3>
-            </div>
-        </div>
-
+    {{-- KPI cards --}}
+    <div class="row g-3 mb-3">
+        @include('owner.components.stat-card', [
+            'title' => __('owner.generated.trips_count'),
+            'value' => $stats->total_trips ?? 0,
+            'icon' => 'bi bi-basket3',
+            'colClass' => 'col-6 col-lg-3',
+        ])
+        @include('owner.components.stat-card', [
+            'title' => __('owner.generated.added_items_count'),
+            'value' => $stats->corrected_items ?? 0,
+            'icon' => 'bi bi-box-seam',
+            'colClass' => 'col-6 col-lg-3',
+        ])
+        @include('owner.components.stat-card', [
+            'title' => __('owner.payrolls.statement.total_unpaid'),
+            'value' => number_format($stats->unpaid_dues ?? 0, 2) . ' ' . $sarIcon,
+            'icon' => 'bi bi-cash-stack',
+            'colClass' => 'col-6 col-lg-3',
+        ])
+        @include('owner.components.stat-card', [
+            'title' => __('owner.crew_advances.total'),
+            'value' => number_format($stats->total_advances ?? 0, 2) . ' ' . $sarIcon,
+            'icon' => 'bi bi-wallet2',
+            'colClass' => 'col-6 col-lg-3',
+        ])
     </div>
-
 
     {{-- Advances (السلف) --}}
     @include('owner.crew-advances._profile', ['user' => $user])
     @include('owner.crew-advances._modal', ['people' => collect([$user]), 'selectedUserId' => $user->id])
 
-
-    {{-- Sales Table --}}
-    <div class="">
-        <div class="card-header bg-primary text-white p-2 mb-2">
-            <h4 class="mb-0 text-white">{{ __('owner.generated.weights_and_added_items_operations') }}</h4>
+    {{-- Weights & added items --}}
+    <div class="card border-0 shadow-sm">
+        @include('owner.partials._card_arrow')
+        <div class="card-header bg-transparent border-bottom d-flex align-items-center py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-clipboard-data text-primary me-2"></i>{{ __('owner.generated.weights_and_added_items_operations') }}
+            </h5>
         </div>
         <div class="card-body p-0">
-            <table id="datatableDefault" class="table table-sm table-bordered table-hover text-center small-text"
+            <table id="datatableDefault" class="table table-sm table-bordered table-hover text-center small-text mb-0"
                 style="width:100%">
                 <thead>
                     <tr>
