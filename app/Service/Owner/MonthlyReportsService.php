@@ -268,7 +268,7 @@ class MonthlyReportsService
             if ($isAr) {
                 $name = $row->red_sea_name ?: $row->arabian_gulf_name ?: $row->scientific_name;
             } else {
-                $name = $row->scientific_name ?: $row->english_name;
+                $name = $row->english_name ?: $row->scientific_name;
             }
 
             return $name ?: (string) $row->fish_name;

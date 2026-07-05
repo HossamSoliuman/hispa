@@ -176,6 +176,35 @@ function formatWeight($value, $threshold = 1000)
     return round($value).' '.__('admin.units.kg');
 }
 
+/**
+ * Format a collection of detail rows as a weight total grouped by their unit,
+ * e.g. "100.00 شكة + 5.00 كجم". Each row must expose a `weight` value and a
+ * `unit` relation. Rows without a unit fall back to the kilogram label.
+ *
+ * @param  iterable<int, object>  $details
+ */
+function formatWeightByUnit(iterable $details): string
+{
+    $groups = [];
+
+    foreach ($details as $detail) {
+        $name = trim((string) (optional($detail->unit)->name ?? ''));
+        if ($name === '') {
+            $name = __('owner.units.kg');
+        }
+
+        $groups[$name] = ($groups[$name] ?? 0) + (float) ($detail->weight ?? 0);
+    }
+
+    if ($groups === []) {
+        return '0';
+    }
+
+    return collect($groups)
+        ->map(fn ($weight, $name) => number_format($weight, 2).' '.$name)
+        ->implode(' + ');
+}
+
 function formatHijriDate($date, $pattern = 'dd/MM/yyyy')
 {
     if (empty($date)) {

@@ -227,7 +227,7 @@ class CustomersController extends Controller
         $owner = auth()->user();
 
         $sales = Sale::where('seller_id', $owner->id)
-            ->with(['paymentMethod', 'details', 'customer'])
+            ->with(['paymentMethod', 'details', 'details.unit', 'customer'])
             ->orderByDesc('sale_datetime')
             ->get();
 

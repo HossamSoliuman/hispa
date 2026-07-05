@@ -766,7 +766,7 @@ return [
             'status' => 'Status',
             'customer' => 'Customer',
             'payment_method' => 'Payment Method',
-            'total_weight' => 'Total Weight (kg)',
+            'total_weight' => 'Total Weight',
             'total_price' => 'Total Amount',
             'date' => 'Issue Date',
             'details' => 'Invoice Details',

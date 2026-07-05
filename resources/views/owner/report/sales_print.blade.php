@@ -23,10 +23,12 @@
         </x-slot:additionalInfo>
     </x-report-info>
 
+    @php $allDetails = $sales->flatMap(fn ($sale) => $sale->details); @endphp
+
     <x-report-stats :items="[
         ['label' => __('owner.sales_report.total_sales'), 'value' => $totalSales],
         ['label' => __('owner.sales_report.total_revenue'), 'value' => number_format($totalRevenue, 2)],
-        ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeight($totalWeight)],
+        ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeightByUnit($allDetails)],
         ['label' => __('owner.sales_report.net_owner_amount'), 'value' => number_format($netOwnerAmount, 2), 'color' => '#16a085'],
     ]" />
 
@@ -52,7 +54,7 @@
                 <td>{{ $sale->number }}</td>
                 <td>{{ $sale->customer_name ?? optional($sale->customer)->name ?? '---' }}</td>
                 <td>{{ optional($sale->paymentMethod)->name ?? '---' }}</td>
-                <td>{{ formatWeight($sale->details->sum('weight')) }}</td>
+                <td>{{ formatWeightByUnit($sale->details) }}</td>
                 <td>{{ $sale->commission_rate }}%</td>
                 <td>{{ $sale->labor_rate }}%</td>
                 <td><x-money-inline :amount="$sale->total_price" /></td>
@@ -74,7 +76,7 @@
         />
         <x-report-summary-row
             :label="__('owner.sales_report.total_weight')"
-            :value="formatWeight($totalWeight)"
+            :value="formatWeightByUnit($allDetails)"
         />
         <x-report-summary-row
             :label="__('owner.sales_report.total_revenue')"

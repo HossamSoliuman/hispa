@@ -766,7 +766,7 @@ return [
             'status' => 'الحالة',
             'customer' => 'الزبون',
             'payment_method' => 'وسيلة الدفع',
-            'total_weight' => 'الإجمالي (كجم)',
+            'total_weight' => 'الوزن الإجمالي',
             'total_price' => 'المبلغ الكلي',
             'date' => 'تاريخ الإصدار',
             'details' => 'تفاصيل الفاتورة',
