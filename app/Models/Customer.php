@@ -17,7 +17,6 @@ class Customer extends Model
         'dalal_id',
         'type',
         'region_id',
-        'city_id',
     ];
 
     public function scopeActive(Builder $query): Builder
@@ -38,11 +37,6 @@ class Customer extends Model
     public function region()
     {
         return $this->belongsTo(\App\Models\Region::class, 'region_id')->withDefault();
-    }
-
-    public function city()
-    {
-        return $this->belongsTo(\App\Models\City::class, 'city_id')->withDefault();
     }
 
     public function sales()

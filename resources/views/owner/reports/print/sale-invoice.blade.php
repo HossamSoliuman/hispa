@@ -8,7 +8,7 @@
 
     $customerName = $sale->customer_name ?? optional($sale->customer)->name ?? '---';
     $customerPhone = optional($sale->customer)->phone;
-    $customerCity = optional(optional($sale->customer)->city)->name;
+    $customerCity = optional(optional($sale->customer)->region)->name;
 
     $paymentStatusText = match ($sale->payment_status) {
         'paid' => __('owner.sales.paid'),
@@ -100,7 +100,7 @@
                 <th>{{ number_format($totalWeight, 2) }}</th>
                 <th></th>
                 <th></th>
-                <th class="col-num">{{ number_format($totalPrice, 2) }} {{ $cur }}</th>
+                <th class="col-num">{{ number_format($totalPrice, 2) }}</th>
             </tr>
         </tfoot>
     </table>
@@ -117,34 +117,34 @@
                     <tbody>
                         <tr>
                             <th class="col-text" style="width:55%;">{{ __('owner.sales.total_price') }}</th>
-                            <td class="col-num">{{ number_format($totalPrice, 2) }} {{ $cur }}</td>
+                            <td class="col-num">{{ number_format($totalPrice, 2) }}</td>
                         </tr>
                         @if($sale->commission_amount > 0)
                             <tr>
                                 <th class="col-text">{{ __('owner.sales_report.commission') }} ({{ rtrim(rtrim(number_format($sale->commission_rate, 2), '0'), '.') }}%)</th>
-                                <td class="col-num">{{ number_format($sale->commission_amount, 2) }} {{ $cur }}</td>
+                                <td class="col-num">{{ number_format($sale->commission_amount, 2) }} </td>
                             </tr>
                         @endif
                         @if($sale->labor_amount > 0)
                             <tr>
                                 <th class="col-text">{{ __('owner.sales_report.labor') }} ({{ rtrim(rtrim(number_format($sale->labor_rate, 2), '0'), '.') }}%)</th>
-                                <td class="col-num">{{ number_format($sale->labor_amount, 2) }} {{ $cur }}</td>
+                                <td class="col-num">{{ number_format($sale->labor_amount, 2) }} </td>
                             </tr>
                         @endif
                         @if($sale->commission_amount > 0 || $sale->labor_amount > 0)
                             <tr class="net-row">
                                 <th class="col-text">{{ __('owner.sales_report.net_owner') }}</th>
-                                <td class="col-num">{{ number_format($sale->net_owner_amount, 2) }} {{ $cur }}</td>
+                                <td class="col-num">{{ number_format($sale->net_owner_amount, 2) }} </td>
                             </tr>
                         @endif
                         @if($sale->payment_status === 'partially_paid')
                             <tr>
                                 <th class="col-text">{{ __('owner.sales.paid_amount') }}</th>
-                                <td class="col-num">{{ number_format($paidAmount, 2) }} {{ $cur }}</td>
+                                <td class="col-num">{{ number_format($paidAmount, 2) }} </td>
                             </tr>
                             <tr>
                                 <th class="col-text">{{ __('owner.sales.remaining') }}</th>
-                                <td class="col-num">{{ number_format($sale->remaining_total, 2) }} {{ $cur }}</td>
+                                <td class="col-num">{{ number_format($sale->remaining_total, 2) }} </td>
                             </tr>
                         @endif
                     </tbody>
