@@ -6,7 +6,7 @@
     Params:
       $user           — the person being shown
       $editRoute      — URL for the edit button
-      $statementRoute — URL for the payroll-statement PDF
+      $statementRoute — (optional) URL for the payroll-statement PDF; button hidden when omitted
 --}}
 <div class="row g-3 mb-3">
     {{-- Identity card --}}
@@ -38,9 +38,11 @@
                     <a href="{{ $editRoute }}" class="btn btn-primary">
                         <i class="bi bi-pencil me-1"></i>{{ __('owner.actions.edit') }}
                     </a>
-                    <a href="{{ $statementRoute }}" target="_blank" class="btn btn-outline-primary">
-                        <i class="bi bi-receipt-cutoff me-1"></i>{{ __('owner.payrolls.statement.button') }}
-                    </a>
+                    @if (! empty($statementRoute))
+                        <a href="{{ $statementRoute }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="bi bi-receipt-cutoff me-1"></i>{{ __('owner.payrolls.statement.button') }}
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@ use App\DataTable\Owner\EmployeeDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\EmployeeRequest;
 use App\Models\Boat;
+use App\Models\PayrollDetailsModel;
 use App\Models\User;
 use App\Repository\Owner\EmployeeRepository;
 use Illuminate\Http\Request;
@@ -58,7 +59,16 @@ class EmployeeController extends Controller
 
         $user->load(['advances' => fn ($q) => $q->where('owner_id', auth()->id())->latest('date')]);
 
-        return view('owner.employee.show', compact('user'));
+        $unpaidDues = (float) PayrollDetailsModel::statementFor((int) $id, (int) auth()->id())
+            ->where('is_paid', false)
+            ->sum('final_salary');
+
+        $stats = (object) [
+            'unpaid_dues' => $unpaidDues,
+            'total_advances' => (float) $user->advances->sum('amount'),
+        ];
+
+        return view('owner.employee.show', compact('user', 'stats'));
     }
 
     /**

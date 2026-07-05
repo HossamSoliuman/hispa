@@ -65,13 +65,13 @@
     <div class="row g-3 mb-3">
         @include('owner.components.stat-card', [
             'title' => __('owner.generated.trips_count'),
-            'value' => '<span id="trips_count">0</span>',
+            'value' => $stats->total_trips ?? 0,
             'icon' => 'bi bi-basket3',
             'colClass' => 'col-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('owner.generated.current_boat_name'),
-            'value' => '<span id="boat_name">—</span>',
+            'value' => $user->boat->name ?? '—',
             'icon' => 'bi bi-water',
             'colClass' => 'col-6 col-lg-3',
         ])
@@ -92,29 +92,6 @@
     {{-- Advances (السلف) --}}
     @include('owner.crew-advances._profile', ['user' => $user])
     @include('owner.crew-advances._modal', ['people' => collect([$user]), 'selectedUserId' => $user->id])
-
-    {{-- Trip log --}}
-    <div class="card border-0 shadow-sm">
-        @include('owner.partials._card_arrow')
-        <div class="card-header bg-transparent border-bottom d-flex align-items-center py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-clipboard-data text-primary me-2"></i>{{ __('owner.generated.crew_trip_log') }}
-            </h5>
-        </div>
-        <div class="card-body p-0">
-            <table id="datatableDefault" class="table table-sm table-bordered table-hover text-center small-text mb-0"
-                style="width:100%">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>{{ __('owner.sales.trip') }}</th>
-                        <th>{{ __('owner.sales.boat') }}</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
 @endsection
 @section('script')
     <script src="{{ asset('dashboard/assets/plugins/@highlightjs/cdn-assets/highlight.min.js') }}"></script>
@@ -138,68 +115,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-
-    <script type="text/javascript">
-        $(function() {
-            // Check if the DataTable is already initialized and destroy it
-            if ($.fn.DataTable.isDataTable('#datatableDefault')) {
-                $('#datatableDefault').DataTable().destroy();
-            }
-
-
-            // Initialize the DataTable
-            var table = $('#datatableDefault').DataTable({
-                processing: true,
-                serverSide: true,
-
-                language: {
-                    url: "{{ asset('dashboard/assets/js/ar.json') }}?v={{ time() }}"
-
-                },
-
-                ajax: {
-                    url: "{{ route('owner.showCrewData', $user->id) }}",
-                    data: function(d) {
-                        // d.from_date = $('#from_date').val();
-                        // d.to_date = $('#to_date').val();
-                    },
-                    dataSrc: function(json) {
-                        $('#boat_name').text(json.boat_name);
-                        $('#trips_count').text(json.trips_count);
-
-                        return json.data;
-                    },
-
-
-                },
-                columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'boat_name',
-                        name: 'trip.name'
-                    },
-                    {
-                        data: 'trip_name',
-                        name: 'fish_name'
-                    },
-
-                ],
-
-                buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ],
-                responsive: false, scrollX: true
-
-            });
-            $('#from_date, #to_date').change(function() {
-                table.draw();
-            });
-        });
-    </script>
 
     <script>
         $("#createForm").validate();
