@@ -16,9 +16,9 @@
 
     <x-report-stats :items="[
         ['label' => __('owner.analysis_reports.boat_profitability.boats_count'), 'value' => count($rows)],
-        ['label' => __('owner.analysis_reports.gross_sales'), 'value' => number_format($totals['gross_sales'], 2)],
-        ['label' => __('owner.analysis_reports.expenses'), 'value' => number_format($totals['expenses'], 2)],
-        ['label' => __('owner.analysis_reports.net_profit'), 'value' => number_format($totals['net_profit'], 2), 'color' => $totals['net_profit'] >= 0 ? '#16a34a' : '#dc2626'],
+        ['label' => __('owner.analysis_reports.gross_sales'), 'value' => $totals['gross_sales'], 'money' => true],
+        ['label' => __('owner.analysis_reports.expenses'), 'value' => $totals['expenses'], 'money' => true],
+        ['label' => __('owner.analysis_reports.net_profit'), 'value' => $totals['net_profit'], 'money' => true, 'color' => $totals['net_profit'] >= 0 ? '#16a34a' : '#dc2626'],
     ]" />
 
     <x-report-table :headers="[
@@ -32,10 +32,10 @@
         @foreach ($rows as $row)
             <tr>
                 <td>{{ $row['boat_name'] }}</td>
-                <td style="text-align:end;">{{ number_format($row['gross_sales'], 2) }}</td>
-                <td style="text-align:end;">{{ number_format($row['net_sales'], 2) }}</td>
-                <td style="text-align:end;">{{ number_format($row['expenses'], 2) }}</td>
-                <td style="text-align:end;font-weight:700;color:{{ $row['net_profit'] >= 0 ? '#16a34a' : '#dc2626' }};">{{ number_format($row['net_profit'], 2) }}</td>
+                <td style="text-align:end;"><x-report-money :amount="$row['gross_sales']" /></td>
+                <td style="text-align:end;"><x-report-money :amount="$row['net_sales']" /></td>
+                <td style="text-align:end;"><x-report-money :amount="$row['expenses']" /></td>
+                <td style="text-align:end;font-weight:700;color:{{ $row['net_profit'] >= 0 ? '#16a34a' : '#dc2626' }};"><x-report-money :amount="$row['net_profit']" /></td>
                 <td style="text-align:end;">{{ number_format($row['margin'], 1) }}%</td>
             </tr>
         @endforeach

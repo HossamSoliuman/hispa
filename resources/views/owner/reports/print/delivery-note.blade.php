@@ -1,6 +1,5 @@
 @php
     $documentNumber = '#' . str_pad($catch->id ?? 0, 8, '0', STR_PAD_LEFT);
-    $totalWeight = $catch->details->sum('weight');
 @endphp
 
 <x-report-layout
@@ -76,7 +75,7 @@
         <tfoot>
             <tr>
                 <th colspan="2" class="col-text">{{ __('owner.catch.total') }}</th>
-                <th>{{ number_format($totalWeight, 2) }}</th>
+                <th>{{ formatWeightByUnit($catch->details) }}</th>
                 <th></th>
             </tr>
         </tfoot>

@@ -94,22 +94,22 @@
 
     {{-- Year KPI cards — row 1: headline figures --}}
     <x-report-stats :items="[
-        ['label' => __('owner.annual_summary.stats.sales'), 'value' => number_format($t['gross_sales'], 2)],
-        ['label' => __('owner.annual_summary.stats.revenue'), 'value' => number_format($t['net_owner_revenue'], 2)],
-        ['label' => __('owner.annual_summary.stats.expenses'), 'value' => number_format($t['total_expenses'], 2)],
-        ['label' => __('owner.annual_summary.stats.depreciation'), 'value' => number_format($t['depreciation'], 2)],
-        ['label' => __('owner.annual_summary.stats.net_profit'), 'value' => number_format($t['net_profit'], 2), 'color' => $t['net_profit'] >= 0 ? '#198754' : '#dc3545'],
+        ['label' => __('owner.annual_summary.stats.sales'), 'value' => $t['gross_sales'], 'money' => true],
+        ['label' => __('owner.annual_summary.stats.revenue'), 'value' => $t['net_owner_revenue'], 'money' => true],
+        ['label' => __('owner.annual_summary.stats.expenses'), 'value' => $t['total_expenses'], 'money' => true],
+        ['label' => __('owner.annual_summary.stats.depreciation'), 'value' => $t['depreciation'], 'money' => true],
+        ['label' => __('owner.annual_summary.stats.net_profit'), 'value' => $t['net_profit'], 'money' => true, 'color' => $t['net_profit'] >= 0 ? '#198754' : '#dc3545'],
         ['label' => __('owner.annual_summary.analysis.margin'), 'value' => number_format($a['margin'], 1) . '%'],
     ]" />
 
     {{-- Year KPI cards — row 2: performance figures --}}
     <x-report-stats :items="[
-        ['label' => __('owner.annual_summary.kpi.avg_profit'), 'value' => number_format($a['avg_net'], 2)],
-        ['label' => __('owner.annual_summary.kpi.best_month') . ' · ' . $bestLabel, 'value' => number_format($bestNet, 2), 'color' => '#198754'],
-        ['label' => __('owner.annual_summary.kpi.worst_month') . ' · ' . $worstLabel, 'value' => number_format($worstNet, 2), 'color' => $worstNet < 0 ? '#dc3545' : '#1a1a1a'],
+        ['label' => __('owner.annual_summary.kpi.avg_profit'), 'value' => $a['avg_net'], 'money' => true],
+        ['label' => __('owner.annual_summary.kpi.best_month') . ' · ' . $bestLabel, 'value' => $bestNet, 'money' => true, 'color' => '#198754'],
+        ['label' => __('owner.annual_summary.kpi.worst_month') . ' · ' . $worstLabel, 'value' => $worstNet, 'money' => true, 'color' => $worstNet < 0 ? '#dc3545' : '#1a1a1a'],
         ['label' => __('owner.annual_summary.kpi.profitable_months'), 'value' => $a['profitable_months'] . ' / ' . $a['closed_count']],
-        ['label' => __('owner.annual_summary.kpi.owner_share'), 'value' => number_format($t['owner_share'], 2)],
-        ['label' => __('owner.annual_summary.kpi.crew_share'), 'value' => number_format($t['crew_share'], 2)],
+        ['label' => __('owner.annual_summary.kpi.owner_share'), 'value' => $t['owner_share'], 'money' => true],
+        ['label' => __('owner.annual_summary.kpi.crew_share'), 'value' => $t['crew_share'], 'money' => true],
     ]" />
 
     {{-- Financial waterfall — from gross sales down to the owner/crew split --}}
@@ -125,13 +125,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.gross_sales') }}</td><td class="col-num">{{ number_format($t['gross_sales'], 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.trip_expenses') }}</td><td class="col-num">({{ number_format($t['trip_expenses'], 2) }})</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.general_expenses') }}</td><td class="col-num">({{ number_format($t['general_expenses'], 2) }})</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.depreciation') }}</td><td class="col-num">({{ number_format($t['depreciation'], 2) }})</td></tr>
-                        <tr class="net-row"><td class="col-text">{{ __('owner.annual_summary.waterfall.net_profit') }}</td><td class="col-num">{{ number_format($t['net_profit'], 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.owner_share') }}</td><td class="col-num">{{ number_format($t['owner_share'], 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.crew_share') }}</td><td class="col-num">{{ number_format($t['crew_share'], 2) }}</td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.gross_sales') }}</td><td class="col-num"><x-report-money :amount="$t['gross_sales']" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.trip_expenses') }}</td><td class="col-num">(<x-report-money :amount="$t['trip_expenses']" />)</td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.general_expenses') }}</td><td class="col-num">(<x-report-money :amount="$t['general_expenses']" />)</td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.depreciation') }}</td><td class="col-num">(<x-report-money :amount="$t['depreciation']" />)</td></tr>
+                        <tr class="net-row"><td class="col-text">{{ __('owner.annual_summary.waterfall.net_profit') }}</td><td class="col-num"><x-report-money :amount="$t['net_profit']" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.owner_share') }}</td><td class="col-num"><x-report-money :amount="$t['owner_share']" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.waterfall.crew_share') }}</td><td class="col-num"><x-report-money :amount="$t['crew_share']" /></td></tr>
                     </tbody>
                 </table>
             </td>
@@ -143,11 +143,11 @@
                     </thead>
                     <tbody>
                         <tr><td class="col-text">{{ __('owner.annual_summary.payroll.crew_count') }}</td><td class="col-num">{{ $payroll['crew_count'] }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.crew_pool') }}</td><td class="col-num">{{ number_format($payroll['crew_pool'], 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.owner_share') }}</td><td class="col-num">{{ number_format($payroll['owner_share'], 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.advances') }}</td><td class="col-num">{{ number_format($payroll['advances'], 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.paid') }}</td><td class="col-num">{{ number_format($payroll['paid'], 2) }}</td></tr>
-                        <tr class="net-row"><td class="col-text">{{ __('owner.annual_summary.payroll.remaining') }}</td><td class="col-num">{{ number_format($payroll['remaining'], 2) }}</td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.crew_pool') }}</td><td class="col-num"><x-report-money :amount="$payroll['crew_pool']" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.owner_share') }}</td><td class="col-num"><x-report-money :amount="$payroll['owner_share']" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.advances') }}</td><td class="col-num"><x-report-money :amount="$payroll['advances']" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.annual_summary.payroll.paid') }}</td><td class="col-num"><x-report-money :amount="$payroll['paid']" /></td></tr>
+                        <tr class="net-row"><td class="col-text">{{ __('owner.annual_summary.payroll.remaining') }}</td><td class="col-num"><x-report-money :amount="$payroll['remaining']" /></td></tr>
                     </tbody>
                 </table>
             </td>
@@ -186,16 +186,16 @@
                         <td class="col-text">{{ $monthNames[$m] }}</td>
                         @if ($closing)
                             <td>{{ __('owner.month_closing.status_closed') }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->gross_sales, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->net_owner_revenue, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->trip_expenses, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->general_expenses, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->depreciation, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->depreciation_deferred, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->total_expenses, 2) }}</td>
-                            <td class="col-num" style="color:{{ (float) $closing->net_profit >= 0 ? $green : $red }};">{{ number_format((float) $closing->net_profit, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->crew_share, 2) }}</td>
-                            <td class="col-num">{{ number_format((float) $closing->owner_share, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->gross_sales" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->net_owner_revenue" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->trip_expenses" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->general_expenses" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->depreciation" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->depreciation_deferred" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->total_expenses" /></td>
+                            <td class="col-num" style="color:{{ (float) $closing->net_profit >= 0 ? $green : $red }};"><x-report-money :amount="(float) $closing->net_profit" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->crew_share" /></td>
+                            <td class="col-num"><x-report-money :amount="(float) $closing->owner_share" /></td>
                         @else
                             <td style="color:#999;">{{ __('owner.annual_summary.not_closed') }}</td>
                             @for ($i = 0; $i < 10; $i++)
@@ -208,16 +208,16 @@
             <tfoot>
                 <tr class="net-row">
                     <td class="col-text" colspan="2">{{ __('owner.annual_summary.columns.total') }}</td>
-                    <td class="col-num">{{ number_format($t['gross_sales'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['net_owner_revenue'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['trip_expenses'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['general_expenses'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['depreciation'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['depreciation_deferred'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['total_expenses'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['net_profit'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['crew_share'], 2) }}</td>
-                    <td class="col-num">{{ number_format($t['owner_share'], 2) }}</td>
+                    <td class="col-num"><x-report-money :amount="$t['gross_sales']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['net_owner_revenue']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['trip_expenses']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['general_expenses']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['depreciation']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['depreciation_deferred']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['total_expenses']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['net_profit']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['crew_share']" /></td>
+                    <td class="col-num"><x-report-money :amount="$t['owner_share']" /></td>
                 </tr>
             </tfoot>
         </table>
@@ -242,9 +242,9 @@
                                 <tr>
                                     <td class="col-text">{{ __('owner.annual_summary.quarters.' . $q) }}</td>
                                     @if ($qd['has'])
-                                        <td class="col-num">{{ number_format($qd['sales'], 2) }}</td>
-                                        <td class="col-num">{{ number_format($qd['expenses'], 2) }}</td>
-                                        <td class="col-num" style="color:{{ $qd['net'] >= 0 ? $green : $red }};">{{ number_format($qd['net'], 2) }}</td>
+                                        <td class="col-num"><x-report-money :amount="$qd['sales']" /></td>
+                                        <td class="col-num"><x-report-money :amount="$qd['expenses']" /></td>
+                                        <td class="col-num" style="color:{{ $qd['net'] >= 0 ? $green : $red }};"><x-report-money :amount="$qd['net']" /></td>
                                         <td class="col-num">{{ number_format($qd['margin'], 1) }}%</td>
                                     @else
                                         <td class="col-num" style="color:#bbb;">—</td>
@@ -258,9 +258,9 @@
                         <tfoot>
                             <tr class="net-row">
                                 <td class="col-text">{{ __('owner.annual_summary.columns.total') }}</td>
-                                <td class="col-num">{{ number_format($t['gross_sales'], 2) }}</td>
-                                <td class="col-num">{{ number_format($t['total_expenses'], 2) }}</td>
-                                <td class="col-num">{{ number_format($t['net_profit'], 2) }}</td>
+                                <td class="col-num"><x-report-money :amount="$t['gross_sales']" /></td>
+                                <td class="col-num"><x-report-money :amount="$t['total_expenses']" /></td>
+                                <td class="col-num"><x-report-money :amount="$t['net_profit']" /></td>
                                 <td class="col-num">{{ number_format($a['margin'], 1) }}%</td>
                             </tr>
                         </tfoot>
@@ -289,7 +289,7 @@
                                     <td style="padding:5px 6px;">
                                         <div class="bar-track"><div class="bar-fill" style="width:{{ $pct }}%;background:{{ $barColor }};"></div></div>
                                     </td>
-                                    <td class="col-num" style="color:{{ $barColor }};">{{ number_format($net, 2) }}</td>
+                                    <td class="col-num" style="color:{{ $barColor }};"><x-report-money :amount="$net" /></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="3" style="color:#999;">{{ __('owner.annual_summary.no_data') }}</td></tr>
@@ -309,10 +309,10 @@
         </div>
 
         <x-report-stats :items="[
-            ['label' => __('owner.annual_summary.sales.gross'), 'value' => number_format($salesData['totals']['gross'], 2)],
-            ['label' => __('owner.annual_summary.sales.net_owner'), 'value' => number_format($salesData['totals']['net_owner'], 2)],
+            ['label' => __('owner.annual_summary.sales.gross'), 'value' => $salesData['totals']['gross'], 'money' => true],
+            ['label' => __('owner.annual_summary.sales.net_owner'), 'value' => $salesData['totals']['net_owner'], 'money' => true],
             ['label' => __('owner.annual_summary.sales.invoices'), 'value' => number_format($salesData['totals']['invoices'])],
-            ['label' => __('owner.annual_summary.sales.avg_invoice'), 'value' => number_format($salesData['totals']['avg_invoice'], 2)],
+            ['label' => __('owner.annual_summary.sales.avg_invoice'), 'value' => $salesData['totals']['avg_invoice'], 'money' => true],
         ]" />
 
         <table class="dual" style="margin-bottom:14px;">
@@ -334,7 +334,7 @@
                                     <td class="col-text">{{ $fish['name'] }}</td>
                                     <td class="col-num">{{ number_format($fish['quantity'], 2) }}</td>
                                     <td class="col-num">{{ number_format($fish['weight'], 2) }}@if (! empty($fish['unit_name'])) {{ $fish['unit_name'] }}@endif</td>
-                                    <td class="col-num">{{ number_format($fish['total'], 2) }}</td>
+                                    <td class="col-num"><x-report-money :amount="$fish['total']" /></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="4" style="color:#999;">{{ __('owner.annual_summary.no_data') }}</td></tr>
@@ -358,7 +358,7 @@
                                 <tr>
                                     <td class="col-text">{{ $customer['name'] }}</td>
                                     <td class="col-num">{{ number_format($customer['invoices']) }}</td>
-                                    <td class="col-num">{{ number_format($customer['total'], 2) }}</td>
+                                    <td class="col-num"><x-report-money :amount="$customer['total']" /></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="3" style="color:#999;">{{ __('owner.annual_summary.no_data') }}</td></tr>
@@ -384,7 +384,7 @@
                         <tr>
                             <td class="col-text">{{ $boatRow['name'] }}</td>
                             <td class="col-num">{{ number_format($boatRow['invoices']) }}</td>
-                            <td class="col-num">{{ number_format($boatRow['total'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$boatRow['total']" /></td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -405,7 +405,7 @@
                 </td>
                 <td>
                     <span class="ib-label">{{ __('owner.annual_summary.catch.total_amount') }}</span>
-                    <span class="ib-value">{{ number_format($catchData['total_amount'], 2) }}</span>
+                    <span class="ib-value"><x-report-money :amount="$catchData['total_amount']" /></span>
                 </td>
             </tr>
         </table>
@@ -424,7 +424,7 @@
                     <tr>
                         <td class="col-text">{{ $species['name'] }}</td>
                         <td class="col-num">{{ number_format($species['weight'], 2) }}@if (! empty($species['unit_name'])) {{ $species['unit_name'] }}@endif</td>
-                        <td class="col-num">{{ number_format($species['total'], 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$species['total']" /></td>
                     </tr>
                 @empty
                     <tr><td colspan="3" style="color:#999;">{{ __('owner.annual_summary.no_data') }}</td></tr>
@@ -455,7 +455,7 @@
                             @forelse ($expensesByCategory as $cat)
                                 <tr>
                                     <td class="col-text">{{ $cat['name'] }}</td>
-                                    <td class="col-num">{{ number_format($cat['total'], 2) }}</td>
+                                    <td class="col-num"><x-report-money :amount="$cat['total']" /></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="2" style="color:#999;">{{ __('owner.annual_summary.no_closings') }}</td></tr>
@@ -476,7 +476,7 @@
                             @forelse ($expensesByType as $type)
                                 <tr>
                                     <td class="col-text">{{ $type['label'] }}</td>
-                                    <td class="col-num">{{ number_format($type['total'], 2) }}</td>
+                                    <td class="col-num"><x-report-money :amount="$type['total']" /></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="2" style="color:#999;">{{ __('owner.annual_summary.no_closings') }}</td></tr>
@@ -509,10 +509,10 @@
                         <td class="col-text">{{ $member['name'] }}</td>
                         <td>{{ $member['role'] }}</td>
                         <td class="col-num">{{ $member['months'] }}</td>
-                        <td class="col-num">{{ number_format($member['earned'], 2) }}</td>
-                        <td class="col-num">{{ number_format($member['advances'], 2) }}</td>
-                        <td class="col-num">{{ number_format($member['paid'], 2) }}</td>
-                        <td class="col-num">{{ number_format($member['remaining'], 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$member['earned']" /></td>
+                        <td class="col-num"><x-report-money :amount="$member['advances']" /></td>
+                        <td class="col-num"><x-report-money :amount="$member['paid']" /></td>
+                        <td class="col-num"><x-report-money :amount="$member['remaining']" /></td>
                     </tr>
                 @empty
                     <tr><td colspan="8" style="color:#999;">{{ __('owner.annual_summary.no_data') }}</td></tr>
@@ -522,10 +522,10 @@
                 <tfoot>
                     <tr class="net-row">
                         <td class="col-text" colspan="4">{{ __('owner.annual_summary.columns.total') }}</td>
-                        <td class="col-num">{{ number_format($payroll['crew_pool'], 2) }}</td>
-                        <td class="col-num">{{ number_format($payroll['advances'], 2) }}</td>
-                        <td class="col-num">{{ number_format($payroll['paid'], 2) }}</td>
-                        <td class="col-num">{{ number_format($payroll['remaining'], 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$payroll['crew_pool']" /></td>
+                        <td class="col-num"><x-report-money :amount="$payroll['advances']" /></td>
+                        <td class="col-num"><x-report-money :amount="$payroll['paid']" /></td>
+                        <td class="col-num"><x-report-money :amount="$payroll['remaining']" /></td>
                     </tr>
                 </tfoot>
             @endif

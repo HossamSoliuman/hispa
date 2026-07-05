@@ -25,7 +25,7 @@
         ['label' => __('owner.analysis_reports.production_species.species_count'), 'value' => count($rows)],
         ['label' => __('owner.analysis_reports.production_species.caught_weight'), 'value' => number_format($totalCaughtWeight, 2)],
         ['label' => __('owner.analysis_reports.production_species.sold_weight'), 'value' => number_format($totalSoldWeight, 2)],
-        ['label' => __('owner.analysis_reports.production_species.sold_value'), 'value' => number_format($totalSoldValue, 2)],
+        ['label' => __('owner.analysis_reports.production_species.sold_value'), 'value' => $totalSoldValue, 'money' => true],
     ]" />
 
     <x-report-table :headers="[
@@ -39,9 +39,9 @@
             <tr>
                 <td>{{ $row['fish_name'] }}</td>
                 <td style="text-align:end;">{{ number_format($row['caught_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
-                <td style="text-align:end;">{{ number_format($row['caught_value'], 2) }}</td>
+                <td style="text-align:end;"><x-report-money :amount="$row['caught_value']" /></td>
                 <td style="text-align:end;">{{ number_format($row['sold_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
-                <td style="text-align:end;font-weight:700;">{{ number_format($row['sold_value'], 2) }}</td>
+                <td style="text-align:end;font-weight:700;"><x-report-money :amount="$row['sold_value']" /></td>
             </tr>
         @endforeach
     </x-report-table>

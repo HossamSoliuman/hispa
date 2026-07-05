@@ -50,12 +50,12 @@
 
     {{-- KPI cards --}}
     <x-report-stats :items="[
-        ['label' => __('owner.month_summary.total_sales'), 'value' => number_format($grossSales, 2)],
-        ['label' => __('owner.month_summary.net_owner_revenue'), 'value' => number_format($netOwnerRevenue, 2)],
-        ['label' => __('owner.month_summary.total_expenses'), 'value' => number_format($totalExpenses, 2)],
-        ['label' => __('owner.month_summary.net_profit_loss'), 'value' => number_format($netProfit, 2), 'color' => $netProfit < 0 ? '#dc3545' : null],
-        ['label' => __('owner.month_summary.owner_share'), 'value' => number_format($ownerShare, 2)],
-        ['label' => __('owner.month_summary.crew_share'), 'value' => number_format($crewShare, 2)],
+        ['label' => __('owner.month_summary.total_sales'), 'value' => $grossSales, 'money' => true],
+        ['label' => __('owner.month_summary.net_owner_revenue'), 'value' => $netOwnerRevenue, 'money' => true],
+        ['label' => __('owner.month_summary.total_expenses'), 'value' => $totalExpenses, 'money' => true],
+        ['label' => __('owner.month_summary.net_profit_loss'), 'value' => $netProfit, 'money' => true, 'color' => $netProfit < 0 ? '#dc3545' : null],
+        ['label' => __('owner.month_summary.owner_share'), 'value' => $ownerShare, 'money' => true],
+        ['label' => __('owner.month_summary.crew_share'), 'value' => $crewShare, 'money' => true],
     ]" />
 
     <table class="dual">
@@ -76,7 +76,7 @@
                         </tr>
                         <tr>
                             <td class="col-text" style="padding-inline-start:18px;">{{ __('owner.month_summary.total_sales') }}</td>
-                            <td class="col-num">{{ number_format($grossSales, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$grossSales" /></td>
                         </tr>
 
                         <tr>
@@ -85,17 +85,17 @@
                         @forelse ($expenses['operating'] as $row)
                             <tr>
                                 <td class="col-text" style="padding-inline-start:18px;">{{ $row['category'] }}</td>
-                                <td class="col-num">({{ number_format($row['amount'], 2) }})</td>
+                                <td class="col-num">(<x-report-money :amount="$row['amount']" />)</td>
                             </tr>
                         @empty
                             <tr>
                                 <td class="col-text" style="padding-inline-start:18px;color:#888;">{{ __('owner.month_summary.no_expenses') }}</td>
-                                <td class="col-num" style="color:#888;">0.00</td>
+                                <td class="col-num" style="color:#888;"><x-report-money :amount="0" /></td>
                             </tr>
                         @endforelse
                         <tr>
                             <th class="col-text">{{ __('owner.month_summary.total_operating_expenses') }}</th>
-                            <th class="col-num">({{ number_format($tripExpenses, 2) }})</th>
+                            <th class="col-num">(<x-report-money :amount="$tripExpenses" />)</th>
                         </tr>
 
                         <tr>
@@ -104,17 +104,17 @@
                         @forelse ($expenses['general'] as $row)
                             <tr>
                                 <td class="col-text" style="padding-inline-start:18px;">{{ $row['category'] }}</td>
-                                <td class="col-num">({{ number_format($row['amount'], 2) }})</td>
+                                <td class="col-num">(<x-report-money :amount="$row['amount']" />)</td>
                             </tr>
                         @empty
                             <tr>
                                 <td class="col-text" style="padding-inline-start:18px;color:#888;">{{ __('owner.month_summary.no_expenses') }}</td>
-                                <td class="col-num" style="color:#888;">0.00</td>
+                                <td class="col-num" style="color:#888;"><x-report-money :amount="0" /></td>
                             </tr>
                         @endforelse
                         <tr>
                             <th class="col-text">{{ __('owner.month_summary.total_general_expenses') }}</th>
-                            <th class="col-num">({{ number_format($generalExpenses, 2) }})</th>
+                            <th class="col-num">(<x-report-money :amount="$generalExpenses" />)</th>
                         </tr>
 
                         <tr>
@@ -122,17 +122,17 @@
                         </tr>
                         <tr>
                             <td class="col-text" style="padding-inline-start:18px;">{{ __('owner.month_summary.depreciation') }}</td>
-                            <td class="col-num">({{ number_format($depreciation, 2) }})</td>
+                            <td class="col-num">(<x-report-money :amount="$depreciation" />)</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <th class="col-text">{{ __('owner.month_summary.total_expenses') }}</th>
-                            <th class="col-num">({{ number_format($totalExpenses, 2) }})</th>
+                            <th class="col-num">(<x-report-money :amount="$totalExpenses" />)</th>
                         </tr>
                         <tr class="net-row">
                             <th class="col-text">{{ __('owner.month_summary.net_profit_loss') }}</th>
-                            <th class="col-num">{{ number_format($netProfit, 2) }}</th>
+                            <th class="col-num"><x-report-money :amount="$netProfit" /></th>
                         </tr>
                     </tfoot>
                 </table>
@@ -152,11 +152,11 @@
                     <tbody>
                         <tr>
                             <td class="col-text">{{ __('owner.month_summary.owner_share') }} ({{ number_format($ownerPercent, 0) }}%)</td>
-                            <td class="col-num">{{ number_format($ownerShare, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$ownerShare" /></td>
                         </tr>
                         <tr>
                             <td class="col-text">{{ __('owner.month_summary.crew_share') }} ({{ number_format(100 - $ownerPercent, 0) }}%)</td>
-                            <td class="col-num">{{ number_format($crewShare, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$crewShare" /></td>
                         </tr>
                         <tr>
                             <td class="col-text">{{ __('owner.month_summary.crew_count') }}</td>
@@ -164,7 +164,7 @@
                         </tr>
                         <tr class="net-row">
                             <th class="col-text">{{ __('owner.month_summary.per_fisherman') }}</th>
-                            <th class="col-num">{{ number_format($perFisherman, 2) }}</th>
+                            <th class="col-num"><x-report-money :amount="$perFisherman" /></th>
                         </tr>
                     </tbody>
                 </table>
@@ -173,11 +173,11 @@
                     <tr>
                         <td>
                             <span class="ib-label">{{ __('owner.month_summary.net_owner_revenue') }}</span>
-                            <span class="ib-value">{{ number_format($netOwnerRevenue, 2) }}</span>
+                            <span class="ib-value"><x-report-money :amount="$netOwnerRevenue" /></span>
                         </td>
                         <td>
                             <span class="ib-label">{{ __('owner.month_summary.net_profit_loss') }}</span>
-                            <span class="ib-value">{{ number_format($netProfit, 2) }}</span>
+                            <span class="ib-value"><x-report-money :amount="$netProfit" /></span>
                         </td>
                     </tr>
                 </table>

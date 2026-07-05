@@ -32,13 +32,13 @@
 
     {{-- KPI cards (borderless, text only) --}}
     <x-report-stats :items="[
-        ['label' => __('owner.profit_loss.total_sales'), 'value' => number_format($f['gross_sales'], 2)],
-        ['label' => __('owner.profit_loss.net_owner_revenue'), 'value' => number_format($f['net_owner_revenue'], 2)],
-        ['label' => __('owner.profit_loss.total_expenses'), 'value' => number_format($f['total_expenses'], 2)],
-        ['label' => __('owner.profit_loss.net_profit_loss'), 'value' => number_format($netProfit, 2)],
-        ['label' => __('owner.profit_loss.losses'), 'value' => number_format(max(-$netProfit, 0), 2)],
-        ['label' => __('owner.profit_loss.owner_share'), 'value' => number_format($f['owner_share'], 2)],
-        ['label' => __('owner.profit_loss.crew_share'), 'value' => number_format($f['crew_share'], 2)],
+        ['label' => __('owner.profit_loss.total_sales'), 'value' => $f['gross_sales'], 'money' => true],
+        ['label' => __('owner.profit_loss.net_owner_revenue'), 'value' => $f['net_owner_revenue'], 'money' => true],
+        ['label' => __('owner.profit_loss.total_expenses'), 'value' => $f['total_expenses'], 'money' => true],
+        ['label' => __('owner.profit_loss.net_profit_loss'), 'value' => $netProfit, 'money' => true],
+        ['label' => __('owner.profit_loss.losses'), 'value' => max(-$netProfit, 0), 'money' => true],
+        ['label' => __('owner.profit_loss.owner_share'), 'value' => $f['owner_share'], 'money' => true],
+        ['label' => __('owner.profit_loss.crew_share'), 'value' => $f['crew_share'], 'money' => true],
     ]" />
 
     {{-- Two 50/50 columns: Revenues stacked over the Profit summary on one side,
@@ -57,19 +57,19 @@
                     <tbody>
                         <tr>
                             <td class="col-text">{{ __('owner.profit_loss.total_sales') }}</td>
-                            <td class="col-num">{{ number_format($f['gross_sales'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['gross_sales']" /></td>
                             <td>{{ $pct($f['gross_sales'], $revenueBase) }}</td>
                         </tr>
                         <tr>
                             <td class="col-text">{{ __('owner.profit_loss.commission_labor') }}</td>
-                            <td class="col-num">({{ number_format($f['commission_labor'], 2) }})</td>
+                            <td class="col-num">(<x-report-money :amount="$f['commission_labor']" />)</td>
                             <td>{{ $pct($f['commission_labor'], $revenueBase) }}</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <th class="col-text">{{ __('owner.profit_loss.net_owner_revenue') }}</th>
-                            <th class="col-num">{{ number_format($f['net_owner_revenue'], 2) }}</th>
+                            <th class="col-num"><x-report-money :amount="$f['net_owner_revenue']" /></th>
                             <th>{{ $pct($f['net_owner_revenue'], $revenueBase) }}</th>
                         </tr>
                     </tfoot>
@@ -78,23 +78,23 @@
                     <tbody>
                         <tr>
                             <th class="col-text" style="width:62%;">{{ __('owner.profit_loss.net_owner_revenue') }}</th>
-                            <td class="col-num">{{ number_format($f['net_owner_revenue'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['net_owner_revenue']" /></td>
                         </tr>
                         <tr>
                             <th class="col-text">{{ __('owner.profit_loss.total_expenses') }}</th>
-                            <td class="col-num">({{ number_format($f['total_expenses'], 2) }})</td>
+                            <td class="col-num">(<x-report-money :amount="$f['total_expenses']" />)</td>
                         </tr>
                         <tr class="net-row">
                             <th class="col-text">{{ __('owner.profit_loss.net_profit_loss') }}</th>
-                            <td class="col-num">{{ number_format($netProfit, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$netProfit" /></td>
                         </tr>
                         <tr>
                             <th class="col-text">{{ __('owner.profit_loss.owner_share') }} ({{ rtrim(rtrim(number_format($f['owner_percent'], 2), '0'), '.') }})</th>
-                            <td class="col-num">{{ number_format($f['owner_share'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['owner_share']" /></td>
                         </tr>
                         <tr>
                             <th class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
-                            <td class="col-num">{{ number_format($f['crew_share'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['crew_share']" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -112,24 +112,24 @@
                     <tbody>
                         <tr>
                             <td class="col-text">{{ __('owner.profit_loss.trip_expenses') }}</td>
-                            <td class="col-num">{{ number_format($f['trip_expenses'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['trip_expenses']" /></td>
                             <td>{{ $pct($f['trip_expenses'], $expenseBase) }}</td>
                         </tr>
                         <tr>
                             <td class="col-text">{{ __('owner.profit_loss.general_expenses') }}</td>
-                            <td class="col-num">{{ number_format($f['general_expenses'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['general_expenses']" /></td>
                             <td>{{ $pct($f['general_expenses'], $expenseBase) }}</td>
                         </tr>
                         <tr>
                             <td class="col-text">{{ __('owner.profit_loss.depreciation') }}</td>
-                            <td class="col-num">{{ number_format($f['depreciation'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['depreciation']" /></td>
                             <td>{{ $pct($f['depreciation'], $expenseBase) }}</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <th class="col-text">{{ __('owner.profit_loss.total_expenses') }}</th>
-                            <th class="col-num">{{ number_format($f['total_expenses'], 2) }}</th>
+                            <th class="col-num"><x-report-money :amount="$f['total_expenses']" /></th>
                             <th>100.00</th>
                         </tr>
                     </tfoot>
@@ -156,14 +156,14 @@
                         <td>{{ $member['role'] }}</td>
                         <td>{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '' : '-' }}</td>
                         <td>{{ $member['custom_percent'] !== null ? '-' : number_format($member['shares'], 2) }}</td>
-                        <td class="col-num">{{ number_format($member['due'], 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$member['due']" /></td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
                     <th colspan="4" class="col-text">{{ __('owner.profit_loss.crew_share') }}</th>
-                    <th class="col-num">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</th>
+                    <th class="col-num"><x-report-money :amount="collect($f['crew_distribution'])->sum('due')" /></th>
                 </tr>
             </tfoot>
         </table>

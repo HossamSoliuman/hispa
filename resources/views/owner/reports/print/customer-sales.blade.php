@@ -25,7 +25,7 @@
             @endif
             <td><span class="ib-label">{{ __('owner.sales_report.total_sales') }}</span><span class="ib-value">{{ $statistics['total_sales'] }}</span></td>
             <td><span class="ib-label">{{ __('owner.sales_report.total_weight') }}</span><span class="ib-value">{{ formatWeightByUnit($allDetails) }}</span></td>
-            <td><span class="ib-label">{{ __('owner.sales_report.total_revenue') }}</span><span class="ib-value">{{ number_format($statistics['total_revenue'], 2) }}</span></td>
+            <td><span class="ib-label">{{ __('owner.sales_report.total_revenue') }}</span><span class="ib-value"><x-report-money :amount="$statistics['total_revenue']" /></span></td>
         </tr>
     </table>
 
@@ -57,8 +57,8 @@
                         <td class="col-text">{{ $sale->customer_name ?? optional($sale->customer)->name ?? '—' }}</td>
                         <td>{{ optional($sale->paymentMethod)->name ?? '—' }}</td>
                         <td>{{ formatWeightByUnit($sale->details) }}</td>
-                        <td class="col-num">{{ number_format($sale->total_price, 2) }}</td>
-                        <td class="col-num">{{ number_format($sale->remaining_total, 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$sale->total_price" /></td>
+                        <td class="col-num"><x-report-money :amount="$sale->remaining_total" /></td>
                         <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '—' }}</td>
                     </tr>
                 @endforeach
@@ -67,8 +67,8 @@
                 <tr>
                     <td colspan="4" class="col-text">{{ __('owner.sales.total') }}</td>
                     <td>{{ formatWeightByUnit($allDetails) }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_remaining'], 2) }}</td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_revenue']" /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_remaining']" /></td>
                     <td></td>
                 </tr>
             </tfoot>

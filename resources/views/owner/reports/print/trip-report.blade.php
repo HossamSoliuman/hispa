@@ -2,7 +2,6 @@
     $isRtl = app()->getLocale() == 'ar';
     $startAlign = $isRtl ? 'right' : 'left';
     $endAlign = $isRtl ? 'left' : 'right';
-    $cur = __('owner.reports.report_currency');
 
     $formatByUnit = function ($byUnit) {
         return $byUnit->isNotEmpty()
@@ -106,8 +105,8 @@
                             <td class="col-text">{{ $detail->fish->name ?? ($detail->fish_name ?? __('owner.reports.unknown_fish')) }}</td>
                             <td>{{ number_format(round($detail->weight), 0) }}</td>
                             <td>{{ $detail->unit->name ?: __('owner.units.kg') }}</td>
-                            <td class="col-num">{{ number_format($detail->price_per_kg, 2) }}</td>
-                            <td class="col-num">{{ number_format($detail->total_price, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$detail->price_per_kg" /></td>
+                            <td class="col-num"><x-report-money :amount="$detail->total_price" /></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="empty">{{ __('owner.trips.show.no_catch_data') }}</td></tr>
@@ -133,7 +132,7 @@
                         <tr>
                             <td>{{ $sale->number }}</td>
                             <td class="col-text">{{ $sale->customer_name ?? ($sale->customer->name ?? '-') }}</td>
-                            <td class="col-num">{{ number_format($sale->total_price, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$sale->total_price" /></td>
                             <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
                         </tr>
                     @empty
@@ -157,7 +156,7 @@
                     @forelse($f['expenses'] as $expense)
                         <tr>
                             <td class="col-text">{{ $expense->category_id ? $expense->category->name : __('owner.reports.not_available') }}</td>
-                            <td class="col-num">{{ number_format($expense->final_price, 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$expense->final_price" /></td>
                         </tr>
                     @empty
                         <tr><td colspan="2" class="empty">{{ __('owner.reports.no_expenses') }}</td></tr>
@@ -167,7 +166,7 @@
                     <tfoot>
                         <tr>
                             <td class="col-text">{{ __('owner.reports.total_costs') }}</td>
-                            <td class="col-num">{{ number_format($f['total_costs'], 2) }} {{ $cur }}</td>
+                            <td class="col-num"><x-report-money :amount="$f['total_costs']" /></td>
                         </tr>
                     </tfoot>
                 @endif
@@ -181,23 +180,23 @@
                 <tbody>
                     <tr>
                         <th class="col-text" style="width:62%;">{{ __('owner.reports.total_income') }}</th>
-                        <td class="col-num" style="width:38%;">{{ number_format($f['total_income'], 2) }} {{ $cur }}</td>
+                        <td class="col-num" style="width:38%;"><x-report-money :amount="$f['total_income']" /></td>
                     </tr>
                     <tr>
                         <th class="col-text">{{ __('owner.reports.total_costs') }}</th>
-                        <td class="col-num">{{ number_format($f['total_costs'], 2) }} {{ $cur }}</td>
+                        <td class="col-num"><x-report-money :amount="$f['total_costs']" /></td>
                     </tr>
                     <tr class="net-row">
                         <th class="col-text">{{ __('owner.reports.net_profit') }}</th>
-                        <td class="col-num">{{ number_format($f['net_profit'], 2) }} {{ $cur }}</td>
+                        <td class="col-num"><x-report-money :amount="$f['net_profit']" /></td>
                     </tr>
                     <tr>
                         <th class="col-text">{{ __('owner.reports.owner_share') }} (50%)</th>
-                        <td class="col-num">{{ number_format($f['owner_share'], 2) }} {{ $cur }}</td>
+                        <td class="col-num"><x-report-money :amount="$f['owner_share']" /></td>
                     </tr>
                     <tr>
                         <th class="col-text">{{ __('owner.reports.crew_share') }} (50%)</th>
-                        <td class="col-num">{{ number_format($f['crew_share'], 2) }} {{ $cur }}</td>
+                        <td class="col-num"><x-report-money :amount="$f['crew_share']" /></td>
                     </tr>
                 </tbody>
             </table>
@@ -220,7 +219,7 @@
                         <tr>
                             <td class="col-text">{{ $member['name'] }}</td>
                             <td>{{ number_format($member['percent'], 2) }}%</td>
-                            <td class="col-num">{{ number_format($member['due'], 2) }}</td>
+                            <td class="col-num"><x-report-money :amount="$member['due']" /></td>
                             <td></td>
                         </tr>
                     @empty
@@ -254,7 +253,7 @@
                 </td>
                 <td>
                     <span class="fact-label">{{ __('owner.reports.net_profit') }}</span>
-                    <span class="fact-value">{{ number_format($statistics['net_profit'], 2) }} {{ $cur }}</span>
+                    <span class="fact-value"><x-report-money :amount="$statistics['net_profit']" /></span>
                 </td>
             </tr>
         </table>
@@ -284,8 +283,8 @@
                         <td>{{ $tripItem->duration_text ?? '-' }}</td>
                         <td>{{ $tripItem->status->label() }}</td>
                         <td>{{ $formatByUnit($tf['catch_weight_by_unit']) }}</td>
-                        <td class="col-num">{{ number_format($tf['gross_revenue'], 2) }}</td>
-                        <td class="col-num">{{ number_format($tf['net_profit'], 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$tf['gross_revenue']" /></td>
+                        <td class="col-num"><x-report-money :amount="$tf['net_profit']" /></td>
                     </tr>
                 @endforeach
             </tbody>
@@ -293,8 +292,8 @@
                 <tr>
                     <td colspan="6" class="col-text">{{ __('owner.reports.financial_summary') }}</td>
                     <td>{{ $formatByUnit($statistics['total_catch_by_unit']) }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} {{ $cur }}</td>
-                    <td class="col-num">{{ number_format($statistics['net_profit'], 2) }} {{ $cur }}</td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_revenue']" /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['net_profit']" /></td>
                 </tr>
             </tfoot>
         </table>

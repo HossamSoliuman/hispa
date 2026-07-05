@@ -1,5 +1,4 @@
 @php
-    $cur = __('owner.reports.report_currency');
     $isPercentage = $payroll->type === 'percentage';
     $typeLabel = __('owner.menu.payrolls_percentage');
     $title = $typeLabel.' - '.$payroll->month.'/'.$payroll->year;
@@ -39,9 +38,9 @@
 
     {{-- KPI cards --}}
     <x-report-stats :items="[
-        ['label' => __('owner.generated.increase'), 'value' => number_format($totalIncrease, 2)],
-        ['label' => __('owner.payrolls.advances_col'), 'value' => number_format($totalAdvances, 2)],
-        ['label' => __('owner.generated.net'), 'value' => number_format($totalNet, 2)],
+        ['label' => __('owner.generated.increase'), 'value' => $totalIncrease, 'money' => true],
+        ['label' => __('owner.payrolls.advances_col'), 'value' => $totalAdvances, 'money' => true],
+        ['label' => __('owner.generated.net'), 'value' => $totalNet, 'money' => true],
     ]" />
 
     {{-- Payroll detail lines --}}
@@ -70,15 +69,15 @@
                     <td>{{ $loop->iteration }}</td>
                     <td class="col-text">{{ $detail->user->name ?? '-' }}</td>
                     @if ($isPercentage)
-                        <td class="col-num">{{ number_format($detail->captins_amount ?? 0, 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$detail->captins_amount ?? 0" /></td>
                         <td>{{ $detail->custom_share_percent > 0 ? number_format((float) $detail->custom_share_percent, 2).'%' : '-' }}</td>
                     @else
-                        <td class="col-num">{{ number_format($detail->base_salary ?? 0, 2) }}</td>
+                        <td class="col-num"><x-report-money :amount="$detail->base_salary ?? 0" /></td>
                     @endif
-                    <td class="col-num">{{ number_format($detail->increase ?? 0, 2) }}</td>
-                    <td class="col-num">{{ number_format($detail->advances ?? 0, 2) }}</td>
+                    <td class="col-num"><x-report-money :amount="$detail->increase ?? 0" /></td>
+                    <td class="col-num"><x-report-money :amount="$detail->advances ?? 0" /></td>
                     <td class="col-text">{{ $detail->note ?: '-' }}</td>
-                    <td class="col-num" style="font-weight:bold;">{{ number_format($detail->final_salary ?? 0, 2) }}</td>
+                    <td class="col-num" style="font-weight:bold;"><x-report-money :amount="$detail->final_salary ?? 0" /></td>
                     <td>
                         @if ($detail->is_paid)
                             <span class="badge bg-success">{{ __('owner.status.paid') }}</span>
@@ -96,10 +95,10 @@
             <tfoot>
                 <tr>
                     <th colspan="{{ $isPercentage ? 4 : 3 }}" class="col-text">{{ __('owner.payrolls.show.details_title') }}</th>
-                    <th class="col-num">{{ number_format($totalIncrease, 2) }}</th>
-                    <th class="col-num">{{ number_format($totalAdvances, 2) }}</th>
+                    <th class="col-num"><x-report-money :amount="$totalIncrease" /></th>
+                    <th class="col-num"><x-report-money :amount="$totalAdvances" /></th>
                     <th></th>
-                    <th class="col-num">{{ number_format($totalNet, 2) }}</th>
+                    <th class="col-num"><x-report-money :amount="$totalNet" /></th>
                     <th></th>
                 </tr>
             </tfoot>

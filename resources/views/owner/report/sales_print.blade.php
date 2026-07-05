@@ -27,9 +27,9 @@
 
     <x-report-stats :items="[
         ['label' => __('owner.sales_report.total_sales'), 'value' => $totalSales],
-        ['label' => __('owner.sales_report.total_revenue'), 'value' => number_format($totalRevenue, 2)],
+        ['label' => __('owner.sales_report.total_revenue'), 'value' => $totalRevenue, 'money' => true],
         ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeightByUnit($allDetails)],
-        ['label' => __('owner.sales_report.net_owner_amount'), 'value' => number_format($netOwnerAmount, 2), 'color' => '#16a085'],
+        ['label' => __('owner.sales_report.net_owner_amount'), 'value' => $netOwnerAmount, 'money' => true, 'color' => '#16a085'],
     ]" />
 
     <x-report-table>
@@ -57,8 +57,8 @@
                 <td>{{ formatWeightByUnit($sale->details) }}</td>
                 <td>{{ $sale->commission_rate }}%</td>
                 <td>{{ $sale->labor_rate }}%</td>
-                <td><x-money-inline :amount="$sale->total_price" /></td>
-                <td><x-money-inline :amount="$sale->net_owner_amount" /></td>
+                <td><x-report-money :amount="$sale->total_price" /></td>
+                <td><x-report-money :amount="$sale->net_owner_amount" /></td>
                 <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '---' }}</td>
             </tr>
             @empty

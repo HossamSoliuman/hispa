@@ -139,7 +139,15 @@
                     <th class="col-text" style="width:18%;">{{ __('owner.payrolls.show.salary_type') }}</th>
                     <td class="col-text" style="width:32%;">{{ $salaryTypeText }}</td>
                     <th class="col-text" style="width:18%;">{{ __('owner.crew.edit.salary_amount') }}</th>
-                    <td class="col-text" style="width:32%;">{{ $val($user->salary_amount) }}</td>
+                    <td class="col-text" style="width:32%;">
+                        @if (! filled($user->salary_amount))
+                            {{ $val($user->salary_amount) }}
+                        @elseif ($user->salary_type === 'percentage')
+                            {{ number_format((float) $user->salary_amount, 2) }}%
+                        @else
+                            <x-report-money :amount="$user->salary_amount" />
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <th class="col-text">{{ __('owner.dalal.modal.form.bank_name') }}</th>

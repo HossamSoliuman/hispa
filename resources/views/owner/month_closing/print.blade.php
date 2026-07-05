@@ -58,34 +58,34 @@
         <div class="sum-bodies">
             {{-- Card 1 — gross sales → returns → net sales --}}
             <div class="sum-body">
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</span><span class="sum-v">{{ number_format($grossSales, 2) }}</span></div>
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.returns') }}</span><span class="sum-v">{{ number_format($salesReturns, 2) }}</span></div>
-                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.net_sales') }}</span><span class="sum-v">{{ number_format($netSales, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.gross_sales') }}</span><span class="sum-v"><x-report-money :amount="$grossSales" /></span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.returns') }}</span><span class="sum-v"><x-report-money :amount="$salesReturns" /></span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.net_sales') }}</span><span class="sum-v"><x-report-money :amount="$netSales" /></span></div>
             </div>
             {{-- Card 2 — expenses --}}
             <div class="sum-body">
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.trip_expenses') }}</span><span class="sum-v">{{ number_format((float) $closing->trip_expenses, 2) }}</span></div>
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.operational_expenses') }}</span><span class="sum-v">{{ number_format($operatingExpenses, 2) }}</span></div>
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.depreciation') }}</span><span class="sum-v">{{ number_format((float) $closing->depreciation, 2) }}</span></div>
-                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.expenses') }}</span><span class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.trip_expenses') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->trip_expenses" /></span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.operational_expenses') }}</span><span class="sum-v"><x-report-money :amount="$operatingExpenses" /></span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.depreciation') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->depreciation" /></span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.expenses') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->total_expenses" /></span></div>
             </div>
             {{-- Card 3 — profit before distribution --}}
             <div class="sum-body">
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.net_owner_revenue') }}</span><span class="sum-v">{{ number_format((float) $closing->net_owner_revenue, 2) }}</span></div>
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</span><span class="sum-v">{{ number_format((float) $closing->total_expenses, 2) }}</span></div>
-                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.net_owner_revenue') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->net_owner_revenue" /></span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.total_expenses') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->total_expenses" /></span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->net_profit" /></span></div>
             </div>
             {{-- Card 4 — owner share --}}
             <div class="sum-body">
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->net_profit" /></span></div>
                 <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_percent') }}</span><span class="sum-v">{{ number_format((float) $closing->owner_percent, 2) }}%</span></div>
-                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</span><span class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->owner_share" /></span></div>
             </div>
             {{-- Card 5 — distributable crew share --}}
             <div class="sum-body">
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v">{{ number_format((float) $closing->net_profit, 2) }}</span></div>
-                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</span><span class="sum-v">{{ number_format((float) $closing->owner_share, 2) }}</span></div>
-                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.final_distributable') }}</span><span class="sum-v">{{ number_format((float) $closing->crew_share, 2) }}</span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.profit_before') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->net_profit" /></span></div>
+                <div class="sum-row"><span class="sum-k">{{ __('owner.month_closing.report.rows.owner_share') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->owner_share" /></span></div>
+                <div class="sum-row sum-total"><span class="sum-k">{{ __('owner.month_closing.report.rows.final_distributable') }}</span><span class="sum-v"><x-report-money :amount="(float) $closing->crew_share" /></span></div>
             </div>
         </div>
     </div>
@@ -113,10 +113,10 @@
                     <td class="col-text">{{ $due->member_name }}</td>
                     <td>{{ $due->role }}</td>
                     <td>{{ $due->custom_share_percent !== null ? number_format((float) $due->custom_share_percent, 2).'%' : number_format((float) $due->shares, 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $due->due_amount, 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $due->advances, 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $due->paid_amount, 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $due->remaining, 2) }}</td>
+                    <td class="col-num"><x-report-money :amount="(float) $due->due_amount" /></td>
+                    <td class="col-num"><x-report-money :amount="(float) $due->advances" /></td>
+                    <td class="col-num"><x-report-money :amount="(float) $due->paid_amount" /></td>
+                    <td class="col-num"><x-report-money :amount="(float) $due->remaining" /></td>
                     <td style="color:#bbb;white-space:nowrap;">..........</td>
                 </tr>
             @empty
@@ -128,10 +128,10 @@
                 <tr>
                     <td colspan="3" class="col-text">{{ __('owner.month_closing.report.dist.total') }}</td>
                     <td>{{ number_format((float) $closing->total_shares, 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $dues->sum('due_amount'), 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $dues->sum('advances'), 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td>
-                    <td class="col-num">{{ number_format((float) $dues->sum('remaining'), 2) }}</td>
+                    <td class="col-num"><x-report-money :amount="(float) $dues->sum('due_amount')" /></td>
+                    <td class="col-num"><x-report-money :amount="(float) $dues->sum('advances')" /></td>
+                    <td class="col-num"><x-report-money :amount="(float) $dues->sum('paid_amount')" /></td>
+                    <td class="col-num"><x-report-money :amount="(float) $dues->sum('remaining')" /></td>
                     <td></td>
                 </tr>
             </tfoot>
@@ -147,18 +147,18 @@
                         <tr><th colspan="2">{{ __('owner.month_closing.report.closing_summary_title') }}</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td class="col-text" style="width:64%">{{ __('owner.month_closing.report.crew_share') }}</td><td class="col-num" style="width:36%">{{ number_format((float) $closing->crew_share, 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.month_closing.report.owner_share') }}</td><td class="col-num">{{ number_format((float) $closing->owner_share, 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.month_closing.report.share_value') }}</td><td class="col-num">{{ number_format((float) $closing->share_value, 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.month_closing.report.total_advances') }}</td><td class="col-num">{{ number_format((float) $dues->sum('advances'), 2) }}</td></tr>
-                        <tr><td class="col-text">{{ __('owner.month_closing.report.total_paid') }}</td><td class="col-num">{{ number_format((float) $dues->sum('paid_amount'), 2) }}</td></tr>
+                        <tr><td class="col-text" style="width:64%">{{ __('owner.month_closing.report.crew_share') }}</td><td class="col-num" style="width:36%"><x-report-money :amount="(float) $closing->crew_share" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.owner_share') }}</td><td class="col-num"><x-report-money :amount="(float) $closing->owner_share" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.share_value') }}</td><td class="col-num"><x-report-money :amount="(float) $closing->share_value" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.total_advances') }}</td><td class="col-num"><x-report-money :amount="(float) $dues->sum('advances')" /></td></tr>
+                        <tr><td class="col-text">{{ __('owner.month_closing.report.total_paid') }}</td><td class="col-num"><x-report-money :amount="(float) $dues->sum('paid_amount')" /></td></tr>
                         @if ((float) $closing->depreciation_brought_forward > 0)
-                            <tr><td class="col-text">{{ __('owner.month_closing.deferral.brought_forward') }}</td><td class="col-num">{{ number_format((float) $closing->depreciation_brought_forward, 2) }}</td></tr>
+                            <tr><td class="col-text">{{ __('owner.month_closing.deferral.brought_forward') }}</td><td class="col-num"><x-report-money :amount="(float) $closing->depreciation_brought_forward" /></td></tr>
                         @endif
                         @if ((float) $closing->depreciation_deferred > 0)
-                            <tr><td class="col-text">{{ __('owner.month_closing.deferral.deferred') }}</td><td class="col-num">{{ number_format((float) $closing->depreciation_deferred, 2) }}</td></tr>
+                            <tr><td class="col-text">{{ __('owner.month_closing.deferral.deferred') }}</td><td class="col-num"><x-report-money :amount="(float) $closing->depreciation_deferred" /></td></tr>
                         @endif
-                        <tr class="net-row"><td class="col-text">{{ __('owner.month_closing.report.total_net_due') }}</td><td class="col-num">{{ number_format((float) $dues->sum('remaining'), 2) }}</td></tr>
+                        <tr class="net-row"><td class="col-text">{{ __('owner.month_closing.report.total_net_due') }}</td><td class="col-num"><x-report-money :amount="(float) $dues->sum('remaining')" /></td></tr>
                     </tbody>
                 </table>
             </td>

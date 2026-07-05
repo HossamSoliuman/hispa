@@ -73,7 +73,7 @@
 
             @include('owner.components.stat-card', [
                 'title' => __('owner.stock_report.total_weight'),
-                'value' => '<span id="totalWeight" class="num">0</span> <span class="unit">{{ __("owner.stock_report.kg") }}</span>',
+                'value' => '<span id="totalWeight" class="num">0</span>',
                 'icon' => 'bi bi-box-seam',
                 'gradient' => 'linear-gradient(135deg,#f59e0b,#d97706)',
                 'colClass' => 'col-6 col-md-3 col-lg-3'
@@ -238,20 +238,8 @@
                         $('#totalTripCount').text(json.trip_count || 0);
                         $('#totalFishCount').text(json.total_fish_count || 0);
 
-                        // weight formatting: show tons when >= 1000 kg
-                        function formatWeightRaw(val) {
-                            var kgLabel = "{{ __('owner.stock_report.kg') }}";
-                            var tonLabel = "{{ __('owner.stock_report.ton') }}";
-                            var n = parseFloat(val) || 0;
-                            if (n >= 1000) {
-                                return {value: (n / 1000).toFixed(2), unit: tonLabel};
-                            }
-                            return {value: n.toFixed(2), unit: kgLabel};
-                        }
-
-                        var w = formatWeightRaw(json.totalWeight);
-                        $('#totalWeight').text(w.value);
-                        $('#totalWeight').next('.unit').text(w.unit);
+                        // weight is grouped by unit server-side (mixed units), e.g. "100.00 شكة + 5.00 كجم"
+                        $('#totalWeight').text(json.totalWeight || '0');
 
                         // total records (fallback to data length)
                         $('#totalRecords').text(json.total_records ?? (json.data ? json.data.length : 0));

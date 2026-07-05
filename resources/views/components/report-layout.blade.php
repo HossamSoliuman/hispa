@@ -225,6 +225,19 @@
         .summary-row-strong td { background: #f2f2f2; }
         .currency-symbol svg, .summary-value svg { width: 12px; height: 12px; fill: currentColor; }
 
+        /* ── Monetary amount + Saudi Riyal glyph ───────────────────────────
+           The single place to tune the SAR icon for every report. Rendered by
+           the report-money component. The glyph scales with the surrounding
+           text (height in em; width auto keeps its aspect ratio) and is
+           centered on the digits. Change it here and it updates everywhere. */
+        .money { white-space: nowrap; }
+        .money .money-riyal {
+            width: auto; height: 0.92em;
+            vertical-align: -0.12em;
+            margin-inline-start: 3px;
+            fill: currentColor;
+        }
+
         .footer { text-align: center; margin-top: 40px; padding-top: 18px; border-top: 1px solid #e0e0e0; font-size: 9pt; color: #95a5a6; }
 
         /* App theme utility classes (Bootstrap palette) for report badges/colors */

@@ -13,7 +13,7 @@ class TripReportDataTable extends DataTables
     {
         $owner_id = auth()->user()->id;
         if ($request->ajax()) {
-            $query = Trip::with(['catches.details', 'sales', 'port', 'boat.port'])->orderBy('created_at', 'desc');
+            $query = Trip::with(['catches.details.unit', 'sales', 'port', 'boat.port'])->orderBy('created_at', 'desc');
             $query->where('owner_id', $owner_id);
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
@@ -50,9 +50,9 @@ class TripReportDataTable extends DataTables
                 })
 
                 ->addColumn('item_weight', function (Trip $trip) {
-                    $weight = (float) ($trip->catches?->details->sum('weight') ?? 0);
+                    $details = $trip->catches?->details ?? collect();
 
-                    return $weight > 0 ? $weight : '--';
+                    return $details->sum('weight') > 0 ? formatWeightByUnit($details) : '--';
                 })
                 ->addColumn('sales_total', function (Trip $trip) {
                     $total = (float) $trip->sales->where('seller_type', 'owner')->sum('total_price');
@@ -114,7 +114,7 @@ class TripReportDataTable extends DataTables
                 ->with([
                     'trip_count' => $data->count(),
                     'total_fish_count' => $data->sum(fn ($trip) => $trip->catches?->details->count() ?? 0),
-                    'totalWeight' => $data->sum(fn ($trip) => (float) ($trip->catches?->details->sum('weight') ?? 0)).' كجم',
+                    'totalWeight' => formatWeightByUnit($data->flatMap(fn ($trip) => $trip->catches?->details ?? collect())),
                     'total_sales' => number_format($data->sum(fn ($trip) => (float) $trip->sales->where('seller_type', 'owner')->sum('total_price')), 2),
                 ])
 

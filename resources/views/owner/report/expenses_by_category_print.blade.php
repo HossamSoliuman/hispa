@@ -23,7 +23,7 @@
     <x-report-stats :items="[
         ['label' => __('owner.analysis_reports.expenses_by_category.categories_count'), 'value' => count($rows)],
         ['label' => __('owner.analysis_reports.expenses_by_category.total_count'), 'value' => array_sum(array_column($rows, 'count'))],
-        ['label' => __('owner.analysis_reports.expenses_by_category.total_amount'), 'value' => number_format($total, 2)],
+        ['label' => __('owner.analysis_reports.expenses_by_category.total_amount'), 'value' => $total, 'money' => true],
     ]" />
 
     <x-report-table :headers="[
@@ -37,7 +37,7 @@
                 <td>{{ $row['category'] }}</td>
                 <td>{{ $row['type'] ? __('owner.analysis_reports.expenses_by_category.type_'.$row['type']) : '—' }}</td>
                 <td style="text-align:end;">{{ number_format($row['count']) }}</td>
-                <td style="text-align:end;font-weight:700;">{{ number_format($row['amount'], 2) }}</td>
+                <td style="text-align:end;font-weight:700;"><x-report-money :amount="$row['amount']" /></td>
             </tr>
         @endforeach
     </x-report-table>

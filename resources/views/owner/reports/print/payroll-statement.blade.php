@@ -4,7 +4,6 @@
      * every monthly payroll entry with its net due, split into paid and unpaid,
      * plus running totals. Inherits the shared report look — no per-view styles.
      */
-    $cur = __('owner.reports.report_currency');
     $docNumber = '#' . str_pad($user->id, 8, '0', STR_PAD_LEFT);
 
     $period = fn ($d) => sprintf('%02d / %04d', (int) ($d->payroll?->month ?? 0), (int) ($d->payroll?->year ?? 0));
@@ -50,9 +49,9 @@
 
     {{-- KPI cards --}}
     <x-report-stats :items="[
-        ['label' => __('owner.payrolls.statement.total_due'), 'value' => number_format($totalDue, 2) . ' ' . $cur],
-        ['label' => __('owner.payrolls.statement.total_paid'), 'value' => number_format($totalPaid, 2) . ' ' . $cur, 'color' => '#198754'],
-        ['label' => __('owner.payrolls.statement.total_unpaid'), 'value' => number_format($totalUnpaid, 2) . ' ' . $cur, 'color' => '#dc3545'],
+        ['label' => __('owner.payrolls.statement.total_due'), 'value' => $totalDue, 'money' => true],
+        ['label' => __('owner.payrolls.statement.total_paid'), 'value' => $totalPaid, 'money' => true, 'color' => '#198754'],
+        ['label' => __('owner.payrolls.statement.total_unpaid'), 'value' => $totalUnpaid, 'money' => true, 'color' => '#dc3545'],
         ['label' => __('owner.payrolls.statement.months_count'), 'value' => (string) $details->count()],
     ]" />
 
@@ -76,9 +75,9 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $period($detail) }}</td>
-                    <td class="col-num">{{ number_format($dueOf($detail), 2) }}</td>
-                    <td class="col-num">{{ number_format($paidOf($detail), 2) }}</td>
-                    <td class="col-num">{{ number_format($unpaidOf($detail), 2) }}</td>
+                    <td class="col-num"><x-report-money :amount="$dueOf($detail)" /></td>
+                    <td class="col-num"><x-report-money :amount="$paidOf($detail)" /></td>
+                    <td class="col-num"><x-report-money :amount="$unpaidOf($detail)" /></td>
                     <td>{{ $detail->is_paid && $detail->paid_at ? optional($detail->paid_at)->format('Y-m-d') : '—' }}</td>
                     <td class="col-text">{{ $detail->note ?: '—' }}</td>
                     <td>
@@ -97,9 +96,9 @@
             <tfoot>
                 <tr class="net-row">
                     <th colspan="2" class="col-text">{{ __('owner.payrolls.statement.totals') }}</th>
-                    <th class="col-num">{{ number_format($totalDue, 2) }}</th>
-                    <th class="col-num">{{ number_format($totalPaid, 2) }}</th>
-                    <th class="col-num">{{ number_format($totalUnpaid, 2) }}</th>
+                    <th class="col-num"><x-report-money :amount="$totalDue" /></th>
+                    <th class="col-num"><x-report-money :amount="$totalPaid" /></th>
+                    <th class="col-num"><x-report-money :amount="$totalUnpaid" /></th>
                     <th colspan="3"></th>
                 </tr>
             </tfoot>

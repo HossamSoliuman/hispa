@@ -29,7 +29,7 @@
     <x-report-stats :items="[
         ['label' => __('owner.reports.total_boats'), 'value' => $statistics['total_boats']],
         ['label' => __('owner.reports.active_boats'), 'value' => $statistics['active_boats']],
-        ['label' => __('owner.reports.total_maintenance_cost'), 'value' => number_format($statistics['total_maintenance_cost'], 2)],
+        ['label' => __('owner.reports.total_maintenance_cost'), 'value' => $statistics['total_maintenance_cost'], 'money' => true],
         ['label' => __('owner.reports.total_payload'), 'value' => number_format($statistics['total_payload'], 2)],
     ]" />
 
@@ -72,7 +72,7 @@
                     @endif
                 </td>
                 <td style="text-align:center;">{{ optional($boat->license_date_expire)->format('Y-m-d') ?? '-' }}</td>
-                <td style="text-align:center;">{{ number_format($boatMaintenanceCost, 2) }}</td>
+                <td style="text-align:center;"><x-report-money :amount="$boatMaintenanceCost" /></td>
             </tr>
         @endforeach
     </x-report-table>

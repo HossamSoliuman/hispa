@@ -32,7 +32,11 @@
             @if($showMinus)
                 <span class="minus">-</span>
             @endif
-            {{ $displayValue }}
+            @if($showCurrency)
+                <span class="money">{{ $displayValue }}<x-riyal-icon class="money-riyal" /></span>
+            @else
+                {{ $displayValue }}
+            @endif
         </td>
     </tr>
 </table>
