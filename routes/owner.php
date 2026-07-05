@@ -37,6 +37,7 @@ use App\Http\Controllers\Owner\PortController;
 use App\Http\Controllers\Owner\ProfileController;
 use App\Http\Controllers\Owner\ProfitLossController;
 use App\Http\Controllers\Owner\RegionController;
+use App\Http\Controllers\Owner\Report\AccountStatementController;
 use App\Http\Controllers\Owner\Report\AnnualSummaryController;
 use App\Http\Controllers\Owner\Report\DalalStockReportController;
 use App\Http\Controllers\Owner\Report\FishHistoryReportController;
@@ -239,6 +240,14 @@ Route::group([
         Route::get('/reports/boat-profitability/print', [ProfitabilityReportController::class, 'boatProfitabilityPrint'])->name('reports.boat-profitability.print');
         Route::get('/reports/production-species', [ProfitabilityReportController::class, 'productionBySpecies'])->name('reports.production-species');
         Route::get('/reports/production-species/print', [ProfitabilityReportController::class, 'productionBySpeciesPrint'])->name('reports.production-species.print');
+
+        // account statements (كشف الحساب): customers, vendors, crew
+        Route::get('/reports/customer-statement', [AccountStatementController::class, 'customer'])->name('reports.customer-statement');
+        Route::get('/reports/customer-statement/print', [AccountStatementController::class, 'customerPrint'])->name('reports.customer-statement.print');
+        Route::get('/reports/vendor-statement', [AccountStatementController::class, 'vendor'])->name('reports.vendor-statement');
+        Route::get('/reports/vendor-statement/print', [AccountStatementController::class, 'vendorPrint'])->name('reports.vendor-statement.print');
+        Route::get('/reports/crew-statement', [AccountStatementController::class, 'crew'])->name('reports.crew-statement');
+        Route::get('/reports/crew-statement/print', [AccountStatementController::class, 'crewPrint'])->name('reports.crew-statement.print');
 
         // fish_Stock_history
         Route::get('/fish_stock_history', [FishHistoryReportController::class, 'index'])->name('fish-history-report');

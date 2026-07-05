@@ -33,6 +33,16 @@
                 ],
             ],
             [
+                'title' => __('owner.analysis_reports.group_statements'),
+                'icon' => 'bi-journal-text',
+                'color' => 'info',
+                'items' => [
+                    ['owner.reports.customer-statement', __('owner.analysis_reports.account_statements.customer.title')],
+                    ['owner.reports.vendor-statement', __('owner.analysis_reports.account_statements.vendor.title')],
+                    ['owner.reports.crew-statement', __('owner.analysis_reports.account_statements.crew.title')],
+                ],
+            ],
+            [
                 'title' => __('owner.analysis_reports.group_closing'),
                 'icon' => 'bi-lock',
                 'color' => 'warning',
