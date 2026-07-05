@@ -120,7 +120,7 @@ return [
     ],
     'alerts' => [
         'title' => 'التنبيهات',
-        'all_clear' => 'لا توجد تنبيهات حالياً 🎉',
+        'all_clear' => 'لا توجد تنبيهات حالياً',
         'count_badge' => ':count تنبيه',
         'showing' => 'عرض :shown من :total',
         'severity' => [

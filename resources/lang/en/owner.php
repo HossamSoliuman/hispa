@@ -120,7 +120,7 @@ return [
     ],
     'alerts' => [
         'title' => 'Alerts',
-        'all_clear' => 'No warnings right now 🎉',
+        'all_clear' => 'No warnings right now',
         'count_badge' => ':count alerts',
         'showing' => 'Showing :shown of :total',
         'severity' => [
