@@ -25,6 +25,8 @@ use Illuminate\Support\Collection;
  */
 final class OwnerAlertService
 {
+    public function __construct(private PayrollService $payroll) {}
+
     /**
      * All current alerts for an owner, highest severity first then soonest due.
      *
@@ -278,8 +280,13 @@ final class OwnerAlertService
 
     /**
      * Outstanding crew/captain dues, aggregated to one alert per person across
-     * all of their unpaid month closings. Severity escalates to Critical once
-     * the oldest unpaid closing is older than the configured threshold.
+     * all of their unpaid month closings. The frozen due snapshot is reconciled
+     * against the real percentage-payroll disbursements — mirroring
+     * {@see \App\Http\Controllers\Owner\MonthClosingController::linkPayrollPayments()}
+     * — so a due settled through payroll clears the alert instead of lingering.
+     * Severity escalates to Critical once the oldest still-unpaid closing is
+     * older than the configured threshold. The alert links to that closing so
+     * the owner lands on the page where the outstanding due is shown.
      *
      * @return \Illuminate\Support\Collection<int, \App\Support\Alert>
      */
@@ -287,21 +294,39 @@ final class OwnerAlertService
     {
         $criticalBefore = today()->subDays((int) config('alerts.unpaid_dues.critical_days'))->startOfDay();
 
+        $paidByPeriod = [];
+        $paidFor = function (MonthClosingDue $due) use ($ownerId, &$paidByPeriod): float {
+            $closing = $due->monthClosing;
+            if (! $closing) {
+                return 0.0;
+            }
+
+            $key = $closing->year.'-'.$closing->month;
+            $paidByPeriod[$key] ??= $this->payroll->monthlyPercentagePaidByUser($ownerId, $closing->year, $closing->month);
+
+            return (float) ($paidByPeriod[$key][$due->user_id] ?? 0);
+        };
+
         return MonthClosingDue::query()
             ->where('is_paid', false)
             ->where('remaining', '>', 0)
             ->whereHas('monthClosing', fn ($query) => $query->where('owner_id', $ownerId))
-            ->with('monthClosing:id,owner_id,closed_at')
+            ->with('monthClosing:id,owner_id,year,month,closed_at')
             ->get()
+            ->each(function (MonthClosingDue $due) use ($paidFor): void {
+                $due->remaining = round((float) $due->remaining - $paidFor($due), 2);
+            })
+            ->filter(fn (MonthClosingDue $due): bool => (float) $due->remaining > 0)
             ->groupBy('user_id')
             ->map(function (Collection $dues) use ($criticalBefore): Alert {
                 $first = $dues->first();
                 $total = (float) $dues->sum('remaining');
-                $oldestClosedAt = $dues
-                    ->map(fn (MonthClosingDue $due) => $due->monthClosing?->closed_at)
-                    ->filter()
-                    ->sort()
-                    ->first();
+
+                $oldest = $dues
+                    ->filter(fn (MonthClosingDue $due): bool => (bool) $due->monthClosing?->closed_at)
+                    ->sortBy(fn (MonthClosingDue $due) => $due->monthClosing->closed_at)
+                    ->first() ?? $first;
+                $oldestClosedAt = $oldest->monthClosing?->closed_at;
 
                 return new Alert(
                     type: AlertType::UnpaidDues,
@@ -313,24 +338,11 @@ final class OwnerAlertService
                         'name' => $first->member_name,
                         'amount' => number_format($total, 2),
                     ]),
-                    url: $this->duesUrlForRole($first->role, (int) $first->user_id),
+                    url: route('owner.month-closing.show', $oldest->month_closing_id),
                     dueAt: $oldestClosedAt,
                 );
             })
             ->values();
-    }
-
-    /**
-     * Best link for a person's outstanding dues: their profile when the role has
-     * one, otherwise the month-closing list.
-     */
-    private function duesUrlForRole(?string $role, int $userId): string
-    {
-        return match ($role) {
-            'captain' => route('owner.captain.show', $userId),
-            'crew' => route('owner.crew.show', $userId),
-            default => route('owner.month-closing.index'),
-        };
     }
 
     /**
