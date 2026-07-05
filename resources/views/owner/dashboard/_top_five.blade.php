@@ -114,7 +114,7 @@
                 @forelse ($tf['species'] as $fish)
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="text-truncate" style="max-width:60%">{{ $fish['fish_name'] }}</span>
-                        <span class="text-muted">{{ number_format($fish['sold_weight'], 0) }} {{ __('owner.dashboard.kg') }}</span>
+                        <span class="text-muted">{{ number_format($fish['sold_weight'], 0) }} {{ $fish['unit_name'] ?: __('owner.dashboard.kg') }}</span>
                     </div>
                 @empty
                     <p class="text-muted small mb-0">{{ __('owner.dashboard.top_five.no_data') }}</p>
