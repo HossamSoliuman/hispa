@@ -13,6 +13,46 @@
             margin-top: 5px;
             display: block;
         }
+
+        .profile-avatar-wrap {
+            position: relative;
+            width: 116px;
+            height: 116px;
+        }
+
+        .profile-avatar {
+            width: 116px;
+            height: 116px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--bs-primary);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+        }
+
+        .profile-status-dot {
+            position: absolute;
+            inset-inline-end: 6px;
+            bottom: 6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid var(--bs-card-bg, #fff);
+        }
+
+        .info-icon {
+            flex: 0 0 auto;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+        }
+
+        .min-w-0 {
+            min-width: 0;
+        }
     </style>
 @endsection
 @section('content')
@@ -27,100 +67,111 @@
 
     </div>
 
-    <div class="row">
+    @php
+        $subscription = $user->activeSubscription;
+        $fields = [
+            ['icon' => 'bi-person-vcard', 'tone' => 'info', 'label' => __('owner.profile_details.id_number'), 'value' => $user->id_number],
+            ['icon' => 'bi-briefcase', 'tone' => 'secondary', 'label' => __('owner.profile_details.job_title'), 'value' => $user->job_title ?: $user->role],
+            ['icon' => 'bi-card-heading', 'tone' => 'success', 'label' => __('owner.profile_details.fishing_license_number'), 'value' => $user->fishing_license_number],
+            ['icon' => 'bi-calendar-x', 'tone' => 'warning', 'label' => __('owner.profile_details.fishing_license_expiry'), 'value' => $user->fishing_license_expiry],
+            ['icon' => 'bi-telephone', 'tone' => 'success', 'label' => __('owner.profile_details.phone'), 'value' => $user->phone],
+            ['icon' => 'bi-envelope', 'tone' => 'primary', 'label' => __('owner.profile_details.email'), 'value' => $user->email],
+            ['icon' => 'bi-pin-map', 'tone' => 'warning', 'label' => __('owner.profile_details.region'), 'value' => $user->region?->name],
+            ['icon' => 'bi-geo-alt', 'tone' => 'info', 'label' => __('owner.profile_details.governorate'), 'value' => $user->governorate?->name],
+            ['icon' => 'bi-buildings', 'tone' => 'secondary', 'label' => __('owner.profile_details.port'), 'value' => $user->port?->name],
+            ['icon' => 'bi-water', 'tone' => 'primary', 'label' => __('owner.profile_details.boats_count'), 'value' => $user->boats_count],
+        ];
+        $subscriptionFields = [
+            ['icon' => 'bi-hash', 'tone' => 'info', 'label' => __('owner.profile_details.subscription_number'), 'value' => $subscription?->id],
+            ['icon' => 'bi-calendar-check', 'tone' => 'success', 'label' => __('owner.profile_details.subscription_start'), 'value' => $subscription?->start_date?->format('Y-m-d')],
+            ['icon' => 'bi-calendar-x', 'tone' => 'danger', 'label' => __('owner.profile_details.subscription_end'), 'value' => $subscription?->end_date?->format('Y-m-d')],
+        ];
+    @endphp
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center bg-primary text-white p-5 h-80">
-                    <div class="mb-4">
-                        @if (auth()->user()->logo)
-                            <img src="{{ asset(auth()->user()->logo) }}" class="rounded-circle shadow" width="120"
-                                height="120" alt="Logo">
-                        @else
-                            <img src="{{ asset('default-avatar.png') }}" class="rounded-circle shadow" width="120"
-                                height="120" alt="Default Logo">
-                        @endif
+    <div class="row g-3">
+        {{-- Identity card --}}
+        <div class="col-lg-4">
+            <div class="card h-100">
+                @include('owner.partials._card_arrow')
+                <div class="card-body text-center p-4 d-flex flex-column">
+                    <div class="profile-avatar-wrap mx-auto mb-3">
+                        <img src="{{ $user->logo ? asset($user->logo) : asset('default-avatar.png') }}"
+                            class="profile-avatar" alt="{{ $user->name }}">
+                        <span class="profile-status-dot bg-{{ $user->status ? 'success' : 'danger' }}"
+                            title="{{ $user->status ? __('owner.status.active') : __('owner.status.inactive') }}"></span>
                     </div>
 
-                    <h5 class="mb-1 text-white">{{ auth()->user()->name }}</h5>
-                    <p class="mb-2 text-white">{{ auth()->user()->role }}</p>
-                    <p>
-                        @if (auth()->user()->status)
-                            <span class="badge bg-success p-2"><i class="fa fa-clock"></i>
-                                {{ __('owner.assets.active') }}</span>
-                        @else
-                            <span class="badge bg-danger p-2">{{ __('owner.fish.status_inactive') }}</span>
-                        @endif
-                    </p>
-                </div>
-                <div class="text-center h-20">
-                    <a href="{{ route('owner.profile.edit', auth()->user()->id) }}" class="btn btn-primary rounded-4 m-4">
-                        <i class="fa fa-edit mx-2"></i>{{ __('owner.generated.edit_profile') }}</a>
-                </div>
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
+                    <h4 class="fw-bold mb-1">{{ $user->name }}</h4>
+                    <p class="text-muted text-capitalize mb-3">{{ $user->job_title ?: $user->role }}</p>
+
+                    @if ($user->status)
+                        <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2 mx-auto">
+                            <i class="bi bi-check-circle-fill me-1"></i>{{ __('owner.status.active') }}
+                        </span>
+                    @else
+                        <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis px-3 py-2 mx-auto">
+                            <i class="bi bi-x-circle-fill me-1"></i>{{ __('owner.status.inactive') }}
+                        </span>
+                    @endif
+
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#editProfileModal">
+                            <i class="bi bi-pencil me-1"></i>{{ __('owner.generated.edit_profile') }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body p-5 text-start h-100">
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <i
-                                    class="bi bi-envelope  d-inline-block bg-primary-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-primary"></i>
-                            </div>
-                            <div class="col-md-10">
-                                <p class="my-2">{{ __('owner.generated.email_address') }}</p>
-                                <p class="m-0"><strong>{{ auth()->user()->email }}</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mt-3">
-                                <i
-                                    class="bi bi-telephone d-inline-block  bg-success-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-success"></i>
-                            </div>
-                            <div class="col-md-10 mt-3">
-                                <p class="my-2">{{ __('owner.generated.phone_number_1') }}</p>
-                                <p class="m-0"><strong>{{ auth()->user()->phone ?? '-----' }}</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mt-3">
-                                <i
-                                    class="bi bi-pin-fill d-inline-block  bg-warning-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-warning"></i>
-                            </div>
-                            <div class="col-md-10 mt-3">
-                                <p class="my-2">{{ __('owner.generated.region') }}</p>
-                                <p class="m-0"><strong>{{ auth()->user()->region?->name ?? '-----' }}</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mt-3">
-                                <i
-                                    class="bi bi-pin-map d-inline-block  bg-default-100 p-2 rounded-3 p-4 fs-4 text-center line-height-100 text-default"></i>
-                            </div>
-                            <div class="col-md-10 mt-3">
-                                <p class="my-2">{{ __('owner.generated.governorate') }}</p>
-                                <p class="m-0"><strong>{{ auth()->user()->governorate?->name ?? '-----' }}</strong></p>
-                            </div>
-                        </div>
 
+        {{-- Details --}}
+        <div class="col-lg-8">
+            <div class="card h-100">
+                @include('owner.partials._card_arrow')
+                <div class="card-body p-4">
+                    <h6 class="text-muted text-uppercase fw-bold small mb-4">
+                        <i class="bi bi-person-vcard me-1"></i>{{ __('owner.profile_details.contact_information') }}
+                    </h6>
+
+                    <div class="row g-4">
+                        @foreach ($fields as $field)
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="info-icon bg-{{ $field['tone'] }} bg-opacity-10 text-{{ $field['tone'] }}">
+                                        <i class="bi {{ $field['icon'] }}"></i>
+                                    </span>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="text-muted small mb-1">{{ $field['label'] }}</div>
+                                        <div class="fw-semibold text-truncate">{{ filled($field['value']) ? $field['value'] : '—' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="text-muted text-uppercase fw-bold small mb-4">
+                        <i class="bi bi-patch-check me-1"></i>{{ __('owner.profile_details.subscription_information') }}
+                    </h6>
+
+                    <div class="row g-4">
+                        @foreach ($subscriptionFields as $field)
+                            <div class="col-sm-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="info-icon bg-{{ $field['tone'] }} bg-opacity-10 text-{{ $field['tone'] }}">
+                                        <i class="bi {{ $field['icon'] }}"></i>
+                                    </span>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="text-muted small mb-1">{{ $field['label'] }}</div>
+                                        <div class="fw-semibold text-truncate">{{ filled($field['value']) ? $field['value'] : '—' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-
-                <div class="card-arrow">
-                    <div class="card-arrow-top-left"></div>
-                    <div class="card-arrow-top-right"></div>
-                    <div class="card-arrow-bottom-left"></div>
-                    <div class="card-arrow-bottom-right"></div>
-                </div>
             </div>
-
         </div>
     </div>
 
