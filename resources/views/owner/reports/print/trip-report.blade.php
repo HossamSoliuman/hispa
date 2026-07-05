@@ -4,6 +4,12 @@
     $endAlign = $isRtl ? 'left' : 'right';
     $cur = __('owner.reports.report_currency');
 
+    $formatByUnit = function ($byUnit) {
+        return $byUnit->isNotEmpty()
+            ? $byUnit->map(fn ($weight, $unit) => number_format(round($weight), 0).' '.$unit)->implode('، ')
+            : '0';
+    };
+
     if ($trip) {
         $reportTitle = __('owner.reports.trip_report').' #'.$trip->number;
         $depart = $trip->start_date ? $trip->start_date->format('Y-m-d') : null;
@@ -47,11 +53,7 @@
     @if($trip)
         @php
             $f = $financials[$trip->id];
-            $catchWeightDisplay = $f['catch_weight_by_unit']->isNotEmpty()
-                ? $f['catch_weight_by_unit']
-                    ->map(fn ($weight, $unit) => number_format(round($weight), 0).' '.$unit)
-                    ->implode('، ')
-                : '0';
+            $catchWeightDisplay = $formatByUnit($f['catch_weight_by_unit']);
             $catchDetails = $trip->catches?->details ?? collect();
         @endphp
 
@@ -66,6 +68,12 @@
                     <span class="fact-label">{{ __('owner.trips.status') }}</span>
                     <span class="fact-value">{{ $trip->status->label() }}</span>
                 </td>
+                @if($trip->duration_text)
+                    <td>
+                        <span class="fact-label">{{ __('owner.reports.duration') }}</span>
+                        <span class="fact-value">{{ $trip->duration_text }}</span>
+                    </td>
+                @endif
                 <td>
                     <span class="fact-label">{{ __('owner.reports.catch_weight') }}</span>
                     <span class="fact-value">{{ $catchWeightDisplay }}</span>
@@ -242,7 +250,7 @@
                 </td>
                 <td>
                     <span class="fact-label">{{ __('owner.reports.total_catch') }}</span>
-                    <span class="fact-value">{{ number_format(round($statistics['total_catch']), 0) }} {{ __('owner.units.kg') }}</span>
+                    <span class="fact-value">{{ $formatByUnit($statistics['total_catch_by_unit']) }}</span>
                 </td>
                 <td>
                     <span class="fact-label">{{ __('owner.reports.net_profit') }}</span>
@@ -255,13 +263,14 @@
             <thead>
                 <tr>
                     <th style="width:5%;">#</th>
-                    <th style="width:14%;">{{ __('owner.trips.trip_number') }}</th>
-                    <th class="col-text" style="width:17%;">{{ __('owner.trips.captain_name') }}</th>
-                    <th style="width:13%;">{{ __('owner.trips.departure_date') }}</th>
-                    <th style="width:11%;">{{ __('owner.trips.status') }}</th>
-                    <th style="width:12%;">{{ __('owner.trips.total_catch') }}</th>
-                    <th class="col-num" style="width:14%;">{{ __('owner.reports.total_revenue') }}</th>
-                    <th class="col-num" style="width:14%;">{{ __('owner.reports.net_profit') }}</th>
+                    <th style="width:12%;">{{ __('owner.trips.trip_number') }}</th>
+                    <th class="col-text" style="width:15%;">{{ __('owner.trips.captain_name') }}</th>
+                    <th style="width:11%;">{{ __('owner.trips.departure_date') }}</th>
+                    <th style="width:9%;">{{ __('owner.reports.duration') }}</th>
+                    <th style="width:10%;">{{ __('owner.trips.status') }}</th>
+                    <th style="width:14%;">{{ __('owner.trips.total_catch') }}</th>
+                    <th class="col-num" style="width:12%;">{{ __('owner.reports.total_revenue') }}</th>
+                    <th class="col-num" style="width:12%;">{{ __('owner.reports.net_profit') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,8 +281,9 @@
                         <td>#{{ $tripItem->number }}</td>
                         <td class="col-text">{{ $tripItem->captain->name ?? __('owner.trips.no_captain') }}</td>
                         <td>{{ $tripItem->start_date ? $tripItem->start_date->format('Y-m-d') : '-' }}</td>
+                        <td>{{ $tripItem->duration_text ?? '-' }}</td>
                         <td>{{ $tripItem->status->label() }}</td>
-                        <td>{{ number_format(round($tf['catch_weight']), 0) }} {{ __('owner.units.kg') }}</td>
+                        <td>{{ $formatByUnit($tf['catch_weight_by_unit']) }}</td>
                         <td class="col-num">{{ number_format($tf['gross_revenue'], 2) }}</td>
                         <td class="col-num">{{ number_format($tf['net_profit'], 2) }}</td>
                     </tr>
@@ -281,8 +291,8 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5" class="col-text">{{ __('owner.reports.financial_summary') }}</td>
-                    <td>{{ number_format(round($statistics['total_catch']), 0) }} {{ __('owner.units.kg') }}</td>
+                    <td colspan="6" class="col-text">{{ __('owner.reports.financial_summary') }}</td>
+                    <td>{{ $formatByUnit($statistics['total_catch_by_unit']) }}</td>
                     <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} {{ $cur }}</td>
                     <td class="col-num">{{ number_format($statistics['net_profit'], 2) }} {{ $cur }}</td>
                 </tr>
