@@ -76,7 +76,7 @@
 
         @include('owner.components.stat-card', [
             'title' => __('owner.sales_report.total_weight'),
-            'value' => '<span id="summary_total_weight" class="num">0</span> <span class="unit">'.__('owner.sales_report.kg').'</span>',
+            'value' => '<span id="summary_total_weight" class="num">0</span>',
             'icon' => 'fas fa-weight',
             'gradient' => 'linear-gradient(135deg,#f59e0b,#d97706)',
             'colClass' => 'col-md-6 col-lg-4',
@@ -124,7 +124,7 @@
                         {{-- <th>{{ __('owner.sales_report.seller') }}</th> --}}
                         <th>{{ __('owner.sales_report.customer') }}</th>
                         <th>{{ __('owner.sales_report.payment_method') }}</th>
-                        <th>{{ __('owner.sales_report.total_weight') }} ({{ __('owner.sales_report.kg') }})</th>
+                        <th>{{ __('owner.sales_report.total_weight') }}</th>
                         <th>{{ __('owner.sales_report.commission') }}</th>
                         <th>{{ __('owner.sales_report.labor') }}</th>
                         <th>{{ __('owner.sales_report.total_price') }}</th>
@@ -238,7 +238,7 @@
                             $('#summary_total_revenue').text(parseFloat(json.total_revenue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                         }
                         if (json.total_weight !== undefined) {
-                            $('#summary_total_weight').text(parseFloat(json.total_weight).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                            $('#summary_total_weight').text(json.total_weight);
                         }
                         if (json.net_owner_amount !== undefined) {
                             $('#summary_net_owner').text(parseFloat(json.net_owner_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));

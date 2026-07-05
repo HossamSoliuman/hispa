@@ -9,11 +9,11 @@
             <div class="info-row">
                 <div class="info-item">
                     <span class="label">{{ __('owner.sales_report.from_date') }}:</span>
-                    <span class="value">{{ $from ? \Alkoumi\LaravelHijriDate\Hijri::Date('d F Y', $from) : __('owner.sales_report.all_dates') }}</span>
+                    <span class="value">{{ $from ? \Illuminate\Support\Carbon::parse($from)->format('Y-m-d') : __('owner.sales_report.all_dates') }}</span>
                 </div>
                 <div class="info-item">
                     <span class="label">{{ __('owner.sales_report.to_date') }}:</span>
-                    <span class="value">{{ $to ? \Alkoumi\LaravelHijriDate\Hijri::Date('d F Y', $to) : __('owner.sales_report.all_dates') }}</span>
+                    <span class="value">{{ $to ? \Illuminate\Support\Carbon::parse($to)->format('Y-m-d') : __('owner.sales_report.all_dates') }}</span>
                 </div>
                 <div class="info-item">
                     <span class="label">{{ __('owner.sales_report.status_filter') }}:</span>
@@ -59,7 +59,7 @@
                 <td>{{ $sale->labor_rate }}%</td>
                 <td><x-money-inline :amount="$sale->total_price" /></td>
                 <td><x-money-inline :amount="$sale->net_owner_amount" /></td>
-                <td>{{ $sale->sale_datetime ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $sale->sale_datetime) : '---' }}</td>
+                <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '---' }}</td>
             </tr>
             @empty
             <tr>
