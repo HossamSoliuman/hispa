@@ -28,6 +28,19 @@ class Subscription extends Model
         'is_suspended' => 'boolean',
     ];
 
+    /**
+     * Cascade a subscription's invoices on delete. The invoices table carries no
+     * database foreign key, so removing a subscription would otherwise leave
+     * orphaned invoices behind. Deleting a subscription cancels it outright
+     * (the model has no SoftDeletes), so its invoices must go with it.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Subscription $subscription): void {
+            $subscription->invoices()->delete();
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

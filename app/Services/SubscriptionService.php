@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Invoice;
 use App\Models\Subscription;
 use App\Models\SubscriptionPackage;
 use Carbon\Carbon;
@@ -29,7 +30,7 @@ class SubscriptionService
     }
 
     /**
-     * Create a new subscription with validated data.
+     * Create a new subscription (with its matching invoice) from validated data.
      */
     public function create(array $validated): Subscription
     {
@@ -38,12 +39,43 @@ class SubscriptionService
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = $this->calculateEndDate($startDate, $durationType);
 
-        return Subscription::create([
-            'user_id' => $validated['user_id'],
-            'package_id' => $validated['package_id'],
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'status' => $validated['status'] ?? 'active',
+        return DB::transaction(function () use ($validated, $package, $startDate, $endDate) {
+            $subscription = Subscription::create([
+                'user_id' => $validated['user_id'],
+                'package_id' => $validated['package_id'],
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'status' => $validated['status'] ?? 'active',
+            ]);
+
+            $this->createInvoiceFor($subscription, $package);
+
+            return $subscription;
+        });
+    }
+
+    /**
+     * Create the subscription's invoice. A subscription that is already active
+     * or on trial is considered paid; otherwise the invoice stays pending until
+     * an admin confirms payment.
+     */
+    public function createInvoiceFor(Subscription $subscription, ?SubscriptionPackage $package = null): Invoice
+    {
+        $package ??= $subscription->package;
+        $amount = (float) $package->effective_price;
+        $isPaid = in_array($subscription->status, ['active', 'trial'], true);
+
+        return Invoice::create([
+            'subscription_id' => $subscription->id,
+            'user_id' => $subscription->user_id,
+            'amount' => $amount,
+            'vat_rate' => 0,
+            'vat_amount' => 0,
+            'total_amount' => $amount,
+            'discount_amount' => 0,
+            'payment_method' => 'cash',
+            'payment_status' => $isPaid ? 'paid' : 'pending',
+            'paid_at' => $isPaid ? now() : null,
         ]);
     }
 

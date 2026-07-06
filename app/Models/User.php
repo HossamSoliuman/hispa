@@ -121,6 +121,31 @@ class User extends Authenticatable
         'roles_name' => 'array',
     ];
 
+    /**
+     * Cascade an owner's billing footprint on delete. The subscriptions and
+     * invoices tables carry no database foreign keys, so removing an owner would
+     * otherwise leave orphaned subscriptions/invoices (which then render blank
+     * recipients on printed invoices). Scoped to owners; their subscriptions,
+     * the invoices under those subscriptions, any invoices linked directly to
+     * the owner, and the owner's company profile are all removed.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user): void {
+            if ($user->role !== 'owner') {
+                return;
+            }
+
+            foreach ($user->subscriptions()->get() as $subscription) {
+                $subscription->invoices()->delete();
+                $subscription->delete();
+            }
+
+            $user->invoices()->delete();
+            $user->company()->delete();
+        });
+    }
+
     public function captainCount()
     {
         return User::where('role', 'captain')

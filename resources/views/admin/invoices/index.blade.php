@@ -137,6 +137,9 @@
                                 <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                <a href="{{ route('admin.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-sm btn-outline-dark" title="{{ __('admin.invoices.print') }}">
+                                    <i class="bi bi-printer"></i>
+                                </a>
                                 <a href="{{ route('admin.invoices.edit', $invoice->id) }}" class="btn btn-sm btn-outline-success">
                                     <i class="bi bi-pencil"></i>
                                 </a>

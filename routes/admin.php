@@ -79,6 +79,7 @@ Route::group([
 
             // Invoices (static paths must precede the resource so they aren't shadowed by invoices/{invoice})
             Route::get('invoices-export', [InvoiceController::class, 'export'])->name('invoices.export');
+            Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
             Route::post('invoices/{invoice}/confirm-payment', [InvoiceController::class, 'confirmPayment'])->name('invoices.confirm-payment');
             Route::resource('invoices', InvoiceController::class)->except(['create', 'store']);
 

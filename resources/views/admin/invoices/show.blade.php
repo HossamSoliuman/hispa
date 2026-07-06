@@ -11,6 +11,9 @@
             <a href="{{ route('admin.invoices.index') }}" class="btn btn-outline-secondary btn-equal">
                 <i class="bi bi-arrow-left"></i> {{ __('admin.invoices.page_header') }}
             </a>
+            <a href="{{ route('admin.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-dark btn-equal">
+                <i class="bi bi-printer"></i> {{ __('admin.invoices.print') }}
+            </a>
             <a href="{{ route('admin.invoices.edit', $invoice->id) }}" class="btn btn-outline-success btn-equal">
                 <i class="bi bi-pencil"></i> {{ __('admin.invoices.edit.title') }}
             </a>
@@ -33,6 +36,16 @@
                             <tr>
                                 <th>{{ __('admin.invoices.user') }}</th>
                                 <td>{{ $invoice->user->name ?? '--' }} <span class="text-muted small">{{ $invoice->user->phone ?? '' }}</span></td>
+                            </tr>
+                            <tr>
+                                <th>{{ __('admin.invoices.send_to_email') }}</th>
+                                <td>
+                                    @if($invoice->user?->email)
+                                        <a href="mailto:{{ $invoice->user->email }}">{{ $invoice->user->email }}</a>
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <th>{{ __('admin.invoices.subscription') }}</th>

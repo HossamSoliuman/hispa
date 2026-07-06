@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Invoice;
 use App\Models\SubscriptionPackage;
 use App\Models\User;
 use App\Services\Owner\OwnerMasterDataService;
@@ -115,25 +114,11 @@ class RegisterController extends Controller
             return;
         }
 
-        $subscription = app(SubscriptionService::class)->create([
+        app(SubscriptionService::class)->create([
             'user_id' => $user->id,
             'package_id' => $package->id,
             'start_date' => now()->toDateString(),
             'status' => 'pending',
-        ]);
-
-        $amount = (float) $package->effective_price;
-
-        Invoice::create([
-            'subscription_id' => $subscription->id,
-            'user_id' => $user->id,
-            'amount' => $amount,
-            'vat_rate' => 0,
-            'vat_amount' => 0,
-            'total_amount' => $amount,
-            'discount_amount' => 0,
-            'payment_method' => 'cash',
-            'payment_status' => 'pending',
         ]);
     }
 

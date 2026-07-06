@@ -164,6 +164,13 @@
                                 <a href="{{ route('admin.subscriptions.edit', $subscription->id) }}" class="btn btn-sm btn-outline-success">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                <form action="{{ route('admin.subscriptions.destroy', $subscription->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('admin.swal.confirm_text') }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('admin.actions.delete') }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         @empty

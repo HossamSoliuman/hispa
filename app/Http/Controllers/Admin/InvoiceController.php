@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\InvoicesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Setting;
 use App\Models\Subscription;
+use App\Service\Owner\ReportQrService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -81,6 +84,25 @@ class InvoiceController extends Controller
         $invoice->load(['user', 'subscription.package', 'confirmedBy']);
 
         return view('admin.invoices.show', compact('invoice'));
+    }
+
+    /**
+     * Render a printable subscription invoice. The printout highlights the
+     * recipient's email so the admin knows where to send the invoice.
+     */
+    public function print(Invoice $invoice): Response
+    {
+        $invoice->load([
+            'user.region', 'user.governorate',
+            'subscription.package',
+            'subscription.user.region', 'subscription.user.governorate',
+            'coupon', 'confirmedBy',
+        ]);
+
+        $settings = $this->reportSettings($invoice);
+        $filename = 'invoice-'.$invoice->invoice_number.'.pdf';
+
+        return pdf_report(view('admin.invoices.print', compact('invoice', 'settings')), [], $filename);
     }
 
     /**
@@ -193,5 +215,29 @@ class InvoiceController extends Controller
         $filename = 'invoices-'.now()->format('Y-m-d-His').'.xlsx';
 
         return Excel::download(new InvoicesExport($invoices), $filename);
+    }
+
+    /**
+     * Platform company settings for the printable invoice header. Admin issues
+     * these subscription invoices on behalf of the platform, so the masthead
+     * identity comes from the global Setting table rather than a per-owner
+     * company.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(Invoice $invoice): array
+    {
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? config('app.name');
+
+        return [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(ReportQrService::class)->dataUri('Invoice: '.$invoice->invoice_number),
+        ];
     }
 }

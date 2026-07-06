@@ -215,6 +215,17 @@
                             <i class="bi bi-arrow-repeat"></i> {{ __('admin.subscriptions.renew') }}
                         </button>
                     </form>
+
+                    <hr>
+
+                    <form action="{{ route('admin.subscriptions.destroy', $subscription->id) }}" method="post"
+                        onsubmit="return confirm('{{ __('admin.subscriptions.delete_confirm') }}');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash"></i> {{ __('admin.subscriptions.delete') }}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
