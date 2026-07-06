@@ -37,6 +37,7 @@ use App\Http\Controllers\Owner\PortController;
 use App\Http\Controllers\Owner\ProfileController;
 use App\Http\Controllers\Owner\ProfitLossController;
 use App\Http\Controllers\Owner\RegionController;
+use App\Http\Controllers\Owner\Report\AccountStatementController;
 use App\Http\Controllers\Owner\Report\AnnualSummaryController;
 use App\Http\Controllers\Owner\Report\DalalStockReportController;
 use App\Http\Controllers\Owner\Report\FishHistoryReportController;
@@ -149,11 +150,15 @@ Route::group([
         Route::resource('/units', UnitController::class)->only(['index', 'store', 'update', 'destroy']);
 
         // captains
+        Route::get('/captain/{id}/print', [CaptainController::class, 'print'])->name('captain.print');
+        Route::get('/captain/{id}/payroll-statement', [CaptainController::class, 'payrollStatement'])->name('captain.payroll-statement');
         Route::resource('/captain', CaptainController::class);
         Route::get('/getCaptainData', [CaptainController::class, 'getCaptainData'])->name('getCaptainData');
         Route::get('/showCaptainData/{id}', [CaptainController::class, 'showCaptainData'])->name('showCaptainData');
 
         // crew
+        Route::get('/crew/{id}/print', [CrewController::class, 'print'])->name('crew.print');
+        Route::get('/crew/{id}/payroll-statement', [CrewController::class, 'payrollStatement'])->name('crew.payroll-statement');
         Route::resource('/crew', CrewController::class);
         Route::get('/getCrewData', [CrewController::class, 'getCrewData'])->name('getCrewData');
         // Data for a single crew member (used by owner.crew.show page)
@@ -236,6 +241,14 @@ Route::group([
         Route::get('/reports/production-species', [ProfitabilityReportController::class, 'productionBySpecies'])->name('reports.production-species');
         Route::get('/reports/production-species/print', [ProfitabilityReportController::class, 'productionBySpeciesPrint'])->name('reports.production-species.print');
 
+        // account statements (كشف الحساب): customers, vendors, crew
+        Route::get('/reports/customer-statement', [AccountStatementController::class, 'customer'])->name('reports.customer-statement');
+        Route::get('/reports/customer-statement/print', [AccountStatementController::class, 'customerPrint'])->name('reports.customer-statement.print');
+        Route::get('/reports/vendor-statement', [AccountStatementController::class, 'vendor'])->name('reports.vendor-statement');
+        Route::get('/reports/vendor-statement/print', [AccountStatementController::class, 'vendorPrint'])->name('reports.vendor-statement.print');
+        Route::get('/reports/crew-statement', [AccountStatementController::class, 'crew'])->name('reports.crew-statement');
+        Route::get('/reports/crew-statement/print', [AccountStatementController::class, 'crewPrint'])->name('reports.crew-statement.print');
+
         // fish_Stock_history
         Route::get('/fish_stock_history', [FishHistoryReportController::class, 'index'])->name('fish-history-report');
         Route::get('/getFishStockHistoryReport', [FishHistoryReportController::class, 'getFishHistoryData'])->name('getFishStockHistoryReport');
@@ -246,6 +259,8 @@ Route::group([
         Route::resource('/catch', CatchController::class);
         Route::get('/getCatchData', [CatchController::class, 'getCatchData'])->name('getCatchData');
         Route::get('/printCatchReport/{id}', [CatchController::class, 'printCatchReport'])->name('printCatchReport');
+        Route::get('/catch/{id}/delivery-note', [CatchController::class, 'printDeliveryNote'])->name('catch.deliveryNote');
+        Route::get('/catch/{id}/product-card', [CatchController::class, 'printProductCard'])->name('catch.productCard');
         Route::get('/printCatchesReport', [CatchController::class, 'printCatchesReport'])->name('printCatchesReport');
         Route::get('/getFishStats', [CatchController::class, 'getFishStats'])->name('getFishStats');
         Route::get('/revenue-by-species', [CatchController::class, 'getRevenueBySpecies'])->name('getRevenueBySpecies');
@@ -360,6 +375,7 @@ Route::group([
         Route::resource('/fishing-equipments', FishingEquipmentController::class);
 
         Route::get('boats_crew/{boat}', [BoatController::class, 'crew']);
+        Route::get('/employee/{id}/print', [EmployeeController::class, 'print'])->name('employee.print');
         Route::resource('/employee', EmployeeController::class);
         Route::get('/getEmployeeData', [EmployeeController::class, 'getEmployeeData'])->name('getEmployeeData');
 

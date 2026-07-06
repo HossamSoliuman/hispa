@@ -37,7 +37,7 @@ class SalesReportController extends Controller
     public function print(Request $request)
     {
         // Build query (admin can see all sales)
-        $query = Sale::with(['details', 'paymentMethod', 'seller', 'customer']);
+        $query = Sale::with(['details', 'details.unit', 'paymentMethod', 'seller', 'customer']);
 
         // Date range filter
         if ($request->filled('start_date')) {

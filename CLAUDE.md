@@ -274,6 +274,10 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 === project rules ===
 
+## Icons (no emojis)
+
+Use real icon fonts for all UI glyphs — never emojis. The dashboard/owner UI uses **Bootstrap Icons** (`<i class="bi bi-..."></i>`); reports use the shared components (e.g. `<x-riyal-icon />`). This applies to translation strings too: do not embed emojis in `resources/lang/**` values (e.g. an "all clear" empty state renders a `bi-check-circle-fill`, not 🎉). Emojis render inconsistently across platforms, break RTL alignment, and don't inherit theme color — a `bi-*` class does. When a status needs a glyph, pick a Bootstrap Icon and color it with `text-{success|warning|danger}`.
+
 ## Printable Reports (mPDF)
 
 All owner-facing printable/PDF reports follow one shared standard. The design (dense bordered "grid" matching the printed reference set) is **centralized** in the shared components — `resources/views/components/report-layout.blade.php` (all CSS classes) and `report-masthead.blade.php` (the page header). Do NOT copy a `<style>` block into report views anymore; just use the shared classes/components and the look is inherited everywhere.

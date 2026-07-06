@@ -15,7 +15,7 @@
             @foreach ($cards as $card)
                 <td class="report-stat-card" @if (! empty($card['accent'])) style="border-top: 3px solid {{ $card['accent'] }};" @endif>
                     <div class="report-stat-label">{{ $card['label'] }}</div>
-                    <div class="report-stat-value" @if (! empty($card['color'])) style="color: {{ $card['color'] }};" @endif>{!! $card['value'] !!}</div>
+                    <div class="report-stat-value" @if (! empty($card['color'])) style="color: {{ $card['color'] }};" @endif>@if (! empty($card['money']))<x-report-money :amount="$card['value']" />@else{!! $card['value'] !!}@endif</div>
                 </td>
             @endforeach
         </tr>

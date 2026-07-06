@@ -14,7 +14,7 @@ class SalesReportDataTable extends DataTables
         $owner_id = auth()->user()->id; // الصيّاد الحالي
 
         if ($request->ajax()) {
-            $query = Sale::with(['details', 'paymentMethod', 'seller', 'customer'])
+            $query = Sale::with(['details', 'details.unit', 'paymentMethod', 'seller', 'customer'])
                 ->where('seller_type', 'owner')
                 ->where('seller_id', $owner_id); // فلترة حسب الصيّاد
 
@@ -35,9 +35,7 @@ class SalesReportDataTable extends DataTables
 
             // Calculate totals for summary cards
             $totalSales = $data->count();
-            $totalWeight = $data->sum(function ($row) {
-                return $row->details->sum('weight');
-            });
+            $totalWeight = formatWeightByUnit($data->flatMap(fn ($row) => $row->details));
             $totalRevenue = $data->sum('total_price');
             $netOwnerAmount = $data->sum('net_owner_amount');
 
@@ -65,7 +63,7 @@ class SalesReportDataTable extends DataTables
                 })
                 ->addColumn('customer', fn ($row) => $row->customer_name ?? optional($row->customer)->name)
                 ->addColumn('payment_method', fn ($row) => optional($row->paymentMethod)->name)
-                ->addColumn('total_weight', fn ($row) => $row->details->sum('weight').' كغم')
+                ->addColumn('total_weight', fn ($row) => formatWeightByUnit($row->details))
                 ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')
                 ->addColumn('labor_rate', fn ($row) => $row->labor_rate.'%')
                 ->addColumn('total_price', fn ($row) => number_format($row->total_price, 2))

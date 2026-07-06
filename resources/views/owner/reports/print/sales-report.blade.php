@@ -11,6 +11,8 @@
         title-en="Sales Report"
         :settings="$settings" />
 
+    @php $allDetails = $sales->flatMap(fn ($sale) => $sale->details); @endphp
+
     {{-- Applied filters / key facts strip --}}
     <table class="info-bar">
         <tr>
@@ -21,15 +23,15 @@
                 <td><span class="ib-label">{{ __('owner.reports.to_date') }}</span><span class="ib-value">{{ $filters['to_date'] }}</span></td>
             @endif
             <td><span class="ib-label">{{ __('owner.sales_report.total_sales') }}</span><span class="ib-value">{{ $statistics['total_sales'] }}</span></td>
-            <td><span class="ib-label">{{ __('owner.sales_report.total_revenue') }}</span><span class="ib-value">{{ number_format($statistics['total_revenue'], 2) }}</span></td>
+            <td><span class="ib-label">{{ __('owner.sales_report.total_revenue') }}</span><span class="ib-value"><x-report-money :amount="$statistics['total_revenue']" /></span></td>
         </tr>
     </table>
 
     <x-report-stats :items="[
         ['label' => __('owner.sales_report.total_sales'), 'value' => $statistics['total_sales']],
-        ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeight($statistics['total_weight'])],
-        ['label' => __('owner.sales_report.total_revenue'), 'value' => number_format($statistics['total_revenue'], 2)],
-        ['label' => __('owner.sales_report.net_owner_amount'), 'value' => number_format($statistics['net_owner_amount'], 2)],
+        ['label' => __('owner.sales_report.total_weight'), 'value' => formatWeightByUnit($allDetails)],
+        ['label' => __('owner.sales_report.total_revenue'), 'value' => $statistics['total_revenue'], 'money' => true],
+        ['label' => __('owner.sales_report.net_owner_amount'), 'value' => $statistics['net_owner_amount'], 'money' => true],
     ]" />
 
     @if($sales->isEmpty())
@@ -58,9 +60,9 @@
                         <td class="col-text">{{ $sale->number }}</td>
                         <td class="col-text">{{ $sale->customer_name ?? optional($sale->customer)->name ?? '---' }}</td>
                         <td>{{ optional($sale->paymentMethod)->name ?? '---' }}</td>
-                        <td>{{ formatWeight($sale->details->sum('weight')) }}</td>
-                        <td class="col-num">{{ number_format($sale->total_price, 2) }} <x-riyal-icon /></td>
-                        <td class="col-num">{{ number_format($sale->net_owner_amount, 2) }} <x-riyal-icon /></td>
+                        <td>{{ formatWeightByUnit($sale->details) }}</td>
+                        <td class="col-num"><x-report-money :amount="$sale->total_price" /></td>
+                        <td class="col-num"><x-report-money :amount="$sale->net_owner_amount" /></td>
                         <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '---' }}</td>
                     </tr>
                 @endforeach
@@ -68,9 +70,9 @@
             <tfoot>
                 <tr>
                     <td colspan="4">{{ __('owner.sales.total') }}</td>
-                    <td>{{ formatWeight($statistics['total_weight']) }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['net_owner_amount'], 2) }} <x-riyal-icon /></td>
+                    <td>{{ formatWeightByUnit($allDetails) }}</td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_revenue']" /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['net_owner_amount']" /></td>
                     <td></td>
                 </tr>
             </tfoot>

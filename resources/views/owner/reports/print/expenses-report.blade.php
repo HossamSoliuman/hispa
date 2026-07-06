@@ -36,9 +36,9 @@
 
     <x-report-stats :items="[
         ['label' => __('owner.expenses.cards.total_count'), 'value' => $statistics['total_count']],
-        ['label' => __('owner.expenses.cards.total_amount'), 'value' => number_format($statistics['total_amount'], 2)],
-        ['label' => __('owner.expenses.cards.paid_amount'), 'value' => number_format($statistics['paid_amount'], 2)],
-        ['label' => __('owner.expenses.cards.pending_amount'), 'value' => number_format($statistics['pending_amount'], 2)],
+        ['label' => __('owner.expenses.cards.total_amount'), 'value' => $statistics['total_amount'], 'money' => true],
+        ['label' => __('owner.expenses.cards.paid_amount'), 'value' => $statistics['paid_amount'], 'money' => true],
+        ['label' => __('owner.expenses.cards.pending_amount'), 'value' => $statistics['pending_amount'], 'money' => true],
     ]" />
 
     @if($expenses->isEmpty())
@@ -70,8 +70,8 @@
                         <td class="col-text">{{ optional($expense->category->parent)->name ? optional($expense->category->parent)->name . ' / ' : '' }}{{ $expense->category->name ?? '---' }}</td>
                         <td class="col-text">{{ $expense->boat->name ?? __('owner.general') }}</td>
                         <td class="col-text">{{ $expense->vendor->name ?? '---' }}</td>
-                        <td class="col-num">{{ number_format($expense->total_price, 2) }} <x-riyal-icon /></td>
-                        <td class="col-num">{{ number_format($expense->final_price, 2) }} <x-riyal-icon /></td>
+                        <td class="col-num"><x-report-money :amount="$expense->total_price" /></td>
+                        <td class="col-num"><x-report-money :amount="$expense->final_price" /></td>
                         <td>{{ $expense->status === 'paid' ? __('owner.paid') : __('owner.pending') }}</td>
                     </tr>
                 @endforeach
@@ -80,7 +80,7 @@
                 <tr>
                     <td colspan="6">{{ __('owner.expenses.print.total') }}</td>
                     <td class="col-num"></td>
-                    <td class="col-num">{{ number_format($statistics['total_amount'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_amount']" /></td>
                     <td></td>
                 </tr>
             </tfoot>

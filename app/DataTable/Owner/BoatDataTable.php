@@ -2,7 +2,9 @@
 
 namespace App\DataTable\Owner;
 
+use App\Enums\TripStatus;
 use App\Models\Boat;
+use App\Models\Trip;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -31,14 +33,19 @@ class BoatDataTable extends DataTables
             $boats_no_task = Boat::has('inspections', '=', 0)->count();
             $boats_upcoming_tasks = $boats_upcoming_task + $boats_no_task;
 
+            $sailingBoatIds = Trip::where('owner_id', $owner_id)
+                ->where('status', TripStatus::InProgress->value)
+                ->pluck('boat_id')
+                ->flip();
+
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('status', function ($row) {
-                    if ($row->status == 1) {
-                        return '<span class="badge bg-success">'.__('owner.status.active').'</span>';
-                    } else {
-                        return '<span class="badge bg-danger">'.__('owner.status.inactive').'</span>';
+                ->addColumn('status', function ($row) use ($sailingBoatIds) {
+                    if ($sailingBoatIds->has($row->id)) {
+                        return '<span class="fw-bold text-success">'.__('owner.status.sailing').'</span>';
                     }
+
+                    return '<span class="fw-bold text-danger">'.__('owner.status.not_sailing').'</span>';
                 })
                 ->addColumn('type', function (Boat $boat) {
 

@@ -24,9 +24,9 @@ class AnnualSummaryController extends Controller
     {
         [$ownerId, $year, $boatId, $boats] = $this->context($request);
 
-        $summary = $this->service->annualSummary($ownerId, $year, $boatId);
+        $years = $this->service->closedYears($ownerId, $boatId);
 
-        return view('owner.report.annual_summary', compact('summary', 'year', 'boatId', 'boats'));
+        return view('owner.report.annual_summary', compact('years', 'boatId', 'boats'));
     }
 
     public function print(Request $request)
@@ -34,11 +34,12 @@ class AnnualSummaryController extends Controller
         [$ownerId, $year, $boatId, $boats] = $this->context($request);
 
         $summary = $this->service->annualSummary($ownerId, $year, $boatId);
+        $analysis = $this->service->annualAnalysis($ownerId, $year, $boatId);
         $settings = $this->companySettings();
 
         $filename = 'annual-summary-'.$year.'.pdf';
 
-        return pdf_report(view('owner.report.annual_summary_print', compact('summary', 'year', 'boatId', 'boats', 'settings')), [], $filename);
+        return pdf_report(view('owner.report.annual_summary_print', compact('summary', 'analysis', 'year', 'boatId', 'boats', 'settings')), [], $filename);
     }
 
     /**

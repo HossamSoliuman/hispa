@@ -113,6 +113,13 @@ class TripReportController extends Controller
             'completed_trips' => $trips->where('status', TripStatus::Sold)->count(),
             'total_boats' => $trips->pluck('boat_id')->unique()->count(),
             'total_catch' => $financials->sum('catch_weight'),
+            'total_catch_by_unit' => $financials->reduce(function (\Illuminate\Support\Collection $carry, array $f): \Illuminate\Support\Collection {
+                foreach ($f['catch_weight_by_unit'] as $unit => $weight) {
+                    $carry[$unit] = ($carry[$unit] ?? 0) + $weight;
+                }
+
+                return $carry;
+            }, collect()),
             'total_revenue' => $financials->sum('gross_revenue'),
             'total_costs' => $financials->sum('total_costs'),
             'net_profit' => $financials->sum('net_profit'),

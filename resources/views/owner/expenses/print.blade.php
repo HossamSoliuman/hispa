@@ -58,7 +58,7 @@
         </div>
         <div class="meta-item">
             <span class="meta-label">{{ __('owner.expenses.show.totals.final_total') }}:</span>
-            <span class="meta-value" style="color: #28a745; font-weight: bold;">{{ number_format($expense->final_price, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
+            <span class="meta-value" style="color: #28a745; font-weight: bold;"><x-report-money :amount="$expense->final_price" /></span>
         </div>
     </div>
 
@@ -90,8 +90,8 @@
                         <td>{{ $loop->iteration }}</td>
                         <td style="text-align: start;">{{ $item->fishingEquipment->name ?? '-' }}</td>
                         <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->unit_price, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
-                        <td style="font-weight: bold;">{{ number_format($item->total_price, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
+                        <td><x-report-money :amount="$item->unit_price" /></td>
+                        <td style="font-weight: bold;"><x-report-money :amount="$item->total_price" /></td>
                     </tr>
                 @endforeach
             </tbody>
@@ -121,7 +121,7 @@
                         <td style="text-align: start;">{{ $maintenance->boat->name ?? '-' }}</td>
                         <td style="text-align: start;">{{ $maintenance->description }}</td>
                         <td>{{ $maintenance->technician }}</td>
-                        <td style="font-weight: bold;">{{ number_format($maintenance->estimated_cost, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
+                        <td style="font-weight: bold;"><x-report-money :amount="$maintenance->estimated_cost" /></td>
                     </tr>
                 @endforeach
             </tbody>
@@ -131,7 +131,7 @@
     <x-report-summary :qrCode="$qrCode ?? ''">
         <div class="summary-row">
             <span>{{ __('owner.expenses.show.totals.before_discount') }}:</span>
-            <span>{{ number_format($expense->total_price, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
+            <span><x-report-money :amount="$expense->total_price" /></span>
         </div>
 
         @if($expense->discount_value > 0)
@@ -141,13 +141,13 @@
                     ({{ $expense->discount_value }}%)
                 @endif:
             </span>
-            <span>- {{ number_format($expense->calculated_discount, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></span>
+            <span>- <x-report-money :amount="$expense->calculated_discount" /></span>
         </div>
         @endif
 
         <div class="summary-row total-row">
             <span><strong>{{ __('owner.expenses.show.totals.final_total') }}:</strong></span>
-            <span><strong style="color: #28a745; font-size: 1.1em;">{{ number_format($expense->final_price, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></strong></span>
+            <span><strong style="color: #28a745; font-size: 1.1em;"><x-report-money :amount="$expense->final_price" /></strong></span>
         </div>
     </x-report-summary>
 

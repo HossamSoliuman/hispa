@@ -74,35 +74,7 @@
         {{--                <div class="menu-icon"><i class="bi bi-search nav-icon"></i></div> --}}
         {{--            </a> --}}
         {{--        </div> --}}
-        <div class="menu-item dropdown dropdown-mobile-full">
-            <a href="#" data-bs-toggle="dropdown" data-bs-display="static" class="menu-link position-relative">
-                <div class="menu-icon"><i class="bi bi-bell nav-icon"></i></div>
-                <div class="menu-badge">
-                    @php
-                        $unreadCount = auth()->user()->unreadNotifications()->count();
-                    @endphp
-                    @if ($unreadCount > 0)
-                        <span class="badge bg-danger rounded-pill">{{ $unreadCount }}</span>
-                    @endif
-                </div>
-            </a>
-
-            <div class="dropdown-menu dropdown-menu-end mt-1 w-300px fs-11px pt-1"
-                style="max-height: 400px; overflow-y: auto;" id="notificationsContainer">
-                <h6 class="dropdown-header fs-10px mb-1">{{ __('owner.menu.notifications') }}</h6>
-                <div class="dropdown-divider mt-1"></div>
-
-                <div id="notificationsContent">
-                    <div class="text-center p-2 text-muted">{{ __('owner.generated.load_notifications') }}</div>
-                </div>
-
-                <hr class="my-0">
-                <div class="py-10px mb-n2 text-center">
-                    <a href="#" id="readAllBtn"
-                        class="text-decoration-none fw-bold">{{ __('owner.generated.read_all') }}</a>
-                </div>
-            </div>
-        </div>
+       
 
         <div class="menu-item dropdown dropdown-mobile-full">
             <a href="#" data-bs-toggle="dropdown" data-bs-display="static" class="menu-link">

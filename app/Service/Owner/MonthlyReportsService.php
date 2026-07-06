@@ -199,15 +199,30 @@ class MonthlyReportsService
         $caught = DB::table('catch_details')
             ->join('catch_models', 'catch_details.catch_id', '=', 'catch_models.id')
             ->leftJoin('units', 'catch_details.unit_id', '=', 'units.id')
+            ->leftJoin('fish', 'catch_details.fish_id', '=', 'fish.id')
             ->whereIn('catch_models.trip_id', $tripIds)
             ->whereBetween(DB::raw('DATE(catch_models.catch_date)'), [$from, $to])
-            ->groupBy('catch_details.fish_id', 'catch_details.fish_name', 'catch_details.unit_id', 'units.name_ar', 'units.name_en')
+            ->groupBy(
+                'catch_details.fish_id',
+                'catch_details.fish_name',
+                'catch_details.unit_id',
+                'units.name_ar',
+                'units.name_en',
+                'fish.scientific_name',
+                'fish.english_name',
+                'fish.red_sea_name',
+                'fish.arabian_gulf_name',
+            )
             ->select(
                 'catch_details.fish_id',
                 'catch_details.fish_name',
                 'catch_details.unit_id',
                 'units.name_ar as unit_name_ar',
                 'units.name_en as unit_name_en',
+                'fish.scientific_name',
+                'fish.english_name',
+                'fish.red_sea_name',
+                'fish.arabian_gulf_name',
                 DB::raw('SUM(catch_details.weight) as weight'),
                 DB::raw('SUM(catch_details.total_price) as value')
             )
@@ -221,18 +236,43 @@ class MonthlyReportsService
 
         $sold = DB::table('sale_details')
             ->leftJoin('units', 'sale_details.unit_id', '=', 'units.id')
+            ->leftJoin('fish', 'sale_details.fish_id', '=', 'fish.id')
             ->whereIn('sale_details.sale_id', $saleIds)
-            ->groupBy('sale_details.fish_id', 'sale_details.fish_name', 'sale_details.unit_id', 'units.name_ar', 'units.name_en')
+            ->groupBy(
+                'sale_details.fish_id',
+                'sale_details.fish_name',
+                'sale_details.unit_id',
+                'units.name_ar',
+                'units.name_en',
+                'fish.scientific_name',
+                'fish.english_name',
+                'fish.red_sea_name',
+                'fish.arabian_gulf_name',
+            )
             ->select(
                 'sale_details.fish_id',
                 'sale_details.fish_name',
                 'sale_details.unit_id',
                 'units.name_ar as unit_name_ar',
                 'units.name_en as unit_name_en',
+                'fish.scientific_name',
+                'fish.english_name',
+                'fish.red_sea_name',
+                'fish.arabian_gulf_name',
                 DB::raw('SUM(sale_details.weight) as weight'),
                 DB::raw('SUM(sale_details.total_price) as value')
             )
             ->get();
+
+        $fishName = function (object $row) use ($isAr): string {
+            if ($isAr) {
+                $name = $row->red_sea_name ?: $row->arabian_gulf_name ?: $row->scientific_name;
+            } else {
+                $name = $row->english_name ?: $row->scientific_name;
+            }
+
+            return $name ?: (string) $row->fish_name;
+        };
 
         $species = [];
         foreach ($caught as $row) {
@@ -240,7 +280,7 @@ class MonthlyReportsService
             $unitName = $isAr ? ($row->unit_name_ar ?? '') : ($row->unit_name_en ?: ($row->unit_name_ar ?? ''));
             $species[$key] = [
                 'fish_id' => (int) $row->fish_id,
-                'fish_name' => $row->fish_name,
+                'fish_name' => $fishName($row),
                 'unit_id' => $row->unit_id,
                 'unit_name' => $unitName,
                 'caught_weight' => round((float) $row->weight, 2),
@@ -255,7 +295,7 @@ class MonthlyReportsService
                 $unitName = $isAr ? ($row->unit_name_ar ?? '') : ($row->unit_name_en ?: ($row->unit_name_ar ?? ''));
                 $species[$key] = [
                     'fish_id' => (int) $row->fish_id,
-                    'fish_name' => $row->fish_name,
+                    'fish_name' => $fishName($row),
                     'unit_id' => $row->unit_id,
                     'unit_name' => $unitName,
                     'caught_weight' => 0.0,

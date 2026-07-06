@@ -43,9 +43,9 @@
     {{-- KPIs --}}
     <x-report-stats :items="[
         ['label' => __('owner.customers.show.cards.orders'), 'value' => number_format($statistics['total_orders'])],
-        ['label' => __('owner.customers.show.cards.purchases'), 'value' => number_format($statistics['total_purchases'], 2)],
-        ['label' => __('owner.customers.show.cards.paid'), 'value' => number_format($statistics['total_paid'], 2)],
-        ['label' => __('owner.customers.show.cards.remaining'), 'value' => number_format($statistics['total_remaining'], 2), 'color' => $statistics['total_remaining'] > 0 ? '#dc2626' : '#16a34a'],
+        ['label' => __('owner.customers.show.cards.purchases'), 'value' => $statistics['total_purchases'], 'money' => true],
+        ['label' => __('owner.customers.show.cards.paid'), 'value' => $statistics['total_paid'], 'money' => true],
+        ['label' => __('owner.customers.show.cards.remaining'), 'value' => $statistics['total_remaining'], 'money' => true, 'color' => $statistics['total_remaining'] > 0 ? '#dc2626' : '#16a34a'],
     ]" />
 
     {{-- Invoices listing --}}
@@ -72,9 +72,9 @@
                     <td>{{ optional($sale->sale_datetime)->format('Y-m-d') ?? '—' }}</td>
                     <td>{{ optional($sale->paymentMethod)->name ?: '—' }}</td>
                     <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
-                    <td class="col-num">{{ number_format($sale->total_price, 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($paid, 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($sale->remaining_total, 2) }} <x-riyal-icon /></td>
+                    <td class="col-num"><x-report-money :amount="$sale->total_price" /></td>
+                    <td class="col-num"><x-report-money :amount="$paid" /></td>
+                    <td class="col-num"><x-report-money :amount="$sale->remaining_total" /></td>
                 </tr>
             @empty
                 <tr><td colspan="8" style="color:#95a5a6;">{{ __('owner.customers.show.no_invoices') }}</td></tr>
@@ -84,9 +84,9 @@
             <tfoot>
                 <tr>
                     <td colspan="5" class="col-text">{{ __('owner.sales.total') }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_purchases'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['total_paid'], 2) }} <x-riyal-icon /></td>
-                    <td class="col-num">{{ number_format($statistics['total_remaining'], 2) }} <x-riyal-icon /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_purchases']" /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_paid']" /></td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_remaining']" /></td>
                 </tr>
             </tfoot>
         @endif

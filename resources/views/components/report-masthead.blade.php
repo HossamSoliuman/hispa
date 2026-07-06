@@ -23,6 +23,17 @@
     $startAlign = $isRtl ? 'right' : 'left';
     $endAlign = $isRtl ? 'left' : 'right';
 
+    // The English identity column reads left-to-right, so Arabic-Indic digits
+    // typed into the company profile (e.g. a licence number) look out of place
+    // there. Normalise them to Latin digits for the English side only; the
+    // Arabic side keeps the numerals as entered.
+    $toLatinDigits = fn (string $value): string => strtr($value, [
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+    ]);
+
     // Resolve the company logo to an inline data URI: Browsershot renders from
     // an HTML string with no base URL, so relative <img src> paths cannot load.
     // Stored logos live on the public disk; absolute URLs / data URIs pass through.
@@ -82,10 +93,10 @@
     <div class="rmast-side rmast-en">
         @if($nameEn)<div class="rmast-name">{{ $nameEn }}</div>@endif
         <div class="rmast-facts">
-            @if($crNumber)<span class="rf"><span class="rf-label">Commercial Reg.</span><span class="rf-value">{{ $crNumber }}</span></span>@endif
-            @if($recordNumber)<span class="rf"><span class="rf-label">Agri. Record</span><span class="rf-value">{{ $recordNumber }}</span></span>@endif
-            @if($vat)<span class="rf"><span class="rf-label">VAT</span><span class="rf-value">{{ $vat }}</span></span>@endif
-            @if($phone)<span class="rf"><span class="rf-label">Tel</span><span class="rf-value">{{ $phone }}</span></span>@endif
+            @if($crNumber)<span class="rf"><span class="rf-label">Commercial Reg.</span><span class="rf-value">{{ $toLatinDigits($crNumber) }}</span></span>@endif
+            @if($recordNumber)<span class="rf"><span class="rf-label">Agri. Record</span><span class="rf-value">{{ $toLatinDigits($recordNumber) }}</span></span>@endif
+            @if($vat)<span class="rf"><span class="rf-label">VAT</span><span class="rf-value">{{ $toLatinDigits($vat) }}</span></span>@endif
+            @if($phone)<span class="rf"><span class="rf-label">Tel</span><span class="rf-value">{{ $toLatinDigits($phone) }}</span></span>@endif
             @if($email)<span class="rf"><span class="rf-label">Email</span><span class="rf-value">{{ $email }}</span></span>@endif
         </div>
     </div>

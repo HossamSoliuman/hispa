@@ -33,7 +33,7 @@ class SalesReportController extends Controller
         $owner_id = auth()->user()->id;
 
         // Build query
-        $query = Sale::with(['details', 'paymentMethod', 'seller', 'customer'])
+        $query = Sale::with(['details', 'details.unit', 'paymentMethod', 'seller', 'customer'])
             ->where('seller_type', 'owner')
             ->where('seller_id', $owner_id);
 

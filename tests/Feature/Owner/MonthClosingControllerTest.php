@@ -150,6 +150,6 @@ class MonthClosingControllerTest extends TestCase
             ->get(route('owner.month-closing.print', $closing));
 
         $response->assertOk();
-        $this->assertSame('application/pdf', $response->headers->get('content-type'));
+        $this->assertStringContainsString('text/html', (string) $response->headers->get('content-type'));
     }
 }

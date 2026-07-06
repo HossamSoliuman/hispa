@@ -109,6 +109,48 @@
                     <button type="button" class="btn btn-sm btn-secondary" onclick="addFishRow()">+
                         {{ __('owner.catch.add_type') }}</button>
 
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold mb-3">{{ __('owner.catch.transport_details') }}</h5>
+                    <div class="row mb-3">
+                        <div class="col-xl-4 mb-3">
+                            <div class="form-group">
+                                <label for="car_type" class="form-label">{{ __('owner.catch.car_type') }}</label>
+                                <input type="text" name="car_type" id="car_type" class="form-control"
+                                    value="{{ old('car_type') }}">
+                            </div>
+                        </div>
+                        <div class="col-xl-4 mb-3">
+                            <div class="form-group">
+                                <label for="driver_name" class="form-label">{{ __('owner.catch.driver_name') }}</label>
+                                <input type="text" name="driver_name" id="driver_name" class="form-control"
+                                    value="{{ old('driver_name') }}">
+                            </div>
+                        </div>
+                        <div class="col-xl-4 mb-3">
+                            <div class="form-group">
+                                <label for="car_plate_number"
+                                    class="form-label">{{ __('owner.catch.car_plate_number') }}</label>
+                                <input type="text" name="car_plate_number" id="car_plate_number" class="form-control"
+                                    value="{{ old('car_plate_number') }}">
+                            </div>
+                        </div>
+                        <div class="col-xl-4 mb-3">
+                            <div class="form-group">
+                                <label for="fish_source" class="form-label">{{ __('owner.catch.fish_source') }}</label>
+                                <input type="text" name="fish_source" id="fish_source" class="form-control"
+                                    value="{{ old('fish_source') }}">
+                            </div>
+                        </div>
+                        <div class="col-xl-4 mb-3">
+                            <div class="form-group">
+                                <label for="temperature" class="form-label">{{ __('owner.catch.temperature') }}</label>
+                                <input type="text" name="temperature" id="temperature" class="form-control"
+                                    placeholder="+1c TO 5c" value="{{ old('temperature') }}">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-success">{{ __('owner.actions.save') }}</button>
                         <a href="{{ route('owner.boats.index') }}"

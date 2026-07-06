@@ -12,6 +12,8 @@
         title-en="All Catches Report"
         :settings="$settings" />
 
+    @php $allDetails = $trips->flatMap(fn ($trip) => $trip->catches?->details ?? collect()); @endphp
+
     {{-- Applied filters / key facts strip --}}
     <table class="info-bar">
         <tr>
@@ -28,9 +30,9 @@
 
     <x-report-stats :items="[
         ['label' => __('owner.catch.cards.total_catch'), 'value' => $statistics['trips_with_catch']],
-        ['label' => __('owner.catch.cards.total_weight'), 'value' => number_format($statistics['total_weight'], 2) . ' ' . __('owner.units.kg')],
-        ['label' => __('owner.catch.cards.total_revenue'), 'value' => number_format($statistics['total_revenue'], 2)],
-        ['label' => __('owner.catch.cards.avg_price_per_kg'), 'value' => number_format($statistics['avg_price_per_kg'], 2)],
+        ['label' => __('owner.catch.cards.total_weight'), 'value' => formatWeightByUnit($allDetails)],
+        ['label' => __('owner.catch.cards.total_revenue'), 'value' => $statistics['total_revenue'], 'money' => true],
+        ['label' => __('owner.catch.cards.avg_price_per_kg'), 'value' => $statistics['avg_price_per_kg'], 'money' => true],
     ]" />
 
     @if($trips->isEmpty())
@@ -54,7 +56,6 @@
             <tbody>
                 @foreach($trips as $i => $trip)
                     @php
-                        $tripWeight  = $trip->catches?->total_weight ?? 0;
                         $tripRevenue = $trip->catches?->details->sum('total_price') ?? 0;
                     @endphp
                     <tr>
@@ -63,16 +64,16 @@
                         <td>{{ $trip->boat?->name ?: '-' }}</td>
                         <td>{{ optional($trip->start_date)->format('Y-m-d') ?? '-' }}</td>
                         <td>{{ optional($trip->end_date)->format('Y-m-d') ?? '-' }}</td>
-                        <td>{{ number_format($tripWeight, 2) }} {{ __('owner.units.kg') }}</td>
-                        <td class="col-num">{{ number_format($tripRevenue, 2) }} <x-riyal-icon /></td>
+                        <td>{{ formatWeightByUnit($trip->catches?->details ?? collect()) }}</td>
+                        <td class="col-num"><x-report-money :amount="$tripRevenue" /></td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
                     <td colspan="5">{{ __('owner.catch.total') }}</td>
-                    <td>{{ number_format($statistics['total_weight'], 2) }} {{ __('owner.units.kg') }}</td>
-                    <td class="col-num">{{ number_format($statistics['total_revenue'], 2) }} <x-riyal-icon /></td>
+                    <td>{{ formatWeightByUnit($allDetails) }}</td>
+                    <td class="col-num"><x-report-money :amount="$statistics['total_revenue']" /></td>
                 </tr>
             </tfoot>
         </table>

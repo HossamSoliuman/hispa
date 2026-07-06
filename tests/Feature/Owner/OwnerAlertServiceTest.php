@@ -10,6 +10,8 @@ use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Models\MonthClosing;
 use App\Models\MonthClosingDue;
+use App\Models\PayrollDetailsModel;
+use App\Models\PayrollModel;
 use App\Models\Trip;
 use App\Models\User;
 use App\Service\Owner\OwnerAlertService;
@@ -131,6 +133,41 @@ class OwnerAlertServiceTest extends TestCase
         $this->assertSame(AlertSeverity::Critical, $alerts->first()->severity);
     }
 
+    public function test_maintenance_due_uses_latest_maintenance_record_per_boat(): void
+    {
+        $owner = $this->owner();
+        $boat = $this->boat($owner);
+
+        // Old maintenance is overdue, but the latest one pushed the next date out.
+        Maintenance::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat->id,
+            'date' => now()->subDays(200)->toDateString(),
+            'next_maintenance_date' => now()->subDays(2)->toDateString(),
+        ]);
+        Maintenance::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat->id,
+            'date' => now()->subDay()->toDateString(),
+            'next_maintenance_date' => now()->addDays(120)->toDateString(),
+        ]);
+
+        $this->assertCount(0, $this->alertsFor($owner)->where('type', AlertType::MaintenanceDue));
+
+        // A boat whose latest maintenance is imminent still fires.
+        $boat2 = $this->boat($owner);
+        Maintenance::create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat2->id,
+            'date' => now()->subDays(180)->toDateString(),
+            'next_maintenance_date' => now()->addDays(2)->toDateString(),
+        ]);
+
+        $alerts = $this->alertsFor($owner)->where('type', AlertType::MaintenanceDue);
+        $this->assertCount(1, $alerts);
+        $this->assertSame(AlertSeverity::Critical, $alerts->first()->severity);
+    }
+
     public function test_alerts_are_scoped_to_their_owner(): void
     {
         $ownerA = $this->owner();
@@ -208,6 +245,37 @@ class OwnerAlertServiceTest extends TestCase
         $this->assertSame(1, $alerts->where('severity', AlertSeverity::Critical)->count());
         $this->assertSame(1, $alerts->where('severity', AlertSeverity::Warning)->count());
         $this->assertStringContainsString('500.00', $alerts->where('severity', AlertSeverity::Critical)->first()->message);
+    }
+
+    public function test_unpaid_dues_cleared_when_settled_through_percentage_payroll(): void
+    {
+        $owner = $this->owner();
+        $crew = $this->crew($owner);
+        $closing = $this->closedMonth($owner, now()->subDays(5));
+        $this->due($closing, $crew, 300);
+
+        // Before payment the due is outstanding.
+        $this->assertCount(1, $this->alertsFor($owner)->where('type', AlertType::UnpaidDues));
+
+        // Paying it in full through the month's percentage payroll clears the alert.
+        $this->percentagePayment($owner, $crew, $closing, 300);
+
+        $this->assertCount(0, $this->alertsFor($owner->fresh())->where('type', AlertType::UnpaidDues));
+    }
+
+    public function test_unpaid_dues_reflect_partial_percentage_payroll_payment_and_link_to_closing(): void
+    {
+        $owner = $this->owner();
+        $crew = $this->crew($owner);
+        $closing = $this->closedMonth($owner, now()->subDays(5));
+        $this->due($closing, $crew, 300);
+        $this->percentagePayment($owner, $crew, $closing, 100);
+
+        $alert = $this->alertsFor($owner)->firstWhere('type', AlertType::UnpaidDues);
+
+        $this->assertNotNull($alert);
+        $this->assertStringContainsString('200.00', $alert->message);
+        $this->assertSame(route('owner.month-closing.show', $closing), $alert->url);
     }
 
     public function test_unpaid_dues_are_scoped_to_their_owner(): void
@@ -364,6 +432,26 @@ class OwnerAlertServiceTest extends TestCase
 
     private function alertsFor(User $owner): Collection
     {
-        return (new OwnerAlertService)->for($owner->id);
+        return app(OwnerAlertService::class)->for($owner->id);
+    }
+
+    private function percentagePayment(User $owner, User $user, MonthClosing $closing, float $paid): void
+    {
+        $payroll = PayrollModel::create([
+            'owner_id' => $owner->id,
+            'year' => $closing->year,
+            'month' => $closing->month,
+            'type' => 'percentage',
+            'status' => 'approved',
+        ]);
+
+        PayrollDetailsModel::create([
+            'payroll_id' => $payroll->id,
+            'user_id' => $user->id,
+            'final_salary' => $paid,
+            'is_paid' => true,
+            'paid_amount' => $paid,
+            'paid_at' => now(),
+        ]);
     }
 }

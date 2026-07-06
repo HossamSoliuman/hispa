@@ -7,7 +7,6 @@ use App\Http\Requests\Owner\ProfileRequest;
 use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
@@ -17,7 +16,9 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        $user = Auth::guard('web')->user();
+        $user = auth()->user();
+        $user->load(['region', 'governorate', 'port', 'activeSubscription']);
+        $user->loadCount('boats');
 
         return view('owner.profile.index', compact('user'));
     }

@@ -111,6 +111,7 @@ class DashboardController extends Controller
         $percentageChange = $this->monthOverMonthChange($currentMonthRevenue, $previousMonthRevenue);
 
         $totalCatch = $this->currentMonthCatch($ownerId, $from, $to);
+        $catchByUnit = $this->currentMonthCatchByUnit($ownerId, $from, $to);
 
         $soldWeight = (float) SaleDetail::whereIn('sale_id', $this->ownerSaleIds($ownerId, $from, $to))->sum('weight');
         $averagePricePerKg = $soldWeight > 0 ? round($currentMonthRevenue / $soldWeight, 2) : 0;
@@ -120,6 +121,11 @@ class DashboardController extends Controller
             ->orderBy('name_ar')
             ->get();
         $activeBoats = $activeBoatsList->count();
+
+        $sailingBoatIds = Trip::where('owner_id', $ownerId)
+            ->where('status', TripStatus::InProgress->value)
+            ->pluck('boat_id')
+            ->flip();
         $completedTrips = Trip::where('owner_id', $ownerId)->where('status', TripStatus::Sold->value)->count();
 
         $currentMonthProfit = $this->currentMonthProfit($ownerId);
@@ -137,11 +143,13 @@ class DashboardController extends Controller
             'currentMonthProfit',
             'percentageChange',
             'totalCatch',
+            'catchByUnit',
             'averagePricePerKg',
             'profitMargin',
             'profit',
             'activeBoats',
             'activeBoatsList',
+            'sailingBoatIds',
             'completedTrips',
             'topFive',
             'currentMonthLabel',
@@ -279,6 +287,35 @@ class DashboardController extends Controller
         }
 
         return $totalWeight;
+    }
+
+    /**
+     * Current-month landed catch broken down by weight unit (كجم/شكه/بوكس …).
+     * Weights are tracked per unit with no kg conversion, so each unit is
+     * reported on its own. Units with no weight are omitted.
+     *
+     * @return \Illuminate\Support\Collection<int, array{unit: string, weight: float}>
+     */
+    private function currentMonthCatchByUnit(int $ownerId, string $from, string $to)
+    {
+        $tripIds = Trip::where('owner_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(actual_end_datetime)'), [$from, $to])
+            ->pluck('id');
+
+        $catchIds = CatchModel::whereIn('trip_id', $tripIds)->pluck('id');
+
+        return CatchDetail::whereIn('catch_id', $catchIds)
+            ->selectRaw('unit_id, SUM(weight) as total_weight')
+            ->groupBy('unit_id')
+            ->having('total_weight', '>', 0)
+            ->with('unit')
+            ->get()
+            ->map(fn (CatchDetail $row): array => [
+                'unit' => $row->unit->name ?: __('owner.units.kg'),
+                'weight' => (float) $row->total_weight,
+            ])
+            ->sortByDesc('weight')
+            ->values();
     }
 
     private function currentMonthProfit(int $ownerId): float

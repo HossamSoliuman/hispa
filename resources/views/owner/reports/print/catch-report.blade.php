@@ -36,14 +36,13 @@
 
     @if ($catch)
         @php
-            $totalWeight = $catch->details->sum('weight');
-            $totalPrice  = $catch->details->sum('total_price');
+            $totalPrice = $catch->details->sum('total_price');
         @endphp
 
         <x-report-stats :items="[
             ['label' => __('owner.catch.items_count'), 'value' => $catch->details->count()],
-            ['label' => __('owner.catch.weight'), 'value' => number_format($totalWeight, 2)],
-            ['label' => __('owner.catch.total_price'), 'value' => number_format($totalPrice, 2)],
+            ['label' => __('owner.catch.weight'), 'value' => formatWeightByUnit($catch->details)],
+            ['label' => __('owner.catch.total_price'), 'value' => $totalPrice, 'money' => true],
         ]" />
 
         <x-report-table :headers="[
@@ -60,8 +59,8 @@
                     <td>{{ $detail->fish?->scientific_name ?? '—' }}</td>
                     <td>{{ number_format($detail->weight, 2) }}</td>
                     <td>{{ $detail->unit?->name ?? '—' }}</td>
-                    <td style="text-align:end;">{{ number_format($detail->price_per_kg, 2) }}</td>
-                    <td style="text-align:end;font-weight:700;">{{ number_format($detail->total_price, 2) }}</td>
+                    <td style="text-align:end;"><x-report-money :amount="$detail->price_per_kg" /></td>
+                    <td style="text-align:end;font-weight:700;"><x-report-money :amount="$detail->total_price" /></td>
                 </tr>
             @endforeach
         </x-report-table>
@@ -73,7 +72,7 @@
             />
             <x-report-summary-row
                 :label="__('owner.catch.weight')"
-                :value="number_format($totalWeight, 2)"
+                :value="formatWeightByUnit($catch->details)"
             />
             <x-report-summary-row
                 :label="__('owner.catch.total_price')"
