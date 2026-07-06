@@ -49,7 +49,7 @@ class DalalSaleRepository implements CRUD
                 if (! empty($stockDetailIds)) {
                     $q->whereIn('dalal_stock_detail_id', $stockDetailIds);
                 }
-                $q->with('fish:id,scientific_name');
+                $q->with('fish:id,name_ar,name_en');
             },
             'customer:id,name',
         ])
@@ -164,7 +164,7 @@ class DalalSaleRepository implements CRUD
         }
 
         $sale = Sale::with([
-            'details.fish:id,scientific_name',
+            'details.fish:id,name_ar,name_en',
             'customer:id,name',
         ])
             ->where('id', $id)

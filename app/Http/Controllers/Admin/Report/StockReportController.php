@@ -51,7 +51,7 @@ class StockReportController extends Controller
         $from = $request->start_date ?? null;
         $to = $request->end_date ?? null;
         $fishName = $request->filled('fish_type')
-            ? (optional(Fish::find($request->fish_type))->scientific_name ?? null)
+            ? optional(Fish::find($request->fish_type))->name
             : null;
 
         $filename = 'stock-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
@@ -106,7 +106,7 @@ class StockReportController extends Controller
 
         return $query->orderBy('created_at', 'desc')->get()->map(function ($stock) {
             return (object) [
-                'name' => optional($stock->fish)->scientific_name ?? '---',
+                'name' => optional($stock->fish)->name ?? '---',
                 'weight_captain' => $stock->weight_captain,
                 'weight_counter' => $stock->weight_counter,
                 'total_weight' => $stock->weight,
@@ -126,7 +126,8 @@ class StockReportController extends Controller
         $query = CatchDetail::query()
             ->selectRaw(
                 'catch_details.fish_id,
-                fish.scientific_name,
+                fish.name_ar as fish_name_ar,
+                fish.name_en as fish_name_en,
                 MAX(addedUser.name) as added_by_name,
                 MAX(catch_details.created_at) as created_at,
                 SUM(catch_details.weight) as total_weight'
@@ -134,7 +135,7 @@ class StockReportController extends Controller
             ->join('fish', 'catch_details.fish_id', '=', 'fish.id')
             ->leftJoin('catch_models', 'catch_details.catch_id', '=', 'catch_models.id')
             ->leftJoin('users as addedUser', 'catch_models.owner_id', '=', 'addedUser.id')
-            ->groupBy('catch_details.fish_id', 'fish.scientific_name')
+            ->groupBy('catch_details.fish_id', 'fish.name_ar', 'fish.name_en')
             ->orderByDesc('total_weight');
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -146,7 +147,7 @@ class StockReportController extends Controller
 
         return $query->get()->map(function ($row) {
             return (object) [
-                'name' => $row->scientific_name ?? '---',
+                'name' => (app()->getLocale() === 'en' ? $row->fish_name_en : $row->fish_name_ar) ?: '---',
                 'weight_captain' => $row->total_weight,
                 'weight_counter' => $row->total_weight,
                 'total_weight' => $row->total_weight,

@@ -2282,29 +2282,15 @@ return [
             0 => 'Activate',
             1 => 'Active',
         ],
-        'code' => [
-            0 => 'Code',
-            1 => 'Code',
+        'name_ar' => [
+            0 => 'Name (Arabic)',
+            1 => 'Name (Arabic)',
         ],
-        'scientific_name' => [
-            0 => 'Scientific Name',
-            1 => 'Scientific Name',
+        'name_en' => [
+            0 => 'Name (English)',
+            1 => 'Name (English)',
         ],
-        'english_name' => [
-            0 => 'English Name',
-            1 => 'English Name',
-        ],
-        'red_sea_name' => [
-            0 => 'Red Sea Name',
-            1 => 'Red Sea Name',
-        ],
-        'arabian_gulf_name' => [
-            0 => 'Arabian Gulf Name',
-            1 => 'Arabian Gulf Name',
-        ],
-        'name' => 'Title',
-        'name_ar' => 'Title',
-        'name_en' => 'Title (English)',
+        'name' => 'Name',
         'status_active' => 'Active',
         'status_inactive' => 'Inactive',
         'parent' => 'Parent Category',

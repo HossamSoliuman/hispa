@@ -28,7 +28,7 @@ class FishStockObserver
         TripDetail::create([
             'trip_id' => $stock->trip->id,
             'fish_id' => $stock->fish_id,
-            'fish_name' => $stock->fish?->scientific_name ?? 'test',
+            'fish_name' => $stock->fish?->name ?? 'test',
             'weight' => $stock->weight,
             'quantity' => $stock->quantity,
             'quantity_captain' => $stock->quantity,
@@ -78,7 +78,7 @@ class FishStockObserver
 
         if ($tripDetail) {
             $data = [
-                'fish_name' => $stock->fish?->scientific_name ?? 'test',
+                'fish_name' => $stock->fish?->name ?? 'test',
                 'weight' => $stock->weight,
                 'quantity' => $stock->quantity,
                 'notes' => $stock->notes,

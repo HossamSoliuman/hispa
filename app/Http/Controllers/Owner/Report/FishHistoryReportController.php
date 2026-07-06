@@ -21,7 +21,7 @@ class FishHistoryReportController extends Controller
 
     public function index()
     {
-        $fish = Fish::Active()->select('scientific_name as name', 'id')->get();
+        $fish = Fish::Active()->get(['id', 'name_ar', 'name_en']);
 
         return view('owner.report.fish_history', compact('fish'));
     }
@@ -77,7 +77,7 @@ class FishHistoryReportController extends Controller
         $fishName = null;
 
         if ($request->filled('fish_id')) {
-            $fishName = Fish::find($request->fish_id)->scientific_name ?? null;
+            $fishName = optional(Fish::find($request->fish_id))->name;
         }
 
         $filename = 'fish-history-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';

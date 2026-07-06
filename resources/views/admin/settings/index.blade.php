@@ -107,11 +107,8 @@
                     ajax: { url: "{{ route('admin.getFishData') }}" },
                     columns: [
                         { data: 'DT_RowIndex', name: 'DT_RowIndex' },
-                        { data: 'code', name: 'code' },
-                        { data: 'scientific_name', name: 'scientific_name' },
-                        { data: 'english_name', name: 'english_name' },
-                        { data: 'red_sea_name', name: 'red_sea_name' },
-                        { data: 'arabian_gulf_name', name: 'arabian_gulf_name' },
+                        { data: 'name_ar', name: 'name_ar' },
+                        { data: 'name_en', name: 'name_en' },
                         { data: 'status', name: 'status' },
                         { data: 'action', name: 'action', orderable: false, searchable: false },
                     ],
@@ -124,11 +121,8 @@
             var button = $(event.relatedTarget);
             if (!button.length || !button.hasClass('editBtn')) return;
             $('#fish_edit_id').val(button.data('id'));
-            $('#fish_code').val(button.data('code'));
-            $('#fish_scientific_name').val(button.data('scientific_name'));
-            $('#fish_english_name').val(button.data('english_name'));
-            $('#fish_red_sea_name').val(button.data('red_sea_name'));
-            $('#fish_arabian_gulf_name').val(button.data('arabian_gulf_name'));
+            $('#fish_name_ar').val(button.data('name_ar'));
+            $('#fish_name_en').val(button.data('name_en'));
             $('#fish_status').prop('checked', button.data('status') == 1);
         });
 

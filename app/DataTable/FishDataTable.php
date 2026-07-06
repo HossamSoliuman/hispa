@@ -24,20 +24,13 @@ class FishDataTable extends DataTables
                         return '<span class="badge bg-danger">غير مفعل</span>';
                     }
                 })
-                ->addColumn('region', function (Fish $fish) {
-                    return $fish->region->name ?? '--';
-                })
-                ->addColumn('governorate', function (Fish $fish) {
-                    return $fish->governorate->name ?? '--';
-                })
                 ->addColumn('action', function (Fish $fish) {
                     $btn = '';
 
                     $btn .= '<a data-bs-effect="effect-scale" data-bs-toggle="modal" href="#modelEdit"
             data-id="'.$fish->id.'"
-            data-code="'.$fish->code.'"
-            data-scientific_name="'.$fish->scientific_name.'"
-            data-english_name="'.$fish->english_name.'"
+            data-name_ar="'.e($fish->name_ar).'"
+            data-name_en="'.e($fish->name_en).'"
             data-status="'.$fish->status.'"
             class="btn btn-sm btn-outline-success me-1 editBtn">
             <i class="bi bi-pencil"></i>
@@ -47,7 +40,7 @@ class FishDataTable extends DataTables
 
                     return $btn;
                 })
-                ->rawColumns(['action', 'status', 'region', 'governorate'])
+                ->rawColumns(['action', 'status'])
                 ->make(true);
         }
 

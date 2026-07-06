@@ -18,7 +18,7 @@ class DalalStockRepository implements CRUD
         $stocks = DalalStock::with([
             'owner:id,name',
             'trip:id,number',
-            'details.fish:id,scientific_name',
+            'details.fish:id,name_ar,name_en',
         ])
             ->where('dalal_id', $user->id)
             ->latest()
@@ -60,7 +60,7 @@ class DalalStockRepository implements CRUD
         $stock = DalalStock::with([
             'owner:id,name',
             'trip:id,number',
-            'details.fish:id,scientific_name',
+            'details.fish:id,name_ar,name_en',
         ])
             ->where('dalal_id', $user->id)
             ->find($id);

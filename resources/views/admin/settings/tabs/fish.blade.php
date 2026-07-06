@@ -16,11 +16,8 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>{{ __('admin.fish.code.1') ?? __('admin.fish.code.0') }}</th>
-                <th>{{ __('admin.fish.scientific_name.1') ?? __('admin.fish.scientific_name.0') }}</th>
-                <th>{{ __('admin.fish.english_name.1') ?? __('admin.fish.english_name.0') }}</th>
-                <th>{{ __('admin.fish.red_sea_name.1') ?? __('admin.fish.red_sea_name.0') }}</th>
-                <th>{{ __('admin.fish.arabian_gulf_name.1') ?? __('admin.fish.arabian_gulf_name.0') }}</th>
+                <th>{{ __('admin.fish.name_ar.1') ?? __('admin.fish.name_ar.0') }}</th>
+                <th>{{ __('admin.fish.name_en.1') ?? __('admin.fish.name_en.0') }}</th>
                 <th>{{ __('admin.fish.status.1') ?? __('admin.fish.status.0') }}</th>
                 <th>{{ __('admin.fish.actions.1') ?? __('admin.fish.actions.0') }}</th>
             </tr>

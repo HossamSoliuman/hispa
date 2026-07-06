@@ -96,68 +96,38 @@
 
                         <div class="row">
 
-                            <div class="col-4 ">
-
+                            <div class="col-6 ">
                                 <div class="form-group ">
-                                    <label for="scientific_name" class="form-label">{{ __('owner.fish.scientific_name') }}<span
+                                    <label for="name_ar" class="form-label">{{ __('owner.fish.name_ar') }}<span
                                             class="text-danger">*</span></label>
-                                    <input type="text" name="scientific_name" value="{{old('scientific_name')}}"
+                                    <input type="text" name="name_ar" value="{{old('name_ar')}}"
                                            class="form-control  " required
-                                           placeholder="{{ __('owner.fish.scientific_name') }}">
+                                           placeholder="{{ __('owner.fish.name_ar') }}">
 
 
-                                    @error('scientific_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="english_name" class="form-label">{{ __('owner.generated.name_in_english') }}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="english_name" value="{{old('english_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{ __('owner.generated.name_in_english') }}">
-
-
-                                    @error('english_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="local_name_primary" class="form-label">{{ __('owner.generated.local_name') }}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="local_name_primary" value="{{old('local_name_primary')}}"
-                                           class="form-control  " required
-                                           placeholder="{{ __('owner.generated.name_local_name') }}">
-
-
-                                    @error('local_name_primary') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="local_name_secondary" class="form-label">{{ __('owner.generated.secondary_local_name') }}</label>
-                                    <input type="text" name="local_name_secondary"
-                                           value="{{old('local_name_secondary')}}"
-                                           class="form-control  "
-                                           placeholder="{{ __('owner.generated.name_secondary_local_name') }}">
-
-
-                                    @error('local_name_secondary') <span
+                                    @error('name_ar') <span
                                         class="text-danger error">{{ $message }}</span>@enderror
 
                                 </div>
                             </div>
                             <div class="col-6 ">
-                                <div class="form-check form-switch " style="margin-top: 35px">
+                                <div class="form-group ">
+                                    <label for="name_en" class="form-label">{{ __('owner.fish.name_en') }}<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="name_en" value="{{old('name_en')}}"
+                                           class="form-control  " required
+                                           placeholder="{{ __('owner.fish.name_en') }}">
+
+
+                                    @error('name_en') <span
+                                        class="text-danger error">{{ $message }}</span>@enderror
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-6 ">
+                                <div class="form-check form-switch " style="margin-top: 10px">
                                     <input type="checkbox" name="status" checked class="form-check-input" value="1">
                                     <label class="form-check-label" for="status">{{ __('owner.customers.modal.labels.status') }}</label>
                                     @error('status') <span class="text-danger error">{{ $message }}</span>@enderror
@@ -191,73 +161,43 @@
                     @method('PUT')
                     <div class="modal-body">
 
+                        <input type="hidden" name="id" id="id">
                         <div class="row">
 
-                            <div class="col-4 ">
-                                <input type="hidden" name="id" id="id">
+                            <div class="col-6 ">
                                 <div class="form-group ">
-                                    <label for="scientific_name" class="form-label">{{ __('owner.fish.scientific_name') }}<span
+                                    <label for="name_ar" class="form-label">{{ __('owner.fish.name_ar') }}<span
                                             class="text-danger">*</span></label>
-                                    <input type="text" name="scientific_name" id="scientific_name"
-                                           value="{{old('scientific_name')}}"
+                                    <input type="text" name="name_ar" id="name_ar"
+                                           value="{{old('name_ar')}}"
                                            class="form-control  " required
-                                           placeholder="{{ __('owner.fish.scientific_name') }}">
+                                           placeholder="{{ __('owner.fish.name_ar') }}">
 
 
-                                    @error('scientific_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="english_name" class="form-label">{{ __('owner.generated.name_in_english') }}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="english_name" id="english_name"
-                                           value="{{old('english_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{ __('owner.generated.name_in_english') }}">
-
-
-                                    @error('english_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="scientific_name" class="form-label">{{ __('owner.generated.local_name') }}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="scientific_name" id="scientific_name"
-                                           value="{{old('scientific_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{ __('owner.generated.name_local_name') }}">
-
-
-                                    @error('scientific_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="local_name_secondary" class="form-label">{{ __('owner.generated.secondary_local_name') }}</label>
-                                    <input type="text" name="local_name_secondary" id="local_name_secondary"
-                                           value="{{old('local_name_secondary')}}"
-                                           class="form-control  "
-                                           placeholder="{{ __('owner.generated.name_secondary_local_name') }}">
-
-
-                                    @error('local_name_secondary') <span
+                                    @error('name_ar') <span
                                         class="text-danger error">{{ $message }}</span>@enderror
 
                                 </div>
                             </div>
                             <div class="col-6 ">
-                                <div class="form-check form-switch " style="margin-top: 35px">
+                                <div class="form-group ">
+                                    <label for="name_en" class="form-label">{{ __('owner.fish.name_en') }}<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="name_en" id="name_en"
+                                           value="{{old('name_en')}}"
+                                           class="form-control  " required
+                                           placeholder="{{ __('owner.fish.name_en') }}">
+
+
+                                    @error('name_en') <span
+                                        class="text-danger error">{{ $message }}</span>@enderror
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-6 ">
+                                <div class="form-check form-switch " style="margin-top: 10px">
                                     <input type="checkbox" name="status" id="status" checked class="form-check-input"
                                            value="1">
                                     <label class="form-check-label" for="status">{{ __('owner.customers.modal.labels.status') }}</label>
@@ -526,18 +466,14 @@
         $('#modelEdit').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget)
             var id = button.data('id')
-            var scientific_name = button.data('scientific_name')
-            var english_name = button.data('english_name')
-            var scientific_name = button.data('scientific_name')
-            var local_name_secondary = button.data('local_name_secondary')
+            var name_ar = button.data('name_ar')
+            var name_en = button.data('name_en')
             var status = button.data('status')
 
             var modal = $(this)
             modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #english_name').val(english_name);
-            modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #local_name_secondary').val(local_name_secondary);
+            modal.find('.modal-body #name_ar').val(name_ar);
+            modal.find('.modal-body #name_en').val(name_en);
             modal.find('.modal-body #status').prop('checked', status == 1);
 
         });

@@ -58,10 +58,9 @@ class DummyDalalStockSeeder extends Seeder
 
         // Create or get a fish
         $fish = Fish::firstOrCreate(
-            ['scientific_name' => 'Testus fishus'],
+            ['name_ar' => 'سمكة تجريبية'],
             [
-                'english_name' => 'Test Fish',
-                'local_name_primary' => 'سمكة تجريبية',
+                'name_en' => 'Test Fish',
                 'status' => 1,
             ]
         );
@@ -82,7 +81,7 @@ class DummyDalalStockSeeder extends Seeder
         DalalStockDetail::create([
             'dalal_stock_id' => $dalalStock->id,
             'fish_id' => $fish->id,
-            'fish_name' => $fish->scientific_name,
+            'fish_name' => $fish->name,
             'weight' => 80.25,
             'quantity' => 10,
         ]);
@@ -90,7 +89,7 @@ class DummyDalalStockSeeder extends Seeder
         DalalStockDetail::create([
             'dalal_stock_id' => $dalalStock->id,
             'fish_id' => $fish->id,
-            'fish_name' => $fish->scientific_name,
+            'fish_name' => $fish->name,
             'weight' => 40.25,
             'quantity' => 5,
         ]);

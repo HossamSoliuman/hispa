@@ -109,7 +109,7 @@ class CaptainDataTable extends DataTables
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('trip_name', fn ($row) => optional($row->trip)->name ?? '---')
-            ->addColumn('fish_name', fn ($row) => optional($row->fish)->scientific_name ?? '---')
+            ->addColumn('fish_name', fn ($row) => optional($row->fish)->name ?? '---')
             ->make(true);
     }
 }

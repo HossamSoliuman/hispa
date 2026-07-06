@@ -108,10 +108,8 @@ class AnnualSummaryControllerTest extends TestCase
         ]);
 
         $fish = Fish::create([
-            'code' => 'HMR',
-            'scientific_name' => 'Hamour',
-            'english_name' => 'Hamour',
-            'local_name_primary' => 'هامور',
+            'name_ar' => 'هامور',
+            'name_en' => 'Hamour',
             'status' => 1,
             'owner_id' => $owner->id,
         ]);

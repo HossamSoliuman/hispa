@@ -114,9 +114,9 @@ class OwnerMasterDataService
     private function seedFish(int $ownerId): void
     {
         $fish = [
-            ['scientific_name' => 'Sparus aurata', 'english_name' => 'Gilt-head bream', 'local_name_primary' => 'دنيس'],
-            ['scientific_name' => 'Dicentrarchus labrax', 'english_name' => 'Sea bass', 'local_name_primary' => 'قاروص'],
-            ['scientific_name' => 'Mugil cephalus', 'english_name' => 'Flathead grey mullet', 'local_name_primary' => 'بوري'],
+            ['name_ar' => 'دنيس', 'name_en' => 'Gilt-head bream'],
+            ['name_ar' => 'قاروص', 'name_en' => 'Sea bass'],
+            ['name_ar' => 'بوري', 'name_en' => 'Flathead grey mullet'],
         ];
 
         foreach ($fish as $item) {

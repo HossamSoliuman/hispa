@@ -334,18 +334,14 @@
         $('#modelEdit').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget)
             var id = button.data('id')
-            var scientific_name = button.data('scientific_name')
-            var english_name = button.data('english_name')
-            var scientific_name = button.data('scientific_name')
-            var local_name_secondary = button.data('local_name_secondary')
+            var name_ar = button.data('name_ar')
+            var name_en = button.data('name_en')
             var status = button.data('status')
 
             var modal = $(this)
             modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #english_name').val(english_name);
-            modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #local_name_secondary').val(local_name_secondary);
+            modal.find('.modal-body #name_ar').val(name_ar);
+            modal.find('.modal-body #name_en').val(name_en);
             modal.find('.modal-body #status').prop('checked', status == 1);
 
         });

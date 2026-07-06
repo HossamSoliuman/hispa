@@ -11,29 +11,17 @@
                 <input type="hidden" name="tab" value="fish">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-4">
-                            <label for="code" class="form-label">{{ __('admin.fish.code.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="code" value="{{ old('code') }}" class="form-control" required placeholder="{{ __('admin.fish.code.0') }}">
+                        <div class="col-6">
+                            <label for="name_ar" class="form-label">{{ __('admin.fish.name_ar.0') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="name_ar" value="{{ old('name_ar') }}" class="form-control" required placeholder="{{ __('admin.fish.name_ar.0') }}">
                         </div>
-                        <div class="col-4">
-                            <label for="scientific_name" class="form-label">{{ __('admin.fish.scientific_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="scientific_name" value="{{ old('scientific_name') }}" class="form-control" required>
-                        </div>
-                        <div class="col-4">
-                            <label for="english_name" class="form-label">{{ __('admin.fish.english_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="english_name" value="{{ old('english_name') }}" class="form-control" required>
+                        <div class="col-6">
+                            <label for="name_en" class="form-label">{{ __('admin.fish.name_en.0') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="name_en" value="{{ old('name_en') }}" class="form-control" required placeholder="{{ __('admin.fish.name_en.0') }}">
                         </div>
                     </div>
-                    <div class="row mt-2">
+                    <div class="row mt-3">
                         <div class="col-4">
-                            <label for="red_sea_name" class="form-label">{{ __('admin.fish.red_sea_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="red_sea_name" value="{{ old('red_sea_name') }}" class="form-control" required>
-                        </div>
-                        <div class="col-4">
-                            <label for="arabian_gulf_name" class="form-label">{{ __('admin.fish.arabian_gulf_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="arabian_gulf_name" value="{{ old('arabian_gulf_name') }}" class="form-control" required>
-                        </div>
-                        <div class="col-4 pt-4">
                             <div class="form-check form-switch">
                                 <input type="checkbox" name="status" class="form-check-input" value="1" checked>
                                 <label class="form-check-label">{{ __('admin.fish.activate.0') }}</label>
@@ -65,29 +53,17 @@
                 <input type="hidden" name="id" id="fish_edit_id">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-4">
-                            <label class="form-label">{{ __('admin.fish.code.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="code" id="fish_code" class="form-control" required>
+                        <div class="col-6">
+                            <label class="form-label">{{ __('admin.fish.name_ar.0') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="name_ar" id="fish_name_ar" class="form-control" required>
                         </div>
-                        <div class="col-4">
-                            <label class="form-label">{{ __('admin.fish.scientific_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="scientific_name" id="fish_scientific_name" class="form-control" required>
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label">{{ __('admin.fish.english_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="english_name" id="fish_english_name" class="form-control" required>
+                        <div class="col-6">
+                            <label class="form-label">{{ __('admin.fish.name_en.0') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="name_en" id="fish_name_en" class="form-control" required>
                         </div>
                     </div>
-                    <div class="row mt-2">
+                    <div class="row mt-3">
                         <div class="col-4">
-                            <label class="form-label">{{ __('admin.fish.red_sea_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="red_sea_name" id="fish_red_sea_name" class="form-control" required>
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label">{{ __('admin.fish.arabian_gulf_name.0') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="arabian_gulf_name" id="fish_arabian_gulf_name" class="form-control" required>
-                        </div>
-                        <div class="col-4 pt-4">
                             <div class="form-check form-switch">
                                 <input type="checkbox" name="status" id="fish_status" class="form-check-input" value="1">
                                 <label class="form-check-label">{{ __('admin.fish.activate.0') }}</label>

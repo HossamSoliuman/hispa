@@ -28,7 +28,8 @@ class MonthlyReportsServiceTest extends TestCase
     private function fish(string $name): int
     {
         return DB::table('fish')->insertGetId([
-            'scientific_name' => $name,
+            'name_ar' => $name,
+            'name_en' => $name,
             'status' => 1,
             'created_at' => now(),
             'updated_at' => now(),

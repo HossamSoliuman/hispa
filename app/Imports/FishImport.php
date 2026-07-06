@@ -21,11 +21,8 @@ class FishImport implements ShouldQueue, ToModel, WithChunkReading, WithHeadingR
     public function model(array $row)
     {
         return new Fish([
-            'code' => $row['code'] ?? null,
-            'scientific_name' => $row['scientific_name'] ?? null,
-            'english_name' => $row['english_name'] ?? null,
-            'red_sea_name' => $row['red_sea_name'] ?? null,
-            'arabian_gulf_name' => $row['arabian_gulf_name'] ?? null,
+            'name_ar' => $row['name_ar'] ?? null,
+            'name_en' => $row['name_en'] ?? null,
             'status' => 1,
         ]);
     }

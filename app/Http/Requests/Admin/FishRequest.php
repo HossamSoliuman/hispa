@@ -22,14 +22,8 @@ class FishRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|max:255',
-            'scientific_name' => 'required|max:255',
-            'english_name' => 'required|max:255',
-            'red_sea_name' => 'required|max:255',
-            'arabian_gulf_name' => 'required|max:255',
-            'region_id ' => 'nullable|exists:regions,id',
-            'governorate_id  ' => 'nullable|exists:governorates,id',
-
+            'name_ar' => 'required|max:255',
+            'name_en' => 'required|max:255',
         ];
     }
 }

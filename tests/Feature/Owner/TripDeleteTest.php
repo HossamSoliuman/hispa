@@ -44,7 +44,7 @@ class TripDeleteTest extends TestCase
     {
         $trip = Trip::factory()->create(['owner_id' => $owner->id]);
 
-        $fish = Fish::create(['scientific_name' => 'Test Fish', 'status' => 1, 'owner_id' => $owner->id]);
+        $fish = Fish::create(['name_ar' => 'سمكة تجريبية', 'name_en' => 'Test Fish', 'status' => 1, 'owner_id' => $owner->id]);
         $unit = Unit::create(['name_ar' => 'كجم', 'is_default' => true, 'status' => true, 'owner_id' => $owner->id]);
 
         $catch = CatchModel::create([
@@ -85,7 +85,7 @@ class TripDeleteTest extends TestCase
             'sale_id' => $sale->id,
             'fish_id' => $fish->id,
             'unit_id' => $unit->id,
-            'fish_name' => $fish->scientific_name,
+            'fish_name' => $fish->name,
             'weight' => 10,
             'price_per_kilo' => 50,
             'total_price' => 500,

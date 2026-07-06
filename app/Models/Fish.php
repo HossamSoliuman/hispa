@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Traits\BelongsToOwner;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Fish extends Model
@@ -14,16 +13,9 @@ class Fish extends Model
     protected $table = 'fish';
 
     protected $fillable = [
-        'code',
-        'scientific_name',
-        'english_name',
-        'local_name_primary',
-        'local_name_secondary',
+        'name_ar',
+        'name_en',
         'status',
-        'red_sea_name',
-        'arabian_gulf_name',
-        'region_id',
-        'governorate_id',
         'owner_id',
     ];
 
@@ -54,28 +46,15 @@ class Fish extends Model
         return $this->hasMany(CatchDetail::class, 'fish_id');
     }
 
-    public function region(): BelongsTo
+    public function getNameAttribute(): string
     {
-        return $this->belongsTo(Region::class);
-    }
+        $nameAr = data_get($this->attributes, 'name_ar');
+        $nameEn = data_get($this->attributes, 'name_en');
 
-    public function governorate(): BelongsTo
-    {
-        return $this->belongsTo(Governorate::class);
-    }
-
-    public function getNameAttribute()
-    {
-        $locale = app()->getLocale();
-
-        if ($locale === 'en') {
-            return $this->attributes['scientific_name'] ?? $this->attributes['english_name'] ?? '--';
+        if (app()->getLocale() === 'en') {
+            return $nameEn ?: ($nameAr ?: '--');
         }
 
-        // استخدام data_get لتجنب Undefined array key
-        $redSea = data_get($this->attributes, 'red_sea_name');
-        $arabianGulf = data_get($this->attributes, 'arabian_gulf_name');
-
-        return $redSea ?: $arabianGulf ?: $this->attributes['scientific_name'] ?? '--';
+        return $nameAr ?: ($nameEn ?: '--');
     }
 }

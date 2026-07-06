@@ -60,7 +60,7 @@ class DalalStockReportController extends Controller
         $stocks = $stocks->map(function ($stock) {
             return (object) [
                 'dalal_name' => optional($stock->dalal)->name ?? '---',
-                'fish_name' => optional($stock->fish)->scientific_name ?? '---',
+                'fish_name' => optional($stock->fish)->name ?? '---',
                 'total_weight' => $stock->weight,
                 'date' => $stock->created_at,
             ];

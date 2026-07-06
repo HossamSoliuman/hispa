@@ -58,7 +58,7 @@ class FishHistoryReportDataTable extends DataTables
 
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('fish_name', fn ($row) => optional($row->fish)->scientific_name ?? '---')
+            ->addColumn('fish_name', fn ($row) => optional($row->fish)->name ?? '---')
             ->addColumn('user_name', fn ($row) => optional($row->stock->trip->owner)->name ?? '---')
             ->addColumn('changed_weight', fn ($row) => number_format($row->changed_weight, 2))
             ->addColumn('remaining_weight', fn ($row) => number_format($row->remaining_weight, 2))

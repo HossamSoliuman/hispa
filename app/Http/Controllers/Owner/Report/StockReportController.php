@@ -20,7 +20,7 @@ class StockReportController extends Controller
 
     public function index()
     {
-        $fish = Fish::Active()->select('scientific_name as name', 'id')->get();
+        $fish = Fish::Active()->get(['id', 'name_ar', 'name_en']);
 
         return view('owner.report.stock', compact('fish'));
     }
@@ -59,7 +59,7 @@ class StockReportController extends Controller
         // Transform data for display
         $stocks = $stocks->map(function ($stock) {
             return (object) [
-                'name' => optional($stock->fish)->scientific_name ?? '---',
+                'name' => optional($stock->fish)->name ?? '---',
                 'weight_captain' => $stock->weight_captain,
                 'weight_counter' => $stock->weight_counter,
                 'total_weight' => $stock->weight,
@@ -82,7 +82,7 @@ class StockReportController extends Controller
         $to = $request->end_date ?? null;
         $fishName = null;
         if ($request->filled('fish_type')) {
-            $fishName = Fish::find($request->fish_type)->scientific_name ?? null;
+            $fishName = optional(Fish::find($request->fish_type))->name;
         }
 
         $filename = 'stock-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';

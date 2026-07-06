@@ -19,7 +19,7 @@ class StockDataTable extends DataTables
 
             if ($request->filled('search')) {
                 $term = $request->search;
-                $query->whereHas('fish', fn ($q) => $q->where('scientific_name', 'like', "%{$term}%"));
+                $query->whereHas('fish', fn ($q) => $q->where('name_ar', 'like', "%{$term}%")->orWhere('name_en', 'like', "%{$term}%"));
             }
 
             $data = $query->get();
@@ -33,7 +33,7 @@ class StockDataTable extends DataTables
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('name', fn ($row) => $row->fish->scientific_name ?? '---')
+                ->addColumn('name', fn ($row) => $row->fish->name ?? '---')
                 ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' '.__('admin.units.kg'))
                 ->addColumn('unit', fn ($row) => __('admin.units.kg'))
                 ->addColumn('details', function ($row) {
@@ -65,7 +65,7 @@ class StockDataTable extends DataTables
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('name', fn ($row) => $row->fish->scientific_name ?? '---')
+                ->addColumn('name', fn ($row) => $row->fish->name ?? '---')
                 ->addColumn('captain_name', fn ($row) => $row->addedBy->name ?? '---')
                 ->addColumn('weight_captain', fn ($row) => $row->weight_captain ? number_format($row->weight_captain, 2).' '.__('admin.units.kg') : '---')
                 ->addColumn('counter_name', fn ($row) => $row->correctedBy->name ?? '---')

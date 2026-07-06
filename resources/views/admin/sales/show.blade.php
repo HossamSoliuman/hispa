@@ -47,7 +47,7 @@
                     @foreach($sale->details as $detail)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ optional($detail->fish)->scientific_name ?? '---' }}</td>
+                            <td>{{ optional($detail->fish)->name ?? '---' }}</td>
                             <td>{{ number_format($detail->weight ?? 0, 2) }} {{ __('admin.stocks_admin.unit_kg') }}</td>
                             <td>{{ number_format($detail->total_price ?? 0, 2) }}</td>
                         </tr>

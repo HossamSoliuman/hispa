@@ -22,7 +22,7 @@ class TripReportController extends Controller
 
     public function index()
     {
-        $fish = Fish::Active()->select('scientific_name as name', 'id')->get();
+        $fish = Fish::Active()->get(['id', 'name_ar', 'name_en']);
 
         return view('owner.report.tripe', compact('fish'));
     }

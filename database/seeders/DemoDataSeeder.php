@@ -67,17 +67,17 @@ class DemoDataSeeder extends Seeder
     private function seedFish(): void
     {
         $species = [
-            ['scientific_name' => 'Epinephelus coioides', 'english_name' => 'Orange-spotted grouper', 'local_name_primary' => 'هامور', 'status' => 1],
-            ['scientific_name' => 'Scomberomorus commerson', 'english_name' => 'Narrow-barred Spanish mackerel', 'local_name_primary' => 'كنعد', 'status' => 1],
-            ['scientific_name' => 'Lethrinus nebulosus', 'english_name' => 'Spangled emperor', 'local_name_primary' => 'شعري', 'status' => 1],
-            ['scientific_name' => 'Lutjanus bohar', 'english_name' => 'Two-spot red snapper', 'local_name_primary' => 'نقرور', 'status' => 1],
-            ['scientific_name' => 'Thunnus albacares', 'english_name' => 'Yellowfin tuna', 'local_name_primary' => 'تونة', 'status' => 1],
-            ['scientific_name' => 'Carangoides bajad', 'english_name' => 'Orange-spotted trevally', 'local_name_primary' => 'صافي', 'status' => 1],
-            ['scientific_name' => 'Siganus rivulatus', 'english_name' => 'Marbled spinefoot', 'local_name_primary' => 'سيجان', 'status' => 1],
+            ['name_ar' => 'هامور', 'name_en' => 'Orange-spotted grouper', 'status' => 1],
+            ['name_ar' => 'كنعد', 'name_en' => 'Narrow-barred Spanish mackerel', 'status' => 1],
+            ['name_ar' => 'شعري', 'name_en' => 'Spangled emperor', 'status' => 1],
+            ['name_ar' => 'نقرور', 'name_en' => 'Two-spot red snapper', 'status' => 1],
+            ['name_ar' => 'تونة', 'name_en' => 'Yellowfin tuna', 'status' => 1],
+            ['name_ar' => 'صافي', 'name_en' => 'Orange-spotted trevally', 'status' => 1],
+            ['name_ar' => 'سيجان', 'name_en' => 'Marbled spinefoot', 'status' => 1],
         ];
 
         foreach ($species as $fish) {
-            Fish::firstOrCreate(['scientific_name' => $fish['scientific_name']], $fish);
+            Fish::firstOrCreate(['name_ar' => $fish['name_ar']], $fish);
         }
     }
 
@@ -547,7 +547,7 @@ class DemoDataSeeder extends Seeder
                     SaleDetail::create([
                         'sale_id' => $sale->id,
                         'fish_id' => $fish->id,
-                        'fish_name' => $fish->local_name_primary,
+                        'fish_name' => $fish->name_ar,
                         'quantity' => rand(5, 50),
                         'weight' => $weight,
                         'price_per_kilo' => $pricePerKilo,
