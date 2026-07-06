@@ -2300,6 +2300,12 @@ return [
         'status_active' => 'نشط',
         'status_inactive' => 'غير نشط',
         'parent' => 'التصنيف الأب',
+        'created_successfully' => 'تم إضافة البيانات بنجاح',
+        'updated_successfully' => 'تم تحديث البيانات بنجاح',
+        'deleted_successfully' => 'تم حذف البيانات بنجاح',
+        'not_found' => 'لا يوجد هذا الصنف',
+        'has_relations' => 'لا يمكن حذف هذا الصنف لأنه مرتبط بالمبيعات أو المصيد',
+        'error_occurred' => 'حدث خطأ ما',
         'create' => [
             'title' => 'إضافة تصنيف قارب',
         ],

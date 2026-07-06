@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CaptainController as AdminCaptainController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CrewController as AdminCrewController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FishController as AdminFishController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OwnerController;
@@ -23,7 +24,6 @@ use App\Http\Controllers\Admin\SubscriptionPackageController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Owner\CategoryController;
 use App\Http\Controllers\Owner\CustomersController;
-use App\Http\Controllers\Owner\FishController;
 use App\Http\Controllers\Owner\GovernorateController;
 use App\Http\Controllers\Owner\LocationController;
 use App\Http\Controllers\Owner\PageController;
@@ -100,8 +100,8 @@ Route::group([
             Route::post('support/ticket', [\App\Http\Controllers\SupportTicketController::class, 'createTicket'])->name('support.ticket.create');
 
             // Fish
-            Route::resource('fish', FishController::class);
-            Route::get('getFishData', [FishController::class, 'getFishData'])->name('getFishData');
+            Route::get('getFishData', [AdminFishController::class, 'getFishData'])->name('getFishData');
+            Route::resource('fish', AdminFishController::class)->only(['index', 'store', 'update', 'destroy']);
 
             // Categories
             Route::resource('categories', CategoryController::class);

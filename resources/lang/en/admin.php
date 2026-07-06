@@ -2294,6 +2294,12 @@ return [
         'status_active' => 'Active',
         'status_inactive' => 'Inactive',
         'parent' => 'Parent Category',
+        'created_successfully' => 'Data added successfully',
+        'updated_successfully' => 'Data updated successfully',
+        'deleted_successfully' => 'Data deleted successfully',
+        'not_found' => 'This fish type was not found',
+        'has_relations' => 'This fish type cannot be deleted because it is linked to sales or catches',
+        'error_occurred' => 'Something went wrong',
         'create' => [
             'title' => 'Add Boat Classification',
         ],
