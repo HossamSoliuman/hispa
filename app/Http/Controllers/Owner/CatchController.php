@@ -147,7 +147,7 @@ class CatchController extends Controller
                     'catch_id' => $catch->id,
                     'fish_id' => $fishId,
                     'unit_id' => $unitId,
-                    'fish_name' => optional(Fish::find($fishId))->scientific_name,
+                    'fish_name' => optional(Fish::find($fishId))->name,
                     'weight' => $weight,
                 ]);
 
@@ -218,7 +218,7 @@ class CatchController extends Controller
                     'catch_id' => $catch->id,
                     'fish_id' => $fishId,
                     'unit_id' => $unitId,
-                    'fish_name' => optional(Fish::find($fishId))->scientific_name,
+                    'fish_name' => optional(Fish::find($fishId))->name,
                     'weight' => $weight,
                 ]);
 

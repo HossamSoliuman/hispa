@@ -68,7 +68,7 @@ class CoutnerDataTable extends DataTables
                     if (auth('admin')->check() && auth('admin')->user()->can('update_counter')) {
 
                         // زر التعديل
-                        $btn .= '<a  href="' . route('admin.counter.edit', $user->id) . '"
+                        $btn .= '<a  href="'.route('admin.counter.edit', $user->id).'"
         class="edit btn btn-primary btn-sm editBtn" title="تعديل">
         <i class="fas fa-edit"></i>
     </a> ';
@@ -104,7 +104,7 @@ class CoutnerDataTable extends DataTables
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('trip_name', fn ($row) => optional($row->trip)->name ?? '---')
-            ->addColumn('fish_name', fn ($row) => optional($row->fish)->scientific_name ?? '---')
+            ->addColumn('fish_name', fn ($row) => optional($row->fish)->name ?? '---')
             ->addColumn('captain_name', fn ($row) => optional($row->addedBy)->name ?? '---')
 
             ->make(true);

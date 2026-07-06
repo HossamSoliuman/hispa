@@ -52,7 +52,7 @@ class OwnerStockController extends Controller
             ->orderBy(app()->getLocale() === 'en' ? 'name_en' : 'name_ar')
             ->get();
         $trips = Trip::query()->where('owner_id', $owner->id)->orderBy('start_date', 'desc')->get();
-        $fishs = Fish::query()->active()->orderBy('scientific_name')->get();
+        $fishs = Fish::query()->active()->orderBy('name_ar')->get();
 
         $boatId = $request->input('boat_id');
         $tripId = $request->input('trip_id');

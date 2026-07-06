@@ -10,7 +10,6 @@
         <thead>
             <tr>
                 <th>{{ __('owner.list_reports.serial') }}</th>
-                <th>{{ __('owner.list_reports.code') }}</th>
                 <th>{{ __('owner.list_reports.name_ar') }}</th>
                 <th>{{ __('owner.list_reports.name_en') }}</th>
                 <th>{{ __('owner.list_reports.status') }}</th>
@@ -20,9 +19,8 @@
             @forelse($fishes as $index => $fish)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $fish->code ?? '---' }}</td>
-                    <td>{{ $fish->scientific_name ?? '---' }}</td>
-                    <td>{{ $fish->english_name ?? '---' }}</td>
+                    <td>{{ $fish->name_ar ?? '---' }}</td>
+                    <td>{{ $fish->name_en ?? '---' }}</td>
                     <td>
                         <span class="badge {{ $fish->status ? 'bg-success' : 'bg-secondary' }}">
                             {{ $fish->status ? __('owner.list_reports.active') : __('owner.list_reports.inactive') }}
@@ -31,7 +29,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">{{ __('owner.list_reports.no_data') }}</td>
+                    <td colspan="4" class="text-center">{{ __('owner.list_reports.no_data') }}</td>
                 </tr>
             @endforelse
         </tbody>

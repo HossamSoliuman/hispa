@@ -170,7 +170,7 @@ class ComprehensiveTestSeeder extends Seeder
             $this->printSummary();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->command->error('❌ Seeding failed: ' . $e->getMessage());
+            $this->command->error('❌ Seeding failed: '.$e->getMessage());
             $this->command->error($e->getTraceAsString());
             throw $e;
         }
@@ -204,7 +204,6 @@ class ComprehensiveTestSeeder extends Seeder
             $this->governorates = collect([$gov]);
         }
 
-
         if ($this->ports->isEmpty()) {
             $port = Port::create([
                 'name' => 'ميناء غزة',
@@ -222,19 +221,19 @@ class ComprehensiveTestSeeder extends Seeder
     private function seedFishSpecies(): void
     {
         $fishSpecies = [
-            ['scientific_name' => 'Sparus aurata', 'english_name' => 'Gilt-head bream', 'local_name_primary' => 'دنيس'],
-            ['scientific_name' => 'Dicentrarchus labrax', 'english_name' => 'Sea bass', 'local_name_primary' => 'قاروص'],
-            ['scientific_name' => 'Mugil cephalus', 'english_name' => 'Flathead grey mullet', 'local_name_primary' => 'بوري'],
-            ['scientific_name' => 'Sardinella aurita', 'english_name' => 'Round sardinella', 'local_name_primary' => 'سردين'],
-            ['scientific_name' => 'Liza ramada', 'english_name' => 'Thinlip grey mullet', 'local_name_primary' => 'بوري رمادي'],
-            ['scientific_name' => 'Scomber scombrus', 'english_name' => 'Atlantic mackerel', 'local_name_primary' => 'ماكريل'],
-            ['scientific_name' => 'Solea solea', 'english_name' => 'Common sole', 'local_name_primary' => 'موسى'],
-            ['scientific_name' => 'Merluccius merluccius', 'english_name' => 'European hake', 'local_name_primary' => 'مرلوسة'],
+            ['name_ar' => 'دنيس', 'name_en' => 'Gilt-head bream'],
+            ['name_ar' => 'قاروص', 'name_en' => 'Sea bass'],
+            ['name_ar' => 'بوري', 'name_en' => 'Flathead grey mullet'],
+            ['name_ar' => 'سردين', 'name_en' => 'Round sardinella'],
+            ['name_ar' => 'بوري رمادي', 'name_en' => 'Thinlip grey mullet'],
+            ['name_ar' => 'ماكريل', 'name_en' => 'Atlantic mackerel'],
+            ['name_ar' => 'موسى', 'name_en' => 'Common sole'],
+            ['name_ar' => 'مرلوسة', 'name_en' => 'European hake'],
         ];
 
         foreach ($fishSpecies as $fish) {
             Fish::firstOrCreate(
-                ['scientific_name' => $fish['scientific_name']],
+                ['name_ar' => $fish['name_ar']],
                 array_merge($fish, ['status' => 1])
             );
         }
@@ -312,7 +311,7 @@ class ComprehensiveTestSeeder extends Seeder
                     'region_id' => $region->id,
                     'governorate_id' => $governorate->id,
                     'port_id' => $port->id,
-                    'tax_number' => '100' . str_pad($i, 6, '0', STR_PAD_LEFT),
+                    'tax_number' => '100'.str_pad($i, 6, '0', STR_PAD_LEFT),
                 ]
             );
 
@@ -337,7 +336,7 @@ class ComprehensiveTestSeeder extends Seeder
                     'role' => 'captain',
                     'status' => 1,
                     'owner_id' => $owner->id,
-                    'id_number' => 'CPT' . str_pad($i, 6, '0', STR_PAD_LEFT),
+                    'id_number' => 'CPT'.str_pad($i, 6, '0', STR_PAD_LEFT),
                     'nationality' => 'فلسطيني',
                     'crew_count' => rand(3, 8),
                     'region_id' => $region->id,
@@ -368,7 +367,7 @@ class ComprehensiveTestSeeder extends Seeder
                     'region_id' => $region->id,
                     'governorate_id' => $governorate->id,
                     'port_id' => $port->id,
-                    'tax_number' => '200' . str_pad($i, 6, '0', STR_PAD_LEFT),
+                    'tax_number' => '200'.str_pad($i, 6, '0', STR_PAD_LEFT),
                 ]
             );
 
@@ -460,7 +459,7 @@ class ComprehensiveTestSeeder extends Seeder
             for ($i = 0; $i < $boatCount; $i++) {
                 $boatType = $boatTypes->random();
                 $boatName = $boatNames[($index * 3 + $i) % count($boatNames)];
-                $boatNumber = 'B-' . str_pad(($index * 10 + $i + 1), 4, '0', STR_PAD_LEFT);
+                $boatNumber = 'B-'.str_pad(($index * 10 + $i + 1), 4, '0', STR_PAD_LEFT);
 
                 $boat = Boat::create([
                     'owner_id' => $owner->id,
@@ -468,17 +467,17 @@ class ComprehensiveTestSeeder extends Seeder
                     'name_en' => $boatName,
                     'number' => $boatNumber,
                     'status' => 1,
-                    'length' => rand(8, 15) . '.' . rand(0, 9),
-                    'width' => rand(2, 5) . '.' . rand(0, 9),
+                    'length' => rand(8, 15).'.'.rand(0, 9),
+                    'width' => rand(2, 5).'.'.rand(0, 9),
                     'color' => ['أزرق', 'أبيض', 'أخضر', 'أحمر'][rand(0, 3)],
                     'type' => $boatType->name_ar,
-                    'license_number' => 'LIC-' . $boatNumber,
+                    'license_number' => 'LIC-'.$boatNumber,
                     'license_region_id' => $this->regions->first()->id,
                     'license_date' => Carbon::now()->subYears(rand(1, 5))->format('Y-m-d'),
                     'license_date_expire' => Carbon::now()->addYears(rand(1, 3))->format('Y-m-d'),
                     'engine_status' => 1,
                     'engine_type' => ['ديزل', 'بنزين'][rand(0, 1)],
-                    'engine_power' => rand(100, 500) . ' حصان',
+                    'engine_power' => rand(100, 500).' حصان',
                     'crew_number' => rand(3, 8),
                     'payload' => rand(500, 2000),
                     'region_id' => $this->regions->first()->id,
@@ -545,9 +544,9 @@ class ComprehensiveTestSeeder extends Seeder
 
             $trip = Trip::withoutEvents(function () use ($boat, $i, $status, $owner, $captain, $counter, $dalal, $startDate, $endDate, $port) {
                 return Trip::create([
-                    'name' => 'رحلة ' . $boat->name_ar . ' - ' . $i,
-                    'number' => 'TRIP-' . str_pad($i, 6, '0', STR_PAD_LEFT),
-                    'license_number' => 'TL-' . str_pad($i, 6, '0', STR_PAD_LEFT),
+                    'name' => 'رحلة '.$boat->name_ar.' - '.$i,
+                    'number' => 'TRIP-'.str_pad($i, 6, '0', STR_PAD_LEFT),
+                    'license_number' => 'TL-'.str_pad($i, 6, '0', STR_PAD_LEFT),
                     'status' => $status,
                     'permit_type' => ['يومي', 'أسبوعي', 'شهري'][rand(0, 2)],
                     'owner_id' => $owner->id,
@@ -601,7 +600,7 @@ class ComprehensiveTestSeeder extends Seeder
                     return FishStock::create([
                         'trip_id' => $trip->id,
                         'fish_id' => $fish->id,
-                        'fish_name' => $fish->local_name_primary,
+                        'fish_name' => $fish->name_ar,
                         'weight' => $weight,
                         'quantity' => $quantity,
                         'quantity_captain' => $quantity,
@@ -677,7 +676,7 @@ class ComprehensiveTestSeeder extends Seeder
                 $saleDate = Carbon::parse($dalalStock->created_at)->addDays(rand(0, 3));
 
                 $sale = Sale::create([
-                    'number' => 'SALE-' . $dalalStock->id . '-' . ($s + 1) . '-' . time(),
+                    'number' => 'SALE-'.$dalalStock->id.'-'.($s + 1).'-'.time(),
                     'seller_type' => 'dalal',
                     'seller_id' => $dalalStock->dalal_id,
                     'trip_id' => $dalalStock->trip_id,
@@ -749,7 +748,7 @@ class ComprehensiveTestSeeder extends Seeder
             if ($paymentChance <= 70) {
                 // Full payment
                 Payment::create([
-                    'number' => 'PAY-' . $sale->id . '-' . time(),
+                    'number' => 'PAY-'.$sale->id.'-'.time(),
                     'sale_id' => $sale->id,
                     'owner_id' => $sale->trip ? $sale->trip->owner_id : null,
                     'seller_id' => $sale->seller_id,
@@ -762,14 +761,14 @@ class ComprehensiveTestSeeder extends Seeder
                 // Partial payment (50-80%)
                 $partialPercentage = rand(50, 80) / 100;
                 Payment::create([
-                    'number' => 'PAY-' . $sale->id . '-' . time(),
+                    'number' => 'PAY-'.$sale->id.'-'.time(),
                     'sale_id' => $sale->id,
                     'owner_id' => $sale->trip ? $sale->trip->owner_id : null,
                     'seller_id' => $sale->seller_id,
                     'amount' => $sale->total_price * $partialPercentage,
                     'payment_method_id' => $sale->payment_method_id,
                     'paid_at' => Carbon::parse($sale->sale_datetime)->addHours(rand(1, 24)),
-                    'notes' => 'دفعة جزئية - ' . ($partialPercentage * 100) . '%',
+                    'notes' => 'دفعة جزئية - '.($partialPercentage * 100).'%',
                 ]);
             }
             // 10% no payment yet
@@ -794,8 +793,8 @@ class ComprehensiveTestSeeder extends Seeder
 
                 Expense::create([
                     'date' => $date->format('Y-m-d'),
-                    'number' => 'EXP-' . $owner->id . '-' . time() . '-' . $i,
-                    'notes' => 'مصروف ' . ['وقود', 'صيانة', 'تجهيزات'][rand(0, 2)],
+                    'number' => 'EXP-'.$owner->id.'-'.time().'-'.$i,
+                    'notes' => 'مصروف '.['وقود', 'صيانة', 'تجهيزات'][rand(0, 2)],
                     'owner_id' => $owner->id,
                     'boat_id' => $boat->id,
                     'total_price' => $totalPrice,
@@ -832,8 +831,8 @@ class ComprehensiveTestSeeder extends Seeder
                     'boat_id' => $boat->id,
                     'owner_id' => $boat->owner_id,
                     'estimated_cost' => rand(200, 1500),
-                    'description' => 'صيانة ' . ['دورية', 'طارئة', 'شاملة'][rand(0, 2)] . ' للمحرك والمعدات',
-                    'technician' => 'فني ' . ['أحمد', 'محمد', 'خالد'][rand(0, 2)],
+                    'description' => 'صيانة '.['دورية', 'طارئة', 'شاملة'][rand(0, 2)].' للمحرك والمعدات',
+                    'technician' => 'فني '.['أحمد', 'محمد', 'خالد'][rand(0, 2)],
                 ]);
             }
         }
@@ -881,7 +880,7 @@ class ComprehensiveTestSeeder extends Seeder
                     'carry_over' => 0,
                     'surplus' => $netProfit > 0 ? $netProfit : 0,
                     'deficit' => $netProfit < 0 ? abs($netProfit) : 0,
-                    'notes' => 'كشف راتب شهر ' . $periodFrom->format('Y-m'),
+                    'notes' => 'كشف راتب شهر '.$periodFrom->format('Y-m'),
                     'owner_percentage' => $ownerPercentage,
                     'status' => ['open', 'closed'][rand(0, 1)],
                 ]);
@@ -924,6 +923,6 @@ class ComprehensiveTestSeeder extends Seeder
         $this->command->info('  Dalal:   dalal1@hawat.test / password');
         $this->command->info('  Counter: counter1@hawat.test / password');
         $this->command->info('');
-        $this->command->info('📅 Data Period: ' . $this->startDate->format('Y-m-d') . ' to ' . $this->endDate->format('Y-m-d'));
+        $this->command->info('📅 Data Period: '.$this->startDate->format('Y-m-d').' to '.$this->endDate->format('Y-m-d'));
     }
 }

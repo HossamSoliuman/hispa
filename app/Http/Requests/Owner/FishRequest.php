@@ -22,9 +22,8 @@ class FishRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|max:255',
-            'scientific_name' => 'required|max:255',
-            'english_name' => 'required|max:255',
+            'name_ar' => 'required|max:255',
+            'name_en' => 'required|max:255',
         ];
     }
 }

@@ -33,11 +33,8 @@ class IfeshMarketplaceController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('fish', function ($q) use ($search) {
-                $q->where('local_name_primary', 'like', "%{$search}%")
-                    ->orWhere('red_sea_name', 'like', "%{$search}%")
-                    ->orWhere('arabian_gulf_name', 'like', "%{$search}%")
-                    ->orWhere('english_name', 'like', "%{$search}%")
-                    ->orWhere('scientific_name', 'like', "%{$search}%");
+                $q->where('name_ar', 'like', "%{$search}%")
+                    ->orWhere('name_en', 'like', "%{$search}%");
             });
         }
 
@@ -61,8 +58,8 @@ class IfeshMarketplaceController extends Controller
 
         $items = $query->paginate(12);
 
-        // Get all fish types for filter - order by local_name_primary
-        $fishTypes = \App\Models\Fish::orderBy('local_name_primary')->get();
+        // Get all fish types for filter - order by Arabic name
+        $fishTypes = \App\Models\Fish::orderBy('name_ar')->get();
 
         // Additional Stats
         $totalBids = \App\Models\IfeshBid::count();

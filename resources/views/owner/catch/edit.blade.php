@@ -86,7 +86,7 @@
                                         @foreach ($fish as $f)
                                             <option value="{{ $f->id }}"
                                                 {{ $detail['fish_id'] == $f->id ? 'selected' : '' }}>
-                                                {{ $f->scientific_name }}</option>
+                                                {{ $f->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -117,7 +117,7 @@
                                     <select name="fish_id[]" class="form-select" required>
                                         <option value="">{{ __('owner.catch.choose_fish') }}</option>
                                         @foreach ($fish as $f)
-                                            <option value="{{ $f->id }}">{{ $f->scientific_name }}</option>
+                                            <option value="{{ $f->id }}">{{ $f->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>

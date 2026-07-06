@@ -128,9 +128,8 @@
                 },
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
-                    {data: 'code', name: 'code'},
-                    {data: 'scientific_name', name: 'scientific_name'},
-                    {data: 'english_name', name: 'english_name'},
+                    {data: 'name_ar', name: 'name_ar'},
+                    {data: 'name_en', name: 'name_en'},
                     {data: 'status', name: 'status'},
                     {data: 'action', name: 'action', orderable: true, searchable: false},
                 ],
@@ -199,18 +198,16 @@
             var button = $(event.relatedTarget);
 
             var id = button.data('id');
-            var code = button.data('code');
-            var scientific_name = button.data('scientific_name');
-            var english_name = button.data('english_name');
+            var name_ar = button.data('name_ar');
+            var name_en = button.data('name_en');
             var status = button.data('status');
             var region_id = button.data('region_id');
             var governorate_id = button.data('governorate_id');
 
             var modal = $(this);
             modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #code').val(code);
-            modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #english_name').val(english_name);
+            modal.find('.modal-body #name_ar').val(name_ar);
+            modal.find('.modal-body #name_en').val(name_en);
             modal.find('.modal-body #status').prop('checked', status == 1);
 
             // Set region

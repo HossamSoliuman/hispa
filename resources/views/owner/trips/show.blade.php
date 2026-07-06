@@ -81,7 +81,7 @@
                                     @foreach($data->catches->details as $i => $detail)
                                         <tr>
                                             <td>{{ $i + 1 }}</td>
-                                            <td>{{ $detail->fish->scientific_name ?? '---' }}</td>
+                                            <td>{{ $detail->fish->name ?? '---' }}</td>
                                             <td>{{ number_format($detail->weight, 2) }}</td>
                                             <td>{{ $detail->unit->name ?? '—' }}</td>
                                             <td>{{ number_format($detail->price_per_kg, 2) }}</td>

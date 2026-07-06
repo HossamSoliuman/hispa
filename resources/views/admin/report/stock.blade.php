@@ -70,7 +70,7 @@
                     <select id="fish_type_filter" class="form-control">
                         <option value="">{{ __('admin.report.stock.all') }}</option>
                         @foreach($fish as $f)
-                            <option value="{{ $f->id }}">{{ $f->name ?? $f->scientific_name ?? $f->id }}</option>
+                            <option value="{{ $f->id }}">{{ $f->name ?? $f->id }}</option>
                         @endforeach
                     </select>
                 </div>

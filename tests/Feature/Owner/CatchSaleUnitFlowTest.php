@@ -45,7 +45,7 @@ class CatchSaleUnitFlowTest extends TestCase
 
     private function fish(User $owner): Fish
     {
-        return Fish::create(['scientific_name' => 'Test Fish', 'status' => 1, 'owner_id' => $owner->id]);
+        return Fish::create(['name_ar' => 'سمكة تجريبية', 'name_en' => 'Test Fish', 'status' => 1, 'owner_id' => $owner->id]);
     }
 
     public function test_catch_stores_separate_stock_rows_per_unit(): void

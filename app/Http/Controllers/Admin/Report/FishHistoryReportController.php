@@ -114,7 +114,7 @@ class FishHistoryReportController extends Controller
         $to = $request->end_date ?? null;
         $fishName = null;
         if ($request->filled('fish_id')) {
-            $fishName = \App\Models\Fish::find($request->fish_id)->scientific_name ?? null;
+            $fishName = optional(\App\Models\Fish::find($request->fish_id))->name;
         }
 
         return view('admin.report.fish_history_print', compact(

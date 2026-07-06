@@ -2480,34 +2480,17 @@ return array (
       0 => 'Activate',
       1 => 'Active',
     ),
-    'code' => 
+    'name_ar' =>
     array (
-      0 => 'Code',
-      1 => 'Code',
+      0 => 'Name (Arabic)',
+      1 => 'Name (Arabic)',
     ),
-    'scientific_name' => 
+    'name_en' =>
     array (
-      0 => 'Scientific Name',
-      1 => 'Scientific Name',
+      0 => 'Name (English)',
+      1 => 'Name (English)',
     ),
-    'english_name' => 
-    array (
-      0 => 'English Name',
-      1 => 'English Name',
-    ),
-    'red_sea_name' => 
-    array (
-      0 => 'Red Sea Name',
-      1 => 'Red Sea Name',
-    ),
-    'arabian_gulf_name' => 
-    array (
-      0 => 'Arabian Gulf Name',
-      1 => 'Arabian Gulf Name',
-    ),
-    'name' => 'Title',
-    'name_ar' => 'Title',
-    'name_en' => 'Title (English)',
+    'name' => 'Name',
     'status_active' => 'Active',
     'status_inactive' => 'Inactive',
     'parent' => 'Parent Category',

@@ -6,7 +6,6 @@ use App\DataTable\FishDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\FishRequest;
 use App\Models\Fish;
-use App\Models\Region;
 use App\Traits\FishImportTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -31,9 +30,8 @@ class FishController extends Controller
     public function index()
     {
         $data = Fish::OrderByDesc('id')->get();
-        $regions = Region::Active()->get();
 
-        return view('owner.fish.index', compact('data', 'regions'));
+        return view('owner.fish.index', compact('data'));
     }
 
     /**
@@ -45,9 +43,6 @@ class FishController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }
-        if ($request->filled('code')) {
-            $query->where('code', 'like', '%'.$request->code.'%');
         }
 
         $fishes = $query->orderByDesc('id')->get();
@@ -86,9 +81,8 @@ class FishController extends Controller
         try {
             DB::beginTransaction();
 
-            $data['code'] = $request->code;
-            $data['scientific_name'] = $request->scientific_name;
-            $data['english_name'] = $request->english_name;
+            $data['name_ar'] = $request->name_ar;
+            $data['name_en'] = $request->name_en;
             $data['status'] = $request->status == 1 ? 1 : 0;
 
             $fish = Fish::create($data);
@@ -127,9 +121,8 @@ class FishController extends Controller
                 return redirect()->back()->with(['error' => 'لايوجد هذا الصنف']);
 
             }
-            $data['code'] = $request->code;
-            $data['scientific_name'] = $request->scientific_name;
-            $data['english_name'] = $request->english_name;
+            $data['name_ar'] = $request->name_ar;
+            $data['name_en'] = $request->name_en;
             $data['status'] = $request->status == 1 ? 1 : 0;
 
             $fish->update($data);

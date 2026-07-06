@@ -59,7 +59,7 @@
                     <select name="fish_id" class="form-select">
                         <option value="">{{ __('admin.owner_stock_fish_quantity.all_fish') }}</option>
                         @foreach($fishs as $fish)
-                            <option value="{{ $fish->id }}" {{ $fishId == $fish->id ? 'selected' : '' }}>{{ $fish->name ?? $fish->name_ar ?? $fish->scientific_name }}</option>
+                            <option value="{{ $fish->id }}" {{ $fishId == $fish->id ? 'selected' : '' }}>{{ $fish->name ?? $fish->name_ar }}</option>
                         @endforeach
                     </select>
                 </div>

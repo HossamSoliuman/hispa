@@ -82,7 +82,7 @@
             @forelse($sale->details as $detail)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td class="col-text">{{ $detail->fish?->scientific_name ?? ($detail->fish_name ?? '—') }}</td>
+                    <td class="col-text">{{ $detail->fish?->name ?? ($detail->fish_name ?? '—') }}</td>
                     <td>{{ number_format($detail->weight, 2) }}</td>
                     <td>{{ $detail->unit?->name ?: __('owner.units.kg') }}</td>
                     <td class="col-num"><x-report-money :amount="$detail->price_per_kilo" /></td>

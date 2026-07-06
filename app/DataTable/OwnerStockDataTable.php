@@ -127,7 +127,7 @@ class OwnerStockDataTable extends DataTables
                 return $row->trip->name ?? $row->trip->number ?? '---';
             })
             ->addColumn('stock_date', fn ($row) => $row->created_at ? $row->created_at->format('Y-m-d H:i') : '---')
-            ->addColumn('fish_name', fn ($row) => $row->fish ? ($row->fish->name ?? $row->fish->scientific_name ?? '---') : '---')
+            ->addColumn('fish_name', fn ($row) => $row->fish ? ($row->fish->name ?? '---') : '---')
             ->addColumn('unit_name', fn ($row) => $row->unit_id ? $row->unit->name : $unit)
             ->addColumn('quantity', fn ($row) => number_format((float) $row->quantity, 2))
             ->addColumn('price_per_kg', fn ($row) => number_format((float) $row->price_per_kg, 2))

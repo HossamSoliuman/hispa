@@ -18,16 +18,13 @@
             vertical-align: middle;
         }
 
-        /* {{ __('owner.generated.item_ed06b0') }} */
         .small-text th,
         .small-text td {
-            font-size: 12px; /* {{ __('owner.generated.or') }} 13px {{ __('owner.generated.item_4cc9e8') }} */
+            font-size: 12px;
             text-align: center !important;
             vertical-align: middle;
             font-weight: bold;
-
         }
-
 
         label.error {
             color: red;
@@ -35,7 +32,6 @@
             margin-top: 5px;
             display: block;
         }
-        /* make Add/Print buttons equal height */
         .btn-equal {
             display: inline-flex;
             align-items: center;
@@ -71,143 +67,44 @@
                     <h5 class="modal-title">{{__('owner.fish.add_new_title')}}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{route('owner.fish.store')}}" id="createForm" method="post"
-                      enctype="multipart/form-data">
+                <form action="{{route('owner.fish.store')}}" id="createForm" method="post">
                     @csrf
                     <div class="modal-body">
-
                         <div class="row">
-
-                            <div class="col-4 ">
-
-                                <div class="form-group ">
-                                    <label for="code" class="form-label">{{__('owner.fish.code')}}<span
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="name_ar" class="form-label">{{__('owner.fish.name_ar')}}<span
                                             class="text-danger">*</span></label>
-                                    <input type="text" name="code" value="{{old('code')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.code')}}">
-
-
-                                    @error('code') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
+                                    <input type="text" name="name_ar" value="{{old('name_ar')}}"
+                                           class="form-control" required
+                                           placeholder="{{__('owner.fish.name_ar')}}">
+                                    @error('name_ar') <span class="text-danger error">{{ $message }}</span>@enderror
                                 </div>
                             </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="name_en" class="form-label">{{__('owner.fish.name_en')}}<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="name_en" value="{{old('name_en')}}"
+                                           class="form-control" required
+                                           placeholder="{{__('owner.fish.name_en')}}">
+                                    @error('name_en') <span class="text-danger error">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
                             <div class="col-4">
-
-                                <div class="form-group ">
-                                    <label for="scientific_name" class="form-label">{{__('owner.fish.scientific_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="scientific_name" value="{{old('scientific_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.scientific_name')}}">
-
-
-                                    @error('scientific_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="form-group ">
-                                    <label for="english_name" class="form-label">{{__('owner.fish.english_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="english_name" value="{{old('english_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.english_name')}}">
-
-
-                                    @error('english_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            </div>
-
-                            <div class="row">
-                            <div class="col-4">
-                                <div class="form-group ">
-                                    <label for="red_sea_name" class="form-label">{{__('owner.fish.red_sea_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="red_sea_name" value="{{old('red_sea_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.red_sea_name')}}">
-
-
-                                    @error('red_sea_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-
-
-                            <div class="col-4">
-                                <div class="form-group ">
-                                    <label for="arabian_gulf_name" class="form-label">{{__('owner.fish.arabian_gulf_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="arabian_gulf_name" required
-                                           value="{{old('arabian_gulf_name')}}"
-                                           class="form-control  "
-                                           placeholder="{{__('owner.fish.arabian_gulf_name')}}">
-
-
-                                    @error('arabian_gulf_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                                <!-- <div class="col-4">
-                                    <div class="form-group ">
-                                        <label for="region_id" class="form-label">{{ __('owner.generated.region_name') }}</label>
-
-                                        <select name="region_id" class="form-control  "  id="region_id">
-                                            <option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>
-                                            @foreach($regions as $region)
-                                                <option
-                                                    value="{{ $region->id }}" {{ old('region_id') == $region->id ? 'selected' : '' }}>
-                                                {{$region->name}}
-                                            @endforeach
-                                        </select>
-
-
-                                        @error('region_id') <span class="text-danger error">{{ $message }}</span>@enderror
-
-                                    </div>
-
-                                </div> -->
-                            </div>
-                            <div class="row">
-                                <!-- <div class="col-4">
-                                    <div class="form-group">
-                                        <label for="governorate_id" class="form-label">{{ __('owner.generated.governorate_name') }}</label>
-
-                                        <select name="governorate_id" class="form-control"  id="governorate_id">
-                                            <option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>
-
-                                        </select>
-
-
-                                        @error('governorate_id') <span class="text-danger error">{{ $message }}</span>@enderror
-
-                                    </div>
-
-                                </div> -->
-                            <div class="col-4 ">
-                                <div class="form-check form-switch " style="margin-top: 35px">
+                                <div class="form-check form-switch" style="margin-top: 10px">
                                     <input type="checkbox" name="status" checked class="form-check-input" value="1">
                                     <label class="form-check-label" for="status">{{__('owner.fish.activate')}}</label>
                                     @error('status') <span class="text-danger error">{{ $message }}</span>@enderror
-
                                 </div>
                             </div>
-                            </div>
-
-
-
+                        </div>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">{{__('owner.actions.close')}}</button>
                         <button type="submit" class="btn btn-outline-theme">{{__('owner.actions.save')}}</button>
-                    </div>
                     </div>
                 </form>
             </div>
@@ -221,141 +118,42 @@
                     <h5 class="modal-title">{{__('owner.fish.edit_title')}} </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{route('owner.fish.update','update')}}" id="editForm"
-                      method="post"
-                      enctype="multipart/form-data">
+                <form action="{{route('owner.fish.update','update')}}" id="editForm" method="post">
                     @csrf
                     @method('PUT')
                     <div class="modal-body">
-
+                        <input type="hidden" name="id" id="id">
                         <div class="row">
-
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="code" class="form-label">{{__('owner.fish.code')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="code" id="code"
-                                           value="{{old('code')}}"
-                                           class="form-control" required
-                                           placeholder="{{__('owner.fish.code')}}">
-
-
-                                    @error('code') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4 ">
-                                <input type="hidden" name="id" id="id">
-                                <div class="form-group ">
-                                    <label for="scientific_name" class="form-label">{{__('owner.fish.scientific_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="scientific_name" id="scientific_name"
-                                           value="{{old('scientific_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.scientific_name')}}">
-
-
-                                    @error('scientific_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <div class="col-4 ">
-                                <div class="form-group ">
-                                    <label for="english_name" class="form-label">{{__('owner.fish.english_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="english_name" id="english_name"
-                                           value="{{old('english_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.english_name')}}">
-
-
-                                    @error('english_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <div class="form-group ">
-                                    <label for="red_sea_name" class="form-label">{{__('owner.fish.red_sea_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="red_sea_name" id="red_sea_name" value="{{old('red_sea_name')}}"
-                                           class="form-control  " required
-                                           placeholder="{{__('owner.fish.red_sea_name')}}">
-
-
-                                    @error('red_sea_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-
-
-                            <div class="col-4">
-                                <div class="form-group ">
-                                    <label for="arabian_gulf_name" class="form-label">{{__('owner.fish.arabian_gulf_name')}}<span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" name="arabian_gulf_name" id="arabian_gulf_name" required
-                                           value="{{old('arabian_gulf_name')}}"
-                                           class="form-control  "
-                                           placeholder="{{__('owner.fish.arabian_gulf_name')}}">
-
-
-                                    @error('arabian_gulf_name') <span
-                                        class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-                            </div>
-                            <!-- <div class="col-4">
-                                <div class="form-group ">
-                                    <label for="region_id" class="form-label">{{ __('owner.generated.region_name') }}</label>
-
-                                    <select name="region_id" class="form-control"  id="region_id_edit">
-                                        <option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>
-                                        @foreach($regions as $region)
-                                            <option
-                                                value="{{ $region->id }}" {{ old('region_id') == $region->id ? 'selected' : '' }}>
-                                            {{$region->name}}
-                                        @endforeach
-                                    </select>
-
-
-                                    @error('region_id') <span class="text-danger error">{{ $message }}</span>@enderror
-
-                                </div>
-
-                            </div> -->
-                        </div>
-                        <div class="row">
-                            <!-- <div class="col-4">
+                            <div class="col-6">
                                 <div class="form-group">
-                                    <label for="governorate_id" class="form-label">{{ __('owner.generated.governorate_name') }}</label>
-
-                                    <select name="governorate_id" class="form-control"  id="governorate_id_edit">
-                                        <option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>
-
-                                    </select>
-
-
-                                    @error('governorate_id') <span class="text-danger error">{{ $message }}</span>@enderror
-
+                                    <label for="name_ar" class="form-label">{{__('owner.fish.name_ar')}}<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="name_ar" id="name_ar"
+                                           class="form-control" required
+                                           placeholder="{{__('owner.fish.name_ar')}}">
+                                    @error('name_ar') <span class="text-danger error">{{ $message }}</span>@enderror
                                 </div>
-
-                            </div> -->
-                            <div class="col-4 ">
-                                <div class="form-check form-switch " style="margin-top: 35px">
-                                    <input type="checkbox" name="status" checked class="form-check-input" value="1">
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="name_en" class="form-label">{{__('owner.fish.name_en')}}<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="name_en" id="name_en"
+                                           class="form-control" required
+                                           placeholder="{{__('owner.fish.name_en')}}">
+                                    @error('name_en') <span class="text-danger error">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-4">
+                                <div class="form-check form-switch" style="margin-top: 10px">
+                                    <input type="checkbox" name="status" id="status" class="form-check-input" value="1">
                                     <label class="form-check-label" for="status">{{__('owner.fish.activate')}}</label>
                                     @error('status') <span class="text-danger error">{{ $message }}</span>@enderror
-
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">{{__('owner.actions.close')}}</button>
@@ -366,62 +164,20 @@
         </div>
     </div>
 
-    <!-- delete -->
-    <div class="modal fade" id="deleteModel">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ __('owner.generated.delete_contact') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="" method="post">
-
-                    {{method_field('delete')}}
-                    {{csrf_field()}}
-                    <div class="modal-body">
-                        <p class="text-center">
-                        <h6 style="color:red"> {{ __('owner.generated.confirm_delete_operation') }}</h6>
-                        </p>
-
-                        <input type="hidden" name="id" id="id" value="">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">{{ __('owner.customers.modal.buttons.close') }}</button>
-                        <button type="submit" class="btn btn-danger ">{{ __('owner.customers.modal.buttons.save') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
     <div class="tab-content py-4">
         <div class="tab-pane fade show active" id="allTab">
-            <!-- BEGIN #datatable -->
-            <!-- BEGIN #datatable -->
             <div id="datatable" class="mb-5">
-                {{--                    <div class="card">--}}
-                {{--                        <div class="card-body">--}}
                 <table id="datatableDefault" class="table table-sm table-bordered table-hover text-center small-text">
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>{{__('owner.fish.code')}}</th>
-                        <th>{{__('owner.fish.scientific_name')}}</th>
-                        <th>{{__('owner.fish.english_name')}}</th>
-                        <th>{{__('owner.fish.red_sea_name')}}</th>
-                        <th>{{__('owner.fish.arabian_gulf_name')}}</th>
-                        <!-- <th>{{ __('owner.crew.edit.region') }}</th>
-                        <th>{{ __('owner.crew.edit.governorate') }}</th> -->
+                        <th>{{__('owner.fish.name_ar')}}</th>
+                        <th>{{__('owner.fish.name_en')}}</th>
                         <th>{{__('owner.fish.status')}}</th>
                         <th>{{__('owner.fish.actions')}}</th>
-
                     </tr>
                     </thead>
                     <tbody>
-
-
                     </tbody>
                 </table>
             </div>
@@ -431,7 +187,6 @@
                 <div class="card-arrow-bottom-left"></div>
                 <div class="card-arrow-bottom-right"></div>
             </div>
-
         </div>
     </div>
     <div class="card-arrow">
@@ -439,7 +194,6 @@
         <div class="card-arrow-top-right"></div>
         <div class="card-arrow-bottom-left"></div>
         <div class="card-arrow-bottom-right"></div>
-    </div>
     </div>
 
 @endsection
@@ -470,7 +224,6 @@
     <script type="text/javascript">
 
         $(function () {
-            // Check if the DataTable is already initialized and destroy it
             if ($.fn.DataTable.isDataTable('#datatableDefault')) {
                 $('#datatableDefault').DataTable().destroy();
             }
@@ -480,41 +233,23 @@
                 languageOptions = { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json" };
             }
 
-            // Initialize the DataTable
             var table = $('#datatableDefault').DataTable({
                 processing: true,
                 serverSide: true,
-
                 language: languageOptions,
-
                 ajax: {
                     url: "{{ route('owner.getFishData') }}",
-                    data: function (d) {
-                        // d.from_date = $('#from_date').val();
-                        // d.to_date = $('#to_date').val();
-                    }
-
                 },
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
-                    {data: 'code', name: 'code'},
-                    {data: 'scientific_name', name: 'scientific_name'},
-                    {data: 'english_name', name: 'english_name'},
-                    {data: 'red_sea_name', name: 'red_sea_name'},
-                    {data: 'arabian_gulf_name', name: 'arabian_gulf_name'},
-                    // {data: 'region', name: 'region'},
-                    // {data: 'governorate', name: 'governorate'},
+                    {data: 'name_ar', name: 'name_ar'},
+                    {data: 'name_en', name: 'name_en'},
                     {data: 'status', name: 'status'},
-
                     {data: 'action', name: 'action', orderable: true, searchable: false},
                 ],
-
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
-            });
-            $('#from_date, #to_date').change(function () {
-                table.draw();
             });
         });
     </script>
@@ -522,7 +257,6 @@
     <script>
         $("#createForm").validate();
         $("#editForm").validate();
-
     </script>
     <script>
         function deleteRecord(recordId) {
@@ -563,109 +297,15 @@
                 }
             });
         }
-
-
-
     </script>
     <script>
-        // On modal open, fill in fields and load governorates
         $('#modelEdit').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
-
-            var id = button.data('id');
-            var code = button.data('code');
-            var red_sea_name = button.data('red_sea_name');
-            var scientific_name = button.data('scientific_name');
-            var arabian_gulf_name = button.data('arabian_gulf_name');
-            var english_name = button.data('english_name');
-            var local_name_primary = button.data('local_name_primary');
-            var local_name_secondary = button.data('local_name_secondary');
-            var status = button.data('status');
-            var region_id = button.data('region_id');
-            var governorate_id = button.data('governorate_id');
-
             var modal = $(this);
-            modal.find('.modal-body #id').val(id);
-            modal.find('.modal-body #code').val(code);
-            modal.find('.modal-body #scientific_name').val(scientific_name);
-            modal.find('.modal-body #red_sea_name').val(red_sea_name);
-            modal.find('.modal-body #arabian_gulf_name').val(arabian_gulf_name);
-            modal.find('.modal-body #english_name').val(english_name);
-            modal.find('.modal-body #local_name_primary').val(local_name_primary);
-            modal.find('.modal-body #local_name_secondary').val(local_name_secondary);
-            modal.find('.modal-body #status').prop('checked', status == 1);
-
-            // Set region
-            modal.find('.modal-body #region_id_edit').val(region_id).trigger('change');
-
-            // Load governorates for selected region
-            if (region_id) {
-                $.get("{{ route('owner.getGovernorates', ['region_id' => 'REGION_ID']) }}", function (data) {
-                    let $governorateSelect = modal.find('.modal-body #governorate_id_edit');
-                    $governorateSelect.empty().append('<option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>');
-                    $.each(data, function (i, item) {
-                        let selected = (item.id == governorate_id) ? 'selected' : '';
-                        $governorateSelect.append('<option value="' + item.id + '" ' + selected + '>' + item.name + '</option>');
-                    });
-                });
-            }
-        });
-
-        // On change of region in the edit modal, load governorates dynamically
-        $(document).ready(function () {
-            $('#region_id_edit').on('change', function () {
-                let regionId = $(this).val();
-                let $governorateSelect = $('#governorate_id_edit');
-
-                $governorateSelect.empty().append('<option value="">{{ __('owner.dalal.performance.loading') }}</option>');
-
-                if (regionId) {
-                    $.get("{{ route('owner.getGovernorates', ['region_id' => 'REGION_ID']) }}", function (data) {
-                        $governorateSelect.empty().append('<option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>');
-                        $.each(data, function (i, item) {
-                            $governorateSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
-                        });
-                    });
-                } else {
-                    $governorateSelect.empty().append('<option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>');
-                }
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            let oldRegionId = '{{ old('region_id') }}';
-            let oldGovernorateId = '{{ old('governorate_id') }}';
-
-
-            // تحميل المحافظات عند اختيار المنطقة
-            $('#region_id').on('change', function () {
-                let regionId = $(this).val();
-                $('#governorate_id').empty().append('<option value="">{{ __('owner.dalal.performance.loading') }}</option>');
-                $('#port_id').empty().append('<option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>');
-
-                if (regionId) {
-                    $.get("{{ route('owner.getGovernorates', ['region_id' => 'REGION_ID']) }}", function (data) {
-                        $('#governorate_id').empty().append('<option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>');
-                        $.each(data, function (i, item) {
-                            $('#governorate_id').append('<option value="' + item.id + '">' + item.name + '</option>');
-                        });
-                    });
-                }
-            });
-
-            // عند تحميل الصفحة إذا في old value للمنطقة والمحافظة والمدينة
-            if (oldRegionId && !$('#governorate_id option:selected').val()) {
-                $.get("{{ route('owner.getGovernorates', ['region_id' => 'REGION_ID']) }}", function (governorates) {
-                    $('#governorate_id').empty().append('<option value="">{{ __('owner.crew.edit.select_placeholder') }}</option>');
-                    $.each(governorates, function (i, item) {
-                        let selected = (item.id == oldGovernorateId) ? 'selected' : '';
-                        $('#governorate_id').append('<option value="' + item.id + '" ' + selected + '>' + item.name + '</option>');
-                    });
-
-                });
-            }
+            modal.find('.modal-body #id').val(button.data('id'));
+            modal.find('.modal-body #name_ar').val(button.data('name_ar'));
+            modal.find('.modal-body #name_en').val(button.data('name_en'));
+            modal.find('.modal-body #status').prop('checked', button.data('status') == 1);
         });
     </script>
 @endsection

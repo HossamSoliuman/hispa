@@ -14,7 +14,7 @@ class StockReportDataTable extends DataTables
         $owner_id = auth()->user()->id;
 
         $query = FishStock::selectRaw(
-            'fish_stocks.fish_id, fish.scientific_name,
+            'fish_stocks.fish_id, fish.name_ar as fish_name_ar, fish.name_en as fish_name_en,
          addedUser.name as added_by_name,
          correctUser.name as correct_by_name,
          fish_stocks.created_at,
@@ -27,7 +27,7 @@ class StockReportDataTable extends DataTables
             ->where('trips.owner_id', $owner_id)
             ->leftJoin('users as addedUser', 'fish_stocks.added_by', '=', 'addedUser.id')
             ->leftJoin('users as correctUser', 'fish_stocks.corrected_by', '=', 'correctUser.id')
-            ->groupBy('fish_stocks.fish_id', 'fish.scientific_name', 'addedUser.name', 'correctUser.name', 'fish_stocks.created_at')
+            ->groupBy('fish_stocks.fish_id', 'fish.name_ar', 'fish.name_en', 'addedUser.name', 'correctUser.name', 'fish_stocks.created_at')
             ->orderByDesc('total_weight');
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -41,7 +41,7 @@ class StockReportDataTable extends DataTables
 
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('name', fn ($row) => $row->scientific_name ?? '---')
+            ->addColumn('name', fn ($row) => (app()->getLocale() === 'en' ? $row->fish_name_en : $row->fish_name_ar) ?: '---')
             ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' كغم')
             ->addColumn('added_by', fn ($row) => $row->added_by_name ?? '---')
             ->addColumn('weight_captain', fn ($row) => number_format($row->weight_captain ?? 0, 2).' كغم')

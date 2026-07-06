@@ -54,7 +54,7 @@
                                     <i class="bi bi-droplet-half text-success"></i>
                                 </div>
                                 <div>
-                                    <div class="fw-bold">{{ $stock->fish->scientific_name ?? $stock->fish_name ?? '—' }}</div>
+                                    <div class="fw-bold">{{ $stock->fish->name ?? $stock->fish_name ?? '—' }}</div>
                                     <div class="text-muted small">{{ number_format($stock->quantity ?? 0, 2) }} {{ display_string(__('admin.units.kg'), 'كغم') }}</div>
                                 </div>
                             </div>

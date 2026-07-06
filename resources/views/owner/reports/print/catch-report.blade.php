@@ -56,7 +56,7 @@
             @foreach ($catch->details as $detail)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $detail->fish?->scientific_name ?? '—' }}</td>
+                    <td>{{ $detail->fish?->name ?? '—' }}</td>
                     <td>{{ number_format($detail->weight, 2) }}</td>
                     <td>{{ $detail->unit?->name ?? '—' }}</td>
                     <td style="text-align:end;"><x-report-money :amount="$detail->price_per_kg" /></td>

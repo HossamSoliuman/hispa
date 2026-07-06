@@ -87,7 +87,7 @@ class OwnerMasterDataTenancyTest extends TestCase
         $other = $this->makeOwner();
 
         $this->actingAs($owner, 'owner');
-        $fish = Fish::create(['scientific_name' => 'Scoped Fish', 'status' => 1]);
+        $fish = Fish::create(['name_ar' => 'سمكة مقيدة', 'name_en' => 'Scoped Fish', 'status' => 1]);
 
         $this->assertSame($owner->id, $fish->owner_id);
 

@@ -114,7 +114,7 @@
                         <option value="">{{ __('owner.catch.filters.all_types') }}</option>
                         @foreach ($fish as $f)
                             <option value="{{ $f->id }}">
-                                {{ $f->scientific_name }}
+                                {{ $f->name }}
                             </option>
                         @endforeach
 

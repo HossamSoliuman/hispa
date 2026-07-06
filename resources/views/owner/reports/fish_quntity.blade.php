@@ -99,7 +99,7 @@
                     @foreach($stocks as $stock)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $stock->fish->scientific_name }}</td>
+                            <td>{{ $stock->fish->name }}</td>
                             <td>{{ number_format($stock->weight, 2) }}</td>
                             <td>{{ $stock->unit->name ?? '—' }}</td>
                             <td>{{ number_format($stock->price_per_kg, 2) }}</td>

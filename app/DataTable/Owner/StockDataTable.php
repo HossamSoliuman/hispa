@@ -26,7 +26,7 @@ class StockDataTable extends DataTables
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('name', fn ($row) => $row->fish->scientific_name ?? '---')
+                ->addColumn('name', fn ($row) => $row->fish->name ?? '---')
                 ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' كغم')
                 ->addColumn('unit', fn ($row) => 'كغم')
                 ->addColumn('details', function ($row) {
@@ -57,7 +57,7 @@ class StockDataTable extends DataTables
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('name', fn ($row) => $row->fish->scientific_name ?? '---')
+                ->addColumn('name', fn ($row) => $row->fish->name ?? '---')
                 ->addColumn('captain_name', fn ($row) => $row->addedBy->name ?? '---')
                 ->addColumn('weight_captain', fn ($row) => $row->weight_captain ? number_format($row->weight_captain, 2).' كغم' : '---')
                 ->addColumn('counter_name', fn ($row) => $row->correctedBy->name ?? '---')

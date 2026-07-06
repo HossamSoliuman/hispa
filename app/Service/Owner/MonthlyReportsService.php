@@ -208,10 +208,8 @@ class MonthlyReportsService
                 'catch_details.unit_id',
                 'units.name_ar',
                 'units.name_en',
-                'fish.scientific_name',
-                'fish.english_name',
-                'fish.red_sea_name',
-                'fish.arabian_gulf_name',
+                'fish.name_ar',
+                'fish.name_en',
             )
             ->select(
                 'catch_details.fish_id',
@@ -219,10 +217,8 @@ class MonthlyReportsService
                 'catch_details.unit_id',
                 'units.name_ar as unit_name_ar',
                 'units.name_en as unit_name_en',
-                'fish.scientific_name',
-                'fish.english_name',
-                'fish.red_sea_name',
-                'fish.arabian_gulf_name',
+                'fish.name_ar as fish_name_ar',
+                'fish.name_en as fish_name_en',
                 DB::raw('SUM(catch_details.weight) as weight'),
                 DB::raw('SUM(catch_details.total_price) as value')
             )
@@ -244,10 +240,8 @@ class MonthlyReportsService
                 'sale_details.unit_id',
                 'units.name_ar',
                 'units.name_en',
-                'fish.scientific_name',
-                'fish.english_name',
-                'fish.red_sea_name',
-                'fish.arabian_gulf_name',
+                'fish.name_ar',
+                'fish.name_en',
             )
             ->select(
                 'sale_details.fish_id',
@@ -255,10 +249,8 @@ class MonthlyReportsService
                 'sale_details.unit_id',
                 'units.name_ar as unit_name_ar',
                 'units.name_en as unit_name_en',
-                'fish.scientific_name',
-                'fish.english_name',
-                'fish.red_sea_name',
-                'fish.arabian_gulf_name',
+                'fish.name_ar as fish_name_ar',
+                'fish.name_en as fish_name_en',
                 DB::raw('SUM(sale_details.weight) as weight'),
                 DB::raw('SUM(sale_details.total_price) as value')
             )
@@ -266,9 +258,9 @@ class MonthlyReportsService
 
         $fishName = function (object $row) use ($isAr): string {
             if ($isAr) {
-                $name = $row->red_sea_name ?: $row->arabian_gulf_name ?: $row->scientific_name;
+                $name = $row->fish_name_ar ?: $row->fish_name_en;
             } else {
-                $name = $row->english_name ?: $row->scientific_name;
+                $name = $row->fish_name_en ?: $row->fish_name_ar;
             }
 
             return $name ?: (string) $row->fish_name;
