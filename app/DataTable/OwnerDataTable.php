@@ -66,87 +66,90 @@ class OwnerDataTable extends DataTables
         $company_count = $data->where('owner_type', 'company')->count();
 
         return Datatables::of($data)
-                ->addIndexColumn()
-                ->addColumn('name', function (User $user) {
-                    $logoUrl = $user->logo ? asset($user->logo) : asset('default-logo.png');
-                    $profileUrl = route('admin.owner.show', $user->id);
+            ->addIndexColumn()
+            ->addColumn('name', function (User $user) {
+                $logoUrl = $user->logo ? asset($user->logo) : asset('default-logo.png');
+                $profileUrl = route('admin.owner.show', $user->id);
 
-                    return '<div class="d-flex align-items-center justify-content-center">
-                        <a href="' . e($profileUrl) . '" class="d-flex align-items-center text-decoration-none text-dark">
-                            <img src="' . e($logoUrl) . '" alt="logo" width="32" height="32" class="rounded-circle me-2 object-fit-cover">
-                            <span class="fw-medium">' . e($user->name) . '</span>
+                return '<div class="d-flex align-items-center justify-content-center">
+                        <a href="'.e($profileUrl).'" class="d-flex align-items-center text-decoration-none text-dark">
+                            <img src="'.e($logoUrl).'" alt="logo" width="32" height="32" class="rounded-circle me-2 object-fit-cover">
+                            <span class="fw-medium">'.e($user->name).'</span>
                         </a>
                     </div>';
-                })
-                ->addColumn('phone', function (User $user) {
-                    $phone = $user->phone ?? '--';
-                    return $phone !== '--' ? '<a href="tel:' . e($phone) . '" class="text-decoration-none">' . e($phone) . '</a>' : '<span class="text-muted">--</span>';
-                })
-                ->addColumn('email', function (User $user) {
-                    $email = $user->email ?? '--';
-                    return $email !== '--' ? '<a href="mailto:' . e($email) . '" class="text-decoration-none">' . e(Str::limit($email, 25)) . '</a>' : '<span class="text-muted">--</span>';
-                })
-                ->addColumn('region', function (User $user) {
-                    return e($user->region->name ?? '--');
-                })
-                ->addColumn('governorate', function (User $user) {
-                    return e($user->governorate->name ?? '--');
-                })
-                ->addColumn('port', function (User $user) {
-                    return e($user->port->name ?? '--');
-                })
-                ->addColumn('boats_count', function (User $user) {
-                    $count = $user->boats_count ?? 0;
-                    return '<span class="badge bg-primary">' . (int) $count . '</span>';
-                })
-                ->addColumn('owner_type', function (User $user) {
-                    // إذا لم يتم تحديد نوع المالك نعرض شرطة فقط
-                    if (empty($user->owner_type)) {
-                        return '-';
-                    }
+            })
+            ->addColumn('phone', function (User $user) {
+                $phone = $user->phone ?? '--';
 
-                    $type = $user->owner_type;
-                    $label = $type === 'company' ? 'مؤسسة / شركة' : 'صيّاد (فرد)';
-                    $badgeType = $type === 'company' ? 'dark' : 'success';
+                return $phone !== '--' ? '<a href="tel:'.e($phone).'" class="text-decoration-none">'.e($phone).'</a>' : '<span class="text-muted">--</span>';
+            })
+            ->addColumn('email', function (User $user) {
+                $email = $user->email ?? '--';
 
-                    return $this->badgeHtml($badgeType, $label);
-                })
-                ->addColumn('payroll_type', function (User $user) {
-                    return $this->getPayrollTypeBadge($user);
-                })
-                ->addColumn('subscription_status', function (User $user) {
-                    if ($user->relationLoaded('activeSubscription') && $user->activeSubscription) {
-                        return $this->badgeHtml('success', __('admin.owner.subscription_active'));
-                    }
-                    $hasAny = ($user->subscriptions_count ?? 0) > 0;
-                    if ($hasAny) {
-                        return '<span class="badge bg-warning text-dark">' . e(__('admin.owner.subscription_expired')) . '</span>';
-                    }
+                return $email !== '--' ? '<a href="mailto:'.e($email).'" class="text-decoration-none">'.e(Str::limit($email, 25)).'</a>' : '<span class="text-muted">--</span>';
+            })
+            ->addColumn('region', function (User $user) {
+                return e($user->region->name ?? '--');
+            })
+            ->addColumn('governorate', function (User $user) {
+                return e($user->governorate->name ?? '--');
+            })
+            ->addColumn('port', function (User $user) {
+                return e($user->port->name ?? '--');
+            })
+            ->addColumn('boats_count', function (User $user) {
+                $count = $user->boats_count ?? 0;
 
-                    return $this->badgeHtml('secondary', __('admin.owner.subscription_none'));
-                })
-                ->addColumn('registered_at', function (User $user) {
-                    return $user->created_at?->format('Y-m-d') ?? '--';
-                })
-                ->addColumn('status', function (User $user) {
-                    return $user->status === self::ACTIVE_STATUS
-                        ? $this->badgeHtml('success', __('admin.status.active'))
-                        : $this->badgeHtml('danger', __('admin.status.inactive'));
-                })
-                ->addColumn('action', function (User $user) {
-                    return $this->buildActionButtons($user);
-                })
-                ->with([
-                    'total_count' => $total_count,
-                    'active_count' => $active_count,
-                    'inactive_count' => $inactive_count,
-                    'fixed_count' => $fixed_count,
-                    'percentage_count' => $percentage_count,
-                    'fisherman_count' => $fisherman_count,
-                    'company_count' => $company_count,
-                ])
-                ->rawColumns(['action', 'status', 'name', 'phone', 'email', 'boats_count', 'payroll_type', 'subscription_status', 'owner_type'])
-                ->make(true);
+                return '<span class="badge bg-primary">'.(int) $count.'</span>';
+            })
+            ->addColumn('owner_type', function (User $user) {
+                // إذا لم يتم تحديد نوع المالك نعرض شرطة فقط
+                if (empty($user->owner_type)) {
+                    return '-';
+                }
+
+                $type = $user->owner_type;
+                $label = $type === 'company' ? 'مؤسسة / شركة' : 'صيّاد (فرد)';
+                $badgeType = $type === 'company' ? 'dark' : 'success';
+
+                return $this->badgeHtml($badgeType, $label);
+            })
+            ->addColumn('payroll_type', function (User $user) {
+                return $this->getPayrollTypeBadge($user);
+            })
+            ->addColumn('subscription_status', function (User $user) {
+                if ($user->relationLoaded('activeSubscription') && $user->activeSubscription) {
+                    return $this->badgeHtml('success', __('admin.owner.subscription_active'));
+                }
+                $hasAny = ($user->subscriptions_count ?? 0) > 0;
+                if ($hasAny) {
+                    return '<span class="badge bg-warning text-dark">'.e(__('admin.owner.subscription_expired')).'</span>';
+                }
+
+                return $this->badgeHtml('secondary', __('admin.owner.subscription_none'));
+            })
+            ->addColumn('registered_at', function (User $user) {
+                return $user->created_at?->format('Y-m-d') ?? '--';
+            })
+            ->addColumn('status', function (User $user) {
+                return $user->status === self::ACTIVE_STATUS
+                    ? $this->badgeHtml('success', __('admin.status.active'))
+                    : $this->badgeHtml('danger', __('admin.status.inactive'));
+            })
+            ->addColumn('action', function (User $user) {
+                return $this->buildActionButtons($user);
+            })
+            ->with([
+                'total_count' => $total_count,
+                'active_count' => $active_count,
+                'inactive_count' => $inactive_count,
+                'fixed_count' => $fixed_count,
+                'percentage_count' => $percentage_count,
+                'fisherman_count' => $fisherman_count,
+                'company_count' => $company_count,
+            ])
+            ->rawColumns(['action', 'status', 'name', 'phone', 'email', 'boats_count', 'payroll_type', 'subscription_status', 'owner_type'])
+            ->make(true);
     }
 
     private function applyPayrollFilter($query, Request $request): void
@@ -274,7 +277,7 @@ class OwnerDataTable extends DataTables
 
     private function badgeHtml(string $type, string $label): string
     {
-        return '<span class="badge bg-' . e($type) . '">' . e($label) . '</span>';
+        return '<span class="badge bg-'.e($type).'">'.e($label).'</span>';
     }
 
     private function buildActionButtons(User $user): string
@@ -291,28 +294,28 @@ class OwnerDataTable extends DataTables
         $buttons = '';
 
         // عرض التفاصيل (يُظهر لجميع المشرفين)
-        $buttons .= '<a href="' . e($showUrl) . '" class="btn btn-info btn-sm" title="' . e(__('admin.owner.action_view_details')) . '"><i class="fas fa-eye"></i></a> ';
+        $buttons .= '<a href="'.e($showUrl).'" class="btn btn-info btn-sm" title="'.e(__('admin.owner.action_view_details')).'"><i class="fas fa-eye"></i></a>';
 
         // تعديل
-        $buttons .= '<a href="' . e($editUrl) . '" class="btn btn-primary btn-sm" title="' . e(__('admin.actions.edit')) . '"><i class="fas fa-edit"></i></a> ';
+        $buttons .= '<a href="'.e($editUrl).'" class="btn btn-primary btn-sm" title="'.e(__('admin.actions.edit')).'"><i class="fas fa-edit"></i></a>';
 
         // قائمة منسدلة: القوارب، الاشتراكات، الرحلات، المبيعات، العملاء
         $buttons .= '<div class="btn-group dropstart d-inline">
-            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" title="' . e(__('admin.owner.action_more')) . '" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
+            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" title="'.e(__('admin.owner.action_more')).'" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="' . e($showUrl) . '#boats-pane"><i class="fas fa-ship me-2"></i>' . e(__('admin.owner.boats_tab')) . '</a></li>
-                <li><a class="dropdown-item" href="' . e($showUrl) . '#subscriptions-pane"><i class="fas fa-box me-2"></i>' . e(__('admin.owner.subscriptions_tab')) . '</a></li>
-                <li><a class="dropdown-item" href="' . e($showUrl) . '#trips-pane"><i class="fas fa-route me-2"></i>' . e(__('admin.owner.trips_tab')) . '</a></li>
-                <li><a class="dropdown-item" href="' . e($showUrl) . '#sales-pane"><i class="fas fa-receipt me-2"></i>' . e(__('admin.owner.sales_tab')) . '</a></li>
-                <li><a class="dropdown-item" href="' . e($showUrl) . '#customers-pane"><i class="fas fa-users me-2"></i>' . e(__('admin.owner.customers_tab')) . '</a></li>
-                <li><a class="dropdown-item" href="' . e($stockUrl) . '"><i class="fas fa-boxes-stacked me-2"></i>' . e(__('admin.owner.action_stock')) . '</a></li>
+                <li><a class="dropdown-item" href="'.e($showUrl).'#boats-pane"><i class="fas fa-ship me-2"></i>'.e(__('admin.owner.boats_tab')).'</a></li>
+                <li><a class="dropdown-item" href="'.e($showUrl).'#subscriptions-pane"><i class="fas fa-box me-2"></i>'.e(__('admin.owner.subscriptions_tab')).'</a></li>
+                <li><a class="dropdown-item" href="'.e($showUrl).'#trips-pane"><i class="fas fa-route me-2"></i>'.e(__('admin.owner.trips_tab')).'</a></li>
+                <li><a class="dropdown-item" href="'.e($showUrl).'#sales-pane"><i class="fas fa-receipt me-2"></i>'.e(__('admin.owner.sales_tab')).'</a></li>
+                <li><a class="dropdown-item" href="'.e($showUrl).'#customers-pane"><i class="fas fa-users me-2"></i>'.e(__('admin.owner.customers_tab')).'</a></li>
+                <li><a class="dropdown-item" href="'.e($stockUrl).'"><i class="fas fa-boxes-stacked me-2"></i>'.e(__('admin.owner.action_stock')).'</a></li>
             </ul>
-        </div> ';
+        </div>';
 
         // حذف
-        $buttons .= '<a href="#" onclick="deleteRecord(' . (int) $user->id . ')" class="btn btn-danger btn-sm" title="' . e(__('admin.actions.delete')) . '"><i class="fas fa-trash"></i></a>';
+        $buttons .= '<a href="#" onclick="deleteRecord('.(int) $user->id.')" class="btn btn-danger btn-sm" title="'.e(__('admin.actions.delete')).'"><i class="fas fa-trash"></i></a>';
 
-        return $buttons ?: '<span class="text-muted">--</span>';
+        return $buttons ? '<div class="d-flex flex-nowrap align-items-center justify-content-center gap-1">'.$buttons.'</div>' : '<span class="text-muted">--</span>';
     }
 
     public function showData($id)
@@ -323,11 +326,11 @@ class OwnerDataTable extends DataTables
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('invoice_number', fn($row) => $row->number)
-            ->addColumn('trip_name', fn($row) => optional($row->trip)->name ?? '---')
-            ->addColumn('customer_name', fn($row) => $row->customer_name ?? '---')
-            ->addColumn('sale_date', fn($row) => $row->created_at ? $row->created_at->format('Y-m-d H:i') : '---')
-            ->addColumn('items_count', fn($row) => $row->details->count())
+            ->addColumn('invoice_number', fn ($row) => $row->number)
+            ->addColumn('trip_name', fn ($row) => optional($row->trip)->name ?? '---')
+            ->addColumn('customer_name', fn ($row) => $row->customer_name ?? '---')
+            ->addColumn('sale_date', fn ($row) => $row->created_at ? $row->created_at->format('Y-m-d H:i') : '---')
+            ->addColumn('items_count', fn ($row) => $row->details->count())
             ->addColumn('payment_method', function ($row) {
                 $color = match ($row->payment_method) {
                     'نقدي' => 'success',
@@ -336,17 +339,17 @@ class OwnerDataTable extends DataTables
                     default => 'secondary',
                 };
 
-                return '<span class="badge bg-' . $color . '">' . e($row->payment_method ?? '---') . '</span>';
+                return '<span class="badge bg-'.$color.'">'.e($row->payment_method ?? '---').'</span>';
             })
             ->addColumn('items_count', function ($row) {
-                return '<a href="#" class="show-sale-details" data-sale-id="' . $row->id . '">' . $row->details->count() . '</a>';
+                return '<a href="#" class="show-sale-details" data-sale-id="'.$row->id.'">'.$row->details->count().'</a>';
             })
             ->rawColumns(['items_count'])
             ->addColumn('total_weight', function ($row) {
-                return '<span class="text-primary fw-bold">' . number_format($row->details->sum('weight'), 2) . ' كغم</span>';
+                return '<span class="text-primary fw-bold">'.number_format($row->details->sum('weight'), 2).' كغم</span>';
             })
             ->addColumn('total_price', function ($row) {
-                return '<span class="text-success fw-bold">' . number_format($row->total_price, 2) . ' ر.س</span>';
+                return '<span class="text-success fw-bold">'.number_format($row->total_price, 2).' ر.س</span>';
             })
             ->rawColumns(['total_weight', 'total_price', 'payment_method', 'items_count']) // إذا كنت تستخدم HTML
             ->make(true);

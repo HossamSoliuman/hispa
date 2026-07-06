@@ -407,6 +407,15 @@
         [data-bs-theme=dark] .text-dark,
         [data-bs-theme=dark] .text-black { color: var(--bs-body-color) !important; }
 
+        /* table-light header row: Bootstrap's variant hardcodes a light-gray
+           bg/dark text regardless of color mode, leaving a bright bar on dark
+           tables — remap it to the themed surface + text tokens */
+        [data-bs-theme=dark] .table-light {
+            --bs-table-bg: var(--bs-tertiary-bg);
+            --bs-table-color: var(--bs-emphasis-color);
+            --bs-table-border-color: var(--bs-border-color);
+        }
+
         /* …but keep dark text legible where it sits on a light-colored badge/box */
         [data-bs-theme=dark] .bg-warning.text-dark,
         [data-bs-theme=dark] .bg-warning .text-dark,
