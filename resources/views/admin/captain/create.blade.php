@@ -95,6 +95,15 @@
                             </div>
                         </div>
                         <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="port_id" class="form-label">{{ __('admin.captains.form.port') }}</label>
+                                <select name="port_id" class="form-control" id="port_id">
+                                    <option value="">{{ __('admin.captains.placeholders.choose') }}</option>
+                                </select>
+                                @error('port_id')<span class="text-danger error">{{ $message }}</span>@enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-check form-switch" style="margin-top: 35px">
                                 <input type="checkbox" name="status" class="form-check-input" value="1" {{ old('status', 1) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="status">{{ __('admin.captains.form.status') }}</label>
@@ -117,14 +126,28 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_ar.js"></script>
     <script>
         $("#createForm").validate();
+        var chooseOption = '<option value="">{{ __('admin.captains.placeholders.choose') }}</option>';
         $('#region_id').on('change', function() {
             var regionId = $(this).val();
-            $('#governorate_id').empty().append('<option value="">{{ __('admin.captains.placeholders.choose') }}</option>');
+            $('#governorate_id').empty().append(chooseOption);
+            $('#port_id').empty().append(chooseOption);
             if (regionId) {
                 var govUrl = "{{ route('admin.getGovernorates', ['region_id' => '__ID__']) }}".replace('__ID__', regionId);
                 $.get(govUrl, function(data) {
                     $.each(data, function(i, item) {
                         $('#governorate_id').append('<option value="' + item.id + '">' + item.name + '</option>');
+                    });
+                });
+            }
+        });
+        $('#governorate_id').on('change', function() {
+            var govId = $(this).val();
+            $('#port_id').empty().append(chooseOption);
+            if (govId) {
+                var portUrl = "{{ route('admin.getPorts', ['gov_id' => '__ID__']) }}".replace('__ID__', govId);
+                $.get(portUrl, function(data) {
+                    $.each(data, function(i, item) {
+                        $('#port_id').append('<option value="' + item.id + '">' + item.name + '</option>');
                     });
                 });
             }

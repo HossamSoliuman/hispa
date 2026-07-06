@@ -123,8 +123,8 @@ Route::group([
             Route::get('getGovernorates/{region_id}', [LocationController::class, 'getGovernorates'])->name('getGovernorates');
             Route::get('getPorts/{gov_id}', [LocationController::class, 'getPorts'])->name('getPorts');
 
-            // Captains (عرض فقط: القائمة + صفحة التفاصيل)
-            Route::resource('captain', AdminCaptainController::class)->only(['index', 'show']);
+            // Captains (القائمة + التفاصيل + تعديل/حذف)
+            Route::resource('captain', AdminCaptainController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
             Route::get('getCaptainData', [AdminCaptainController::class, 'getCaptainData'])->name('getCaptainData');
 
             // Crews (عرض فقط: القائمة + صفحة التفاصيل)

@@ -1813,6 +1813,7 @@ return [
             'iban' => 'IBAN',
             'region' => 'اسم المنطقة',
             'governorate' => 'اسم المحافظة',
+            'port' => 'الميناء',
             'password' => 'كلمة المرور',
             'password_confirmation' => 'تأكيد كلمة المرور',
             'status' => 'الحالة',

@@ -79,9 +79,15 @@ class CaptainDataTable extends DataTables
                     }
                 })
                 ->addColumn('action', function (User $user) {
-                    $btn = '';
+                    $showUrl = route('admin.captain.show', $user->id);
+                    $editUrl = route('admin.captain.edit', $user->id);
+                    $deleteBase = rtrim(route('admin.captain.index'), '/');
 
-                    return $btn;
+                    $buttons = '<a href="'.e($showUrl).'" class="btn btn-info btn-sm" title="'.e(__('admin.actions.view')).'"><i class="bi bi-eye"></i></a>';
+                    $buttons .= '<a href="'.e($editUrl).'" class="btn btn-primary btn-sm" title="'.e(__('admin.actions.edit')).'"><i class="bi bi-pencil"></i></a>';
+                    $buttons .= '<button type="button" onclick="deleteRecord('.(int) $user->id.', \''.e($deleteBase).'\')" class="btn btn-danger btn-sm" title="'.e(__('admin.actions.delete')).'"><i class="bi bi-trash"></i></button>';
+
+                    return '<div class="d-flex flex-nowrap align-items-center justify-content-center gap-1">'.$buttons.'</div>';
                 })
                 ->with([
                     'captain_count' => $data->count(),
