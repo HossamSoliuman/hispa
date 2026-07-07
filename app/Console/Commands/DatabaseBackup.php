@@ -3,12 +3,12 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 class DatabaseBackup extends Command
 {
@@ -70,55 +70,90 @@ class DatabaseBackup extends Command
     }
 
     /**
-     * Dump a MySQL/MariaDB database and gzip it in a single streaming pipeline.
+     * Dump a MySQL/MariaDB database's data (INSERT rows only) to a gzipped SQL
+     * file using the app's own PDO connection, so no external mysqldump binary
+     * or shell access is needed.
      */
     protected function backupMysql(string $connection, string $directory, string $timestamp): string
     {
-        $config = Config::get("database.connections.{$connection}");
-        $database = $config['database'];
+        $db = DB::connection($connection);
+        $database = $db->getDatabaseName();
         $path = "{$directory}/{$database}_{$timestamp}.sql.gz";
-
-        $dumpBinary = Config::get('database.dump.mysqldump_binary', 'mysqldump');
-
-        $command = [
-            $dumpBinary,
-            '--host='.($config['host'] ?? '127.0.0.1'),
-            '--port='.($config['port'] ?? '3306'),
-            '--user='.($config['username'] ?? 'root'),
-            '--single-transaction',
-            '--quick',
-            '--default-character-set='.($config['charset'] ?? 'utf8mb4'),
-            $database,
-        ];
-
-        $env = [];
-        if (! empty($config['password'])) {
-            $env['MYSQL_PWD'] = $config['password'];
-        }
-
-        $dump = new Process($command, null, $env ?: null, null, 3600);
-        $dump->start();
 
         $handle = gzopen($path, 'wb9');
         if ($handle === false) {
-            $dump->stop();
             throw new \RuntimeException("Unable to open backup file for writing: {$path}");
         }
 
-        foreach ($dump as $type => $data) {
-            if ($type === Process::OUT) {
-                gzwrite($handle, $data);
+        $pdo = $db->getPdo();
+        $bufferedByDefault = $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
+        $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+
+        try {
+            gzwrite($handle, "-- Data-only backup of `{$database}` at ".Carbon::now()->toDateTimeString()."\n");
+            gzwrite($handle, "SET NAMES utf8mb4;\n");
+            gzwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n\n");
+
+            foreach ($this->baseTables($db) as $table) {
+                $this->dumpTableData($pdo, $handle, $table);
             }
+
+            gzwrite($handle, "SET FOREIGN_KEY_CHECKS=1;\n");
+        } catch (\Throwable $e) {
+            gzclose($handle);
+            File::delete($path);
+            throw $e;
+        } finally {
+            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $bufferedByDefault);
         }
 
         gzclose($handle);
 
-        if (! $dump->isSuccessful()) {
-            File::delete($path);
-            throw new ProcessFailedException($dump);
+        return $path;
+    }
+
+    /**
+     * List the base tables in the database, skipping views (which hold no data).
+     *
+     * @return list<string>
+     */
+    protected function baseTables(Connection $db): array
+    {
+        $tables = [];
+
+        foreach ($db->select('SHOW FULL TABLES') as $row) {
+            $values = array_values((array) $row);
+
+            if (($values[1] ?? 'BASE TABLE') !== 'VIEW') {
+                $tables[] = $values[0];
+            }
         }
 
-        return $path;
+        return $tables;
+    }
+
+    /**
+     * Write an INSERT statement for every row of a single table.
+     *
+     * @param  resource  $handle
+     */
+    protected function dumpTableData(\PDO $pdo, $handle, string $table): void
+    {
+        $statement = $pdo->query('SELECT * FROM `'.$table.'`');
+        $columns = null;
+
+        while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+            if ($columns === null) {
+                $columns = '`'.implode('`, `', array_keys($row)).'`';
+            }
+
+            $values = implode(', ', array_map(
+                fn ($value): string => $value === null ? 'NULL' : $pdo->quote((string) $value),
+                array_values($row)
+            ));
+
+            gzwrite($handle, "INSERT INTO `{$table}` ({$columns}) VALUES ({$values});\n");
+        }
     }
 
     /**
