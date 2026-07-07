@@ -33,6 +33,13 @@
             margin-top: 5px;
             display: block;
         }
+
+        /* Total-weight KPI holds a mixed-unit string (e.g. "45.00 كجم + 67.00 شكه");
+           shrink it so it fits the card without overflowing. */
+        #totalWeight {
+            font-size: .95rem;
+            line-height: 1.3;
+        }
     </style>
 @endsection
 @section('content')
