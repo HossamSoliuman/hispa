@@ -88,7 +88,7 @@
 
         @include('owner.components.stat-card', [
             'title' => __('owner.catch.cards.total_weight'),
-            'value' => '<span id="totalWeight">0</span> <span class="unit">' . __('owner.units.kg') . '</span>',
+            'value' => '<span id="totalWeight">0</span> <span class="unit">' . __('owner.units.each') . '</span>',
             'icon' => 'bi bi-bar-chart-line',
             'gradient' => 'linear-gradient(135deg, #16a085, #1abc9c)',
             'colClass' => 'col-md-3 col-sm-6 mb-3',

@@ -23,7 +23,7 @@
                     <tr>
                         <th>{{ __('owner.generated.trip') }}</th>
                         <th>{{ __('owner.catch.filters.boat') }}</th>
-                        <th>{{ __('owner.assets.weight') }}({{ __('owner.generated.kg') }})</th>
+                        <th>{{ __('owner.assets.weight') }}({{ __('owner.units.each') }})</th>
                         <th>{{ __('owner.generated.price') }}</th>
                         <th>{{ __('owner.generated.trip_start') }}</th>
                         <th>{{ __('owner.generated.trip_end') }}</th>
