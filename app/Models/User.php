@@ -121,6 +121,31 @@ class User extends Authenticatable
         'roles_name' => 'array',
     ];
 
+    /**
+     * Cascade an owner's billing footprint on delete. The subscriptions and
+     * invoices tables carry no database foreign keys, so removing an owner would
+     * otherwise leave orphaned subscriptions/invoices (which then render blank
+     * recipients on printed invoices). Scoped to owners; their subscriptions,
+     * the invoices under those subscriptions, any invoices linked directly to
+     * the owner, and the owner's company profile are all removed.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user): void {
+            if ($user->role !== 'owner') {
+                return;
+            }
+
+            foreach ($user->subscriptions()->get() as $subscription) {
+                $subscription->invoices()->delete();
+                $subscription->delete();
+            }
+
+            $user->invoices()->delete();
+            $user->company()->delete();
+        });
+    }
+
     public function captainCount()
     {
         return User::where('role', 'captain')
@@ -309,6 +334,43 @@ class User extends Authenticatable
         return $this->hasOne(Subscription::class)->where('status', 'active')
             ->where('is_suspended', false)
             ->where('end_date', '>=', now());
+    }
+
+    /**
+     * Number of boats this owner may create, driven by the active subscription's
+     * plan. No active subscription means no boats are allowed.
+     */
+    public function boatLimit(): int
+    {
+        $subscription = $this->relationLoaded('activeSubscription')
+            ? $this->activeSubscription
+            : $this->activeSubscription()->with('package')->first();
+
+        return (int) ($subscription?->package?->boats_count ?? 0);
+    }
+
+    /**
+     * How many boats the owner has already created.
+     */
+    public function boatsUsed(): int
+    {
+        return $this->boats()->count();
+    }
+
+    /**
+     * Remaining boat slots on the current plan (never negative).
+     */
+    public function remainingBoatSlots(): int
+    {
+        return max(0, $this->boatLimit() - $this->boatsUsed());
+    }
+
+    /**
+     * Whether the owner can create another boat under their plan quota.
+     */
+    public function canCreateBoat(): bool
+    {
+        return $this->boatsUsed() < $this->boatLimit();
     }
 
     public function invoices()

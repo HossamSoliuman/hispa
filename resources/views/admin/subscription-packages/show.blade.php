@@ -91,46 +91,6 @@
                             @endif
                         </div>
                     </div>
-                    @php
-                        $descAr = $subscriptionPackage->feature_ar;
-                        $descEn = $subscriptionPackage->feature_en;
-                        $listAr = is_string($descAr) ? json_decode($descAr, true) : $descAr;
-                        $listEn = is_string($descEn) ? json_decode($descEn, true) : $descEn;
-                        if (!is_array($listAr)) {
-                            $listAr = $descAr ? [$descAr] : [];
-                        }
-                        if (!is_array($listEn)) {
-                            $listEn = $descEn ? [$descEn] : [];
-                        }
-                    @endphp
-                    @if(!empty($listAr) || !empty($listEn))
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong>{{ __('admin.subscription_packages.feature_ar') }}:</strong>
-                            @if(!empty($listAr))
-                                <ul class="mb-0 ps-3">
-                                    @foreach(array_filter($listAr) as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p class="mb-0 text-muted">--</p>
-                            @endif
-                        </div>
-                        <div class="col-md-6">
-                            <strong>{{ __('admin.subscription_packages.feature_en') }}:</strong>
-                            @if(!empty($listEn))
-                                <ul class="mb-0 ps-3">
-                                    @foreach(array_filter($listEn) as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p class="mb-0 text-muted">--</p>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>{{ __('admin.subscription_packages.created_at') }}:</strong> {{ $subscriptionPackage->created_at?->format('Y-m-d H:i') ?? '--' }}

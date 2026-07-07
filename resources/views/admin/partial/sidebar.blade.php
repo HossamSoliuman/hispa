@@ -9,7 +9,7 @@
                 </a>
             </div>
 
-            <div class="menu-item has-sub {{ request()->routeIs('admin.subscription-packages.*') || request()->routeIs('admin.subscriptions.*') || request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
+            <div class="menu-item has-sub {{ request()->routeIs('admin.subscription-packages.*') || request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
                 <a href="#" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-box-seam"></i></span>
                     <span class="menu-text">{{ __('admin.menu.subscription_packages') }}</span>
@@ -24,11 +24,6 @@
                     <div class="menu-item {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.subscriptions.index') }}" class="menu-link">
                             <span class="menu-text">{{ __('admin.menu.subscriptions') }}</span>
-                        </a>
-                    </div>
-                    <div class="menu-item {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.coupons.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('admin.menu.coupons') }}</span>
                         </a>
                     </div>
                 </div>
@@ -93,7 +88,7 @@
                 </div>
             </div>
 
-            <div class="menu-item has-sub {{ request()->routeIs('admin.fish.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+            <div class="menu-item has-sub {{ request()->routeIs('admin.fish.*') || request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                 <a href="#" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-collection"></i></span>
                     <span class="menu-text">{{ __('admin.menu.content_management') }}</span>
@@ -108,11 +103,6 @@
                     <div class="menu-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.categories.index') }}" class="menu-link">
                             <span class="menu-text">{{ __('admin.menu.categories') }}</span>
-                        </a>
-                    </div>
-                    <div class="menu-item {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.pages.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('admin.menu.pages') }}</span>
                         </a>
                     </div>
                 </div>
@@ -163,13 +153,6 @@
                 <a href="{{ route('admin.settings.index') }}" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-gear"></i></span>
                     <span class="menu-text">{{ __('admin.menu.settings') }}</span>
-                </a>
-            </div>
-
-            <div class="menu-item {{ request()->routeIs('admin.user_request.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.user_request.index') }}" class="menu-link">
-                    <span class="menu-icon"><i class="bi bi-envelope-paper"></i></span>
-                    <span class="menu-text">{{ __('admin.menu.user_requests') }}</span>
                 </a>
             </div>
 

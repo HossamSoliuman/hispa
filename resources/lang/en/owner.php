@@ -435,6 +435,11 @@ return [
         'add_boat' => 'Add New Boat',
         'print_all_boats' => 'Print All Boats Report',
         'maintenance_schedule' => 'Maintenance Schedule',
+        'quota' => [
+            'usage' => 'You have used :used of :limit boats in your plan.',
+            'limit_reached' => 'You have reached your limit — upgrade your plan to add more boats.',
+            'no_subscription' => 'No active subscription. You cannot add boats until your subscription is activated.',
+        ],
         'active_boats' => 'Active Boats',
         'total_boats' => 'Total Boats',
         'maintenance_cost' => 'Maintenance Cost',

@@ -17,12 +17,12 @@ class TripDataTable extends DataTables
 
             $boat_id = $request->boat_id;
             if ($boat_id) {
-                $query = Trip::with(['sales', 'owner', 'boat', 'captain', 'catches'])
+                $query = Trip::with(['sales', 'owner', 'boat.captain', 'catches'])
                     ->where('owner_id', $owner_id)
                     ->where('boat_id', $boat_id)
                     ->orderBy('created_at', 'desc');
             } else {
-                $query = Trip::with(['sales', 'owner', 'boat', 'captain', 'catches'])
+                $query = Trip::with(['sales', 'owner', 'boat.captain', 'catches'])
                     ->where('owner_id', $owner_id)
                     ->orderBy('created_at', 'desc');
             }
@@ -49,7 +49,7 @@ class TripDataTable extends DataTables
                 })
                 ->addColumn('owner', fn (Trip $trip) => $trip->owner->name ?? '--')
                 ->addColumn('boat', fn (Trip $trip) => $trip->boat->name ?? '--')
-                ->addColumn('captain', fn (Trip $trip) => $trip->captain->name ?? '--')
+                ->addColumn('captain', fn (Trip $trip) => $trip->boat?->captain?->name ?? '--')
                 ->addColumn('total_sales', function (Trip $trip) {
                     $weight = $trip->sales->sum('net_owner_amount');
 

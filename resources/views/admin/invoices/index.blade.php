@@ -17,12 +17,6 @@
             <h2 class="fw-bold text-dark mb-1">{{ __('admin.menu.invoices') }}</h2>
         </div>
         <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
-            <a href="{{ route('admin.invoices.create') }}" class="btn btn-outline-theme btn-equal">
-                <i class="fa fa-plus-circle btn-success fa-fw me-1"></i> {{ __('admin.invoices.add') }}
-            </a>
-            <a href="{{ route('admin.invoices.tax-report') }}" class="btn btn-outline-info btn-equal">
-                <i class="bi bi-file-earmark-text"></i> {{ __('admin.invoices.tax_report') }}
-            </a>
             <a href="{{ route('admin.invoices.export', request()->query()) }}" class="btn btn-outline-success btn-equal">
                 <i class="bi bi-file-earmark-excel"></i> {{ __('admin.invoices.export_invoices') }}
             </a>
@@ -87,7 +81,7 @@
         :showSearchButton="true"
         :showResetButton="true"
         :filters="[
-            ['type' => 'text', 'id' => 'search', 'name' => 'search', 'label' => __('admin.filters.search'), 'placeholder' => __('admin.invoices.search'), 'value' => request('search')],
+            ['type' => 'text', 'id' => 'search', 'name' => 'search', 'label' => __('admin.filters.search'), 'placeholder' => __('admin.invoices.search_placeholder'), 'value' => request('search')],
             ['type' => 'select-static', 'id' => 'payment_status', 'name' => 'payment_status', 'label' => __('admin.invoices.payment_status'), 'options' => $invoicePaymentStatusOptions, 'selected' => request('payment_status')],
             ['type' => 'select-static', 'id' => 'payment_method', 'name' => 'payment_method', 'label' => __('admin.invoices.payment_method'), 'options' => $invoicePaymentMethodOptions, 'selected' => request('payment_method')],
         ]"
@@ -104,7 +98,6 @@
                             <th>{{ __('admin.invoices.invoice_number') }}</th>
                             <th>{{ __('admin.invoices.user') }}</th>
                             <th>{{ __('admin.invoices.amount') }}</th>
-                            <th>{{ __('admin.invoices.vat') }}</th>
                             <th>{{ __('admin.invoices.discount') }}</th>
                             <th>{{ __('admin.invoices.total') }}</th>
                             <th>{{ __('admin.invoices.payment_method') }}</th>
@@ -119,7 +112,6 @@
                             <td>{{ $invoice->invoice_number }}</td>
                             <td>{{ $invoice->user->name ?? '--' }}</td>
                             <td>{{ number_format($invoice->amount, 2) }} <x-riyal-icon /></td>
-                            <td>{{ number_format($invoice->vat_amount, 2) }} <x-riyal-icon /></td>
                             <td>
                                 @if(($invoice->discount_amount ?? 0) > 0)
                                     <span class="text-success">-{{ number_format($invoice->discount_amount, 2) }}</span>
@@ -145,14 +137,25 @@
                                 <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                <a href="{{ route('admin.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-sm btn-outline-dark" title="{{ __('admin.invoices.print') }}">
+                                    <i class="bi bi-printer"></i>
+                                </a>
                                 <a href="{{ route('admin.invoices.edit', $invoice->id) }}" class="btn btn-sm btn-outline-success">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                @if($invoice->payment_status === 'pending')
+                                <form action="{{ route('admin.invoices.confirm-payment', $invoice->id) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('admin.swal.confirm_text') }}');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="{{ __('admin.invoices.confirm_payment') }}">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                </form>
+                                @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">{{ __('admin.invoices.no_invoices') }}</td>
+                            <td colspan="9" class="text-center">{{ __('admin.invoices.no_invoices') }}</td>
                         </tr>
                         @endforelse
                     </tbody>

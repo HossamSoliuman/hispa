@@ -29,14 +29,9 @@ class StoreSubscriptionPackageRequest extends FormRequest
                 'lt:original_price',
             ],
             'duration_type' => ['required', Rule::in(['monthly', 'quarterly', 'yearly'])],
-            'features' => ['nullable', 'array'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'sort_order' => ['nullable', 'integer'],
-            'feature_ar' => ['nullable', 'array'],
-            'feature_ar.*' => ['nullable', 'string'],
-            'feature_en' => ['nullable', 'array'],
-            'feature_en.*' => ['nullable', 'string'],
         ];
     }
 

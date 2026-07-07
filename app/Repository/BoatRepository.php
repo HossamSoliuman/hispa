@@ -7,6 +7,7 @@ use App\Models\Boat;
 use App\Models\BoatType;
 use App\Models\Category;
 use App\Models\Payroll;
+use App\Models\User;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
@@ -15,12 +16,17 @@ class BoatRepository implements CRUD
     public function getList($request)
     {
         if ($request['guard'] == 'owner') {
-            $boats = Boat::where('owner_id', auth()->user()->id)->get();
+            $owner = auth()->user();
+            $boats = Boat::where('owner_id', $owner->id)->get();
             $categories = Category::where('type', 'maintenance')
                 ->whereNotNull('parent_id')
                 ->get();
 
-            return view('owner.boats.index', compact('boats', 'categories'));
+            $boatLimit = $owner->boatLimit();
+            $boatsUsed = $owner->boatsUsed();
+            $canAddBoat = $boatsUsed < $boatLimit;
+
+            return view('owner.boats.index', compact('boats', 'categories', 'boatLimit', 'boatsUsed', 'canAddBoat'));
         } else {
             $boat_types = BoatType::Active()
                 ->orderBy(App::getLocale() === 'ar' ? 'name_ar' : 'name_en')
@@ -95,11 +101,28 @@ class BoatRepository implements CRUD
         if ($request['guard'] == 'admin') {
             $request->validate(['owner_id' => 'required|integer|exists:users,id']);
         }
+
+        $ownerId = $request->owner_id ?? auth()->user()->id;
+        $owner = User::find($ownerId);
+
+        if (! $owner || ! $owner->canCreateBoat()) {
+            $limit = $owner ? $owner->boatLimit() : 0;
+            $message = $limit > 0
+                ? trans('api.boat_limit_reached', ['limit' => $limit])
+                : trans('api.no_active_subscription');
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
+            return back()->withErrors(['boats_count' => $message])->withInput();
+        }
+
         DB::beginTransaction();
 
         try {
             $boat = new Boat;
-            $boat->owner_id = $request->owner_id ?? auth()->user()->id;
+            $boat->owner_id = $ownerId;
             $boat->name_ar = $request['name_ar'];
             $boat->name_en = $request['name_en'] ?? null;
             $boat->number = $request['number'];

@@ -63,7 +63,7 @@
                         <select name="status" id="status" class="form-select" required>
                             <option value="active" {{ old('status', $subscription->status) == 'active' ? 'selected' : '' }}>{{ __('admin.subscriptions.active') }}</option>
                             <option value="expired" {{ old('status', $subscription->status) == 'expired' ? 'selected' : '' }}>{{ __('admin.subscriptions.expired') }}</option>
-                            <option value="trial" {{ old('status', $subscription->status) == 'trial' ? 'selected' : '' }}>{{ __('admin.subscriptions.trial') }}</option>
+                            <option value="pending" {{ old('status', $subscription->status) == 'pending' ? 'selected' : '' }}>{{ __('admin.subscriptions.pending') }}</option>
                             <option value="suspended" {{ old('status', $subscription->status) == 'suspended' ? 'selected' : '' }}>{{ __('admin.subscriptions.suspended') }}</option>
                         </select>
                     </div>

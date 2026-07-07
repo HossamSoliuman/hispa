@@ -310,12 +310,12 @@ class OwnerDataTable extends DataTables
                 <li><a class="dropdown-item" href="'.e($showUrl).'#customers-pane"><i class="fas fa-users me-2"></i>'.e(__('admin.owner.customers_tab')).'</a></li>
                 <li><a class="dropdown-item" href="'.e($stockUrl).'"><i class="fas fa-boxes-stacked me-2"></i>'.e(__('admin.owner.action_stock')).'</a></li>
             </ul>
-        </div> ';
+        </div>';
 
         // حذف
         $buttons .= '<a href="#" onclick="deleteRecord('.(int) $user->id.')" class="btn btn-danger btn-sm" title="'.e(__('admin.actions.delete')).'"><i class="fas fa-trash"></i></a>';
 
-        return $buttons ?: '<span class="text-muted">--</span>';
+        return $buttons ? '<div class="d-flex flex-nowrap align-items-center justify-content-center gap-1">'.$buttons.'</div>' : '<span class="text-muted">--</span>';
     }
 
     public function showData($id)

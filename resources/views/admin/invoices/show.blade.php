@@ -11,6 +11,9 @@
             <a href="{{ route('admin.invoices.index') }}" class="btn btn-outline-secondary btn-equal">
                 <i class="bi bi-arrow-left"></i> {{ __('admin.invoices.page_header') }}
             </a>
+            <a href="{{ route('admin.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-dark btn-equal">
+                <i class="bi bi-printer"></i> {{ __('admin.invoices.print') }}
+            </a>
             <a href="{{ route('admin.invoices.edit', $invoice->id) }}" class="btn btn-outline-success btn-equal">
                 <i class="bi bi-pencil"></i> {{ __('admin.invoices.edit.title') }}
             </a>
@@ -35,16 +38,22 @@
                                 <td>{{ $invoice->user->name ?? '--' }} <span class="text-muted small">{{ $invoice->user->phone ?? '' }}</span></td>
                             </tr>
                             <tr>
+                                <th>{{ __('admin.invoices.send_to_email') }}</th>
+                                <td>
+                                    @if($invoice->user?->email)
+                                        <a href="mailto:{{ $invoice->user->email }}">{{ $invoice->user->email }}</a>
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>{{ __('admin.invoices.subscription') }}</th>
                                 <td>{{ $invoice->subscription->package->name ?? '--' }}</td>
                             </tr>
                             <tr>
                                 <th>{{ __('admin.invoices.amount') }}</th>
                                 <td>{{ number_format($invoice->amount, 2) }} <x-riyal-icon /></td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.invoices.vat') }} ({{ number_format($invoice->vat_rate ?? 0, 2) }}%)</th>
-                                <td>{{ number_format($invoice->vat_amount, 2) }} <x-riyal-icon /></td>
                             </tr>
                             @if(($invoice->discount_amount ?? 0) > 0)
                                 <tr>
@@ -110,7 +119,7 @@
             </div>
         </div>
 
-        @if($invoice->payment_method === 'bank_transfer' && $invoice->payment_status === 'pending')
+        @if($invoice->payment_status === 'pending')
             <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header">

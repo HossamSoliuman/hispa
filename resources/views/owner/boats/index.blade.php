@@ -65,12 +65,24 @@
     </div>
 
 
-    {{-- <div class="alert alert-warning d-flex align-items-center" role="alert"> --}}
-    {{-- <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> --}}
-    {{-- <div> --}}
-    {{-- يوجد <strong>{{ __('owner.generated.boats_3') }}</strong> {{ __('owner.generated.docs_expiring_within') }}<strong>{{ __('owner.generated.days_30') }}</strong>. --}}
-    {{-- </div> --}}
-    {{-- </div> --}}
+    @isset($boatLimit)
+        @if($boatLimit <= 0)
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <div>{{ __('owner.boats.quota.no_subscription') }}</div>
+            </div>
+        @else
+            <div class="alert {{ $canAddBoat ? 'alert-info' : 'alert-warning' }} d-flex align-items-center" role="alert">
+                <i class="bi {{ $canAddBoat ? 'bi-info-circle-fill' : 'bi-exclamation-triangle-fill' }} me-2 fs-5"></i>
+                <div>
+                    {{ __('owner.boats.quota.usage', ['used' => $boatsUsed, 'limit' => $boatLimit]) }}
+                    @unless($canAddBoat)
+                        <strong>{{ __('owner.boats.quota.limit_reached') }}</strong>
+                    @endunless
+                </div>
+            </div>
+        @endif
+    @endisset
 
     <!-- {{ __('owner.generated.item_84b1e0') }} -->
     <div class="row">

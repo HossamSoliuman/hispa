@@ -297,7 +297,7 @@
                             @endif
                             <tr>
                                 <th>{{ __('owner.trips.show.crew_count') }}</th>
-                                <td>{{ ($data->crew_count ?? 0) + ($data->captain ? 1 : 0) }}</td>
+                                <td>{{ ($data->crew_count ?? 0) + ($data->boat?->captain ? 1 : 0) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -355,11 +355,11 @@
                     <i class="fas fa-user-ninja me-2"></i> {{ __('owner.trips.show.captain') }}
                 </div>
                 <div class="card-body d-flex align-items-center">
-                    <img src="{{ asset($data->captain->logo ?? 'assets/img/avatar.png') }}"
+                    <img src="{{ asset($data->boat?->captain?->logo ?? 'assets/img/avatar.png') }}"
                         alt="{{ __('owner.generated.item_0a9699') }}" class="rounded-circle border" width="50" height="50">
                     <div class="ms-3">
-                        <div class="fw-bold">{{ $data->captain?->name ?? '---' }}</div>
-                        <div class="text-muted small">{{ $data->captain?->phone ?? '---' }}</div>
+                        <div class="fw-bold">{{ $data->boat?->captain?->name ?? '---' }}</div>
+                        <div class="text-muted small">{{ $data->boat?->captain?->phone ?? '---' }}</div>
                     </div>
                 </div>
                 <div class="card-arrow">

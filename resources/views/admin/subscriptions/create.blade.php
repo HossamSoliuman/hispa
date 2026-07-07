@@ -64,19 +64,6 @@
                         </select>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input type="hidden" name="is_trial" value="0">
-                            <input type="checkbox" name="is_trial" id="is_trial" value="1" class="form-check-input" {{ old('is_trial') ? 'checked' : '' }}>
-                            <label for="is_trial" class="form-check-label">{{ __('admin.subscriptions.subscription_type') }} ({{ __('admin.subscriptions.trial') }})</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6" id="wrap_trial_days" style="{{ old('is_trial') ? '' : 'display:none;' }}">
-                        <label for="trial_days" class="form-label">{{ __('admin.subscriptions.trial_days') }}</label>
-                        <input type="number" name="trial_days" id="trial_days" class="form-control" min="1" max="30" value="{{ old('trial_days', 7) }}">
-                    </div>
-                </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">{{ __('admin.subscriptions.add') }}</button>
                     <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-secondary">{{ __('admin.actions.cancel') }}</a>
@@ -84,11 +71,4 @@
             </form>
         </div>
     </div>
-    @push('scripts')
-    <script>
-        document.getElementById('is_trial').addEventListener('change', function() {
-            document.getElementById('wrap_trial_days').style.display = this.checked ? 'block' : 'none';
-        });
-    </script>
-    @endpush
 @endsection

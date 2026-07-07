@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Invoice;
 use App\Models\Subscription;
 use App\Models\SubscriptionPackage;
 use Carbon\Carbon;
@@ -10,7 +11,9 @@ use Illuminate\Support\Facades\DB;
 class SubscriptionService
 {
     public const DURATION_MONTHLY = 'monthly';
+
     public const DURATION_QUARTERLY = 'quarterly';
+
     public const DURATION_YEARLY = 'yearly';
 
     /**
@@ -27,7 +30,7 @@ class SubscriptionService
     }
 
     /**
-     * Create a new subscription with validated data.
+     * Create a new subscription (with its matching invoice) from validated data.
      */
     public function create(array $validated): Subscription
     {
@@ -35,21 +38,44 @@ class SubscriptionService
         $durationType = $validated['duration_type'] ?? $package->duration_type;
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = $this->calculateEndDate($startDate, $durationType);
-        $isTrial = (bool) ($validated['is_trial'] ?? false);
-        $status = $isTrial ? 'trial' : 'active';
-        $trialEndsAt = null;
 
-        if ($status === 'trial' && !empty($validated['trial_days'])) {
-            $trialEndsAt = $startDate->copy()->addDays((int) $validated['trial_days']);
-        }
+        return DB::transaction(function () use ($validated, $package, $startDate, $endDate) {
+            $subscription = Subscription::create([
+                'user_id' => $validated['user_id'],
+                'package_id' => $validated['package_id'],
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'status' => $validated['status'] ?? 'active',
+            ]);
 
-        return Subscription::create([
-            'user_id' => $validated['user_id'],
-            'package_id' => $validated['package_id'],
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'status' => $status,
-            'trial_ends_at' => $trialEndsAt,
+            $this->createInvoiceFor($subscription, $package);
+
+            return $subscription;
+        });
+    }
+
+    /**
+     * Create the subscription's invoice. A subscription that is already active
+     * or on trial is considered paid; otherwise the invoice stays pending until
+     * an admin confirms payment.
+     */
+    public function createInvoiceFor(Subscription $subscription, ?SubscriptionPackage $package = null): Invoice
+    {
+        $package ??= $subscription->package;
+        $amount = (float) $package->effective_price;
+        $isPaid = in_array($subscription->status, ['active', 'trial'], true);
+
+        return Invoice::create([
+            'subscription_id' => $subscription->id,
+            'user_id' => $subscription->user_id,
+            'amount' => $amount,
+            'vat_rate' => 0,
+            'vat_amount' => 0,
+            'total_amount' => $amount,
+            'discount_amount' => 0,
+            'payment_method' => 'cash',
+            'payment_status' => $isPaid ? 'paid' : 'pending',
+            'paid_at' => $isPaid ? now() : null,
         ]);
     }
 
@@ -72,8 +98,31 @@ class SubscriptionService
                 'suspension_reason' => null,
                 'renewal_count' => ($subscription->renewal_count ?? 0) + 1,
             ]);
+
             return $subscription->fresh();
         });
+    }
+
+    /**
+     * Activate a subscription after payment is confirmed: flip to active and
+     * (re)start the paid period from today for the plan's duration.
+     */
+    public function activate(Subscription $subscription): Subscription
+    {
+        $subscription->loadMissing('package');
+        $durationType = $subscription->package?->duration_type ?? self::DURATION_MONTHLY;
+        $startDate = Carbon::today();
+
+        $subscription->update([
+            'status' => 'active',
+            'is_suspended' => false,
+            'suspended_at' => null,
+            'suspension_reason' => null,
+            'start_date' => $startDate,
+            'end_date' => $this->calculateEndDate($startDate, $durationType),
+        ]);
+
+        return $subscription->fresh();
     }
 
     /**
@@ -87,6 +136,7 @@ class SubscriptionService
             'suspended_at' => now(),
             'suspension_reason' => $reason,
         ]);
+
         return $subscription->fresh();
     }
 
@@ -102,26 +152,12 @@ class SubscriptionService
             'suspended_at' => null,
             'suspension_reason' => null,
         ]);
+
         return $subscription->fresh();
     }
 
     /**
-     * Grant trial: set status to trial and extend by trial_days.
-     */
-    public function grantTrial(Subscription $subscription, int $trialDays): Subscription
-    {
-        $trialEndsAt = Carbon::now()->addDays($trialDays);
-        $subscription->update([
-            'status' => 'trial',
-            'trial_ends_at' => $trialEndsAt,
-            'start_date' => Carbon::now(),
-            'end_date' => $trialEndsAt,
-        ]);
-        return $subscription->fresh();
-    }
-
-    /**
-     * Get subscription counts for filters (active, expired, trial, suspended).
+     * Get subscription counts for filters (active, expired, pending, suspended).
      */
     public function getCounts(): array
     {
@@ -137,9 +173,9 @@ class SubscriptionService
                 });
         })->count();
 
-        $trialCount = Subscription::where('status', 'trial')->count();
+        $pendingCount = Subscription::where('status', 'pending')->count();
         $suspendedCount = Subscription::where('is_suspended', true)->count();
 
-        return compact('activeCount', 'expiredCount', 'trialCount', 'suspendedCount');
+        return compact('activeCount', 'expiredCount', 'pendingCount', 'suspendedCount');
     }
 }

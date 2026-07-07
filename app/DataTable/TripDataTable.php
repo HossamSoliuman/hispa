@@ -14,7 +14,7 @@ class TripDataTable extends DataTables
     public function getData(Request $request)
     {
         if ($request->ajax()) {
-            $query = Trip::with(['fishQuantityStocks', 'owner'])->orderBy('created_at', 'desc');
+            $query = Trip::with(['fishQuantityStocks', 'owner', 'boat.captain'])->orderBy('created_at', 'desc');
 
             if ($request->filled('status') && in_array($request->status, range(1, 8))) {
                 $query->where('status', $request->status);
@@ -63,10 +63,7 @@ class TripDataTable extends DataTables
                     return $trip->owner->name ?? '--';
                 })
                 ->addColumn('captain', function (Trip $trip) {
-                    return $trip->captain->name ?? '--';
-                })
-                ->addColumn('counter', function (Trip $trip) {
-                    return $trip->counter->name ?? '--';
+                    return $trip->boat?->captain?->name ?? '--';
                 })
 
                 ->addColumn('port', function (Trip $trip) {
@@ -151,7 +148,7 @@ class TripDataTable extends DataTables
                     'trip_cancelled' => $cancelledTrips,
                     'trip_new' => $newTrips,
                 ])
-                ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'counter', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges
+                ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges
                 ->make(true);
         }
     }

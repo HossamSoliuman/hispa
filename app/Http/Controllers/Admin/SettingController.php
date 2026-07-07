@@ -37,7 +37,7 @@ class SettingController extends Controller
         $data = Setting::get();
         $regions = Region::orderByDesc('id')->get();
         $governorates = Governorate::with('region')->orderByDesc('id')->get();
-        $ports = Port::with('governorate')->orderByDesc('id')->get();
+        $ports = Port::with('governorate.region')->orderByDesc('id')->get();
         $boatTypes = BoatType::active()->get();
         $parents = Category::whereNull('parent_id')->get();
 

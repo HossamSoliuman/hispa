@@ -28,8 +28,12 @@
             </ul>
         </nav>
         <div class="mt-6 flex flex-col gap-3 border-t border-slate-200 pt-6">
-            <a href="{{ route('frontend.show_login_form') }}" class="mobile-nav-item inline-flex items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-3 text-base font-semibold text-blue-600 transition-colors hover:bg-blue-50">{{ __('site.nav.login') }}</a>
-            <a href="{{ route('frontend.show_register_form') }}" class="mobile-nav-item inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">{{ __('site.nav.signup') }}</a>
+            @auth('owner')
+                <a href="{{ route('owner.dashboard') }}" class="mobile-nav-item inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">{{ __('site.nav.dashboard') }}</a>
+            @else
+                <a href="{{ route('frontend.show_login_form') }}" class="mobile-nav-item inline-flex items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-3 text-base font-semibold text-blue-600 transition-colors hover:bg-blue-50">{{ __('site.nav.login') }}</a>
+                <a href="{{ route('frontend.show_register_form') }}" class="mobile-nav-item inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">{{ __('site.nav.signup') }}</a>
+            @endauth
         </div>
     </div>
 </div>

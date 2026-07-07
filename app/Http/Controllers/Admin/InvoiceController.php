@@ -5,15 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\InvoicesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Setting;
 use App\Models\Subscription;
+use App\Service\Owner\ReportQrService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class InvoiceController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly SubscriptionService $subscriptionService
+    ) {
         $this->middleware('auth:admin');
     }
 
@@ -60,7 +65,6 @@ class InvoiceController extends Controller
         $pendingInvoices = Invoice::where('payment_status', 'pending')->count();
         $totalRevenue = Invoice::where('payment_status', 'paid')->sum('total_amount');
         $pendingRevenue = Invoice::where('payment_status', 'pending')->sum('total_amount');
-        $totalVAT = Invoice::where('payment_status', 'paid')->sum('vat_amount');
 
         return view('admin.invoices.index', compact(
             'invoices',
@@ -68,59 +72,8 @@ class InvoiceController extends Controller
             'paidInvoices',
             'pendingInvoices',
             'totalRevenue',
-            'pendingRevenue',
-            'totalVAT'
+            'pendingRevenue'
         ));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $subscriptions = Subscription::with(['user', 'package'])
-            ->where('status', 'active')
-            ->where('is_suspended', false)
-            ->get();
-        return view('admin.invoices.create', compact('subscriptions'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'subscription_id' => 'required|exists:subscriptions,id',
-            'amount' => 'required|numeric|min:0',
-            'vat_rate' => 'nullable|numeric|min:0|max:100',
-            'payment_method' => 'required|in:mada,visa,bank_transfer',
-            'payment_status' => 'required|in:pending,paid,cancelled',
-            'payment_notes' => 'nullable|string|max:500',
-            'bank_transfer_receipt' => 'nullable|string',
-        ]);
-
-        $subscription = Subscription::findOrFail($validated['subscription_id']);
-        $vatRate = $validated['vat_rate'] ?? 0;
-        $vatAmount = ($validated['amount'] * $vatRate) / 100;
-        $totalAmount = $validated['amount'] + $vatAmount;
-
-        $invoice = Invoice::create([
-            'subscription_id' => $validated['subscription_id'],
-            'user_id' => $subscription->user_id,
-            'amount' => $validated['amount'],
-            'vat_rate' => $vatRate,
-            'vat_amount' => $vatAmount,
-            'total_amount' => $totalAmount,
-            'payment_method' => $validated['payment_method'],
-            'payment_status' => $validated['payment_status'],
-            'payment_notes' => $validated['payment_notes'] ?? null,
-            'bank_transfer_receipt' => $validated['bank_transfer_receipt'] ?? null,
-            'paid_at' => $validated['payment_status'] === 'paid' ? now() : null,
-        ]);
-
-        return redirect()->route('admin.invoices.show', $invoice)
-            ->with('success', __('admin.invoices.created_successfully'));
     }
 
     /**
@@ -129,7 +82,27 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice)
     {
         $invoice->load(['user', 'subscription.package', 'confirmedBy']);
+
         return view('admin.invoices.show', compact('invoice'));
+    }
+
+    /**
+     * Render a printable subscription invoice. The printout highlights the
+     * recipient's email so the admin knows where to send the invoice.
+     */
+    public function print(Invoice $invoice): Response
+    {
+        $invoice->load([
+            'user.region', 'user.governorate',
+            'subscription.package',
+            'subscription.user.region', 'subscription.user.governorate',
+            'coupon', 'confirmedBy',
+        ]);
+
+        $settings = $this->reportSettings($invoice);
+        $filename = 'invoice-'.$invoice->invoice_number.'.pdf';
+
+        return pdf_report(view('admin.invoices.print', compact('invoice', 'settings')), [], $filename);
     }
 
     /**
@@ -138,6 +111,7 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
         $subscriptions = Subscription::with(['user', 'package'])->get();
+
         return view('admin.invoices.edit', compact('invoice', 'subscriptions'));
     }
 
@@ -148,27 +122,20 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0',
-            'vat_rate' => 'nullable|numeric|min:0|max:100',
             'payment_method' => 'required|in:mada,visa,bank_transfer',
             'payment_status' => 'required|in:pending,paid,cancelled',
             'payment_notes' => 'nullable|string|max:500',
             'bank_transfer_receipt' => 'nullable|string',
         ]);
 
-        $vatRate = $validated['vat_rate'] ?? 0;
-        $vatAmount = ($validated['amount'] * $vatRate) / 100;
-        $totalAmount = $validated['amount'] + $vatAmount;
-
         $invoice->update([
             'amount' => $validated['amount'],
-            'vat_rate' => $vatRate,
-            'vat_amount' => $vatAmount,
-            'total_amount' => $totalAmount,
+            'total_amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
             'payment_status' => $validated['payment_status'],
             'payment_notes' => $validated['payment_notes'] ?? null,
             'bank_transfer_receipt' => $validated['bank_transfer_receipt'] ?? null,
-            'paid_at' => $validated['payment_status'] === 'paid' && !$invoice->paid_at ? now() : $invoice->paid_at,
+            'paid_at' => $validated['payment_status'] === 'paid' && ! $invoice->paid_at ? now() : $invoice->paid_at,
         ]);
 
         return redirect()->route('admin.invoices.show', $invoice)
@@ -181,6 +148,7 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         $invoice->delete();
+
         return redirect()->route('admin.invoices.index')
             ->with('success', __('admin.invoices.deleted_successfully'));
     }
@@ -193,11 +161,6 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'payment_notes' => 'nullable|string|max:500',
         ]);
-
-        if ($invoice->payment_method !== 'bank_transfer') {
-            return redirect()->back()
-                ->with('error', __('admin.invoices.only_bank_transfer_can_be_confirmed'));
-        }
 
         if ($invoice->payment_status === 'paid') {
             return redirect()->back()
@@ -212,48 +175,15 @@ class InvoiceController extends Controller
             'payment_notes' => $validated['payment_notes'] ?? $invoice->payment_notes,
         ]);
 
-        // Update subscription if needed
+        // Confirming payment activates the subscription and (re)starts its paid
+        // period, which unlocks the owner's boat quota.
         $subscription = $invoice->subscription;
         if ($subscription && $subscription->status !== 'active') {
-            $subscription->update([
-                'status' => 'active',
-                'is_suspended' => false,
-            ]);
+            $this->subscriptionService->activate($subscription);
         }
 
         return redirect()->back()
             ->with('success', __('admin.invoices.payment_confirmed_successfully'));
-    }
-
-    /**
-     * Generate tax report
-     */
-    public function taxReport(Request $request)
-    {
-        $query = Invoice::where('payment_status', 'paid');
-
-        // Date range filter
-        if ($request->has('start_date') && $request->start_date) {
-            $query->whereDate('paid_at', '>=', $request->start_date);
-        }
-        if ($request->has('end_date') && $request->end_date) {
-            $query->whereDate('paid_at', '<=', $request->end_date);
-        }
-
-        $invoices = $query->with(['user', 'subscription.package'])
-            ->orderBy('paid_at', 'desc')
-            ->get();
-
-        $totalAmount = $invoices->sum('amount');
-        $totalVAT = $invoices->sum('vat_amount');
-        $totalRevenue = $invoices->sum('total_amount');
-
-        return view('admin.invoices.tax-report', compact(
-            'invoices',
-            'totalAmount',
-            'totalVAT',
-            'totalRevenue'
-        ));
     }
 
     /**
@@ -282,8 +212,32 @@ class InvoiceController extends Controller
         }
 
         $invoices = $query->orderBy('created_at', 'desc')->get();
-        $filename = 'invoices-' . now()->format('Y-m-d-His') . '.xlsx';
+        $filename = 'invoices-'.now()->format('Y-m-d-His').'.xlsx';
 
         return Excel::download(new InvoicesExport($invoices), $filename);
+    }
+
+    /**
+     * Platform company settings for the printable invoice header. Admin issues
+     * these subscription invoices on behalf of the platform, so the masthead
+     * identity comes from the global Setting table rather than a per-owner
+     * company.
+     *
+     * @return array<string, mixed>
+     */
+    private function reportSettings(Invoice $invoice): array
+    {
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? config('app.name');
+
+        return [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(ReportQrService::class)->dataUri('Invoice: '.$invoice->invoice_number),
+        ];
     }
 }

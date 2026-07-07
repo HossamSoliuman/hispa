@@ -203,7 +203,7 @@
             <th>{{ __('admin.ports.name') }}</th>
             <th>{{ __('admin.ports.category') }}</th>
             <th>{{ __('admin.ports.governorate') }}</th>
-            <th>{{ __('admin.ports.capacity') }}</th>
+            <th>{{ __('admin.ports.region') }}</th>
             <th>{{ __('admin.ports.status') }}</th>
             <th>{{ __('admin.ports.actions') }}</th>
         </tr>
@@ -214,7 +214,7 @@
             <td>{{ $info->name }}</td>
             <td>{{ $info->category_ar == 'government' ? __('admin.ports.government') : __('admin.ports.private') }}</td>
             <td>{{ $info->governorate->name ?? '' }}</td>
-            <td>{{ $info->boatTypes->sum('pivot.max') ?? '' }}</td>
+            <td>{{ $info->governorate->region->name ?? '' }}</td>
             <td>
                 @if($info->status == 1)
                     <span class="badge bg-success">{{ __('admin.status.active') }}</span>

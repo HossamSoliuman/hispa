@@ -87,7 +87,6 @@
                             <th>{{ __('admin.trips.number') }}</th>
                             <th>{{ __('admin.trips.owner') }}</th>
                             <th>{{ __('admin.trips.captain') }}</th>
-                            <th>{{ __('admin.trips.counter') }}</th>
                             <th>{{ __('admin.trips.port') }}</th>
                             <th>{{ __('admin.trips.date') }}</th>
                             <th>{{ __('admin.trips.status') }}</th>
@@ -158,8 +157,6 @@
                     data: 'owner', name: 'owner'
                 }, {
                     data: 'captain', name: 'captain'
-                }, {
-                    data: 'counter', name: 'counter'
                 }, {
                     data: 'port', name: 'port'
                 }, {

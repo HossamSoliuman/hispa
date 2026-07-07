@@ -56,9 +56,24 @@
                     <a href="{{ route('frontend.show_login_form') }}" class="font-semibold underline text-blue-600 hover:text-blue-700">{{ __('site.signup.login_link') }}</a>
                 </p>
 
+                @if(!empty($selectedPackage))
+                    <div class="mt-6 flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
+                        <div class="text-start">
+                            <p class="text-xs text-blue-600">{{ __('site.signup.selected_plan') }}</p>
+                            <p class="text-base font-bold text-slate-900">{{ $selectedPackage->name }}</p>
+                            <p class="text-xs text-slate-500">{{ $selectedPackage->boatsLabel() }}</p>
+                        </div>
+                        <div class="text-end">
+                            <p class="text-lg font-extrabold text-blue-600">{{ number_format((float) $selectedPackage->effective_price, 0) }} {{ __('site.pricing.currency', ['default' => 'ر.س']) }}</p>
+                            <a href="{{ route('site.pricing') }}" class="text-xs text-blue-600 underline hover:text-blue-700">{{ __('site.signup.change_plan') }}</a>
+                        </div>
+                    </div>
+                @endif
+
                 <form id="signupForm" action="{{ route('frontend.register') }}" method="post" class="mt-8 space-y-4">
                     @csrf
                     @if(isset($guard))<input type="hidden" name="guard" value="{{ $guard }}" />@endif
+                    @if(!empty($selectedPackage))<input type="hidden" name="package_id" value="{{ $selectedPackage->id }}" />@endif
                     <div>
                         <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('site.signup.name') }}</label>
                         <input id="fullNameInput" name="name" type="text" placeholder="{{ __('site.signup.name_placeholder') }}" value="{{ old('name') }}"

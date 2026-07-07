@@ -8,13 +8,13 @@
     $price = $selectedPackage ? (float) $selectedPackage->effective_price : 500;
     $title = $selectedPackage ? $selectedPackage->name : 'البداية';
     $description = $selectedPackage ? ($selectedPackage->description ?: 'مناسبة لقارب واحد') : 'مناسبة لقارب واحد';
-    $featuresList = $selectedPackage && is_array($selectedPackage->features) ? $selectedPackage->features : [
-        'إتمام عملية الدفع',
+    $durationLabel = $selectedPackage ? __('site.order_review.durations.' . $selectedPackage->duration_type) : '';
+    $featuresList = $selectedPackage ? array_filter([
+        $selectedPackage->boatsLabel(),
+        $durationLabel,
+    ]) : [
         'إدارة قارب واحد بحساب واحد.',
         'تسجيل المصاريف والإيرادات.',
-        'محاصصة تلقائية للرحلة.',
-        'تقرير ختامي لكل رحلة.',
-        'تتبع أساسي للديون والسلفيات.',
     ];
 @endphp
 
@@ -110,7 +110,7 @@
                     </div>
                 </div>
                 <hr class="my-3" />
-                <a href="{{ route('site.payment') }}?orderId=ORDER{{ $selectedPackage ? $selectedPackage->id : '' }}{{ time() }}&package_id={{ $selectedPackage?->id ?? '' }}&amount={{ $price }}" id="submitBtn" class="mt-6 block w-full text-center text-white bg-[#3C74BE] py-4 hover:bg-[#3C74BE]/80 transition-colors rounded-lg shadow-sm">المتابعة إلى الدفع</a>
+                <a href="{{ route('frontend.show_register_form', ['package_id' => $selectedPackage?->id, 'guard' => 'owner']) }}" id="submitBtn" class="mt-6 block w-full text-center text-white bg-[#3C74BE] py-4 hover:bg-[#3C74BE]/80 transition-colors rounded-lg shadow-sm">{{ __('site.order_review.continue') }}</a>
                 <p id="errorMsg" class="hidden text-center text-sm text-red-600 mt-3"></p>
             </div>
         </div>

@@ -42,10 +42,6 @@
                         <label for="amount" class="form-label">{{ __('admin.invoices.amount') }} <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" value="{{ old('amount', $invoice->amount) }}" required>
                     </div>
-                    <div class="col-md-6">
-                        <label for="vat_rate" class="form-label">{{ __('admin.invoices.vat_rate') }} (%)</label>
-                        <input type="number" step="0.01" min="0" max="100" name="vat_rate" id="vat_rate" class="form-control" value="{{ old('vat_rate', $invoice->vat_rate) }}">
-                    </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">

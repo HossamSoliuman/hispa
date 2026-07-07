@@ -17,7 +17,7 @@ class UpdateSubscriptionRequest extends FormRequest
             'package_id' => 'required|exists:subscription_packages,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'status' => 'required|in:active,expired,trial,suspended',
+            'status' => 'required|in:active,expired,suspended,pending',
         ];
     }
 }

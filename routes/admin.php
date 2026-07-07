@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CaptainController as AdminCaptainController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CrewController as AdminCrewController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FishController as AdminFishController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OwnerController;
@@ -23,13 +24,10 @@ use App\Http\Controllers\Admin\SubscriptionPackageController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Owner\CategoryController;
 use App\Http\Controllers\Owner\CustomersController;
-use App\Http\Controllers\Owner\FishController;
 use App\Http\Controllers\Owner\GovernorateController;
 use App\Http\Controllers\Owner\LocationController;
-use App\Http\Controllers\Owner\PageController;
 use App\Http\Controllers\Owner\PortController;
 use App\Http\Controllers\Owner\RegionController;
-use App\Http\Controllers\Owner\UserRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -76,13 +74,12 @@ Route::group([
             Route::post('subscriptions/{subscription}/suspend', [SubscriptionController::class, 'suspend'])->name('subscriptions.suspend');
             Route::post('subscriptions/{subscription}/unsuspend', [SubscriptionController::class, 'unsuspend'])->name('subscriptions.unsuspend');
             Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
-            Route::post('subscriptions/{subscription}/grant-trial', [SubscriptionController::class, 'grantTrial'])->name('subscriptions.grant-trial');
 
             // Invoices (static paths must precede the resource so they aren't shadowed by invoices/{invoice})
-            Route::get('invoices/tax-report', [InvoiceController::class, 'taxReport'])->name('invoices.tax-report');
             Route::get('invoices-export', [InvoiceController::class, 'export'])->name('invoices.export');
+            Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
             Route::post('invoices/{invoice}/confirm-payment', [InvoiceController::class, 'confirmPayment'])->name('invoices.confirm-payment');
-            Route::resource('invoices', InvoiceController::class);
+            Route::resource('invoices', InvoiceController::class)->except(['create', 'store']);
 
             // Profile
             Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');
@@ -101,15 +98,12 @@ Route::group([
             Route::post('support/ticket', [\App\Http\Controllers\SupportTicketController::class, 'createTicket'])->name('support.ticket.create');
 
             // Fish
-            Route::resource('fish', FishController::class);
-            Route::get('getFishData', [FishController::class, 'getFishData'])->name('getFishData');
+            Route::get('getFishData', [AdminFishController::class, 'getFishData'])->name('getFishData');
+            Route::resource('fish', AdminFishController::class)->only(['index', 'store', 'update', 'destroy']);
 
             // Categories
             Route::resource('categories', CategoryController::class);
             Route::get('getCategoriesData', [CategoryController::class, 'getData'])->name('getCategoriesData');
-
-            // Pages
-            Route::resource('pages', PageController::class);
 
             // Owners (Fishermen) - User model with role=owner
             Route::get('owner', [OwnerController::class, 'index'])->name('owner.index');
@@ -124,8 +118,8 @@ Route::group([
             Route::get('getGovernorates/{region_id}', [LocationController::class, 'getGovernorates'])->name('getGovernorates');
             Route::get('getPorts/{gov_id}', [LocationController::class, 'getPorts'])->name('getPorts');
 
-            // Captains (عرض فقط: القائمة + صفحة التفاصيل)
-            Route::resource('captain', AdminCaptainController::class)->only(['index', 'show']);
+            // Captains (القائمة + التفاصيل + تعديل/حذف)
+            Route::resource('captain', AdminCaptainController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
             Route::get('getCaptainData', [AdminCaptainController::class, 'getCaptainData'])->name('getCaptainData');
 
             // Crews (عرض فقط: القائمة + صفحة التفاصيل)
@@ -199,8 +193,6 @@ Route::group([
             Route::resource('governorates', GovernorateController::class)->only(['store', 'update', 'destroy']);
             Route::resource('ports', PortController::class)->only(['store', 'update', 'destroy']);
 
-            // User Requests
-            Route::resource('user_request', UserRequestController::class);
         });
     });
 });
