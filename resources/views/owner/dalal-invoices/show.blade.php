@@ -126,8 +126,8 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $detail->fish->name ?? __('owner.unknown') }}</td>
                                             <td>{{ number_format($detail->weight ?? 0, 2) }} {{ __('owner.units.kg') }}</td>
-                                            <td>{{ number_format($detail->price ?? 0, 2) }} {{ __('owner.units.sar') }}</td>
-                                            <td>{{ number_format(($detail->weight ?? 0) * ($detail->price ?? 0), 2) }} {{ __('owner.units.sar') }}</td>
+                                            <td>{{ number_format($detail->price ?? 0, 2) }} <x-riyal-icon /></td>
+                                            <td>{{ number_format(($detail->weight ?? 0) * ($detail->price ?? 0), 2) }} <x-riyal-icon /></td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -174,19 +174,19 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
                             <span class="fw-semibold">{{ __('owner.dalal_invoices.subtotal') }}:</span>
-                            <span class="fw-bold">{{ number_format($sale->total_price ?? 0, 2) }} {{ __('owner.units.sar') }}</span>
+                            <span class="fw-bold">{{ number_format($sale->total_price ?? 0, 2) }} <x-riyal-icon /></span>
                         </div>
                         <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
                             <span class="fw-semibold">{{ __('owner.dalal_invoices.commission') }} ({{ $sale->commission_rate ?? 0 }}%):</span>
-                            <span class="text-danger">- {{ number_format($sale->commission_amount ?? 0, 2) }} {{ __('owner.units.sar') }}</span>
+                            <span class="text-danger">- {{ number_format($sale->commission_amount ?? 0, 2) }} <x-riyal-icon /></span>
                         </div>
                         <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
                             <span class="fw-semibold">{{ __('owner.dalal_invoices.labor') }} ({{ $sale->labor_rate ?? 0 }}%):</span>
-                            <span class="text-danger">- {{ number_format($sale->labor_amount ?? 0, 2) }} {{ __('owner.units.sar') }}</span>
+                            <span class="text-danger">- {{ number_format($sale->labor_amount ?? 0, 2) }} <x-riyal-icon /></span>
                         </div>
                         <div class="d-flex justify-content-between mb-0 pt-2">
                             <span class="fw-bold fs-5">{{ __('owner.dalal_invoices.net_owner_amount') }}:</span>
-                            <span class="fw-bold fs-5 text-success">{{ number_format($sale->net_owner_amount ?? 0, 2) }} {{ __('owner.units.sar') }}</span>
+                            <span class="fw-bold fs-5 text-success">{{ number_format($sale->net_owner_amount ?? 0, 2) }} <x-riyal-icon /></span>
                         </div>
                     </div>
                 </div>

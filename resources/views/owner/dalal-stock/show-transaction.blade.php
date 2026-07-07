@@ -258,7 +258,7 @@
                         setTimeout(() => {
                             $('#dalal_name').text(json.dalal_name ?? '-');
                             $('#totalDalals').text(json.total_fish_count ?? 0);
-                            $('#totalRevenue').text((json.total_sales_amount ?? 0) + '{{ __('owner.generated.item_93fe61') }}');
+                            $('#totalRevenue').html((json.total_sales_amount ?? 0) + ' ' + @json(view('components.riyal-icon')->render()));
                             $('#totalWeight').text((json.total_stock_weight ?? 0) + '{{ __('owner.generated.item_5a01cb') }}');
                             $('#totalRemaining').text((json.total_remaining_weight ?? 0) + '{{ __('owner.generated.item_5a01cb') }}');
                             $('#totalSold').text((json.total_sold_weight ?? 0) + '{{ __('owner.generated.item_5a01cb') }}');

@@ -475,7 +475,7 @@
                                 label: function(context) {
                                     const label = context.label || '';
                                     const value = Number(context.parsed).toLocaleString();
-                                    return label + ': ' + value + ' {{ __('owner.units.sar') }}';
+                                    return label + ': ' + value;
                                 }
                             }
                         }
@@ -489,7 +489,7 @@
                 data: {
                     labels: ['{{ __('owner.boats.revenues') }}', '{{ __('owner.boats.expenses') }}'],
                     datasets: [{
-                        label: '{{ __('owner.units.sar') }}',
+                        label: '{{ __('owner.dashboard.revenue_vs_expenses') }}',
                         data: [revenues, expenses],
                         backgroundColor: ['rgba(40, 167, 69, 0.7)', 'rgba(220, 53, 69, 0.7)'],
                         borderColor: ['rgba(40, 167, 69, 1)', 'rgba(220, 53, 69, 1)'],
@@ -513,7 +513,7 @@
                             callbacks: {
                                 label: function(context) {
                                     return context.dataset.label + ': ' + Number(context.parsed.y)
-                                        .toLocaleString() + ' {{ __('owner.units.sar') }}';
+                                        .toLocaleString();
                                 }
                             }
                         }

@@ -670,7 +670,7 @@
                 success: function(data) {
                     // أفضل نوع أداءً
                     $('#bestFishName').text(data.best_fish.name);
-                    $('#bestFishRevenue').text(data.best_fish.revenue);
+                    $('#bestFishRevenue').html(data.best_fish.revenue);
                     $('#bestFishCatchCount').text(data.best_fish.catch_count);
                     $('#bestFishWeight').text(data.best_fish.weight_kg);
                     $('#bestFishPerformance').html(data.best_fish.performance);
@@ -693,11 +693,11 @@
                     $('#activeBoats').text(data.performance_indicators.active_boats);
                     $('#activePorts').text(data.performance_indicators.active_ports);
                     $('#distinctFishTypes').text(data.performance_indicators.distinct_fish_types);
-                    $('#totalRevenue').text(data.performance_indicators.total_revenue);
+                    $('#totalRevenue').html(data.performance_indicators.total_revenue);
                     $('#totalWeightKg').text(data.performance_indicators.total_weight_kg);
-                    $('#revenuePerTrip').text(data.performance_indicators.revenue_per_trip);
+                    $('#revenuePerTrip').html(data.performance_indicators.revenue_per_trip);
                     $('#weightPerTrip').text(data.performance_indicators.weight_per_trip_kg);
-                    $('#avgPricePerKg').text(data.performance_indicators.avg_price_per_kg);
+                    $('#avgPricePerKg').html(data.performance_indicators.avg_price_per_kg);
                 },
                 error: function(xhr) {
                     alert('{{ __('owner.generated.error_fetching_data') }}');

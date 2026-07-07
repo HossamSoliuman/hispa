@@ -33,7 +33,7 @@
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.sales.kpi.total_revenue'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_revenue">0</span> ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_revenue">0</span> ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-currency-exchange',
             'gradient' => 'linear-gradient(135deg, #198754, #157347)',
             'colClass' => 'col-md-3 col-sm-6',
@@ -47,7 +47,7 @@
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.sales.kpi.net_owner'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_net_owner">0</span> ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString('<span id="summary_net_owner">0</span> ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-person-badge',
             'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
             'colClass' => 'col-md-3 col-sm-6',

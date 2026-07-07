@@ -117,6 +117,6 @@ class Coupon extends Model
             return number_format((float) $this->value, 0).'%';
         }
 
-        return number_format((float) $this->value, 2).' '.(__('admin.units.sar') ?? 'ر.س');
+        return number_format((float) $this->value, 2).' '.view('components.riyal-icon')->render();
     }
 }

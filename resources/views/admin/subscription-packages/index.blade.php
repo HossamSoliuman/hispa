@@ -106,7 +106,7 @@
                                 @else
                                     {{ number_format($package->original_price, 2) }}
                                 @endif
-                                {{ __('admin.units.sar') }}
+                                <x-riyal-icon />
                             </td>
                             <td>{{ __('admin.subscription_packages.duration_types.' . $package->duration_type) }}</td>
                             <td>

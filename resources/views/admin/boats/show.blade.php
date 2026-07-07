@@ -21,19 +21,19 @@
     <div class="row mb-3">
         @include('owner.components.stat-card', [
             'title' => __('admin.boats.show.revenue'),
-            'value' => new \Illuminate\Support\HtmlString(number_format($revenues ?? 0, 2) . ' ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString(number_format($revenues ?? 0, 2) . ' ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-cash-coin',
             'colClass' => 'col-md-3 col-sm-6 mb-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.boats.show.expenses'),
-            'value' => new \Illuminate\Support\HtmlString(number_format($expenses ?? 0, 2) . ' ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString(number_format($expenses ?? 0, 2) . ' ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-arrow-down-circle',
             'colClass' => 'col-md-3 col-sm-6 mb-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.boats.show.salaries'),
-            'value' => new \Illuminate\Support\HtmlString(number_format($payrolls ?? 0, 2) . ' ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString(number_format($payrolls ?? 0, 2) . ' ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-people',
             'colClass' => 'col-md-3 col-sm-6 mb-3',
         ])

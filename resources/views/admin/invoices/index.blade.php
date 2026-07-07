@@ -118,8 +118,8 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $invoice->invoice_number }}</td>
                             <td>{{ $invoice->user->name ?? '--' }}</td>
-                            <td>{{ number_format($invoice->amount, 2) }} {{ __('admin.units.sar') }}</td>
-                            <td>{{ number_format($invoice->vat_amount, 2) }} {{ __('admin.units.sar') }}</td>
+                            <td>{{ number_format($invoice->amount, 2) }} <x-riyal-icon /></td>
+                            <td>{{ number_format($invoice->vat_amount, 2) }} <x-riyal-icon /></td>
                             <td>
                                 @if(($invoice->discount_amount ?? 0) > 0)
                                     <span class="text-success">-{{ number_format($invoice->discount_amount, 2) }}</span>
@@ -130,7 +130,7 @@
                                     —
                                 @endif
                             </td>
-                            <td>{{ number_format($invoice->total_amount, 2) }} {{ __('admin.units.sar') }}</td>
+                            <td>{{ number_format($invoice->total_amount, 2) }} <x-riyal-icon /></td>
                             <td>{{ __('admin.invoices.payment_methods.' . $invoice->payment_method) }}</td>
                             <td>
                                 @if($invoice->payment_status == 'paid')

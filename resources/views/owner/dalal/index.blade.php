@@ -292,7 +292,7 @@
                     <div class="card-body">
                             <h6 class="fw-bold mb-3"><i class="bi bi-award-fill me-2"></i>{{ __('owner.dalal.performance.top_due') }}</h6>
                             <h5 class="fw-bold text-primary" id="topDalalName">{{ __('owner.loading') }}</h5>
-                            <p class="mb-1"><strong>{{ __('owner.dalal.performance.due_label') }}</strong> <span id="topDalalDue">0</span> {{ __('owner.units.sar') }}</p>
+                            <p class="mb-1"><strong>{{ __('owner.dalal.performance.due_label') }}</strong> <span id="topDalalDue">0</span> <x-riyal-icon /></p>
                     </div>
                 </div>
             </div>
@@ -322,7 +322,7 @@
                             <div class="col-md-3">
                                 <div class="border rounded py-3">
                                     <h6 class="fw-bold mb-1">{{ __('owner.dalal.performance.avg_sale') }}</h6>
-                                    <p class="mb-0"><span id="avgSaleAmount">0</span> {{ __('owner.units.sar') }} {{ __('owner.dalal.performance.per_sale') }}</p>
+                                    <p class="mb-0"><span id="avgSaleAmount">0</span> <x-riyal-icon /> {{ __('owner.dalal.performance.per_sale') }}</p>
                                 </div>
                             </div>
 

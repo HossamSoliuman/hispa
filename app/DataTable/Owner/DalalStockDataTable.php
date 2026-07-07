@@ -91,7 +91,7 @@ class DalalStockDataTable extends DataTables
                 ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' كجم')
                 ->addColumn('sold_weight', fn ($row) => number_format($row->sold_weight, 2).' كجم')
                 ->addColumn('remaining_weight', fn ($row) => number_format($row->remaining_weight, 2).' كجم')
-                ->addColumn('total_revenue', fn ($row) => number_format($row->total_revenue, 2).' ر.س')
+                ->addColumn('total_revenue', fn ($row) => number_format($row->total_revenue, 2).' '.view('components.riyal-icon')->render())
                 ->addColumn('details', function ($row) {
                     return '<a href="'.route('owner.dalal.show-boat', $row->boat_id).'" class="btn btn-sm btn-info">عرض</a>';
                 })
@@ -103,7 +103,7 @@ class DalalStockDataTable extends DataTables
                     'total_remaining' => number_format($totalRemaining, 2),
                     'total_revenue' => number_format($totalRevenue, 2),
                 ])
-                ->rawColumns(['details'])
+                ->rawColumns(['details', 'total_revenue'])
                 ->make(true);
         }
     }
@@ -177,7 +177,7 @@ class DalalStockDataTable extends DataTables
             ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' كجم')
             ->addColumn('sold_weight', fn ($row) => number_format($row->sold_weight, 2).' كجم')
             ->addColumn('remaining_weight', fn ($row) => number_format($row->remaining_weight, 2).' كجم')
-            ->addColumn('total_revenue', fn ($row) => number_format($row->total_revenue, 2).' ر.س')
+            ->addColumn('total_revenue', fn ($row) => number_format($row->total_revenue, 2).' '.view('components.riyal-icon')->render())
             ->addColumn('details', fn ($row) => '<a href="'.route('owner.dalal.show-trip', $row->trip_id).'" class="btn btn-sm btn-info">عرض</a>'
             )
             ->with([
@@ -189,7 +189,7 @@ class DalalStockDataTable extends DataTables
                 'total_remaining' => number_format($totalRemaining, 2),
                 'total_revenue' => number_format($totalRevenue, 2),
             ])
-            ->rawColumns(['details'])
+            ->rawColumns(['details', 'total_revenue'])
             ->make(true);
     }
 
@@ -262,7 +262,7 @@ class DalalStockDataTable extends DataTables
             ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' كجم')
             ->addColumn('sold_weight', fn ($row) => number_format($row->sold_weight, 2).' كجم')
             ->addColumn('remaining_weight', fn ($row) => number_format($row->remaining_weight, 2).' كجم')
-            ->addColumn('total_revenue', fn ($row) => number_format($row->total_revenue, 2).' ر.س')
+            ->addColumn('total_revenue', fn ($row) => number_format($row->total_revenue, 2).' '.view('components.riyal-icon')->render())
             ->addColumn('details', fn ($row) => '<a href="'.route('owner.dalal.show-dalal', $trip_id).'" class="btn btn-sm btn-info">عرض</a>'
             )
             ->with([
@@ -273,7 +273,7 @@ class DalalStockDataTable extends DataTables
                 'total_remaining' => number_format($totalRemaining, 2),
                 'total_revenue' => number_format($totalRevenue, 2),
             ])
-            ->rawColumns(['details'])
+            ->rawColumns(['details', 'total_revenue'])
             ->make(true);
     }
 

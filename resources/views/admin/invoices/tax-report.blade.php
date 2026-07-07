@@ -17,19 +17,19 @@
     <div class="row mb-3">
         @include('owner.components.stat-card', [
             'title' => __('admin.invoices.amount'),
-            'value' => new \Illuminate\Support\HtmlString(number_format($totalAmount, 2) . ' ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString(number_format($totalAmount, 2) . ' ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-cash-coin',
             'colClass' => 'col-md-4 col-sm-6 mb-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.invoices.vat'),
-            'value' => new \Illuminate\Support\HtmlString(number_format($totalVAT, 2) . ' ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString(number_format($totalVAT, 2) . ' ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-percent',
             'colClass' => 'col-md-4 col-sm-6 mb-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.invoices.total_revenue'),
-            'value' => new \Illuminate\Support\HtmlString(number_format($totalRevenue, 2) . ' ' . __('admin.units.sar')),
+            'value' => new \Illuminate\Support\HtmlString(number_format($totalRevenue, 2) . ' ' . view('components.riyal-icon')->render()),
             'icon' => 'bi bi-graph-up',
             'colClass' => 'col-md-4 col-sm-6 mb-3',
         ])

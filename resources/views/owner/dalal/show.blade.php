@@ -286,9 +286,9 @@
                     },
                     dataSrc: function (json) {
                         $('#totalSalesCount').text(json.total_sales_count);
-                        $('#totalOwnerAmount').text(json.total_owner_amount + '{{ __('owner.generated.item_93fe61') }}');
-                        $('#totalPaid').text(json.total_paid + '{{ __('owner.generated.item_93fe61') }}');
-                        $('#totalRemaining').text(json.total_remaining + '{{ __('owner.generated.item_93fe61') }}');
+                        $('#totalOwnerAmount').html(json.total_owner_amount + ' ' + @json(view('components.riyal-icon')->render()));
+                        $('#totalPaid').html(json.total_paid + ' ' + @json(view('components.riyal-icon')->render()));
+                        $('#totalRemaining').html(json.total_remaining + ' ' + @json(view('components.riyal-icon')->render()));
                         return json.data;
                     }
                 },

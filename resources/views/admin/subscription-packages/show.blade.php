@@ -56,7 +56,7 @@
                         </div>
                         <div class="col-md-6">
                             <strong>{{ __('admin.subscription_packages.original_price') }}:</strong>
-                            {{ number_format($subscriptionPackage->original_price, 2) }} {{ __('admin.units.sar') }}
+                            {{ number_format($subscriptionPackage->original_price, 2) }} <x-riyal-icon />
                         </div>
                     </div>
                     @if($subscriptionPackage->hasOfferPrice())
@@ -65,14 +65,14 @@
                             <strong>{{ __('admin.subscription_packages.offer_price') }}:</strong>
                             <span class="text-decoration-line-through text-muted me-1">{{ number_format($subscriptionPackage->original_price, 2) }}</span>
                             <span class="text-success fw-bold">{{ number_format($subscriptionPackage->price, 2) }}</span>
-                            {{ __('admin.units.sar') }}
+                            <x-riyal-icon />
                         </div>
                     </div>
                     @endif
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>{{ __('admin.subscription_packages.effective_price') }}:</strong>
-                            <span class="fw-bold">{{ number_format($subscriptionPackage->effective_price, 2) }}</span> {{ __('admin.units.sar') }}
+                            <span class="fw-bold">{{ number_format($subscriptionPackage->effective_price, 2) }}</span> <x-riyal-icon />
                         </div>
                     </div>
                     <div class="row mb-3">

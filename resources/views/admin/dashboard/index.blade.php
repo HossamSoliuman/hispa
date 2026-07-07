@@ -336,7 +336,7 @@
     <div class="row hud-row mb-4">
         @include('admin.components.hud-stat-card', [
             'title'    => __('admin.dashboard.revenue_bank_transfer'),
-            'value'    => '<span class="unit">ر.س</span> ' . number_format($revenueByBankTransfer, 0),
+            'value'    => '<span class="unit">' . view('components.riyal-icon')->render() . '</span> ' . number_format($revenueByBankTransfer, 0),
             'icon'     => 'bi bi-bank',
             'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
         ])
@@ -390,7 +390,7 @@
         ])
         @include('admin.components.hud-stat-card', [
             'title'    => __('admin.dashboard.mrr_title'),
-            'value'    => '<span class="unit">ر.س</span> ' . number_format($mrr ?? 0, 0),
+            'value'    => '<span class="unit">' . view('components.riyal-icon')->render() . '</span> ' . number_format($mrr ?? 0, 0),
             'icon'     => 'bi bi-cash-stack',
             'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
         ])

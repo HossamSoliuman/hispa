@@ -477,7 +477,7 @@
                                             <small
                                                 class="text-muted d-block">{{ __('owner.dashboard.total_label') }}</small>
                                             <div class="fw-semibold text-primary" id="catchTotal">
-                                                {{ $totalCatch >= 1000 ? number_format($totalCatch / 1000, 2) . ' ' . __('owner.units.ton') : number_format($totalCatch, 0) . ' ' . __('owner.units.kg') }}
+                                                {{ number_format($totalCatch, 0) . ' ' . __('owner.units.each') }}
                                             </div>
                                         </div>
                                     </div>
@@ -873,7 +873,7 @@
                                     </div>
                                     <div class="text-end">
                                         <div class="fw-bold small text-primary">${perc}%</div>
-                                        <div class="text-muted" style="font-size:0.7rem;">${value} {{ __('owner.units.sar') }}</div>
+                                        <div class="text-muted" style="font-size:0.7rem;">${value} ${riyalIconHtml('var(--bs-secondary)')}</div>
                                     </div>
                                 </li>
                             `;
@@ -887,14 +887,8 @@
 
                     // Update catch total if provided
                     if (res.totalCatchKg !== undefined) {
-                        let totalText = '';
-                        if (res.totalCatchKg >= 1000) {
-                            totalText = (res.totalCatchKg / 1000).toFixed(2) +
-                                ' {{ __('owner.units.ton') }}';
-                        } else {
-                            totalText = Math.round(Number(res.totalCatchKg)).toLocaleString() +
-                                ' {{ __('owner.units.kg') }}';
-                        }
+                        const totalText = Math.round(Number(res.totalCatchKg)).toLocaleString() +
+                            ' {{ __('owner.units.each') }}';
                         $('#catchTotal').text(totalText);
                     }
 
@@ -1034,7 +1028,6 @@
 
         $(document).ready(function() {
             $('#financial-tab').on('shown.bs.tab', function() {
-                const unitSar = "{{ __('owner.units.sar') }}";
                 $.ajax({
                     url: '{{ route('owner.financial.summary') }}',
                     type: 'GET',
@@ -1142,8 +1135,7 @@
                                                 return context.dataset.label +
                                                     ': ' +
                                                     Number(context.parsed.y)
-                                                    .toLocaleString() + ' ' +
-                                                    unitSar;
+                                                    .toLocaleString();
                                             }
                                         }
                                     }
@@ -1191,8 +1183,8 @@
                         trips: "{{ __('owner.dashboard.trips') }}",
                         catch: "{{ __('owner.dashboard.catch') }}",
                         revenue: "{{ __('owner.dashboard.revenue_short') }}",
-                        kg: "{{ __('owner.units.kg') }}",
-                        sar: "{{ __('owner.units.sar') }}",
+                        kg: "{{ __('owner.units.each') }}",
+                        sar: riyalIconHtml('var(--bs-info)'),
                         efficiency: "{{ __('owner.dashboard.efficiency_badge', ['value' => ':value']) }}",
                         dailyTrips: "{{ __('owner.dashboard.daily_trips_count') }}",
                         dailyCatch: "{{ __('owner.dashboard.daily_catch') }}",
@@ -1212,8 +1204,12 @@
                         res.sailors.forEach(function(sailor, index) {
                             const efficiencyColor = sailor.efficiency >= 80 ? 'success' :
                                 sailor.efficiency >= 60 ? 'warning' : 'danger';
-                            const rankBadge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ?
-                                '🥉' : '';
+                            const medals = [
+                                '<i class="bi bi-trophy-fill text-warning me-1"></i>',
+                                '<i class="bi bi-trophy-fill me-1" style="color:#adb5bd;"></i>',
+                                '<i class="bi bi-trophy-fill me-1" style="color:#cd7f32;"></i>'
+                            ];
+                            const rankBadge = medals[index] || '';
 
                             sailorsContainer.append(`
                                 <div class="card border-0 shadow-sm mb-3">
@@ -1371,8 +1367,7 @@
         let performanceComparisonChartInstance = null;
 
         $('#analytics-tab').on('shown.bs.tab', function() {
-            const unitSar = "{{ __('owner.units.sar') }}";
-            const unitKg = "{{ __('owner.units.kg') }}";
+            const unitLabel = "{{ __('owner.units.each') }}";
 
             $.ajax({
                 url: "{{ route('owner.analytics.data') }}",
@@ -1401,7 +1396,7 @@
                                         <div class="rounded" style="width: 4px; height: 40px; background: var(--bs-${color});"></div>
                                         <div>
                                             <div class="fw-semibold">${fish.fish_name}</div>
-                                            <small class="text-muted">${weight} ${unitKg}</small>
+                                            <small class="text-muted">${weight} ${unitLabel}</small>
                                         </div>
                                     </div>
                                     <div class="text-end">
@@ -1443,8 +1438,7 @@
                         data: {
                             labels: comparisonData.map(d => d.label || d.month),
                             datasets: [{
-                                    label: "{{ __('owner.dashboard.catch') }} (" + unitKg +
-                                        ")",
+                                    label: "{{ __('owner.dashboard.catch') }}",
                                     data: comparisonData.map(d => d.catch || 0),
                                     backgroundColor: 'rgba(54, 162, 235, 0.7)',
                                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -1452,8 +1446,7 @@
                                     yAxisID: 'y'
                                 },
                                 {
-                                    label: "{{ __('owner.dashboard.revenue') }} (" +
-                                        unitSar + ")",
+                                    label: "{{ __('owner.dashboard.revenue') }}",
                                     data: comparisonData.map(d => d.revenue || 0),
                                     backgroundColor: 'rgba(40, 167, 69, 0.7)',
                                     borderColor: 'rgba(40, 167, 69, 1)',

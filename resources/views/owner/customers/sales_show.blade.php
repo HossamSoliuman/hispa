@@ -151,23 +151,23 @@
                     <ul class="list-group fs-5">
                         <li class="list-group-item d-flex justify-content-between">
                             <strong>{{ __('owner.generated.total') }}</strong>
-                            <strong>{{ number_format($data->total_price{{ __('owner.generated.total_2') }}) }} {{ __('owner.units.sar') }}</strong>
+                            <strong>{{ number_format($data->total_price{{ __('owner.generated.total_2') }}) }} <x-riyal-icon /></strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <strong>{{ __('owner.generated.item_f109e1') }} ({{ $data->commission_rate }}%):</strong>
-                            <strong>{{ number_format($data->commission_amount{{ __('owner.generated.total_2') }}) }} {{ __('owner.units.sar') }}</strong>
+                            <strong>{{ number_format($data->commission_amount{{ __('owner.generated.total_2') }}) }} <x-riyal-icon /></strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <strong>{{ __('owner.generated.item_a1db64') }} ({{ $data->labor_rate }}%):</strong>
-                            <strong>{{ number_format($data->labor_amount{{ __('owner.generated.total_2') }}) }} {{ __('owner.units.sar') }}</strong>
+                            <strong>{{ number_format($data->labor_amount{{ __('owner.generated.total_2') }}) }} <x-riyal-icon /></strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <strong>{{ __('owner.generated.fisherman_net') }}</strong>
-                            <strong>{{ number_format($data->net_owner_amount{{ __('owner.generated.total_2') }}) }} {{ __('owner.units.sar') }}</strong>
+                            <strong>{{ number_format($data->net_owner_amount{{ __('owner.generated.total_2') }}) }} <x-riyal-icon /></strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <strong>{{ __('owner.generated.remaining_1') }}</strong>
-                            <strong>{{ number_format($data->remaining_total{{ __('owner.generated.total_2') }}) }} {{ __('owner.units.sar') }}</strong>
+                            <strong>{{ number_format($data->remaining_total{{ __('owner.generated.total_2') }}) }} <x-riyal-icon /></strong>
                         </li>
                     </ul>
 

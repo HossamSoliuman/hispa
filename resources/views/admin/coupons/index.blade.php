@@ -103,7 +103,7 @@
                             <td>{{ $coupon->name ?? '—' }}</td>
                             <td><code class="bg-light px-2 py-1 rounded">{{ $coupon->code }}</code></td>
                             <td>{{ $coupon->type === 'percentage' ? __('admin.coupons.percentage') : __('admin.coupons.fixed') }}</td>
-                            <td>{{ $coupon->formatted_value }}</td>
+                            <td>{!! $coupon->formatted_value !!}</td>
                             <td>{{ $coupon->usage_limit ?? __('admin.coupons.unlimited') }}</td>
                             <td>{{ $coupon->times_used }}</td>
                             <td>{{ $coupon->valid_from ? $coupon->valid_from->format('Y-m-d') : '—' }}</td>

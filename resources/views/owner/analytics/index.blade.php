@@ -360,7 +360,7 @@
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return value + '{{ __('owner.generated.item_93fe61') }}';
+                            return value;
                         }
                     }
                 }

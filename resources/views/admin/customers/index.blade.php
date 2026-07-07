@@ -46,7 +46,7 @@
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.customers.cards.total_sales'),
-            'value' => '<span id="totalSales">0</span> <span class="unit">' . __('admin.units.sar') . '</span>',
+            'value' => '<span id="totalSales">0</span> <span class="unit">' . view('components.riyal-icon')->render() . '</span>',
             'icon' => 'bi bi-cash-stack',
             'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
             'colClass' => 'col-md-3 col-sm-6 mb-3'

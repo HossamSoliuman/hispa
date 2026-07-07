@@ -140,7 +140,7 @@
                         <th>{{ __('owner.generated.grand_total') }}({{ __('owner.sales_report.kg') }})</th>
                         <th>{{ __('owner.generated.remaining_total') }}({{ __('owner.sales_report.kg') }})</th>
                         <th>{{ __('owner.generated.sold_total') }}({{ __('owner.sales_report.kg') }})</th>
-                        <th>{{ __('owner.reports.total_revenue') }}({{ __('owner.units.sar') }})</th>
+                        <th>{{ __('owner.reports.total_revenue') }}(<x-riyal-icon />)</th>
                         <th>{{ __('owner.dalal_stock_boat.table.details') }}</th>
 
 
@@ -229,7 +229,7 @@
                         setTimeout(() => {
                             $('#tripCount').text(json.trip_count);
                             $('#totalDalals').text(json.total_dalals);
-                            $('#totalRevenue').text(json.total_revenue + '{{ __('owner.generated.item_93fe61') }}');
+                            $('#totalRevenue').html(json.total_revenue + ' ' + @json(view('components.riyal-icon')->render()));
                             $('#totalWeight').text(json.total_weight + '{{ __('owner.generated.item_5a01cb') }}');
                             $('#totalRemaining').text(json.total_remaining + '{{ __('owner.generated.item_5a01cb') }}');
                             $('#totalSold').text(json.total_sold + '{{ __('owner.generated.item_5a01cb') }}');

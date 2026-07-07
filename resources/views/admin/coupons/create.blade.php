@@ -61,18 +61,18 @@
                                 <p class="text-muted small mb-2">{{ __('admin.coupons.preview_hint') }}</p>
                                 <div class="row align-items-end g-2">
                                     <div class="col-auto">
-                                        <label for="preview_amount" class="form-label small mb-0">{{ __('admin.coupons.sample_amount') }} ({{ __('admin.units.sar') }})</label>
+                                        <label for="preview_amount" class="form-label small mb-0">{{ __('admin.coupons.sample_amount') }} (<x-riyal-icon />)</label>
                                         <input type="number" id="preview_amount" class="form-control form-control-sm" value="1000" min="0" step="1" style="width: 120px;">
                                     </div>
                                     <div class="col-auto">
                                         <div class="mb-0">
                                             <span class="text-muted small">{{ __('admin.coupons.discount_amount') }}:</span>
-                                            <strong id="preview_discount" class="text-danger">0.00</strong> {{ __('admin.units.sar') }}
+                                            <strong id="preview_discount" class="text-danger">0.00</strong> <x-riyal-icon />
                                         </div>
                                     </div>
                                     <div class="col-auto">
                                         <span class="text-muted small">{{ __('admin.coupons.amount_after_discount') }}:</span>
-                                        <strong id="preview_final" class="text-success">0.00</strong> {{ __('admin.units.sar') }}
+                                        <strong id="preview_final" class="text-success">0.00</strong> <x-riyal-icon />
                                     </div>
                                 </div>
                             </div>
@@ -104,7 +104,7 @@
                             @forelse($packages as $pkg)
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="package_ids[]" id="pkg_{{ $pkg->id }}" value="{{ $pkg->id }}" {{ in_array($pkg->id, old('package_ids', [])) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="pkg_{{ $pkg->id }}">{{ $pkg->name }} ({{ number_format($pkg->effective_price, 2) }} {{ __('admin.units.sar') }})</label>
+                                    <label class="form-check-label" for="pkg_{{ $pkg->id }}">{{ $pkg->name }} ({{ number_format($pkg->effective_price, 2) }} <x-riyal-icon />)</label>
                                 </div>
                             @empty
                                 <span class="text-muted">{{ __('admin.subscription_packages.no_packages') ?? 'لا توجد باقات' }}</span>

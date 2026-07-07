@@ -128,25 +128,25 @@ class DalalDataTable extends DataTables
                 if ($weight > 0) {
                     $avgPrice = $row->total_price / $weight;
 
-                    return number_format($avgPrice, 2).' '.__('admin.units.sar').'/ '.__('admin.units.kg');
+                    return number_format($avgPrice, 2).' '.view('components.riyal-icon')->render().'/ '.__('admin.units.each');
                 }
 
                 return '---';
             })
             ->addColumn('total_price', function ($row) {
-                return '<span class="text-success fw-bold">'.number_format($row->total_price, 2).' '.__('admin.units.sar').'</span>';
+                return '<span class="text-success fw-bold">'.number_format($row->total_price, 2).' '.view('components.riyal-icon')->render().'</span>';
             })
             ->addColumn('commission_amount', function ($row) {
-                return number_format($row->commission_amount, 2).' '.__('admin.units.sar');
+                return number_format($row->commission_amount, 2).' '.view('components.riyal-icon')->render();
             })
             ->addColumn('labor_amount', function ($row) {
-                return number_format($row->labor_amount, 2).' '.__('admin.units.sar');
+                return number_format($row->labor_amount, 2).' '.view('components.riyal-icon')->render();
             })
             ->addColumn('net_owner_amount', function ($row) {
-                return number_format($row->net_owner_amount, 2).' '.__('admin.units.sar');
+                return number_format($row->net_owner_amount, 2).' '.view('components.riyal-icon')->render();
             })
             ->addColumn('remaining_total', function ($row) {
-                return number_format($row->remaining_total, 2).' '.__('admin.units.sar');
+                return number_format($row->remaining_total, 2).' '.view('components.riyal-icon')->render();
             })
             ->rawColumns([
                 'payment_method',
@@ -154,6 +154,10 @@ class DalalDataTable extends DataTables
                 'total_weight',
                 'total_price',
                 'price_per_kilo',
+                'commission_amount',
+                'labor_amount',
+                'net_owner_amount',
+                'remaining_total',
             ])
             ->make(true);
     }

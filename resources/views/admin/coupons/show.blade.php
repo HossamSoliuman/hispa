@@ -36,7 +36,7 @@
                         </tr>
                         <tr>
                             <th class="text-muted">{{ __('admin.coupons.value') }}</th>
-                            <td>{{ $coupon->formatted_value }}</td>
+                            <td>{!! $coupon->formatted_value !!}</td>
                         </tr>
                         <tr>
                             <th class="text-muted">{{ __('admin.coupons.usage_limit') }}</th>
@@ -71,14 +71,14 @@
                     <div class="card border-primary bg-light mb-3">
                         <div class="card-body py-3">
                             <h6 class="card-title text-primary mb-2">{{ __('admin.coupons.discount_preview') }}</h6>
-                            <p class="text-muted small mb-2">{{ __('admin.coupons.sample_amount') }}: 1,000 {{ __('admin.units.sar') }}</p>
+                            <p class="text-muted small mb-2">{{ __('admin.coupons.sample_amount') }}: 1,000 <x-riyal-icon /></p>
                             <p class="mb-1">
                                 <span class="text-muted">{{ __('admin.coupons.discount_amount') }}:</span>
-                                <strong class="text-danger">{{ number_format($preview['discount'], 2) }}</strong> {{ __('admin.units.sar') }}
+                                <strong class="text-danger">{{ number_format($preview['discount'], 2) }}</strong> <x-riyal-icon />
                             </p>
                             <p class="mb-0">
                                 <span class="text-muted">{{ __('admin.coupons.amount_after_discount') }}:</span>
-                                <strong class="text-success">{{ number_format($preview['final_amount'], 2) }}</strong> {{ __('admin.units.sar') }}
+                                <strong class="text-success">{{ number_format($preview['final_amount'], 2) }}</strong> <x-riyal-icon />
                             </p>
                         </div>
                     </div>

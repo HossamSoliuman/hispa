@@ -40,21 +40,21 @@
                             </tr>
                             <tr>
                                 <th>{{ __('admin.invoices.amount') }}</th>
-                                <td>{{ number_format($invoice->amount, 2) }} {{ __('admin.units.sar') }}</td>
+                                <td>{{ number_format($invoice->amount, 2) }} <x-riyal-icon /></td>
                             </tr>
                             <tr>
                                 <th>{{ __('admin.invoices.vat') }} ({{ number_format($invoice->vat_rate ?? 0, 2) }}%)</th>
-                                <td>{{ number_format($invoice->vat_amount, 2) }} {{ __('admin.units.sar') }}</td>
+                                <td>{{ number_format($invoice->vat_amount, 2) }} <x-riyal-icon /></td>
                             </tr>
                             @if(($invoice->discount_amount ?? 0) > 0)
                                 <tr>
                                     <th>{{ __('admin.invoices.discount') }}</th>
-                                    <td class="text-success">-{{ number_format($invoice->discount_amount, 2) }} {{ __('admin.units.sar') }}</td>
+                                    <td class="text-success">-{{ number_format($invoice->discount_amount, 2) }} <x-riyal-icon /></td>
                                 </tr>
                             @endif
                             <tr class="table-active">
                                 <th>{{ __('admin.invoices.total') }}</th>
-                                <td class="fw-bold">{{ number_format($invoice->total_amount, 2) }} {{ __('admin.units.sar') }}</td>
+                                <td class="fw-bold">{{ number_format($invoice->total_amount, 2) }} <x-riyal-icon /></td>
                             </tr>
                             <tr>
                                 <th>{{ __('admin.invoices.payment_method') }}</th>

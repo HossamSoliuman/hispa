@@ -172,12 +172,15 @@ trait CatchStatistics
         $weightPerTrip = $totalTrips > 0 ? round($totalWeightKg / $totalTrips, 2) : 0;
         $avgPricePerKg = $totalWeightKg > 0 ? round($totalRevenue / $totalWeightKg, 2) : 0;
 
+        $riyalIcon = view('components.riyal-icon')->render();
+        $unit = __('owner.units.each');
+
         return response()->json([
             'best_fish' => [
                 'name' => $bestFish->fish_name ?? '-',
-                'revenue' => number_format($bestFish->total_revenue ?? 0, 2).' ر.س',
+                'revenue' => number_format($bestFish->total_revenue ?? 0, 2).' '.$riyalIcon,
                 'catch_count' => $bestFish->catch_count ?? 0,
-                'weight_kg' => number_format($bestFish->total_weight_kg ?? 0, 2).' كجم',
+                'weight_kg' => number_format($bestFish->total_weight_kg ?? 0, 2).' '.$unit,
                 'performance' => $bestFish->performance ?? '-',
             ],
             'top_port' => [
@@ -196,11 +199,11 @@ trait CatchStatistics
                 'active_boats' => $activeBoatsCount,
                 'active_ports' => $activePortsCount,
                 'distinct_fish_types' => $distinctFishTypes,
-                'total_revenue' => number_format($totalRevenue, 2).' ر.س',
-                'total_weight_kg' => number_format($totalWeightKg, 2).' كجم',
-                'revenue_per_trip' => $revenuePerTrip.' ر.س / رحلة',
-                'weight_per_trip_kg' => $weightPerTrip.' كجم / رحلة',
-                'avg_price_per_kg' => $avgPricePerKg.' ر.س / كجم',
+                'total_revenue' => number_format($totalRevenue, 2).' '.$riyalIcon,
+                'total_weight_kg' => number_format($totalWeightKg, 2).' '.$unit,
+                'revenue_per_trip' => $revenuePerTrip.' '.$riyalIcon.' / رحلة',
+                'weight_per_trip_kg' => $weightPerTrip.' '.$unit.' / رحلة',
+                'avg_price_per_kg' => $avgPricePerKg.' '.$riyalIcon.' / '.$unit,
             ],
         ]);
     }
