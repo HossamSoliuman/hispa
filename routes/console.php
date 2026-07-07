@@ -11,3 +11,8 @@ Artisan::command('inspire', function () {
 Schedule::command('app:assets-depreciation-run')
     ->yearlyOn(1, 1)
     ->at('01:00');
+
+Schedule::command('db:backup')
+    ->daily()
+    ->at('02:00')
+    ->withoutOverlapping();
