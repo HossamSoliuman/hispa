@@ -26,10 +26,8 @@ use App\Http\Controllers\Owner\CategoryController;
 use App\Http\Controllers\Owner\CustomersController;
 use App\Http\Controllers\Owner\GovernorateController;
 use App\Http\Controllers\Owner\LocationController;
-use App\Http\Controllers\Owner\PageController;
 use App\Http\Controllers\Owner\PortController;
 use App\Http\Controllers\Owner\RegionController;
-use App\Http\Controllers\Owner\UserRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -106,9 +104,6 @@ Route::group([
             // Categories
             Route::resource('categories', CategoryController::class);
             Route::get('getCategoriesData', [CategoryController::class, 'getData'])->name('getCategoriesData');
-
-            // Pages
-            Route::resource('pages', PageController::class);
 
             // Owners (Fishermen) - User model with role=owner
             Route::get('owner', [OwnerController::class, 'index'])->name('owner.index');
@@ -198,8 +193,6 @@ Route::group([
             Route::resource('governorates', GovernorateController::class)->only(['store', 'update', 'destroy']);
             Route::resource('ports', PortController::class)->only(['store', 'update', 'destroy']);
 
-            // User Requests
-            Route::resource('user_request', UserRequestController::class);
         });
     });
 });

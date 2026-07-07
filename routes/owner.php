@@ -53,7 +53,6 @@ use App\Http\Controllers\Owner\SettingsController;
 use App\Http\Controllers\Owner\StockController;
 use App\Http\Controllers\Owner\TripController;
 use App\Http\Controllers\Owner\UnitController;
-use App\Http\Controllers\Owner\UserRequestController;
 use App\Http\Controllers\Owner\VendorsController;
 use App\Http\Controllers\SupportTicketController;
 use App\Models\Trip;
@@ -81,8 +80,6 @@ Route::group([
         Route::get('/financial-summary', [DashboardController::class, 'summary'])->name('financial.summary');
         Route::get('/operations/data', [DashboardController::class, 'getOperationsData'])->name('operations.data');
         Route::get('/analytics-data', [DashboardController::class, 'getAnalyticsData'])->name('analytics.data');
-        // users_Requests
-        Route::resource('/user_request', UserRequestController::class);
 
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
