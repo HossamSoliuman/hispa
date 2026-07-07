@@ -6,17 +6,35 @@ use App\Models\CatchModel;
 use App\Models\FishQuantityStock;
 use App\Models\Trip;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class CatchDataTable extends DataTables
 {
+    /**
+     * Sum weight per unit and render it as a comma-separated breakdown
+     * (e.g. "100.00 كجم، 20.00 شكه"), since weights are never converted between units.
+     */
+    private function weightBreakdown(Collection $details): string
+    {
+        $breakdown = $details
+            ->groupBy(fn ($detail) => $detail->unit->name ?: __('owner.units.kg'))
+            ->map(fn (Collection $group, $unitName) => number_format($group->sum('weight'), 2).' '.$unitName)
+            ->implode('، ');
+
+        return $breakdown ?: number_format(0, 2);
+    }
+
     public function getData(Request $request)
     {
         if ($request->ajax()) {
             $owner = auth()->user();
             $owner_id = $owner->id;
-            $trips = Trip::with('catches', 'catches.details')
+            $trips = Trip::with([
+                'catches.details.unit',
+                'sales' => fn ($q) => $q->where('seller_type', 'owner')->where('seller_id', $owner_id),
+            ])
                 ->whereNotNull('end_date')
                 ->where('owner_id', $owner_id)
                 ->when($request->filled('from_date'), fn ($q) => $q->whereDate('start_date', '>=', $request->from_date))
@@ -38,7 +56,7 @@ class CatchDataTable extends DataTables
             $trips = $trips->get();
 
             $total_trips = $trips->whereNotNull('catches')->count();
-            $total_revenue = $trips->sum(fn ($trip) => $trip->catches?->total_amount ?? 0);
+            $total_revenue = $trips->sum(fn ($trip) => $trip->sales->sum('total_price'));
             $total_weight = $trips->sum(fn ($trip) => $trip->catches?->total_weight ?? 0);
 
             $summary = [
@@ -47,6 +65,9 @@ class CatchDataTable extends DataTables
                 'total_revenue' => $total_revenue,
                 'avg_revenue_per_trip' => $total_trips > 0 ? $total_revenue / $total_trips : 0,
                 'total_weight_kg' => $total_weight,
+                'total_weight_breakdown' => $this->weightBreakdown(
+                    $trips->flatMap(fn ($trip) => $trip->catches?->details ?? collect())
+                ),
                 'avg_weight_per_trip_kg' => $total_trips > 0 ? $total_weight / $total_trips : 0,
                 'avg_price_per_kg' => $total_weight > 0 ? $total_revenue / $total_weight : 0,
             ];
@@ -55,8 +76,8 @@ class CatchDataTable extends DataTables
                 ->addIndexColumn()
                 ->addColumn('trip', fn ($row) => $row->name)
                 ->addColumn('boat', fn ($row) => $row->boat->name ?: '-')
-                ->addColumn('total_weight', fn ($row) => number_format($row->catches?->total_weight ?? 0, 2))
-                ->addColumn('total_amount', fn ($row) => number_format($row->catches?->total_amount ?? 0, 2))
+                ->addColumn('total_weight', fn ($row) => $this->weightBreakdown($row->catches?->details ?? collect()))
+                ->addColumn('total_amount', fn ($row) => number_format($row->sales->sum('total_price'), 2))
                 ->addColumn('start_date', fn ($row) => optional($row->start_date)->format('Y-m-d'))
                 ->addColumn('end_date', fn ($row) => optional($row->end_date)->format('Y-m-d'))
                 ->addColumn('action', function ($row) {

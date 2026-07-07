@@ -69,6 +69,11 @@ class Sale extends Model
         return $this->belongsTo(Trip::class)->withDefault();
     }
 
+    public function catch()
+    {
+        return $this->belongsTo(CatchModel::class, 'catch_id');
+    }
+
     public function details()
     {
         return $this->hasMany(SaleDetail::class, 'sale_id');

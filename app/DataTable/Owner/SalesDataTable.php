@@ -5,11 +5,42 @@ namespace App\DataTable\Owner;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class SalesDataTable extends DataTables
 {
+    /**
+     * Sum weight per unit and render it as a comma-separated breakdown
+     * (e.g. "100.00 كجم، 20.00 شكه"), since weights are never converted between units.
+     */
+    private function weightBreakdown(Collection $details): string
+    {
+        $breakdown = $details
+            ->groupBy(fn ($detail) => $detail->unit->name ?: __('owner.units.kg'))
+            ->map(fn (Collection $group, $unitName) => number_format($group->sum('weight'), 2).' '.$unitName)
+            ->implode('، ');
+
+        return $breakdown ?: number_format(0, 2);
+    }
+
+    /**
+     * The weight-bearing rows for a sale: its own line items when present,
+     * otherwise the linked catch's details (older/imported sales carry no line items,
+     * so their weight is taken from the catch they were sold from).
+     */
+    private function effectiveDetails(Sale $sale): Collection
+    {
+        if ($sale->details->isNotEmpty()) {
+            return $sale->details;
+        }
+
+        $catch = $sale->catch ?? $sale->trip->catches;
+
+        return $catch?->details ?? collect();
+    }
+
     public function getData(Request $request)
     {
 
@@ -21,7 +52,7 @@ class SalesDataTable extends DataTables
 
             $query = Sale::where('seller_type', 'owner')
                 ->where('seller_id', auth()->user()->getAuthIdentifier())
-                ->with(['details', 'details.unit', 'paymentMethod']);
+                ->with(['details.unit', 'paymentMethod', 'catch.details.unit', 'trip.catches.details.unit']);
 
             if (! $hasFilters) {
                 $query->whereBetween(DB::raw('DATE(sale_datetime)'), [
@@ -42,30 +73,25 @@ class SalesDataTable extends DataTables
                 $query->whereHas('details', fn ($q) => $q->where('fish_id', $request->fish_id));
             }
 
-            $countQuery = clone $query;
-
-            $totalItems = $countQuery->count();
-
-            // لجلب المجموعات بشكل منفصل
-            $totalWeight = $query->get()->flatMap->details->sum('weight');
-
             // حساب مجموع السعر
             $totalAmount = $query->sum('total_price');
 
             // جلب البيانات للـ DataTables
             $sales = $query->get();
 
-            $total_sales = $query->count();
+            $totalItems = $sales->count();
+            $total_sales = $sales->count();
 
-            $total_weight = $sales->sum(function ($sale) {
-                return $sale->details->sum('weight');
-            });
+            $allDetails = $sales->flatMap(fn (Sale $sale) => $this->effectiveDetails($sale));
+            $total_weight = $allDetails->sum('weight');
+
             $summary = [
                 'total_trips' => $total_sales,
                 'total_fish_types' => 0,
                 'total_revenue' => $totalAmount,
                 'avg_revenue_per_trip' => $total_sales > 0 ? $totalAmount / $total_sales : 0,
                 'total_weight_kg' => $total_weight,
+                'total_weight_breakdown' => $this->weightBreakdown($allDetails),
                 'avg_weight_per_trip_kg' => $total_sales > 0 ? $total_weight / $total_sales : 0,
                 'avg_price_per_kg' => $total_weight > 0 ? $totalAmount / $total_weight : 0,
             ];
@@ -113,12 +139,7 @@ class SalesDataTable extends DataTables
 
                 ->addColumn('payment_method', fn ($row) => optional($row->paymentMethod)->name)
 
-                ->addColumn('total_weight', function ($row) {
-                    return $row->details
-                        ->groupBy(fn ($d) => $d->unit->name ?: 'كغم')
-                        ->map(fn ($group, $unitName) => number_format($group->sum('weight'), 2).' '.$unitName)
-                        ->implode('، ');
-                })
+                ->addColumn('total_weight', fn ($row) => $this->weightBreakdown($this->effectiveDetails($row)))
 
                 ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')
                 ->addColumn('labor_rate', fn ($row) => $row->labor_rate.'%')
@@ -143,7 +164,7 @@ class SalesDataTable extends DataTables
                 })
                 ->with([
                     'total_items' => $totalItems,
-                    'total_weight' => round($totalWeight, 2),
+                    'total_weight' => round($total_weight, 2),
                     'total_amount' => round($totalAmount, 2),
                     'summary' => $summary,
                 ])

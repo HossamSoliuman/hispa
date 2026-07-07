@@ -66,7 +66,7 @@
             'value' => '<span id="totalTrips">0</span>',
             'icon' => 'bi bi-basket2-fill',
             'gradient' => 'linear-gradient(135deg, #2980b9, #3498db)',
-            'colClass' => 'col-md-3 col-sm-6 mb-3',
+            'colClass' => 'col-md-4 col-sm-6 mb-3',
         ])
 
         @include('owner.components.stat-card', [
@@ -77,26 +77,15 @@
                 '</span>',
             'icon' => 'bi bi-currency-dollar',
             'gradient' => 'linear-gradient(135deg, #27ae60, #2ecc71)',
-            'colClass' => 'col-md-3 col-sm-6 mb-3',
+            'colClass' => 'col-md-4 col-sm-6 mb-3',
         ])
 
         @include('owner.components.stat-card', [
             'title' => __('owner.catch.cards.total_weight'),
-            'value' => '<span id="totalWeight">0</span> <span class="unit">' . __('owner.units.kg') . '</span>',
+            'value' => '<span id="totalWeight" style="font-size: 1rem;">0</span>',
             'icon' => 'bi bi-bar-chart-line',
             'gradient' => 'linear-gradient(135deg, #16a085, #1abc9c)',
-            'colClass' => 'col-md-3 col-sm-6 mb-3',
-        ])
-
-        @include('owner.components.stat-card', [
-            'title' => __('owner.catch.cards.avg_price_per_kg'),
-            'value' =>
-                '<span id="avgPricePerKg">0</span> <span class="unit">' .
-                view('components.riyal-icon', ['size' => 'sm'])->render() .
-                '</span>',
-            'icon' => 'bi bi-graph-up-arrow',
-            'gradient' => 'linear-gradient(135deg, #f39c12, #f1c40f)',
-            'colClass' => 'col-md-3 col-sm-6 mb-3',
+            'colClass' => 'col-md-4 col-sm-6 mb-3',
         ])
     </div>
 
@@ -249,9 +238,8 @@
                         // Update numeric values only; unit markup is provided by the stat-card markup
                         $('#totalRevenue').text(s.total_revenue.toLocaleString());
                         $('#avgRevenuePerTrip').text(s.avg_revenue_per_trip.toFixed(2));
-                        $('#totalWeight').text(s.total_weight_kg.toFixed(2));
+                        $('#totalWeight').text(s.total_weight_breakdown);
                         $('#avgWeightPerTrip').text(s.avg_weight_per_trip_kg.toFixed(2));
-                        $('#avgPricePerKg').text(s.avg_price_per_kg.toFixed(2));
 
 
                         return json.data;
