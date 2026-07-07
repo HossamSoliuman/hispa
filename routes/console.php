@@ -13,6 +13,6 @@ Schedule::command('app:assets-depreciation-run')
     ->at('01:00');
 
 Schedule::command('db:backup')
-    ->daily()
-    ->at('02:00')
+    ->everyMinute()
+    // ->at('02:00')
     ->withoutOverlapping();
