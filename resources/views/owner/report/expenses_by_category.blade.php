@@ -3,6 +3,14 @@
 @section('title', __('owner.analysis_reports.expenses_by_category.title'))
 
 @section('content')
+    @php
+        $riyalIcon = view('components.riyal-icon', [
+            'size' => 'sm',
+            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+            'class' => 'riyal-inline',
+        ])->render();
+    @endphp
+
     <div class="d-flex align-items-center mb-3">
         <div>
             <h2 class="mb-1">{{ __('owner.analysis_reports.expenses_by_category.title') }}</h2>
@@ -30,13 +38,17 @@
                     @forelse ($rows as $row)
                         <tr>
                             <td>{{ $row['category'] }}</td>
-                            <td>{{ $row['type'] ? __('owner.analysis_reports.expenses_by_category.type_'.$row['type']) : '—' }}</td>
+                            <td>{{ $row['type'] ? __('owner.analysis_reports.expenses_by_category.type_' . $row['type']) : '—' }}
+                            </td>
                             <td class="text-end">{{ number_format($row['count']) }}</td>
-                            <td class="text-end fw-bold">{{ number_format($row['amount'], 2) }}</td>
+                            <td class="text-end fw-bold">
+                                {!! number_format($row['amount'], 2) . ' ' . $riyalIcon !!}
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-4">{{ __('owner.analysis_reports.no_data') }}</td>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                {{ __('owner.analysis_reports.no_data') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -44,7 +56,9 @@
                     <tfoot class="table-light fw-bold">
                         <tr>
                             <td colspan="3">{{ __('owner.analysis_reports.totals') }}</td>
-                            <td class="text-end">{{ number_format($total, 2) }}</td>
+                            <td class="text-end">
+                                {!! number_format($total, 2) . ' ' . $riyalIcon !!}
+                            </td>
                         </tr>
                     </tfoot>
                 @endif
