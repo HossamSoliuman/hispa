@@ -3,6 +3,14 @@
 @section('title', __('owner.analysis_reports.production_species.title'))
 
 @section('content')
+    @php
+        $riyalIcon = view('components.riyal-icon', [
+            'size' => 'sm',
+            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+            'class' => 'riyal-inline',
+        ])->render();
+    @endphp
+
     <div class="d-flex align-items-center mb-3">
         <div>
             <h2 class="mb-1">{{ __('owner.analysis_reports.production_species.title') }}</h2>
@@ -32,14 +40,17 @@
                     @forelse ($rows as $row)
                         <tr>
                             <td>{{ $row['fish_name'] }}</td>
-                            <td class="text-end">{{ number_format($row['caught_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
-                            <td class="text-end">{{ number_format($row['caught_value'], 2) }}</td>
-                            <td class="text-end">{{ number_format($row['sold_weight'], 2) }} {{ $row['unit_name'] ?? '' }}</td>
-                            <td class="text-end fw-bold">{{ number_format($row['sold_value'], 2) }}</td>
+                            <td class="text-end">{{ number_format($row['caught_weight'], 2) }} {{ $row['unit_name'] ?? '' }}
+                            </td>
+                            <td class="text-end">{!! number_format($row['caught_value'], 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{{ number_format($row['sold_weight'], 2) }} {{ $row['unit_name'] ?? '' }}
+                            </td>
+                            <td class="text-end fw-bold">{!! number_format($row['sold_value'], 2) . ' ' . $riyalIcon !!}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">{{ __('owner.analysis_reports.no_data') }}</td>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                {{ __('owner.analysis_reports.no_data') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
