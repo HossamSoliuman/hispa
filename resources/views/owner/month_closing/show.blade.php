@@ -3,6 +3,14 @@
 @section('title', __('owner.month_closing.report_title').' '.sprintf('%02d/%d', $closing->month, $closing->year))
 
 @section('content')
+    @php
+        $riyalIcon = view('components.riyal-icon', [
+            'size' => 'sm',
+            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+            'class' => 'riyal-inline',
+        ])->render();
+    @endphp
+
     <div class="d-flex align-items-center mb-3">
         <div>
             <h2 class="mb-1">{{ __('owner.month_closing.report_title') }} {{ sprintf('%02d/%d', $closing->month, $closing->year) }}</h2>
@@ -95,7 +103,7 @@
                     <div class="card-body text-center">
                         <div class="small text-muted mb-1">{{ __($label) }}</div>
                         <div class="h5 fw-bold text-{{ $color }} mb-0">
-                            {{ number_format($value, 2) }} <x-riyal-icon size="sm" />
+                            {!! number_format($value, 2) . ' ' . $riyalIcon !!}
                         </div>
                     </div>
                 </div>
@@ -127,10 +135,10 @@
                             <td>{{ optional($sale->sale_datetime)->format('Y-m-d') }}</td>
                             <td>{{ $sale->number }}</td>
                             <td>{{ $sale->customer_name ?: $sale->customer->name }}</td>
-                            <td class="text-end">{{ number_format((float) $sale->total_price, 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $sale->commission_amount + (float) $sale->labor_amount, 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $sale->net_owner_amount, 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $sale->remaining_total, 2) }}</td>
+                            <td class="text-end">{!! number_format((float) $sale->total_price, 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $sale->commission_amount + (float) $sale->labor_amount, 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $sale->net_owner_amount, 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $sale->remaining_total, 2) . ' ' . $riyalIcon !!}</td>
                         </tr>
                     @empty
                         <tr>
@@ -142,10 +150,10 @@
                     <tfoot>
                         <tr class="table-light fw-bold">
                             <td colspan="3">{{ __('owner.month_closing.revenue_details.total_label') }}</td>
-                            <td class="text-end">{{ number_format((float) $details['sales']->sum('total_price'), 2) }}</td>
-                            <td class="text-end">{{ number_format($details['sales']->sum(fn ($s) => (float) $s->commission_amount + (float) $s->labor_amount), 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $details['sales']->sum('net_owner_amount'), 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $details['sales']->sum('remaining_total'), 2) }}</td>
+                            <td class="text-end">{!! number_format((float) $details['sales']->sum('total_price'), 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format($details['sales']->sum(fn ($s) => (float) $s->commission_amount + (float) $s->labor_amount), 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $details['sales']->sum('net_owner_amount'), 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $details['sales']->sum('remaining_total'), 2) . ' ' . $riyalIcon !!}</td>
                         </tr>
                     </tfoot>
                 @endif
@@ -178,9 +186,9 @@
                             <td>{{ $expense->number }}</td>
                             <td>{{ $expense->category->name }}</td>
                             <td>{{ optional($expense->vendor)->name ?: '-' }}</td>
-                            <td class="text-end">{{ number_format((float) $expense->total_price, 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $expense->calculated_discount, 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $expense->final_price, 2) }}</td>
+                            <td class="text-end">{!! number_format((float) $expense->total_price, 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $expense->calculated_discount, 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $expense->final_price, 2) . ' ' . $riyalIcon !!}</td>
                         </tr>
                     @empty
                         <tr>
@@ -192,9 +200,9 @@
                     <tfoot>
                         <tr class="table-light fw-bold">
                             <td colspan="4">{{ __('owner.month_closing.expense_details.total_label') }}</td>
-                            <td class="text-end">{{ number_format((float) $details['expenses']->sum('total_price'), 2) }}</td>
-                            <td class="text-end">{{ number_format($details['expenses']->sum(fn ($e) => (float) $e->calculated_discount), 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $details['expenses']->sum('final_price'), 2) }}</td>
+                            <td class="text-end">{!! number_format((float) $details['expenses']->sum('total_price'), 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format($details['expenses']->sum(fn ($e) => (float) $e->calculated_discount), 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="text-end">{!! number_format((float) $details['expenses']->sum('final_price'), 2) . ' ' . $riyalIcon !!}</td>
                         </tr>
                     </tfoot>
                 @endif
@@ -213,7 +221,8 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">{{ __('owner.month_closing.distribution') }}</h5>
             <span class="badge bg-secondary">
-                {{ __('owner.month_closing.columns.share_value') }}: {{ number_format($closing->share_value, 2) }}
+                {{ __('owner.month_closing.columns.share_value') }}:
+                {!! number_format($closing->share_value, 2) . ' ' . $riyalIcon !!}
             </span>
         </div>
         <div class="card-body table-responsive">
@@ -237,20 +246,20 @@
                             <td>{{ $due->role }}</td>
                             <td>{{ $due->custom_share_percent !== null ? '-' : number_format($due->shares, 2) }}</td>
                             <td>{{ $due->custom_share_percent !== null ? number_format($due->custom_share_percent, 2) . '%' : '-' }}</td>
-                            <td>{{ number_format($due->due_amount, 2) }}</td>
-                            <td>{{ number_format($due->advances, 2) }}</td>
-                            <td>{{ number_format($due->paid_amount, 2) }}</td>
-                            <td class="fw-bold">{{ number_format($due->remaining, 2) }}</td>
+                            <td>{!! number_format($due->due_amount, 2) . ' ' . $riyalIcon !!}</td>
+                            <td>{!! number_format($due->advances, 2) . ' ' . $riyalIcon !!}</td>
+                            <td>{!! number_format($due->paid_amount, 2) . ' ' . $riyalIcon !!}</td>
+                            <td class="fw-bold">{!! number_format($due->remaining, 2) . ' ' . $riyalIcon !!}</td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     <tr class="table-light fw-bold">
                         <td colspan="4">{{ __('owner.month_closing.columns.shares') }}: {{ number_format($closing->total_shares, 2) }}</td>
-                        <td>{{ number_format($closing->dues->sum('due_amount'), 2) }}</td>
-                        <td>{{ number_format($closing->dues->sum('advances'), 2) }}</td>
-                        <td>{{ number_format($closing->dues->sum('paid_amount'), 2) }}</td>
-                        <td>{{ number_format($closing->dues->sum('remaining'), 2) }}</td>
+                        <td>{!! number_format($closing->dues->sum('due_amount'), 2) . ' ' . $riyalIcon !!}</td>
+                        <td>{!! number_format($closing->dues->sum('advances'), 2) . ' ' . $riyalIcon !!}</td>
+                        <td>{!! number_format($closing->dues->sum('paid_amount'), 2) . ' ' . $riyalIcon !!}</td>
+                        <td>{!! number_format($closing->dues->sum('remaining'), 2) . ' ' . $riyalIcon !!}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -284,8 +293,8 @@
                             <tr>
                                 <td>{{ __('owner.month_closing.payroll_summary.'.$label) }}</td>
                                 <td>{{ $row['paid_count'] }} / {{ $row['count'] }}</td>
-                                <td>{{ number_format($row['net_total'], 2) }} <x-riyal-icon size="sm" /></td>
-                                <td class="fw-bold">{{ number_format($row['paid_amount'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td>{!! number_format($row['net_total'], 2) . ' ' . $riyalIcon !!}</td>
+                                <td class="fw-bold">{!! number_format($row['paid_amount'], 2) . ' ' . $riyalIcon !!}</td>
                                 <td><span class="badge bg-{{ $badge }}">{{ __('owner.month_closing.payroll_summary.'.$row['status']) }}</span></td>
                                 <td>{{ optional($row['paid_at'])->format('Y-m-d') ?? '-' }}</td>
                             </tr>
