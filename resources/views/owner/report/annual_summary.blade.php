@@ -3,7 +3,15 @@
 @section('title', __('owner.annual_summary.title'))
 
 @section('content')
-    @php $monthNames = __('owner.annual_summary.months'); @endphp
+    @php
+        $monthNames = __('owner.annual_summary.months');
+
+        $riyalIcon = view('components.riyal-icon', [
+            'size' => 'sm',
+            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+            'class' => 'riyal-inline',
+        ])->render();
+    @endphp
 
     <div class="d-flex align-items-center mb-3">
         <div>
@@ -64,17 +72,19 @@
                             <tr>
                                 <td class="fw-semibold">{{ $row['year'] }}</td>
                                 <td>{{ $row['summary']['closed_count'] }} / 12</td>
-                                <td>{{ number_format($t['gross_sales'], 2) }}</td>
-                                <td class="text-danger">{{ number_format($t['total_expenses'], 2) }}</td>
+                                <td>{!! number_format($t['gross_sales'], 2) . ' ' . $riyalIcon !!}</td>
+                                <td class="text-danger">{!! number_format($t['total_expenses'], 2) . ' ' . $riyalIcon !!}</td>
                                 <td class="fw-bold {{ $t['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                    {{ number_format($t['net_profit'], 2) }}
+                                    {!! number_format($t['net_profit'], 2) . ' ' . $riyalIcon !!}
                                 </td>
-                                <td>{{ number_format($t['crew_share'], 2) }}</td>
+                                <td>{!! number_format($t['crew_share'], 2) . ' ' . $riyalIcon !!}</td>
                                 <td>
                                     @if ($t['net_profit'] >= 0)
-                                        <span class="badge bg-success-subtle text-success-emphasis">{{ __('owner.annual_summary.verdict_profit') }}</span>
+                                        <span
+                                            class="badge bg-success-subtle text-success-emphasis">{{ __('owner.annual_summary.verdict_profit') }}</span>
                                     @else
-                                        <span class="badge bg-danger-subtle text-danger-emphasis">{{ __('owner.annual_summary.verdict_loss') }}</span>
+                                        <span
+                                            class="badge bg-danger-subtle text-danger-emphasis">{{ __('owner.annual_summary.verdict_loss') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -86,7 +96,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted">{{ __('owner.annual_summary.no_closings') }}</td>
+                                <td colspan="8" class="text-center text-muted">
+                                    {{ __('owner.annual_summary.no_closings') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
