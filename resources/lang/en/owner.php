@@ -324,6 +324,15 @@ return [
         'status_in_progress' => 'In Progress',
         'status_cancelled' => 'Cancelled',
         'status_pending' => 'Pending',
+        'filters' => [
+            'title' => 'Filters',
+            'status' => 'Status',
+            'all_statuses' => 'All Statuses',
+            'from_date' => 'Departure date from',
+            'to_date' => 'Departure date to',
+            'search' => 'Search',
+            'clear' => 'Clear Filters',
+        ],
         'show' => [
             'title' => 'Trip Details',
             'breadcrumb_manage' => 'Trips Management',

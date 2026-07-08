@@ -108,6 +108,42 @@
         ])
     </div>
 
+    <!-- Filters -->
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-header">
+            <h5 class="card-title">{{ __('owner.trips.filters.title') }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end gy-2">
+                <div class="col-md-3">
+                    <label class="form-label">{{ __('owner.trips.filters.status') }}</label>
+                    <select class="form-select" id="filter_status">
+                        <option value="">{{ __('owner.trips.filters.all_statuses') }}</option>
+                        @foreach (\App\Enums\TripStatus::filterable() as $tripStatus)
+                            <option value="{{ $tripStatus->value }}"
+                                {{ (string) request('status') === (string) $tripStatus->value ? 'selected' : '' }}>
+                                {{ $tripStatus->label() }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ __('owner.trips.filters.from_date') }}</label>
+                    <input type="date" id="from_date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ __('owner.trips.filters.to_date') }}</label>
+                    <input type="date" id="to_date" class="form-control">
+                </div>
+            </div>
+            <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mt-3">
+                <button type="button" id="searchBtn" class="btn btn-success btn-sm"><i class="bi bi-search"></i>
+                    {{ __('owner.trips.filters.search') }}</button>
+                <button type="button" id="clearBtn" class="btn btn-light btn-sm"><i class="bi bi-x-circle"></i>
+                    {{ __('owner.trips.filters.clear') }}</button>
+            </div>
+        </div>
+    </div>
 
     <div class="tab-content py-4">
         <div class="tab-pane fade show active" id="allTab">
@@ -389,7 +425,9 @@
                 ajax: {
                     url: "{{ route('owner.getTripData') }}",
                     data: function(d) {
-                        d.status = '{{ request('status') }}'; // تمرير الحالة الحالية من الرابط
+                        d.status = $('#filter_status').val();
+                        d.from_date = $('#from_date').val();
+                        d.to_date = $('#to_date').val();
                     },
                     dataSrc: function(json) {
                         // ✅ عرض القيم في أي مكان خارج الجدول
@@ -452,7 +490,18 @@
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ],
             });
-            $('#from_date, #to_date').change(function() {
+            $('#searchBtn').on('click', function() {
+                table.draw();
+            });
+
+            $('#clearBtn').on('click', function() {
+                $('#filter_status').val('');
+                $('#from_date').val('');
+                $('#to_date').val('');
+                table.draw();
+            });
+
+            $('#filter_status, #from_date, #to_date').on('change', function() {
                 table.draw();
             });
         });

@@ -37,6 +37,17 @@ enum TripStatus: int
         return in_array($this, [self::Sold, self::Cancelled], true);
     }
 
+    /**
+     * Statuses selectable in list filters — the counting flow is retired
+     * and the transient Finished (waiting-for-counting) state is hidden.
+     *
+     * @return array<int, self>
+     */
+    public static function filterable(): array
+    {
+        return [self::New, self::InProgress, self::Cancelled, self::ReadyToSell, self::Sold];
+    }
+
     /** @return array<int, self> */
     public function allowedNext(): array
     {

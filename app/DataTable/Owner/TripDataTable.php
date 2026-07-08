@@ -15,20 +15,25 @@ class TripDataTable extends DataTables
         if ($request->ajax()) {
             $owner_id = auth()->id();
 
-            $boat_id = $request->boat_id;
-            if ($boat_id) {
-                $query = Trip::with(['sales', 'owner', 'boat.captain', 'catches'])
-                    ->where('owner_id', $owner_id)
-                    ->where('boat_id', $boat_id)
-                    ->orderBy('created_at', 'desc');
-            } else {
-                $query = Trip::with(['sales', 'owner', 'boat.captain', 'catches'])
-                    ->where('owner_id', $owner_id)
-                    ->orderBy('created_at', 'desc');
+            $query = Trip::with(['sales', 'owner', 'boat.captain', 'catches'])
+                ->where('owner_id', $owner_id)
+                ->orderBy('start_date', 'desc')
+                ->orderBy('id', 'desc');
+
+            if ($request->filled('boat_id')) {
+                $query->where('boat_id', $request->boat_id);
             }
 
-            if ($request->has('status') && in_array($request->status, range(1, 8))) {
+            if ($request->filled('status') && in_array((int) $request->status, range(1, 8), true)) {
                 $query->where('status', $request->status);
+            }
+
+            if ($request->filled('from_date')) {
+                $query->whereDate('start_date', '>=', $request->from_date);
+            }
+
+            if ($request->filled('to_date')) {
+                $query->whereDate('start_date', '<=', $request->to_date);
             }
 
             $data = $query->get();
