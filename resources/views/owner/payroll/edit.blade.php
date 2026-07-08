@@ -41,7 +41,8 @@
     @isset($financials)
         <div class="row g-3 mb-4">
             @php
-                $operatingExpenses = (float) ($financials['total_expenses'] ?? 0) - (float) ($financials['depreciation'] ?? 0);
+                $operatingExpenses =
+                    (float) ($financials['total_expenses'] ?? 0) - (float) ($financials['depreciation'] ?? 0);
                 $netProfit = (float) ($financials['net_profit'] ?? 0);
                 $summaryCards = [
                     ['owner.profit_loss.net_sales', $financials['net_sales'] ?? 0, 'success'],
@@ -109,8 +110,21 @@
 
                 @php
                     $looop = 0;
-                    $crewRows = ($payroll->details ?? collect())->filter(fn ($d) => $d->user && $d->user->salary_type === 'percentage' && $d->user->role !== 'captain');
-                    $captainRows = ($payroll->details ?? collect())->filter(fn ($d) => $d->user && $d->user->role === 'captain' && $d->user->salary_type === 'percentage');
+                    $crewRows = ($payroll->details ?? collect())->filter(
+                        fn($d) => $d->user && $d->user->salary_type === 'percentage' && $d->user->role !== 'captain',
+                    );
+                    $captainRows = ($payroll->details ?? collect())->filter(
+                        fn($d) => $d->user && $d->user->role === 'captain' && $d->user->salary_type === 'percentage',
+                    );
+                @endphp
+
+                @php
+                    $riyalIcon = view('components.riyal-icon', [
+                        'size' => 'sm',
+                        'style' =>
+                            'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                        'class' => 'riyal-inline',
+                    ])->render();
                 @endphp
 
                 <div class="row mb-3 mt-3 px-2">
@@ -133,16 +147,32 @@
                                 <tr data-detail-id="{{ $d->id }}">
                                     <td>
                                         {{ $d->user->name }}
-                                        <input type="hidden" name="details[{{ $looop }}][id]" value="{{ $d->id }}">
-                                        <input type="hidden" name="details[{{ $looop }}][user_id]" value="{{ $d->user_id }}">
+                                        <input type="hidden" name="details[{{ $looop }}][id]"
+                                            value="{{ $d->id }}">
+                                        <input type="hidden" name="details[{{ $looop }}][user_id]"
+                                            value="{{ $d->user_id }}">
                                         <input type="hidden" class="base" value="{{ (float) $d->base_salary }}">
                                     </td>
                                     <td>{{ $d->user->boat->name ?? '' }}</td>
-                                    <td>{{ $d->custom_share_percent > 0 ? number_format((float) $d->custom_share_percent, 2) . '%' : '-' }}</td>
-                                    <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
-                                    <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
-                                    <td><input type="number" class="form-control advances text-danger" value="{{ (float) $d->advances }}" readonly></td>
-                                    <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
+                                    <td>{{ $d->custom_share_percent > 0 ? number_format((float) $d->custom_share_percent, 2) . '%' : '-' }}
+                                    </td>
+                                    <td>
+                                        <input type="number" name="details[{{ $looop }}][increase]"
+                                            class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="details[{{ $looop }}][note]"
+                                            class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control advances text-danger"
+                                            value="{{ (float) $d->advances }}" readonly>
+                                    </td>
+                                    <td>
+                                        <span class="text-black fw-bold net_salary">
+                                            {!! number_format($d->final_salary, 2) . ' ' . $riyalIcon !!}
+                                        </span>
+                                    </td>
                                     <td class="payment-cell">
                                         @include('owner.payroll.partials.pay-cell', ['d' => $d])
                                     </td>
@@ -174,16 +204,33 @@
                                     <tr data-detail-id="{{ $d->id }}">
                                         <td>
                                             {{ $d->user->name }}
-                                            <input type="hidden" name="details[{{ $looop }}][id]" value="{{ $d->id }}">
-                                            <input type="hidden" name="details[{{ $looop }}][user_id]" value="{{ $d->user_id }}">
+                                            <input type="hidden" name="details[{{ $looop }}][id]"
+                                                value="{{ $d->id }}">
+                                            <input type="hidden" name="details[{{ $looop }}][user_id]"
+                                                value="{{ $d->user_id }}">
                                             <input type="hidden" class="base" value="{{ (float) $d->base_salary }}">
                                         </td>
                                         <td>{{ $d->user->boat->name ?? '' }}</td>
-                                        <td>{{ $d->custom_share_percent > 0 ? number_format((float) $d->custom_share_percent, 2) . '%' : '-' }}</td>
-                                        <td><input type="number" name="details[{{ $looop }}][increase]" class="form-control increase" value="{{ $d->increase }}" @readonly($d->is_paid)></td>
-                                        <td><input type="text" name="details[{{ $looop }}][note]" class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)></td>
-                                        <td><input type="number" class="form-control advances text-danger" value="{{ (float) $d->advances }}" readonly></td>
-                                        <td><span class="text-black fw-bold net_salary">{{ $d->final_salary }}</span></td>
+                                        <td>{{ $d->custom_share_percent > 0 ? number_format((float) $d->custom_share_percent, 2) . '%' : '-' }}
+                                        </td>
+                                        <td>
+                                            <input type="number" name="details[{{ $looop }}][increase]"
+                                                class="form-control increase" value="{{ $d->increase }}"
+                                                @readonly($d->is_paid)>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="details[{{ $looop }}][note]"
+                                                class="form-control note" value="{{ $d->note }}" @readonly($d->is_paid)>
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control advances text-danger"
+                                                value="{{ (float) $d->advances }}" readonly>
+                                        </td>
+                                        <td>
+                                            <span class="text-black fw-bold net_salary">
+                                                {!! number_format($d->final_salary, 2) . ' ' . $riyalIcon !!}
+                                            </span>
+                                        </td>
                                         <td class="payment-cell">
                                             @include('owner.payroll.partials.pay-cell', ['d' => $d])
                                         </td>
@@ -281,7 +328,8 @@
                         row.find('.increase, .note').prop('readonly', true);
                         row.find('.net_salary').text(res.final_salary);
                         btn.closest('.payment-cell').html(
-                            '<span class="badge bg-success">' + PAYROLL.txt.paid + '</span>' +
+                            '<span class="badge bg-success">' + PAYROLL.txt.paid +
+                            '</span>' +
                             '<div class="small text-muted">' + res.paid_at + '</div>'
                         );
                         if (window.toastr) {
@@ -291,7 +339,8 @@
                     },
                     error: function(xhr) {
                         btn.prop('disabled', false);
-                        const msg = (xhr.responseJSON && xhr.responseJSON.message) || PAYROLL.txt.error;
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) || PAYROLL
+                            .txt.error;
                         if (window.toastr) {
                             toastr.error(msg);
                         } else {
