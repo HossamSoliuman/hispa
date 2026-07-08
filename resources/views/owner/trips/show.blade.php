@@ -19,7 +19,7 @@
     @php
         $catchWeightDisplay = $financials['catch_weight_by_unit']->isNotEmpty()
             ? $financials['catch_weight_by_unit']
-                ->map(fn ($weight, $unit) => number_format(round($weight), 0) . ' ' . $unit)
+                ->map(fn($weight, $unit) => number_format(round($weight), 0) . ' ' . $unit)
                 ->implode('، ')
             : '0';
     @endphp
@@ -27,27 +27,51 @@
     {{-- Financial summary cards --}}
     <div class="row mb-3">
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.catch_weight'),
-            'value'    => $catchWeightDisplay,
-            'icon'     => 'fas fa-weight-hanging',
+            'title' => __('owner.reports.catch_weight'),
+            'value' => $catchWeightDisplay,
+            'icon' => 'fas fa-weight-hanging',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.total_income'),
-            'value'    => number_format($financials['total_income'], 2),
-            'icon'     => 'fas fa-coins',
+            'title' => __('owner.reports.total_income'),
+            'value' =>
+                number_format($financials['total_income'], 2) .
+                ' ' .
+                view('components.riyal-icon', [
+                    'size' => 'sm',
+                    'style' =>
+                        'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                    'class' => 'riyal-inline',
+                ])->render(),
+            'icon' => 'fas fa-coins',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.total_costs'),
-            'value'    => number_format($financials['total_costs'], 2),
-            'icon'     => 'fas fa-receipt',
+            'title' => __('owner.reports.total_costs'),
+            'value' =>
+                number_format($financials['total_costs'], 2) .
+                ' ' .
+                view('components.riyal-icon', [
+                    'size' => 'sm',
+                    'style' =>
+                        'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                    'class' => 'riyal-inline',
+                ])->render(),
+            'icon' => 'fas fa-receipt',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
         @include('owner.components.stat-card', [
-            'title'    => __('owner.reports.net_profit'),
-            'value'    => number_format($financials['net_profit'], 2),
-            'icon'     => 'fas fa-chart-line',
+            'title' => __('owner.reports.net_profit'),
+            'value' =>
+                number_format($financials['net_profit'], 2) .
+                ' ' .
+                view('components.riyal-icon', [
+                    'size' => 'sm',
+                    'style' =>
+                        'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                    'class' => 'riyal-inline',
+                ])->render(),
+            'icon' => 'fas fa-chart-line',
             'colClass' => 'col-6 col-lg-3 mb-3',
         ])
     </div>
@@ -64,7 +88,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    @if($data->catches && $data->catches->details->isNotEmpty())
+                    @if ($data->catches && $data->catches->details->isNotEmpty())
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered text-center mb-0">
                                 <thead class="table-light">
@@ -78,14 +102,28 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($data->catches->details as $i => $detail)
+                                    @foreach ($data->catches->details as $i => $detail)
                                         <tr>
                                             <td>{{ $i + 1 }}</td>
                                             <td>{{ $detail->fish->name ?? '---' }}</td>
                                             <td>{{ number_format($detail->weight, 2) }}</td>
                                             <td>{{ $detail->unit->name ?? '—' }}</td>
-                                            <td>{{ number_format($detail->price_per_kg, 2) }}</td>
-                                            <td>{{ number_format($detail->total_price, 2) }}</td>
+                                            <td>
+                                                {!! number_format($detail->price_per_kg, 2) .
+                                                    ' ' .
+                                                    view('components.riyal-icon', [
+                                                        'size' => 'sm',
+                                                        'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                                        'class' => 'riyal-inline',
+                                                    ])->render() !!}
+                                            </td>
+                                            <td> {!! number_format($detail->total_price, 2) .
+                                                ' ' .
+                                                view('components.riyal-icon', [
+                                                    'size' => 'sm',
+                                                    'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                                    'class' => 'riyal-inline',
+                                                ])->render() !!}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -114,7 +152,7 @@
                     <i class="fas fa-cash-register me-2"></i> {{ __('owner.reports.sales_breakdown') }}
                 </div>
                 <div class="card-body p-0">
-                    @if($data->sales->isNotEmpty())
+                    @if ($data->sales->isNotEmpty())
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered text-center mb-0">
                                 <thead class="table-light">
@@ -128,13 +166,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($data->sales as $i => $sale)
+                                    @foreach ($data->sales as $i => $sale)
                                         <tr>
                                             <td>{{ $i + 1 }}</td>
                                             <td>{{ $sale->number }}</td>
                                             <td>{{ $sale->customer_name ?? ($sale->customer->name ?? '-') }}</td>
-                                            <td>{{ $sale->sale_datetime ? $sale->sale_datetime->format('Y-m-d') : '-' }}</td>
-                                            <td>{{ number_format($sale->total_price, 2) }}</td>
+                                            <td>{{ $sale->sale_datetime ? $sale->sale_datetime->format('Y-m-d') : '-' }}
+                                            </td>
+                                            <td>{!! number_format($sale->total_price, 2) .
+                                                ' ' .
+                                                view('components.riyal-icon', [
+                                                    'size' => 'sm',
+                                                    'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                                    'class' => 'riyal-inline',
+                                                ])->render() !!}</td>
                                             <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
                                         </tr>
                                     @endforeach
@@ -165,19 +210,52 @@
                         <tbody>
                             <tr>
                                 <th class="w-50">{{ __('owner.reports.total_income') }}</th>
-                                <td>{{ number_format($financials['total_income'], 2) }}</td>
+                                <td>
+                                    {!! number_format($financials['total_income'], 2) .
+                                        ' ' .
+                                        view('components.riyal-icon', [
+                                            'size' => 'sm',
+                                            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                            'class' => 'riyal-inline',
+                                        ])->render() !!}
+                                </td>
                             </tr>
                             <tr>
                                 <th>{{ __('owner.reports.total_costs') }}</th>
-                                <td>{{ number_format($financials['total_expenses'], 2) }}</td>
+                                <td>
+                                    {!! number_format($financials['total_expenses'], 2) .
+                                        ' ' .
+                                        view('components.riyal-icon', [
+                                            'size' => 'sm',
+                                            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                            'class' => 'riyal-inline',
+                                        ])->render() !!}
+                                </td>
                             </tr>
                             <tr>
                                 <th>{{ __('owner.reports.outstanding') }}</th>
-                                <td>{{ number_format($financials['outstanding'], 2) }}</td>
+                                <td>
+                                    {!! number_format($financials['outstanding'], 2) .
+                                        ' ' .
+                                        view('components.riyal-icon', [
+                                            'size' => 'sm',
+                                            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                            'class' => 'riyal-inline',
+                                        ])->render() !!}
+
+                                </td>
                             </tr>
                             <tr class="table-success fw-bold">
                                 <th>{{ __('owner.reports.net_profit') }}</th>
-                                <td>{{ number_format($financials['net_profit'], 2) }}</td>
+                                <td>
+                                    {!! number_format($financials['net_profit'], 2) .
+                                        ' ' .
+                                        view('components.riyal-icon', [
+                                            'size' => 'sm',
+                                            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                            'class' => 'riyal-inline',
+                                        ])->render() !!}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -200,11 +278,27 @@
                         <tbody>
                             <tr>
                                 <th class="w-50">{{ __('owner.reports.owner_share') }} (50%)</th>
-                                <td>{{ number_format($financials['owner_share'], 2) }}</td>
+                                <td>
+                                    {!! number_format($financials['owner_share'], 2) .
+                                        ' ' .
+                                        view('components.riyal-icon', [
+                                            'size' => 'sm',
+                                            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                            'class' => 'riyal-inline',
+                                        ])->render() !!}
+                                </td>
                             </tr>
                             <tr>
                                 <th>{{ __('owner.reports.crew_share') }} (50%)</th>
-                                <td>{{ number_format($financials['crew_share'], 2) }}</td>
+                                <td>
+                                    {!! number_format($financials['crew_share'], 2) .
+                                        ' ' .
+                                        view('components.riyal-icon', [
+                                            'size' => 'sm',
+                                            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                            'class' => 'riyal-inline',
+                                        ])->render() !!}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -222,7 +316,14 @@
                                 <tr>
                                     <td>{{ $member['name'] }}</td>
                                     <td>{{ number_format($member['percent'], 2) }}%</td>
-                                    <td>{{ number_format($member['due'], 2) }}</td>
+                                    <td>
+                                        {!! number_format($member['due'], 2) .
+                                            ' ' .
+                                            view('components.riyal-icon', [
+                                                'size' => 'sm',
+                                                'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                                'class' => 'riyal-inline',
+                                            ])->render() !!}</td>
                                     <td></td>
                                 </tr>
                             @empty
@@ -268,7 +369,7 @@
                                     </span>
                                 </td>
                             </tr>
-                            @if($data->duration_text)
+                            @if ($data->duration_text)
                                 <tr>
                                     <th>{{ __('owner.reports.duration') }}</th>
                                     <td>{{ $data->duration_text }}</td>
@@ -276,20 +377,22 @@
                             @endif
                             @php
                                 use Illuminate\Support\Carbon;
-                                $startDate = $data->start_date ? Carbon::parse($data->start_date)->format('Y/m/d') : '--';
-                                $endDate   = $data->end_date   ? Carbon::parse($data->end_date)->format('Y/m/d')   : '--';
+                                $startDate = $data->start_date
+                                    ? Carbon::parse($data->start_date)->format('Y/m/d')
+                                    : '--';
+                                $endDate = $data->end_date ? Carbon::parse($data->end_date)->format('Y/m/d') : '--';
                             @endphp
                             <tr>
                                 <th>{{ __('owner.trips.show.date_depart_return') }}</th>
                                 <td>{{ $startDate }} — {{ $endDate }}</td>
                             </tr>
-                            @if($data->port)
+                            @if ($data->port)
                                 <tr>
                                     <th>{{ __('owner.reports.port') }}</th>
                                     <td>{{ $data->port->name }}</td>
                                 </tr>
                             @endif
-                            @if($data->governorate)
+                            @if ($data->governorate)
                                 <tr>
                                     <th>{{ __('owner.reports.governorate') }}</th>
                                     <td>{{ $data->governorate->name }}</td>
@@ -356,7 +459,8 @@
                 </div>
                 <div class="card-body d-flex align-items-center">
                     <img src="{{ asset($data->boat?->captain?->logo ?? 'assets/img/avatar.png') }}"
-                        alt="{{ __('owner.generated.item_0a9699') }}" class="rounded-circle border" width="50" height="50">
+                        alt="{{ __('owner.generated.item_0a9699') }}" class="rounded-circle border" width="50"
+                        height="50">
                     <div class="ms-3">
                         <div class="fw-bold">{{ $data->boat?->captain?->name ?? '---' }}</div>
                         <div class="text-muted small">{{ $data->boat?->captain?->phone ?? '---' }}</div>
@@ -371,7 +475,7 @@
             </div>
 
             {{-- Notes --}}
-            @if($data->notes)
+            @if ($data->notes)
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header fw-bold">
                         <i class="fas fa-sticky-note me-2"></i> {{ __('owner.trips.show.notes') }}
@@ -399,15 +503,21 @@
             let cancelReason = null;
 
             function doTransition() {
-                let postData = { _token: '{{ csrf_token() }}', to: toStatus };
-                if (cancelReason) { postData.cancel_reason = cancelReason; }
+                let postData = {
+                    _token: '{{ csrf_token() }}',
+                    to: toStatus
+                };
+                if (cancelReason) {
+                    postData.cancel_reason = cancelReason;
+                }
 
                 $.ajax({
                     url: "{{ route('owner.trips.transition', ['trip' => '__ID__']) }}".replace('__ID__', tripId),
                     type: 'POST',
                     data: postData,
                     success: function(response) {
-                        Swal.fire('{{ __('owner.swal.success_title') ?? __('owner.swal.success') }}', response.message, 'success').then(() => {
+                        Swal.fire('{{ __('owner.swal.success_title') ?? __('owner.swal.success') }}', response
+                            .message, 'success').then(() => {
                             window.location.reload();
                         });
                     },
@@ -452,7 +562,9 @@
                     confirmButtonText: '{{ __('owner.swal.confirm_yes') }}',
                     cancelButtonText: '{{ __('owner.swal.cancel') }}'
                 }).then((result) => {
-                    if (result.isConfirmed) { doTransition(); }
+                    if (result.isConfirmed) {
+                        doTransition();
+                    }
                 });
             }
         }

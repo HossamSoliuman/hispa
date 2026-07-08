@@ -439,13 +439,15 @@
                                         <div class="col-4 border-start border-end">
                                             <div class="small text-muted mb-1">{{ __('owner.dashboard.profit_label') }}
                                             </div>
-                                            <div class="fw-semibold text-info" id="kpiProfit">{!! number_format($profit, 0) .
+                                            <div class="fw-semibold text-info" id="kpiProfit">
+                                                {!! number_format($profit, 0) .
                                                 ' ' .
                                                 view('components.riyal-icon', [
                                                     'size' => 'sm',
                                                     'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
                                                     'class' => 'riyal-inline',
-                                                ])->render() !!}</div>
+                                                ])->render() !!}
+                                                </div>
                                         </div>
 
                                         <div class="col-4">
