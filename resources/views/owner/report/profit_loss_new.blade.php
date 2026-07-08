@@ -65,8 +65,14 @@
         }
 
         [data-bs-theme=dark] .stat-card,
-        [data-bs-theme=dark] .filter-card { background: var(--bs-secondary-bg); box-shadow: none; }
-        [data-bs-theme=dark] .stat-card .label { color: var(--bs-secondary-color); }
+        [data-bs-theme=dark] .filter-card {
+            background: var(--bs-secondary-bg);
+            box-shadow: none;
+        }
+
+        [data-bs-theme=dark] .stat-card .label {
+            color: var(--bs-secondary-color);
+        }
 
         .form-group label {
             font-size: 13px;
@@ -115,10 +121,15 @@
         }
 
         @media (max-width: 992px) {
-            .col-fifth { width: 33.333%; }
+            .col-fifth {
+                width: 33.333%;
+            }
         }
+
         @media (max-width: 576px) {
-            .col-fifth { width: 100%; }
+            .col-fifth {
+                width: 100%;
+            }
         }
 
         @media print {
@@ -148,14 +159,22 @@
         }
     </style>
 @endsection
-
 @section('content')
+    @php
+        $riyalIcon = view('components.riyal-icon', [
+            'size' => 'sm',
+            'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+            'class' => 'riyal-inline',
+        ])->render();
+    @endphp
+
     <div class="d-flex align-items-center mb-3 no-print">
         <div>
             <h2 class="mb-2">{{ __('owner.profit_loss.title') }}</h2>
         </div>
         <div class="ms-auto">
-            <a href="{{ route('owner.profit.loss.print', request()->all()) }}" target="_blank" class="btn btn-outline-info btn-border-radius">
+            <a href="{{ route('owner.profit.loss.print', request()->all()) }}" target="_blank"
+                class="btn btn-outline-info btn-border-radius">
                 <i class="fa fa-print me-2"></i>{{ __('owner.profit_loss.print') }}
             </a>
         </div>
@@ -204,6 +223,7 @@
             </form>
         </div>
         <hr>
+
         {{-- Summary Cards --}}
         <div id="printable-area" class="p-3">
             <div class="row">
@@ -218,8 +238,7 @@
                             <div class="stat-card revenue">
                                 <div class="label">{{ __('owner.profit_loss.total_sales') }}</div>
                                 <div class="value">
-                                    {{ number_format($f['gross_sales'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format($f['gross_sales'], 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -229,8 +248,7 @@
                             <div class="stat-card expense">
                                 <div class="label">{{ __('owner.profit_loss.total_expenses') }}</div>
                                 <div class="value">
-                                    {{ number_format($f['total_expenses'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format($f['total_expenses'], 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -240,8 +258,7 @@
                             <div class="stat-card expense">
                                 <div class="label">{{ __('owner.profit_loss.depreciation') }}</div>
                                 <div class="value">
-                                    {{ number_format($f['depreciation'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format($f['depreciation'], 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -251,8 +268,7 @@
                             <div class="stat-card profit">
                                 <div class="label">{{ __('owner.profit_loss.net_profit') }}</div>
                                 <div class="value">
-                                    {{ number_format(max((float) $f['net_profit'], 0), 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format(max((float) $f['net_profit'], 0), 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -262,8 +278,7 @@
                             <div class="stat-card loss">
                                 <div class="label">{{ __('owner.profit_loss.losses') }}</div>
                                 <div class="value">
-                                    {{ number_format(max(-(float) $f['net_profit'], 0), 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format(max(-(float) $f['net_profit'], 0), 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -271,10 +286,10 @@
                         {{-- Card 6: Owner Share --}}
                         <div class="col-md-3">
                             <div class="stat-card revenue">
-                                <div class="label">{{ __('owner.profit_loss.owner_share') }} ({{ number_format($f['owner_percent'], 0) }}%)</div>
+                                <div class="label">{{ __('owner.profit_loss.owner_share') }}
+                                    ({{ number_format($f['owner_percent'], 0) }}%)</div>
                                 <div class="value">
-                                    {{ number_format($f['owner_share'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format($f['owner_share'], 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -284,8 +299,7 @@
                             <div class="stat-card payroll">
                                 <div class="label">{{ __('owner.profit_loss.crew_share') }}</div>
                                 <div class="value">
-                                    {{ number_format($f['crew_share'], 2) }}
-                                    <span class="currency-symbol"><x-riyal-icon size="sm" /></span>
+                                    {!! number_format($f['crew_share'], 2) . ' ' . $riyalIcon !!}
                                 </div>
                             </div>
                         </div>
@@ -312,15 +326,20 @@
                                     <tr>
                                         <td>{{ $member['name'] }}</td>
                                         <td>{{ $member['role'] }}</td>
-                                        <td>{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}</td>
-                                        <td class="text-end fw-bold">{{ number_format($member['due'], 2) }}</td>
+                                        <td>{{ $member['custom_percent'] !== null ? number_format($member['custom_percent'], 2) . '%' : '-' }}
+                                        </td>
+                                        <td class="text-end fw-bold">
+                                            {!! number_format($member['due'], 2) . ' ' . $riyalIcon !!}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr class="table-light fw-bold">
                                     <td colspan="3">{{ __('owner.profit_loss.crew_share') }}</td>
-                                    <td class="text-end">{{ number_format(collect($f['crew_distribution'])->sum('due'), 2) }}</td>
+                                    <td class="text-end">
+                                        {!! number_format(collect($f['crew_distribution'])->sum('due'), 2) . ' ' . $riyalIcon !!}
+                                    </td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -329,9 +348,6 @@
             @endif
         </div>
     </div>
-
-
-
 @endsection
 
 @section('script')
