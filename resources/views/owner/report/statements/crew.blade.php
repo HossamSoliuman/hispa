@@ -39,16 +39,16 @@
     @else
         <div class="row g-3 mb-3">
             @foreach ([
-                ['label' => __('owner.payrolls.statement.total_due'), 'value' => number_format($totalDue, 2), 'color' => 'secondary'],
-                ['label' => __('owner.payrolls.statement.total_paid'), 'value' => number_format($totalPaid, 2), 'color' => 'success'],
-                ['label' => __('owner.payrolls.statement.total_unpaid'), 'value' => number_format($totalUnpaid, 2), 'color' => $totalUnpaid > 0 ? 'danger' : 'success'],
+                ['label' => __('owner.payrolls.statement.total_due'), 'value' => number_format($totalDue, 2), 'color' => 'secondary', 'money' => true],
+                ['label' => __('owner.payrolls.statement.total_paid'), 'value' => number_format($totalPaid, 2), 'color' => 'success', 'money' => true],
+                ['label' => __('owner.payrolls.statement.total_unpaid'), 'value' => number_format($totalUnpaid, 2), 'color' => $totalUnpaid > 0 ? 'danger' : 'success', 'money' => true],
                 ['label' => __('owner.payrolls.statement.months_count'), 'value' => (string) $details->count(), 'color' => 'primary'],
             ] as $card)
                 <div class="col-6 col-lg-3">
                     <div class="card shadow-sm border-0 h-100">
                         <div class="card-body">
                             <div class="text-muted small mb-1">{{ $card['label'] }}</div>
-                            <div class="h4 mb-0 text-{{ $card['color'] }}">{{ $card['value'] }}</div>
+                            <div class="h4 mb-0 text-{{ $card['color'] }}">{{ $card['value'] }}@if (!empty($card['money'])) <x-riyal-icon size="sm" />@endif</div>
                         </div>
                     </div>
                 </div>
@@ -78,9 +78,9 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ sprintf('%02d / %04d', (int) ($detail->payroll?->month ?? 0), (int) ($detail->payroll?->year ?? 0)) }}</td>
-                                <td class="text-end">{{ number_format($dueOf($detail), 2) }}</td>
-                                <td class="text-end">{{ number_format($paidOf($detail), 2) }}</td>
-                                <td class="text-end {{ $unpaidOf($detail) > 0 ? 'text-danger' : '' }}">{{ number_format($unpaidOf($detail), 2) }}</td>
+                                <td class="text-end">{{ number_format($dueOf($detail), 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($paidOf($detail), 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end {{ $unpaidOf($detail) > 0 ? 'text-danger' : '' }}">{{ number_format($unpaidOf($detail), 2) }} <x-riyal-icon size="sm" /></td>
                                 <td>{{ $detail->is_paid && $detail->paid_at ? optional($detail->paid_at)->format('Y-m-d') : '—' }}</td>
                                 <td>
                                     @if ($detail->is_paid)
@@ -98,9 +98,9 @@
                         <tfoot class="table-light fw-bold">
                             <tr>
                                 <td colspan="2">{{ __('owner.payrolls.statement.totals') }}</td>
-                                <td class="text-end">{{ number_format($totalDue, 2) }}</td>
-                                <td class="text-end">{{ number_format($totalPaid, 2) }}</td>
-                                <td class="text-end">{{ number_format($totalUnpaid, 2) }}</td>
+                                <td class="text-end">{{ number_format($totalDue, 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($totalPaid, 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($totalUnpaid, 2) }} <x-riyal-icon size="sm" /></td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>

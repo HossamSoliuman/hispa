@@ -75,7 +75,10 @@
                 </div>
                 <div class="col-md-2">
                 <div style="align-self:end; display:flex; gap:8px;">
-                    <button class="pl-btn btn btn-success sm me-2" type="submit">{{ __('owner.profit_loss.update') }}</button>                
+                    <button class="pl-btn btn btn-success sm me-2" type="submit">{{ __('owner.profit_loss.update') }}</button>
+                    <a href="{{ route('owner.fishQuntity.print', request()->all()) }}" target="_blank" class="btn btn-outline-info">
+                        <i class="bi bi-printer me-1"></i>{{ __('owner.profit_loss.print') }}
+                    </a>
                 </div>
                 </div>
                 </div>
@@ -99,13 +102,13 @@
                     @foreach($stocks as $stock)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $stock->fish->name }}</td>
+                            <td>{{ $stock->fish?->name }}</td>
                             <td>{{ number_format($stock->weight, 2) }}</td>
                             <td>{{ $stock->unit->name ?? '—' }}</td>
-                            <td>{{ number_format($stock->price_per_kg, 2) }}</td>
+                            <td>{{ number_format($stock->price_per_kg, 2) }} <x-riyal-icon size="sm" /></td>
                             @php $fish_total_price = ($stock->weight * $stock->price_per_kg); @endphp
                             @php $total_price += $fish_total_price; @endphp
-                            <td>{{ number_format($fish_total_price, 2) }}</td>
+                            <td>{{ number_format($fish_total_price, 2) }} <x-riyal-icon size="sm" /></td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -119,7 +122,7 @@
                     @endforeach
                     <tr>
                         <th colspan="2">{{ __('owner.catch.total_price') }}</th>
-                        <th colspan="4">{{ number_format($total_price, 2) }}</th>
+                        <th colspan="4">{{ number_format($total_price, 2) }} <x-riyal-icon size="sm" /></th>
                     </tr>
                     </tfoot>
                 </table>

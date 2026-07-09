@@ -29,9 +29,9 @@
                     @foreach ($assets as $row)
                         <tr>
                             <td>{{ $row['name'] }}</td>
-                            <td class="text-end">{{ number_format((float) $row['purchase_cost'], 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $row['annual'], 2) }}</td>
-                            <td class="text-end">{{ number_format((float) $row['monthly'], 2) }}</td>
+                            <td class="text-end">{{ number_format((float) $row['purchase_cost'], 2) }} <x-riyal-icon size="sm" /></td>
+                            <td class="text-end">{{ number_format((float) $row['annual'], 2) }} <x-riyal-icon size="sm" /></td>
+                            <td class="text-end">{{ number_format((float) $row['monthly'], 2) }} <x-riyal-icon size="sm" /></td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -57,19 +57,19 @@
                 <tbody>
                     <tr>
                         <td>{{ __('owner.month_closing.deferral.brought_forward') }}</td>
-                        <td class="text-end">{{ number_format($broughtForward, 2) }}</td>
+                        <td class="text-end">{{ number_format($broughtForward, 2) }} <x-riyal-icon size="sm" /></td>
                     </tr>
                     <tr>
                         <td>{{ __('owner.month_closing.deferral.own') }}</td>
-                        <td class="text-end">{{ number_format($ownTotal, 2) }}</td>
+                        <td class="text-end">{{ number_format($ownTotal, 2) }} <x-riyal-icon size="sm" /></td>
                     </tr>
                     <tr class="table-light fw-bold">
                         <td>{{ __('owner.month_closing.deferral.considered') }}</td>
-                        <td class="text-end">{{ number_format($consideredTotal, 2) }}</td>
+                        <td class="text-end">{{ number_format($consideredTotal, 2) }} <x-riyal-icon size="sm" /></td>
                     </tr>
                     <tr>
                         <td>{{ __('owner.month_closing.deferral.charged') }}</td>
-                        <td class="text-end">{{ number_format($charged, 2) }}</td>
+                        <td class="text-end">{{ number_format($charged, 2) }} <x-riyal-icon size="sm" /></td>
                     </tr>
                     <tr class="{{ $deferred > 0 ? 'table-warning' : 'table-light' }} fw-bold">
                         <td>{{ __('owner.month_closing.deferral.deferred') }}</td>

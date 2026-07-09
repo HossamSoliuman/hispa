@@ -334,6 +334,7 @@ Route::group([
         Route::delete('/month-closing/{monthClosing}', [MonthClosingController::class, 'destroy'])->name('month-closing.destroy');
 
         Route::get('/fish-quntity', [ReportsController::class, 'fishQuntity'])->name('fishQuntity');
+        Route::get('/fish-quntity/print', [ReportsController::class, 'fishQuntityPrint'])->name('fishQuntity.print');
 
         Route::resource('/crew-check', CrewCheckController::class);
         Route::resource('/financial-reports', FinancialReportsController::class);

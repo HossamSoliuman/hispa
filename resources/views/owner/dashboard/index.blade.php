@@ -454,7 +454,13 @@
                                             <div class="small text-muted mb-1">{{ __('owner.dashboard.avg_price_kg') }}
                                             </div>
                                             <div class="fw-semibold text-primary" id="kpiAvgPrice">
-                                                {{ number_format($averagePricePerKg, 2) }}</div>
+                                                {!! number_format($averagePricePerKg, 2) .
+                                                    ' ' .
+                                                    view('components.riyal-icon', [
+                                                        'size' => 'sm',
+                                                        'style' => 'width:0.9rem; height:auto; display:inline-block; vertical-align:middle; margin-left:.25rem;',
+                                                        'class' => 'riyal-inline',
+                                                    ])->render() !!}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -907,7 +913,7 @@
                             $('#kpiProfit').html(prof + ' ' + riyalIconHtml('var(--bs-success)'));
                         }
                         if (res.summary.avgPricePerKg !== undefined) {
-                            $('#kpiAvgPrice').text(Number(res.summary.avgPricePerKg).toFixed(2));
+                            $('#kpiAvgPrice').html(Number(res.summary.avgPricePerKg).toFixed(2) + ' ' + riyalIconHtml('var(--bs-primary)'));
                         }
                     }
 

@@ -28,15 +28,15 @@
         <div class="row g-3 mb-3">
             @foreach ([
                 ['label' => __('owner.customers.show.cards.orders'), 'value' => number_format($statistics['total_orders']), 'color' => 'primary'],
-                ['label' => __('owner.customers.show.cards.purchases'), 'value' => number_format($statistics['total_purchases'], 2), 'color' => 'secondary'],
-                ['label' => __('owner.customers.show.cards.paid'), 'value' => number_format($statistics['total_paid'], 2), 'color' => 'success'],
-                ['label' => __('owner.customers.show.cards.remaining'), 'value' => number_format($statistics['total_remaining'], 2), 'color' => $statistics['total_remaining'] > 0 ? 'danger' : 'success'],
+                ['label' => __('owner.customers.show.cards.purchases'), 'value' => number_format($statistics['total_purchases'], 2), 'color' => 'secondary', 'money' => true],
+                ['label' => __('owner.customers.show.cards.paid'), 'value' => number_format($statistics['total_paid'], 2), 'color' => 'success', 'money' => true],
+                ['label' => __('owner.customers.show.cards.remaining'), 'value' => number_format($statistics['total_remaining'], 2), 'color' => $statistics['total_remaining'] > 0 ? 'danger' : 'success', 'money' => true],
             ] as $card)
                 <div class="col-6 col-lg-3">
                     <div class="card shadow-sm border-0 h-100">
                         <div class="card-body">
                             <div class="text-muted small mb-1">{{ $card['label'] }}</div>
-                            <div class="h4 mb-0 text-{{ $card['color'] }}">{{ $card['value'] }}</div>
+                            <div class="h4 mb-0 text-{{ $card['color'] }}">{{ $card['value'] }}@if (!empty($card['money'])) <x-riyal-icon size="sm" />@endif</div>
                         </div>
                     </div>
                 </div>
@@ -68,9 +68,9 @@
                                 <td>{{ optional($sale->sale_datetime)->format('Y-m-d') ?? '—' }}</td>
                                 <td>{{ optional($sale->paymentMethod)->name ?: '—' }}</td>
                                 <td>{{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</td>
-                                <td class="text-end">{{ number_format($sale->total_price, 2) }}</td>
-                                <td class="text-end">{{ number_format($paid, 2) }}</td>
-                                <td class="text-end {{ $sale->remaining_total > 0 ? 'text-danger' : '' }}">{{ number_format($sale->remaining_total, 2) }}</td>
+                                <td class="text-end">{{ number_format($sale->total_price, 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($paid, 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end {{ $sale->remaining_total > 0 ? 'text-danger' : '' }}">{{ number_format($sale->remaining_total, 2) }} <x-riyal-icon size="sm" /></td>
                             </tr>
                         @empty
                             <tr><td colspan="8" class="text-center text-muted py-4">{{ __('owner.analysis_reports.no_data') }}</td></tr>
@@ -80,9 +80,9 @@
                         <tfoot class="table-light fw-bold">
                             <tr>
                                 <td colspan="5">{{ __('owner.analysis_reports.totals') }}</td>
-                                <td class="text-end">{{ number_format($statistics['total_purchases'], 2) }}</td>
-                                <td class="text-end">{{ number_format($statistics['total_paid'], 2) }}</td>
-                                <td class="text-end">{{ number_format($statistics['total_remaining'], 2) }}</td>
+                                <td class="text-end">{{ number_format($statistics['total_purchases'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($statistics['total_paid'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($statistics['total_remaining'], 2) }} <x-riyal-icon size="sm" /></td>
                             </tr>
                         </tfoot>
                     @endif

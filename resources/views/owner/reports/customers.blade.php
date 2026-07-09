@@ -38,7 +38,7 @@
     <x-report-stats :items="[
         ['label' => __('owner.customers.cards.total'), 'value' => number_format($totalCustomers)],
         ['label' => __('owner.customers.cards.active'), 'value' => number_format($activeCustomers)],
-        ['label' => __('owner.customers.cards.total_sales'), 'value' => number_format($totalRevenue, 2)],
+        ['label' => __('owner.customers.cards.total_sales'), 'value' => $totalRevenue, 'money' => true],
         ['label' => __('owner.customers.cards.total_orders'), 'value' => number_format($totalOrders)],
     ]" />
 

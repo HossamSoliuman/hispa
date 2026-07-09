@@ -139,15 +139,15 @@
                                 <tr>
                                     <td>{{ $detail->fish_name }}</td>
                                     <td>{{ $detail->weight }}</td>
-                                    <td>{{ number_format($detail->price_per_kilo, 2) }}</td>
-                                    <td>{{ number_format($detail->total_price, 2) }}</td>
+                                    <td>{{ number_format($detail->price_per_kilo, 2) }} <x-riyal-icon size="sm" /></td>
+                                    <td>{{ number_format($detail->total_price, 2) }} <x-riyal-icon size="sm" /></td>
                                 </tr>
                             @endforeach
                             </tbody>
                         </table>
                     </div>
 
-                    <h5 class="mt-4">💰 <strong>{{ __('owner.expenses.show.invoice_summary') }}</strong></h5>
+                    <h5 class="mt-4"><i class="bi bi-cash-coin me-1"></i><strong>{{ __('owner.expenses.show.invoice_summary') }}</strong></h5>
                     <ul class="list-group fs-5">
                         <li class="list-group-item d-flex justify-content-between">
                             <strong>{{ __('owner.generated.total') }}</strong>

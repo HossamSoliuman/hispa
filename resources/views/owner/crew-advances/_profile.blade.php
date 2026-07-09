@@ -9,7 +9,7 @@
             <i class="bi bi-plus-circle me-1"></i>{{ __('owner.crew_advances.add') }}
         </button>
         <span class="badge bg-dark fs-6 ms-2">
-            {{ __('owner.crew_advances.total') }}: {{ number_format($totalAdvances, 2) }}
+            {{ __('owner.crew_advances.total') }}: {{ number_format($totalAdvances, 2) }} <x-riyal-icon size="sm" />
         </span>
     </div>
     <div class="card-body p-0">
@@ -26,7 +26,7 @@
                 @forelse ($advances as $advance)
                     <tr>
                         <td>{{ optional($advance->date)->format('Y-m-d') }}</td>
-                        <td>{{ number_format($advance->amount, 2) }}</td>
+                        <td>{{ number_format($advance->amount, 2) }} <x-riyal-icon size="sm" /></td>
                         <td>{{ $advance->notes ?: '-' }}</td>
                         <td>
                             <form method="POST" action="{{ route('owner.crew-advances.destroy', $advance->id) }}"

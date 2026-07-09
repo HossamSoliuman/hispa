@@ -82,7 +82,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">{{ __('owner.month_closing.distribution') }}</h5>
             <span class="badge bg-secondary">
-                {{ __('owner.month_closing.columns.share_value') }}: {{ number_format($preview['share_value'], 2) }}
+                {{ __('owner.month_closing.columns.share_value') }}: {{ number_format($preview['share_value'], 2) }} <x-riyal-icon size="sm" />
             </span>
         </div>
         <div class="card-body table-responsive">
@@ -103,9 +103,9 @@
                             <td>{{ $due['member_name'] }}</td>
                             <td>{{ $due['role'] }}</td>
                             <td>{{ $due['custom_share_percent'] !== null ? number_format($due['custom_share_percent'], 2) . '%' : '-' }}</td>
-                            <td>{{ number_format($due['due_amount'], 2) }}</td>
-                            <td>{{ number_format($due['advances'], 2) }}</td>
-                            <td class="fw-bold">{{ number_format($due['remaining'], 2) }}</td>
+                            <td>{{ number_format($due['due_amount'], 2) }} <x-riyal-icon size="sm" /></td>
+                            <td>{{ number_format($due['advances'], 2) }} <x-riyal-icon size="sm" /></td>
+                            <td class="fw-bold">{{ number_format($due['remaining'], 2) }} <x-riyal-icon size="sm" /></td>
                         </tr>
                     @empty
                         <tr><td colspan="6" class="text-center text-muted">--</td></tr>
@@ -114,9 +114,9 @@
                 <tfoot>
                     <tr class="table-light fw-bold">
                         <td colspan="3"></td>
-                        <td>{{ number_format(collect($preview['dues'])->sum('due_amount'), 2) }}</td>
-                        <td>{{ number_format(collect($preview['dues'])->sum('advances'), 2) }}</td>
-                        <td>{{ number_format(collect($preview['dues'])->sum('remaining'), 2) }}</td>
+                        <td>{{ number_format(collect($preview['dues'])->sum('due_amount'), 2) }} <x-riyal-icon size="sm" /></td>
+                        <td>{{ number_format(collect($preview['dues'])->sum('advances'), 2) }} <x-riyal-icon size="sm" /></td>
+                        <td>{{ number_format(collect($preview['dues'])->sum('remaining'), 2) }} <x-riyal-icon size="sm" /></td>
                     </tr>
                 </tfoot>
             </table>

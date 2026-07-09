@@ -30,7 +30,7 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">{{ __('owner.vendors.cards.total_expenses') }}</div>
-                        <div class="h4 mb-0 text-secondary">{{ number_format($totalExpenses, 2) }}</div>
+                        <div class="h4 mb-0 text-secondary">{{ number_format($totalExpenses, 2) }} <x-riyal-icon size="sm" /></div>
                     </div>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">{{ __('owner.vendors.cards.pending_amount') }}</div>
-                        <div class="h4 mb-0 {{ $totalDue > 0 ? 'text-danger' : 'text-success' }}">{{ number_format($totalDue, 2) }}</div>
+                        <div class="h4 mb-0 {{ $totalDue > 0 ? 'text-danger' : 'text-success' }}">{{ number_format($totalDue, 2) }} <x-riyal-icon size="sm" /></div>
                     </div>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                                         <span class="badge bg-success">{{ ucfirst($exp->status ?? '—') }}</span>
                                     @endif
                                 </td>
-                                <td class="text-end">{{ number_format($exp->final_price ?? 0, 2) }}</td>
+                                <td class="text-end">{{ number_format($exp->final_price ?? 0, 2) }} <x-riyal-icon size="sm" /></td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="text-center text-muted py-4">{{ __('owner.analysis_reports.no_data') }}</td></tr>
@@ -80,7 +80,7 @@
                         <tfoot class="table-light fw-bold">
                             <tr>
                                 <td colspan="4">{{ __('owner.analysis_reports.totals') }}</td>
-                                <td class="text-end">{{ number_format($totalExpenses, 2) }}</td>
+                                <td class="text-end">{{ number_format($totalExpenses, 2) }} <x-riyal-icon size="sm" /></td>
                             </tr>
                         </tfoot>
                     @endif
