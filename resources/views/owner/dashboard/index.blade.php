@@ -172,11 +172,11 @@
                         {{-- header row --}}
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div class="flex-grow-1 pe-2">
-                                <div class="hud-sc-label">{{ __('owner.dashboard.active_boats') }}</div>
-                                <div class="hud-sc-value">{{ $activeBoats }}</div>
+                                <div class="hud-sc-label">{{ __('owner.dashboard.trips_this_month') }}</div>
+                                <div class="hud-sc-value">{{ $tripsThisMonth }}</div>
                             </div>
                             <div class="hud-icon-box">
-                                <i class="fas fa-ship"></i>
+                                <i class="bi bi-map"></i>
                             </div>
                         </div>
 

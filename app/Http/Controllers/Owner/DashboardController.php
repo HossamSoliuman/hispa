@@ -120,7 +120,10 @@ class DashboardController extends Controller
             ->with(['captain:id,name,boat_id', 'crews:id,name,boat_id'])
             ->orderBy('name_ar')
             ->get();
-        $activeBoats = $activeBoatsList->count();
+
+        $tripsThisMonth = Trip::where('owner_id', $ownerId)
+            ->whereBetween(DB::raw('DATE(start_date)'), [$from, $to])
+            ->count();
 
         $sailingBoatIds = Trip::where('owner_id', $ownerId)
             ->where('status', TripStatus::InProgress->value)
@@ -147,7 +150,7 @@ class DashboardController extends Controller
             'averagePricePerKg',
             'profitMargin',
             'profit',
-            'activeBoats',
+            'tripsThisMonth',
             'activeBoatsList',
             'sailingBoatIds',
             'completedTrips',

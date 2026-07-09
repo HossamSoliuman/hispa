@@ -224,7 +224,7 @@ return [
         'total_catch' => 'إجمالي المصيد',
         'kg' => 'كجم',
         'average_price_per_kg' => 'متوسط :price ر.س / كجم',
-        'active_boats' => 'القوارب النشطة',
+        'trips_this_month' => 'رحلات هذا الشهر',
         'no_active_boats' => 'لا توجد قوارب نشطة',
         'no_captain' => 'لا يوجد كابتن',
         'crew_including_captain' => 'عدد الطاقم (شامل الكابتن)',

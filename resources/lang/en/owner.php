@@ -224,7 +224,7 @@ return [
         'total_catch' => 'Total Catch',
         'kg' => 'kg',
         'average_price_per_kg' => 'Avg. :price SAR/kg',
-        'active_boats' => 'Active Boats',
+        'trips_this_month' => 'Trips This Month',
         'no_active_boats' => 'No active boats',
         'no_captain' => 'No captain',
         'crew_including_captain' => 'Crew count (including captain)',

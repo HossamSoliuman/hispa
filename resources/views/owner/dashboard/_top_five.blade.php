@@ -37,7 +37,10 @@
                 @if ($tf['is_closed'])
                     <div class="small text-muted">
                         {{ __('owner.dashboard.top_five.unpaid_dues') }}:
-                        <span class="fw-bold text-danger">{{ number_format($tf['unpaid_dues'], 0) }}</span>
+                        <span class="fw-bold text-danger">
+                            {{ number_format($tf['unpaid_dues'], 0) }}
+                            {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.65rem;height:auto;display:inline-block;'])->render() !!}
+                        </span>
                     </div>
                     <div><span class="badge bg-success-subtle text-success">{{ __('owner.dashboard.top_five.closed_badge') }}</span></div>
                 @else
@@ -60,7 +63,10 @@
                     <div class="mb-2">
                         <div class="d-flex justify-content-between small">
                             <span class="text-truncate" style="max-width:55%">{{ $boat['boat_name'] }}</span>
-                            <span class="fw-bold {{ $boat['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($boat['net_profit'], 0) }}</span>
+                            <span class="fw-bold {{ $boat['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                {{ number_format($boat['net_profit'], 0) }}
+                                {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.65rem;height:auto;display:inline-block;'])->render() !!}
+                            </span>
                         </div>
                         <div class="progress" style="height:5px;">
                             <div class="progress-bar {{ $boat['net_profit'] >= 0 ? 'bg-success' : 'bg-danger' }}"
@@ -91,6 +97,7 @@
                                     <td class="small text-muted text-truncate" style="max-width:90px">{{ $trip['boat_name'] }}</td>
                                     <td class="small text-end fw-bold {{ $trip['net_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                         {{ number_format($trip['net_profit'], 0) }}
+                                        {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.65rem;height:auto;display:inline-block;'])->render() !!}
                                     </td>
                                 </tr>
                             @endforeach
