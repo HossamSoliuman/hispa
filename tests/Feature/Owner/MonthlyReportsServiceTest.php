@@ -109,7 +109,7 @@ class MonthlyReportsServiceTest extends TestCase
     public function test_production_by_species_compares_caught_vs_sold(): void
     {
         $owner = User::factory()->create(['role' => 'owner']);
-        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'start_date' => '2026-06-05']);
+        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'start_date' => '2026-06-05', 'end_date' => '2026-06-07']);
         $fishId = $this->fish('Hamour');
 
         $catchId = DB::table('catch_models')->insertGetId([
@@ -151,10 +151,63 @@ class MonthlyReportsServiceTest extends TestCase
         $this->assertSame(7000.0, $rows[0]['sold_value']);
     }
 
+    public function test_production_by_species_sums_across_renamed_fish_snapshots(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'start_date' => '2026-06-05', 'end_date' => '2026-06-07']);
+
+        // Master fish is currently named "بياض"; older records still carry the
+        // pre-rename snapshot name "فارس".
+        $fishId = DB::table('fish')->insertGetId([
+            'name_ar' => 'بياض',
+            'name_en' => 'Bayadh',
+            'status' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $catchId = DB::table('catch_models')->insertGetId([
+            'trip_id' => $trip->id,
+            'owner_id' => $owner->id,
+            'catch_date' => '2026-06-06 08:00:00',
+            'total_weight' => 500,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('catch_details')->insert([
+            [
+                'catch_id' => $catchId,
+                'fish_id' => $fishId,
+                'fish_name' => 'فارس',
+                'weight' => 300,
+                'total_price' => 13521,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'catch_id' => $catchId,
+                'fish_id' => $fishId,
+                'fish_name' => 'بياض',
+                'weight' => 200,
+                'total_price' => 70512,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $rows = $this->service->productionBySpecies($owner->id, '2026-06-01', '2026-06-30');
+
+        // One row per fish, summed across snapshot names, shown under the current name.
+        $this->assertCount(1, $rows);
+        $this->assertSame('بياض', $rows[0]['fish_name']);
+        $this->assertSame(500.0, $rows[0]['caught_weight']);
+        $this->assertSame(84033.0, $rows[0]['caught_value']);
+    }
+
     public function test_production_by_species_excludes_deleted_fish(): void
     {
         $owner = User::factory()->create(['role' => 'owner']);
-        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'start_date' => '2026-06-05']);
+        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'start_date' => '2026-06-05', 'end_date' => '2026-06-07']);
         $fishId = $this->fish('Hamour');
 
         $catchId = DB::table('catch_models')->insertGetId([
@@ -191,6 +244,42 @@ class MonthlyReportsServiceTest extends TestCase
         $this->assertCount(1, $rows);
         $this->assertSame('Hamour', $rows[0]['fish_name']);
         $this->assertSame(100.0, $rows[0]['caught_weight']);
+    }
+
+    public function test_production_by_species_scopes_by_trip_window_not_catch_date(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $fishId = $this->fish('Hamour');
+
+        // Trip is dated in April, but the catch itself was recorded (catch_date) in June.
+        // The catch listing filters by the trip window, so this must NOT appear in a June report.
+        $trip = Trip::factory()->create([
+            'owner_id' => $owner->id,
+            'start_date' => '2026-04-02',
+            'end_date' => '2026-04-02',
+        ]);
+
+        $catchId = DB::table('catch_models')->insertGetId([
+            'trip_id' => $trip->id,
+            'owner_id' => $owner->id,
+            'catch_date' => '2026-06-15 08:00:00',
+            'total_weight' => 500,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('catch_details')->insert([
+            'catch_id' => $catchId,
+            'fish_id' => $fishId,
+            'fish_name' => 'Hamour',
+            'weight' => 500,
+            'total_price' => 84000,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $rows = $this->service->productionBySpecies($owner->id, '2026-06-01', '2026-06-30');
+
+        $this->assertSame([], $rows);
     }
 
     public function test_expenses_by_category_groups_and_sums(): void

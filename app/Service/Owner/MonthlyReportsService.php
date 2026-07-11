@@ -189,11 +189,19 @@ class MonthlyReportsService
     /**
      * Caught vs sold weight and value per fish species (and unit) for the period.
      *
+     * The period is scoped by the trip window (completed trips whose start/end
+     * fall within [$from, $to]) to stay consistent with the catch listing, and
+     * species are keyed by the stable fish_id so renames never split or drop rows.
+     *
      * @return array<int, array{fish_id: int, fish_name: string, unit_id: int|null, unit_name: string, caught_weight: float, caught_value: float, sold_weight: float, sold_value: float}>
      */
     public function productionBySpecies(int $ownerId, string $from, string $to): array
     {
-        $tripIds = Trip::where('owner_id', $ownerId)->pluck('id');
+        $tripIds = Trip::where('owner_id', $ownerId)
+            ->whereNotNull('end_date')
+            ->whereDate('start_date', '>=', $from)
+            ->whereDate('end_date', '<=', $to)
+            ->pluck('id');
         $isAr = app()->getLocale() !== 'en';
 
         $caught = DB::table('catch_details')
@@ -201,10 +209,8 @@ class MonthlyReportsService
             ->leftJoin('units', 'catch_details.unit_id', '=', 'units.id')
             ->join('fish', 'catch_details.fish_id', '=', 'fish.id')
             ->whereIn('catch_models.trip_id', $tripIds)
-            ->whereBetween(DB::raw('DATE(catch_models.catch_date)'), [$from, $to])
             ->groupBy(
                 'catch_details.fish_id',
-                'catch_details.fish_name',
                 'catch_details.unit_id',
                 'units.name_ar',
                 'units.name_en',
@@ -213,7 +219,6 @@ class MonthlyReportsService
             )
             ->select(
                 'catch_details.fish_id',
-                'catch_details.fish_name',
                 'catch_details.unit_id',
                 'units.name_ar as unit_name_ar',
                 'units.name_en as unit_name_en',
@@ -227,7 +232,7 @@ class MonthlyReportsService
         $saleIds = DB::table('sales')
             ->where('seller_type', 'owner')
             ->where('seller_id', $ownerId)
-            ->whereBetween(DB::raw('DATE(sale_datetime)'), [$from, $to])
+            ->whereIn('trip_id', $tripIds)
             ->pluck('id');
 
         $sold = DB::table('sale_details')
@@ -236,7 +241,6 @@ class MonthlyReportsService
             ->whereIn('sale_details.sale_id', $saleIds)
             ->groupBy(
                 'sale_details.fish_id',
-                'sale_details.fish_name',
                 'sale_details.unit_id',
                 'units.name_ar',
                 'units.name_en',
@@ -245,7 +249,6 @@ class MonthlyReportsService
             )
             ->select(
                 'sale_details.fish_id',
-                'sale_details.fish_name',
                 'sale_details.unit_id',
                 'units.name_ar as unit_name_ar',
                 'units.name_en as unit_name_en',
@@ -263,7 +266,7 @@ class MonthlyReportsService
                 $name = $row->fish_name_en ?: $row->fish_name_ar;
             }
 
-            return $name ?: (string) $row->fish_name;
+            return $name ?: '--';
         };
 
         $species = [];

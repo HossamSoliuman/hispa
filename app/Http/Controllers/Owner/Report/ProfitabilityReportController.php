@@ -63,7 +63,7 @@ class ProfitabilityReportController extends Controller
     public function productionBySpecies(Request $request)
     {
         [$ownerId, $from, $to] = $this->context($request);
-        $rows = $this->reports->productionBySpecies($ownerId, $from, $to);
+         $rows = $this->reports->productionBySpecies($ownerId, $from, $to);
 
         return view('owner.report.production_species', compact('from', 'to', 'rows'));
     }
