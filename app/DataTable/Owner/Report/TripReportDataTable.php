@@ -77,11 +77,12 @@ class TripReportDataTable extends DataTables
                 })
                 ->addColumn('date_count', function (Trip $trip) {
                     if ($trip->start_date && $trip->end_date) {
-                        $start = \Carbon\Carbon::parse($trip->start_date);
-                        $end = \Carbon\Carbon::parse($trip->end_date);
-                        $diff = $start->diffInDays($end); // عدد الأيام بين التاريخين
+                        $start = Carbon::parse($trip->start_date)->startOfDay();
+                        $end = Carbon::parse($trip->end_date)->startOfDay();
+                        $days = (int) abs($start->diffInDays($end)) + 1;
+                        $label = $days === 1 ? __('owner.trips.finish.day') : __('owner.trips.finish.days');
 
-                        return " ({$diff} يوم)";
+                        return "({$days} {$label})";
                     }
 
                     return '--';
