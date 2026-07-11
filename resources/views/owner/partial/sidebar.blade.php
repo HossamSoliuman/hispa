@@ -167,12 +167,10 @@
             </div>
 
             <div
-                class="menu-item has-sub {{ request()->routeIs('owner.profit.loss') ||
-                request()->routeIs('owner.month-closing.*') ||
+                class="menu-item has-sub {{ request()->routeIs('owner.month-closing.*') ||
                 request()->routeIs('owner.reports.*') ||
                 request()->routeIs('owner.fishQuntity') ||
-                request()->routeIs('owner.sales.index') ||
-                request()->routeIs('owner.customers.index')
+                request()->routeIs('owner.sales.index')
                     ? 'active'
                     : '' }}">
                 <a href="#" class="menu-link">
@@ -188,13 +186,6 @@
                         </a>
                     </div>
 
-                    <!-- {{ __('owner.generated.item_57b5f1') }} -->
-                    <div class="menu-item {{ request()->routeIs('owner.profit.loss') ? 'active' : '' }} ">
-                        <a href="{{ route('owner.profit.loss') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.menu.profit_loss') }}</span>
-                        </a>
-                    </div>
-
                     <div class="menu-item {{ request()->routeIs('owner.month-closing.*') ? 'active' : '' }} ">
                         <a href="{{ route('owner.month-closing.index') }}" class="menu-link">
                             <span class="menu-text">{{ __('owner.menu.month_closing') }}</span>
@@ -204,11 +195,6 @@
                     <div class="menu-item {{ request()->routeIs('owner.fishQuntity') ? 'active' : '' }} ">
                         <a href="{{ route('owner.fishQuntity') }}" class="menu-link">
                             <span class="menu-text">{{ __('owner.menu.fish_stock') }}</span>
-                        </a>
-                    </div>
-                    <div class="menu-item {{ request()->routeIs('owner.customers.index') ? 'active' : '' }} ">
-                        <a href="{{ route('owner.customers.index') }}" class="menu-link">
-                            <span class="menu-text">{{ __('owner.customers.reports.customers') }}</span>
                         </a>
                     </div>
                     <div class="menu-item {{ request()->routeIs('owner.sales.index') ? 'active' : '' }} ">
