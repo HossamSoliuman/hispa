@@ -3543,6 +3543,7 @@ return [
         'cancel' => 'Cancel',
         'add' => 'Add',
         'edit' => 'Edit',
+        'delete' => 'Delete project',
         'confirm_delete' => 'Are you sure you want to delete this record?',
         'confirm_delete_project' => 'This will delete the project and all of its records (partners, expenses, contributions, loans). Are you sure?',
         'name' => 'Project name',

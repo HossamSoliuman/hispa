@@ -5,10 +5,6 @@
 @section('content')
 @php
     $moneyColumns = ['amount', 'required', 'paid', 'balance', 'principal', 'remaining', 'installment'];
-    $centerColumns = ['date', 'share', 'status'];
-    $alignFor = fn (string $column): string => in_array($column, $moneyColumns, true)
-        ? 'text-end'
-        : (in_array($column, $centerColumns, true) ? 'text-center' : '');
     $query = array_filter(request()->only([
         'from',
         'to',
@@ -148,11 +144,11 @@
 
 <div class="card border-0 shadow-sm">
     <div class="table-responsive">
-        <table class="table table-bordered table-sm align-middle mb-0">
+        <table class="table table-bordered table-sm align-middle text-center mb-0">
             <thead class="table-light">
                 <tr>
                     @foreach($columns as $column)
-                        <th class="{{ $alignFor($column) }}">{{ __('owner.startup.columns.'.$column) }}</th>
+                        <th>{{ __('owner.startup.columns.'.$column) }}</th>
                     @endforeach
                 </tr>
             </thead>
@@ -160,7 +156,7 @@
                 @forelse($rows as $row)
                     <tr>
                         @foreach($columns as $column)
-                            <td class="{{ $alignFor($column) }}">
+                            <td>
                                 @if($column === 'invoice' && filter_var($row[$column] ?? null, FILTER_VALIDATE_URL))
                                     <a href="{{ $row[$column] }}" target="_blank" rel="noopener">{{ __('owner.startup.view_attachment') }}</a>
                                 @elseif(in_array($column, $moneyColumns, true) && ($row[$column] ?? '') !== '')
@@ -179,7 +175,7 @@
                 <tfoot class="table-light fw-semibold">
                     <tr>
                         @foreach($columns as $column)
-                            <td class="{{ $alignFor($column) }}">
+                            <td>
                                 @if(in_array($column, $moneyColumns, true) && ($totals[$column] ?? '') !== '')
                                     {{ number_format((float) $totals[$column], 2) }} <x-riyal-icon size="sm" />
                                 @else
