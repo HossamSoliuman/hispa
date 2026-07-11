@@ -151,6 +151,48 @@ class MonthlyReportsServiceTest extends TestCase
         $this->assertSame(7000.0, $rows[0]['sold_value']);
     }
 
+    public function test_production_by_species_excludes_deleted_fish(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $trip = Trip::factory()->create(['owner_id' => $owner->id, 'start_date' => '2026-06-05']);
+        $fishId = $this->fish('Hamour');
+
+        $catchId = DB::table('catch_models')->insertGetId([
+            'trip_id' => $trip->id,
+            'owner_id' => $owner->id,
+            'catch_date' => '2026-06-06 08:00:00',
+            'total_weight' => 150,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('catch_details')->insert([
+            [
+                'catch_id' => $catchId,
+                'fish_id' => $fishId,
+                'fish_name' => 'Hamour',
+                'weight' => 100,
+                'total_price' => 8000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'catch_id' => $catchId,
+                'fish_id' => 999999,
+                'fish_name' => 'بياض',
+                'weight' => 500,
+                'total_price' => 84000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $rows = $this->service->productionBySpecies($owner->id, '2026-06-01', '2026-06-30');
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('Hamour', $rows[0]['fish_name']);
+        $this->assertSame(100.0, $rows[0]['caught_weight']);
+    }
+
     public function test_expenses_by_category_groups_and_sums(): void
     {
         $owner = User::factory()->create(['role' => 'owner']);

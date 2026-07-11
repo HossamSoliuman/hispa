@@ -199,7 +199,7 @@ class MonthlyReportsService
         $caught = DB::table('catch_details')
             ->join('catch_models', 'catch_details.catch_id', '=', 'catch_models.id')
             ->leftJoin('units', 'catch_details.unit_id', '=', 'units.id')
-            ->leftJoin('fish', 'catch_details.fish_id', '=', 'fish.id')
+            ->join('fish', 'catch_details.fish_id', '=', 'fish.id')
             ->whereIn('catch_models.trip_id', $tripIds)
             ->whereBetween(DB::raw('DATE(catch_models.catch_date)'), [$from, $to])
             ->groupBy(
@@ -232,7 +232,7 @@ class MonthlyReportsService
 
         $sold = DB::table('sale_details')
             ->leftJoin('units', 'sale_details.unit_id', '=', 'units.id')
-            ->leftJoin('fish', 'sale_details.fish_id', '=', 'fish.id')
+            ->join('fish', 'sale_details.fish_id', '=', 'fish.id')
             ->whereIn('sale_details.sale_id', $saleIds)
             ->groupBy(
                 'sale_details.fish_id',
