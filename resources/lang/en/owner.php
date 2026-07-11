@@ -916,6 +916,7 @@ return [
             'status' => 'Status',
             'actions' => 'Actions',
             'description' => 'Description',
+            'category' => 'Category',
             'trip' => 'Trip',
             'amount' => 'Amount',
             'date' => 'Date',

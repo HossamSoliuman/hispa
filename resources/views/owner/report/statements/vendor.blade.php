@@ -51,7 +51,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>{{ __('owner.vendors.table.description') }}</th>
+                            <th>{{ __('owner.vendors.table.category') }}</th>
                             <th>{{ __('owner.vendors.table.trip') }}</th>
                             <th>{{ __('owner.vendors.table.date') }}</th>
                             <th>{{ __('owner.vendors.table.status') }}</th>
@@ -62,7 +62,7 @@
                         @forelse ($expenses as $exp)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $exp->notes ?: ($exp->category?->name ?: '—') }}</td>
+                                <td>{{ $exp->category?->name ?: '—' }}</td>
                                 <td>{{ $exp->trip?->name ?: '—' }}</td>
                                 <td>{{ optional($exp->created_at)->format('Y-m-d') ?? '—' }}</td>
                                 <td>

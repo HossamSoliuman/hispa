@@ -34,7 +34,7 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>{{ __('owner.vendors.table.description') ?? 'Description' }}</th>
+                <th>{{ __('owner.vendors.table.category') ?? 'Category' }}</th>
                 <th>{{ __('owner.vendors.table.trip') ?? 'Trip' }}</th>
                 <th>{{ __('owner.vendors.table.amount') ?? 'Amount' }}</th>
                 <th>{{ __('owner.vendors.table.status') ?? 'Status' }}</th>
@@ -45,7 +45,7 @@
             @forelse($expenses as $exp)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $exp->notes ?: ($exp->category?->name ?: '-') }}</td>
+                <td>{{ $exp->category?->name ?: '-' }}</td>
                 <td>{{ $exp->trip?->name ?: '-' }}</td>
                 <td>{{ number_format($exp->final_price ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
                 <td>{{ ucfirst($exp->status ?? '-') }}</td>
