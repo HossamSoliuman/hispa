@@ -235,6 +235,16 @@
                 </div>
             </div> --}}
 
+            @if(auth('owner')->user()?->hasBusinessStartupAccess())
+                <div class="menu-item has-sub {{ request()->routeIs('owner.startup.*') ? 'active' : '' }}">
+                    <a href="#" class="menu-link"><span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span><span class="menu-text">{{ __('owner.startup.menu.title') }}</span><span class="menu-caret"><b class="caret"></b></span></a>
+                    <div class="menu-submenu">
+                        <div class="menu-item {{ request()->routeIs('owner.startup.projects.*') ? 'active' : '' }}"><a class="menu-link" href="{{ route('owner.startup.projects.index') }}"><span class="menu-text">{{ __('owner.startup.menu.projects') }}</span></a></div>
+                        <div class="menu-item {{ request()->routeIs('owner.startup.categories.*') ? 'active' : '' }}"><a class="menu-link" href="{{ route('owner.startup.categories.index') }}"><span class="menu-text">{{ __('owner.startup.menu.categories') }}</span></a></div>
+                    </div>
+                </div>
+            @endif
+
             <div class="menu-item {{ request()->routeIs('owner.settings.index') ? 'active' : '' }}">
                 <a href="{{ route('owner.settings.index') }}" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-gear-fill"></i></span>

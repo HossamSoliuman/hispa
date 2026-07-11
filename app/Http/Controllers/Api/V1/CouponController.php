@@ -19,7 +19,7 @@ class CouponController extends Controller
      * POST /api/v1/validate-coupon
      * Body: code (required), package_id (optional), amount (optional - uses package price if package_id provided)
      */
-    public function validate(Request $request): JsonResponse
+    public function validateCoupon(Request $request): JsonResponse
     {
         $request->validate([
             'code' => 'required|string|max:64',
@@ -45,7 +45,7 @@ class CouponController extends Controller
 
         $result = $this->couponService->validate($code, (float) $amount, $packageId);
 
-        if (!$result['valid']) {
+        if (! $result['valid']) {
             return response()->json([
                 'valid' => false,
                 'message' => $result['message'] ?? __('admin.coupons.not_found_or_expired'),

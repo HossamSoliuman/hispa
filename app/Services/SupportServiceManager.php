@@ -18,7 +18,7 @@ class SupportServiceManager
         // attempt to load the DB-configured service (first record)
         try {
             $this->serviceModel = SupportService::orderBy('id')->first();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // DB may not be available during some console commands; ignore
             $this->serviceModel = null;
         }

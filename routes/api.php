@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Auth\ForgetPasswordController;
 use App\Http\Controllers\Api\V1\Auth\VerificationPhoneController;
 use App\Http\Controllers\Api\V1\Captain\FishStockController;
 use App\Http\Controllers\Api\V1\ContactController;
+use App\Http\Controllers\Api\V1\CouponController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\Dalal\DalalSaleController;
 use App\Http\Controllers\Api\V1\Dalal\DalalStockController;
@@ -17,7 +18,6 @@ use App\Http\Controllers\Api\V1\Owner\SaleController;
 use App\Http\Controllers\Api\V1\PageController;
 use App\Http\Controllers\Api\V1\PaymentMethods;
 use App\Http\Controllers\Api\V1\ProfileController;
-use App\Http\Controllers\Api\V1\CouponController;
 use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\TripController;
 use Illuminate\Http\Request;
@@ -125,7 +125,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'lang'], function () {
     });
 
     // validate coupon (for subscription checkout - public)
-    Route::post('validate-coupon', [CouponController::class, 'validate'])->name('coupon.validate');
+    Route::post('validate-coupon', [CouponController::class, 'validateCoupon'])->name('coupon.validate');
 
     // general settings
     Route::get('settings', [SettingController::class, 'index'])->name('general.settings');

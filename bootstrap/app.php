@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\BusinessStartupAccess;
 use App\Http\Middleware\CaptainRole;
 use App\Http\Middleware\CheckOwnerAndActive;
 use App\Http\Middleware\DalalRole;
@@ -48,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => Authenticate::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
+            'business-startup' => BusinessStartupAccess::class,
 
         ]);
         // Configure guest redirects for admin

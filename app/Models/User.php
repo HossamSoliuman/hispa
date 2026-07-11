@@ -373,6 +373,11 @@ class User extends Authenticatable
         return $this->boatsUsed() < $this->boatLimit();
     }
 
+    public function hasBusinessStartupAccess(): bool
+    {
+        return $this->role === 'owner';
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);

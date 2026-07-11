@@ -408,5 +408,28 @@ Route::group([
         Route::get('/regions/print', [RegionController::class, 'print'])->name('regions.print');
         Route::resource('/regions', RegionController::class);
         Route::resource('/boat-types', BoatTypeController::class)->only(['store', 'update', 'destroy']);
+
+        Route::prefix('startup')->as('startup.')->middleware('business-startup')->group(function () {
+            Route::resource('projects', \App\Http\Controllers\Owner\Startup\ProjectController::class);
+            Route::resource('projects.partners', \App\Http\Controllers\Owner\Startup\PartnerController::class)->shallow()->except(['index', 'show', 'create']);
+            Route::resource('projects.expenses', \App\Http\Controllers\Owner\Startup\ExpenseController::class)->shallow()->except('show');
+            Route::resource('projects.contributions', \App\Http\Controllers\Owner\Startup\ContributionController::class)->shallow()->except(['index', 'show', 'create']);
+            Route::resource('projects.loans', \App\Http\Controllers\Owner\Startup\LoanController::class)->shallow()->except('show');
+            Route::post('loans/{loan}/payments', [\App\Http\Controllers\Owner\Startup\LoanPaymentController::class, 'store'])->name('loans.payments.store');
+            Route::delete('loan-payments/{payment}', [\App\Http\Controllers\Owner\Startup\LoanPaymentController::class, 'destroy'])->name('loans.payments.destroy');
+            Route::resource('categories', \App\Http\Controllers\Owner\Startup\ExpenseCategoryController::class)->except('show');
+            Route::prefix('projects/{project}/reports')->as('reports.')->controller(\App\Http\Controllers\Owner\Startup\ReportController::class)->group(function () {
+                Route::get('expenses', 'expenses')->name('expenses');
+                Route::get('partners', 'partners')->name('partners');
+                Route::get('loans', 'loans')->name('loans');
+                Route::get('partner-statement', 'partnerStatement')->name('partner-statement');
+                Route::get('print/summary', 'printSummary')->name('print.summary');
+                Route::get('print/expenses', 'printExpenses')->name('print.expenses');
+                Route::get('print/partners', 'printPartners')->name('print.partners');
+                Route::get('print/loans', 'printLoans')->name('print.loans');
+                Route::get('print/partner-statement', 'printPartnerStatement')->name('print.partner-statement');
+                Route::get('excel/{report}', 'excel')->name('excel');
+            });
+        });
     });
 });
