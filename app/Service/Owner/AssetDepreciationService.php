@@ -150,6 +150,79 @@ class AssetDepreciationService
     }
 
     /**
+     * Snapshot register of the owner's assets with each asset's straight-line
+     * depreciation position as of today: the monthly charge, accumulated
+     * depreciation to date and the remaining net book value (cost less
+     * accumulated depreciation). Unlike {@see forYear()} this lists assets of
+     * every status so it doubles as a full inventory of what the owner owns.
+     *
+     * @return array{
+     *     assets: array<int, array{id: int, name: string, type: string, boat: string|null, purchase_date: string|null, purchase_cost: float, salvage_value: float, useful_life_years: int, monthly: float, months_paid: int, total_months: int, accumulated: float, book_value: float, status: string}>,
+     *     totals: array{count: int, cost: float, salvage: float, accumulated: float, book_value: float}
+     * }
+     */
+    public function register(int $ownerId, ?int $boatId = null, ?string $type = null): array
+    {
+        $query = Asset::where('owner_id', $ownerId)->with('boat');
+
+        if ($boatId !== null) {
+            $query->where('boat_id', $boatId);
+        }
+
+        if ($type !== null) {
+            $query->where('asset_type', $type);
+        }
+
+        $assets = [];
+        $totals = ['count' => 0, 'cost' => 0.0, 'salvage' => 0.0, 'accumulated' => 0.0, 'book_value' => 0.0];
+
+        foreach ($query->orderBy('asset_type')->orderBy('purchase_date')->get() as $asset) {
+            $cost = round((float) $asset->purchase_cost, 2);
+            $salvage = round((float) $asset->salvage_value, 2);
+            $monthly = round($this->monthlyAmount($asset), 2);
+
+            [$totalMonths, $monthsPaid] = $this->lifetimeProgress($asset);
+
+            $accumulated = round($monthly * $monthsPaid, 2);
+            $bookValue = round($cost - $accumulated, 2);
+
+            $assets[] = [
+                'id' => (int) $asset->id,
+                'name' => (string) $asset->name,
+                'type' => (string) $asset->asset_type,
+                'boat' => $asset->boat?->name,
+                'purchase_date' => $asset->purchase_date ? Carbon::parse($asset->purchase_date)->format('Y-m-d') : null,
+                'purchase_cost' => $cost,
+                'salvage_value' => $salvage,
+                'useful_life_years' => (int) $asset->useful_life_years,
+                'monthly' => $monthly,
+                'months_paid' => $monthsPaid,
+                'total_months' => $totalMonths,
+                'accumulated' => $accumulated,
+                'book_value' => $bookValue,
+                'status' => (string) $asset->status,
+            ];
+
+            $totals['count']++;
+            $totals['cost'] += $cost;
+            $totals['salvage'] += $salvage;
+            $totals['accumulated'] += $accumulated;
+            $totals['book_value'] += $bookValue;
+        }
+
+        return [
+            'assets' => $assets,
+            'totals' => [
+                'count' => $totals['count'],
+                'cost' => round($totals['cost'], 2),
+                'salvage' => round($totals['salvage'], 2),
+                'accumulated' => round($totals['accumulated'], 2),
+                'book_value' => round($totals['book_value'], 2),
+            ],
+        ];
+    }
+
+    /**
      * Lifetime depreciation progress for an asset as of the current month:
      * total useful-life months, months already depreciated (from the purchase
      * month, inclusive, capped at the useful life) and months remaining.

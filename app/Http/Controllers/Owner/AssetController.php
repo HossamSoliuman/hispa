@@ -188,6 +188,43 @@ class AssetController extends Controller
         return pdf_report(view('owner.assets.depreciation_print', compact('schedule', 'year', 'settings')), [], $filename);
     }
 
+    public function register(Request $request)
+    {
+        $ownerId = $this->ownerId();
+        $filters = $this->registerFilters($request);
+
+        $register = $this->depreciation->register($ownerId, $filters['boat_id'], $filters['type']);
+        $boats = Boat::where('owner_id', $ownerId)->orderBy('name')->get();
+
+        return view('owner.assets.register', compact('register', 'boats', 'filters'));
+    }
+
+    public function registerPrint(Request $request)
+    {
+        $ownerId = $this->ownerId();
+        $filters = $this->registerFilters($request);
+
+        $register = $this->depreciation->register($ownerId, $filters['boat_id'], $filters['type']);
+        $settings = $this->reportSettings();
+
+        $filename = 'assets-register-'.now()->format('Y-m-d').'.pdf';
+
+        return pdf_report(view('owner.assets.register_print', compact('register', 'settings', 'filters')), [], $filename);
+    }
+
+    /**
+     * @return array{boat_id: int|null, type: string|null}
+     */
+    private function registerFilters(Request $request): array
+    {
+        $type = $request->input('type');
+        $type = in_array($type, ['boat', 'fishing_equipment', 'other'], true) ? $type : null;
+
+        $boatId = $request->filled('boat_id') ? (int) $request->input('boat_id') : null;
+
+        return ['boat_id' => $boatId, 'type' => $type];
+    }
+
     /**
      * Month-by-month straight-line depreciation for the owner's assets in a
      * year, with a running accumulated total and a per-asset breakdown.

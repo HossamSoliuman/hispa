@@ -59,6 +59,15 @@
                     ['owner.fishQuntity', __('owner.menu.fish_quantity')],
                 ],
             ],
+            [
+                'title' => __('owner.analysis_reports.group_assets'),
+                'icon' => 'bi-box-seam',
+                'color' => 'danger',
+                'items' => [
+                    ['owner.assets.register', __('owner.analysis_reports.assets_register.menu_title')],
+                    ['owner.assets.index', __('owner.assets.depreciation_schedule.title')],
+                ],
+            ],
         ];
     @endphp
 
