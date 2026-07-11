@@ -35,6 +35,7 @@
             <tr>
                 <th>#</th>
                 <th>{{ __('owner.vendors.table.description') ?? 'Description' }}</th>
+                <th>{{ __('owner.vendors.table.trip') ?? 'Trip' }}</th>
                 <th>{{ __('owner.vendors.table.amount') ?? 'Amount' }}</th>
                 <th>{{ __('owner.vendors.table.status') ?? 'Status' }}</th>
                 <th>{{ __('owner.vendors.table.date') ?? 'Date' }}</th>
@@ -45,13 +46,14 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $exp->notes ?: ($exp->category?->name ?: '-') }}</td>
+                <td>{{ $exp->trip?->name ?: '-' }}</td>
                 <td>{{ number_format($exp->final_price ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
                 <td>{{ ucfirst($exp->status ?? '-') }}</td>
                 <td>{{ optional($exp->created_at)->format('Y-m-d') }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="text-center">{{ __('owner.reports.no_data_found') }}</td>
+                <td colspan="6" class="text-center">{{ __('owner.reports.no_data_found') }}</td>
             </tr>
             @endforelse
         </tbody>

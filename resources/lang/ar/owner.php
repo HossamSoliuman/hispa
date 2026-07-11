@@ -916,6 +916,7 @@ return [
             'status' => 'الحالة',
             'actions' => 'الإجراءات',
             'description' => 'الوصف',
+            'trip' => 'الرحلة',
             'amount' => 'المبلغ',
             'date' => 'التاريخ',
         ],

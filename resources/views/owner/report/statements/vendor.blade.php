@@ -52,6 +52,7 @@
                         <tr>
                             <th>#</th>
                             <th>{{ __('owner.vendors.table.description') }}</th>
+                            <th>{{ __('owner.vendors.table.trip') }}</th>
                             <th>{{ __('owner.vendors.table.date') }}</th>
                             <th>{{ __('owner.vendors.table.status') }}</th>
                             <th class="text-end">{{ __('owner.vendors.table.amount') }}</th>
@@ -62,6 +63,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $exp->notes ?: ($exp->category?->name ?: '—') }}</td>
+                                <td>{{ $exp->trip?->name ?: '—' }}</td>
                                 <td>{{ optional($exp->created_at)->format('Y-m-d') ?? '—' }}</td>
                                 <td>
                                     @if ($exp->status === 'pending')
@@ -73,13 +75,13 @@
                                 <td class="text-end">{{ number_format($exp->final_price ?? 0, 2) }} <x-riyal-icon size="sm" /></td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="text-center text-muted py-4">{{ __('owner.analysis_reports.no_data') }}</td></tr>
+                            <tr><td colspan="6" class="text-center text-muted py-4">{{ __('owner.analysis_reports.no_data') }}</td></tr>
                         @endforelse
                     </tbody>
                     @if ($expenses->isNotEmpty())
                         <tfoot class="table-light fw-bold">
                             <tr>
-                                <td colspan="4">{{ __('owner.analysis_reports.totals') }}</td>
+                                <td colspan="5">{{ __('owner.analysis_reports.totals') }}</td>
                                 <td class="text-end">{{ number_format($totalExpenses, 2) }} <x-riyal-icon size="sm" /></td>
                             </tr>
                         </tfoot>

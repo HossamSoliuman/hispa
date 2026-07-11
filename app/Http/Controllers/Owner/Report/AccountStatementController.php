@@ -164,7 +164,7 @@ class AccountStatementController extends Controller
     private function vendorExpenses(User $vendor, ?string $from, ?string $to): Collection
     {
         return Expense::where('vendor_id', $vendor->id)
-            ->with('category')
+            ->with(['category', 'trip'])
             ->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
             ->when($to, fn ($q) => $q->whereDate('created_at', '<=', $to))
             ->orderByDesc('created_at')
