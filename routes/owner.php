@@ -131,6 +131,7 @@ Route::group([
         Route::get('/getBoatInfo/{id}', [BoatController::class, 'getBoatInfo'])->name('getBoatInfo');
         Route::get('/getBoatInfoByTrip/{id}', [BoatController::class, 'getBoatInfoByTrip'])->name('getBoatInfoByTrip');
 
+        Route::get('/assets/depreciation-print', [AssetController::class, 'depreciationPrint'])->name('assets.depreciation-print');
         Route::resource('/assets', AssetController::class);
         Route::get('/getAssetsData', [AssetController::class, 'getAssetsData'])->name('getAssetsData');
 

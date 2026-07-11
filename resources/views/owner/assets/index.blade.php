@@ -158,6 +158,156 @@
 {{-- </div>--}}
 <!-- END #datatable -->
 
+{{-- ══════════════ Monthly depreciation schedule (each month with its data) ══════════════ --}}
+@php
+    $monthNames = __('owner.annual_summary.months');
+    $riyal = view('components.riyal-icon', ['size' => 'sm'])->render();
+    $typeLabels = [
+        'boat' => __('owner.assets.boat'),
+        'fishing_equipment' => __('owner.assets.fishing_equipment'),
+        'other' => __('owner.assets.other'),
+    ];
+@endphp
+
+<div class="card shadow-sm border-0 mt-4" id="depreciationSchedule">
+    <div class="card-header d-flex flex-wrap gap-3 align-items-center justify-content-between">
+        <div>
+            <h5 class="card-title mb-0">{{ __('owner.assets.depreciation_schedule.title') }}</h5>
+            <small class="text-muted">{{ __('owner.assets.depreciation_schedule.subtitle') }}</small>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-end">
+            <form method="GET" action="{{ route('owner.assets.index') }}" class="d-flex align-items-end gap-2 mb-0">
+                <div>
+                    <label class="form-label mb-1">{{ __('owner.assets.depreciation_schedule.year') }}</label>
+                    <select name="year" class="form-control form-select" onchange="this.form.submit()">
+                        @foreach ($years as $y)
+                            <option value="{{ $y }}" @selected($y == $year)>{{ $y }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-outline-theme">
+                    <i class="bi bi-arrow-repeat"></i> {{ __('owner.assets.depreciation_schedule.show') }}
+                </button>
+            </form>
+            <a href="{{ route('owner.assets.depreciation-print', ['year' => $year]) }}" target="_blank"
+               class="btn btn-success">
+                <i class="bi bi-printer"></i> {{ __('owner.assets.depreciation_schedule.print') }}
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            @include('owner.components.stat-card', [
+                'title' => __('owner.assets.depreciation_schedule.annual_total'),
+                'value' => number_format($schedule['year_total'], 2) . ' ' . $riyal,
+                'icon' => 'bi bi-cash-stack',
+                'gradient' => 'linear-gradient(135deg, #2980b9, #3498db)',
+                'colClass' => 'col-md-4 col-sm-6 mb-3',
+            ])
+            @include('owner.components.stat-card', [
+                'title' => __('owner.assets.depreciation_schedule.monthly_average'),
+                'value' => number_format($schedule['monthly_average'], 2) . ' ' . $riyal,
+                'icon' => 'bi bi-graph-down',
+                'gradient' => 'linear-gradient(135deg, #16a085, #1abc9c)',
+                'colClass' => 'col-md-4 col-sm-6 mb-3',
+            ])
+            @include('owner.components.stat-card', [
+                'title' => __('owner.assets.depreciation_schedule.depreciating_assets'),
+                'value' => count($schedule['assets']),
+                'icon' => 'bi bi-tools',
+                'gradient' => 'linear-gradient(135deg, #f39c12, #f1c40f)',
+                'colClass' => 'col-md-4 col-sm-6 mb-3',
+            ])
+        </div>
+
+        @if ($schedule['year_total'] <= 0 && count($schedule['assets']) === 0)
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
+                {{ __('owner.assets.depreciation_schedule.no_data') }}
+            </div>
+        @else
+            {{-- Per-asset breakdown for the selected year + lifetime progress --}}
+            <h6 class="fw-bold mb-2">{{ __('owner.assets.depreciation_schedule.breakdown_title') }}</h6>
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered table-sm align-middle mb-0 text-nowrap">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ __('owner.assets.depreciation_schedule.asset') }}</th>
+                            <th>{{ __('owner.assets.depreciation_schedule.type') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.cost') }}</th>
+                            <th class="text-center">{{ __('owner.assets.depreciation_schedule.useful_life') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.monthly_depreciation') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.paid_so_far') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.remaining') }}</th>
+                            <th class="text-center">{{ __('owner.assets.depreciation_schedule.months_paid') }}</th>
+                            <th class="text-center">{{ __('owner.assets.depreciation_schedule.remaining_months') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.asset_total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($schedule['assets'] as $asset)
+                            <tr>
+                                <td>{{ $asset['name'] }}</td>
+                                <td>{{ $typeLabels[$asset['type']] ?? $asset['type'] }}</td>
+                                <td class="text-end">{{ number_format($asset['purchase_cost'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-center">{{ $asset['useful_life_years'] }}</td>
+                                <td class="text-end">{{ number_format($asset['monthly'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($asset['paid_so_far'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($asset['remaining'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-center">{{ $asset['months_paid'] }} / {{ $asset['total_months'] }}</td>
+                                <td class="text-center">{{ $asset['remaining_months'] }}</td>
+                                <td class="text-end">{{ number_format($asset['year_total'], 2) }} <x-riyal-icon size="sm" /></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="9">{{ __('owner.assets.depreciation_schedule.total') }}</td>
+                            <td class="text-end">{{ number_format($schedule['year_total'], 2) }} <x-riyal-icon size="sm" /></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            {{-- Monthly schedule: each month with its depreciation --}}
+            <h6 class="fw-bold mb-2">{{ __('owner.assets.depreciation_schedule.title') }} — {{ $year }}</h6>
+            <div class="table-responsive" style="max-width: 560px;">
+                <table class="table table-bordered table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ __('owner.assets.depreciation_schedule.month') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.monthly_depreciation') }}</th>
+                            <th class="text-end">{{ __('owner.assets.depreciation_schedule.accumulated') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($schedule['months'] as $m => $row)
+                            <tr>
+                                <td>{{ $monthNames[$m] }}</td>
+                                <td class="text-end">{{ number_format($row['total'], 2) }} <x-riyal-icon size="sm" /></td>
+                                <td class="text-end">{{ number_format($row['accumulated'], 2) }} <x-riyal-icon size="sm" /></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td>{{ __('owner.assets.depreciation_schedule.total') }}</td>
+                            <td class="text-end">{{ number_format($schedule['year_total'], 2) }} <x-riyal-icon size="sm" /></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        @endif
+    </div>
+    <div class="card-arrow">
+        <div class="card-arrow-top-left"></div>
+        <div class="card-arrow-top-right"></div>
+        <div class="card-arrow-bottom-left"></div>
+        <div class="card-arrow-bottom-right"></div>
+    </div>
+</div>
+
 <div class="card-arrow">
     <div class="card-arrow-top-left"></div>
     <div class="card-arrow-top-right"></div>

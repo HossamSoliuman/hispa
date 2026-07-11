@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Boat;
+use App\Service\Owner\AssetDepreciationService;
+use App\Service\Owner\ReportQrService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -12,14 +15,17 @@ use Yajra\DataTables\DataTables;
 
 class AssetController extends Controller
 {
-    public function index()
-    {
-        $assets = Asset::where('owner_id', $this->ownerId())
-            ->with('boat')
-            ->latest()
-            ->paginate(20);
+    public function __construct(private AssetDepreciationService $depreciation) {}
 
-        return view('owner.assets.index', compact('assets'));
+    public function index(Request $request)
+    {
+        $ownerId = $this->ownerId();
+        $year = (int) $request->input('year', now()->year);
+
+        $years = $this->availableYears($ownerId);
+        $schedule = $this->monthlyDepreciationSchedule($ownerId, $year);
+
+        return view('owner.assets.index', compact('schedule', 'year', 'years'));
     }
 
     public function create()
@@ -167,6 +173,83 @@ class AssetController extends Controller
             ->rawColumns(['status', 'action', 'type']) // أضف 'action' هنا لأن به HTML
             ->with(['summary' => $summary])
             ->make(true);
+    }
+
+    public function depreciationPrint(Request $request)
+    {
+        $ownerId = $this->ownerId();
+        $year = (int) $request->input('year', now()->year);
+
+        $schedule = $this->monthlyDepreciationSchedule($ownerId, $year);
+        $settings = $this->reportSettings();
+
+        $filename = 'asset-depreciation-'.$year.'.pdf';
+
+        return pdf_report(view('owner.assets.depreciation_print', compact('schedule', 'year', 'settings')), [], $filename);
+    }
+
+    /**
+     * Month-by-month straight-line depreciation for the owner's assets in a
+     * year, with a running accumulated total and a per-asset breakdown.
+     *
+     * @return array{
+     *     year: int,
+     *     months: array<int, array{total: float, accumulated: float}>,
+     *     assets: array<int, array{id: int, name: string, type: string, purchase_cost: float, useful_life_years: int, monthly: float, months_charged: int, year_total: float}>,
+     *     year_total: float,
+     *     monthly_average: float
+     * }
+     */
+    private function monthlyDepreciationSchedule(int $ownerId, int $year): array
+    {
+        $data = $this->depreciation->forYear($ownerId, $year);
+
+        $months = [];
+        $accumulated = 0.0;
+
+        foreach ($data['months'] as $month => $total) {
+            $accumulated += $total;
+            $months[$month] = [
+                'total' => $total,
+                'accumulated' => round($accumulated, 2),
+            ];
+        }
+
+        return [
+            'year' => $year,
+            'months' => $months,
+            'assets' => $data['assets'],
+            'year_total' => $data['year_total'],
+            'monthly_average' => round($data['year_total'] / 12, 2),
+        ];
+    }
+
+    /**
+     * Years the owner may view, from the earliest asset purchase year to now
+     * (most recent first). Always includes the current year.
+     *
+     * @return array<int, int>
+     */
+    private function availableYears(int $ownerId): array
+    {
+        $earliest = Asset::where('owner_id', $ownerId)->min('purchase_date');
+        $currentYear = (int) now()->year;
+        $startYear = $earliest ? (int) Carbon::parse($earliest)->year : $currentYear;
+        $startYear = min($startYear, $currentYear);
+
+        return range($currentYear, $startYear);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function reportSettings(): array
+    {
+        $companyName = currentCompany()?->name ?: 'N/A';
+
+        return ownerCompanySettings([
+            'qr_code' => app(ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ]);
     }
 
     private function ownerId(): int
