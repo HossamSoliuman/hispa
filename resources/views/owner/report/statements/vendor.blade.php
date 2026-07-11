@@ -61,7 +61,7 @@
                         @forelse ($expenses as $exp)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $exp->description ?: '—' }}</td>
+                                <td>{{ $exp->notes ?: ($exp->category?->name ?: '—') }}</td>
                                 <td>{{ optional($exp->created_at)->format('Y-m-d') ?? '—' }}</td>
                                 <td>
                                     @if ($exp->status === 'pending')

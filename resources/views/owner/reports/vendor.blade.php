@@ -44,7 +44,7 @@
             @forelse($expenses as $exp)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $exp->description ?? '-' }}</td>
+                <td>{{ $exp->notes ?: ($exp->category?->name ?: '-') }}</td>
                 <td>{{ number_format($exp->final_price ?? 0, 2) }} <span class="currency-symbol"><x-riyal-icon size="sm" /></span></td>
                 <td>{{ ucfirst($exp->status ?? '-') }}</td>
                 <td>{{ optional($exp->created_at)->format('Y-m-d') }}</td>
