@@ -664,6 +664,53 @@ class MonthClosingService
     }
 
     /**
+     * Distinct (year, month) periods the owner has closed, across every boat.
+     * A month counts as closed once any of its closings is frozen.
+     *
+     * @return array<int, array{year: int, month: int}>
+     */
+    public function closedMonths(int $ownerId): array
+    {
+        return MonthClosing::query()
+            ->where('owner_id', $ownerId)
+            ->where('status', 'closed')
+            ->get(['year', 'month'])
+            ->map(fn (MonthClosing $closing): array => [
+                'year' => (int) $closing->year,
+                'month' => (int) $closing->month,
+            ])
+            ->unique(fn (array $month): string => $month['year'].'-'.$month['month'])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Constrain a listing query to still-open months by excluding every row whose
+     * date column falls inside one of the owner's closed months. A no-op while the
+     * owner has closed nothing, so early listings behave exactly as before.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<*>  $query
+     */
+    public function excludeClosedMonths($query, string $column, int $ownerId): void
+    {
+        $months = $this->closedMonths($ownerId);
+
+        if ($months === []) {
+            return;
+        }
+
+        $query->where(function ($inner) use ($column, $months): void {
+            foreach ($months as $month) {
+                $start = Carbon::create($month['year'], $month['month'], 1)->startOfMonth();
+                $inner->whereNotBetween(DB::raw('DATE('.$column.')'), [
+                    $start->toDateString(),
+                    $start->copy()->endOfMonth()->toDateString(),
+                ]);
+            }
+        });
+    }
+
+    /**
      * Constrain a query's date column to a given set of months of a year.
      *
      * Portable across MySQL (production) and SQLite (test DB, which has no

@@ -66,7 +66,7 @@
             <button type="button" class="btn btn-success btn-border-radius" data-bs-toggle="modal" data-bs-target="#addTripModal">
                 <i class="bi bi-plus me-1"></i> {{ __('owner.trips.add_trip') }}
             </button>
-            <a href="{{ route('owner.reports.print.all_trips') }}" target="_blank"
+            <a href="{{ route('owner.reports.print.all_trips') }}" id="printAllTripsBtn" target="_blank"
                 class="btn btn-outline-info btn-border-radius">
                 <i class="bi bi-printer me-1"></i> {{ __('owner.trips.print_all_trips') }}
             </a>
@@ -503,6 +503,22 @@
 
             $('#filter_status, #from_date, #to_date').on('change', function() {
                 table.draw();
+            });
+
+            // Print exactly what the listing shows: carry the active filters into the
+            // report, or print the open (un-closed) months when nothing is filtered.
+            $('#printAllTripsBtn').on('click', function(e) {
+                e.preventDefault();
+                const params = new URLSearchParams();
+                const status = $('#filter_status').val();
+                const fromDate = $('#from_date').val();
+                const toDate = $('#to_date').val();
+                if (status) params.append('status', status);
+                if (fromDate) params.append('from_date', fromDate);
+                if (toDate) params.append('to_date', toDate);
+                const query = params.toString();
+                const url = "{{ route('owner.reports.print.all_trips') }}" + (query ? ('?' + query) : '');
+                window.open(url, '_blank');
             });
         });
     </script>

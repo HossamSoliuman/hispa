@@ -76,6 +76,17 @@ class TripReportController extends Controller
             $query->where('boat_id', $request->boat_id);
         }
 
+        // Match the listing: when printing the whole report (no single trip and no
+        // filters) show only still-open months so closed months stay out of the PDF.
+        $hasFilters = $request->filled('from_date')
+            || $request->filled('to_date')
+            || $request->filled('status')
+            || $request->filled('boat_id');
+
+        if (! $trip_id && ! $hasFilters) {
+            app(\App\Service\Owner\MonthClosingService::class)->excludeClosedMonths($query, 'start_date', $owner_id);
+        }
+
         $trips = $query->orderBy('start_date', 'desc')->get();
 
         // Prepare filters for diagnostics and view

@@ -12,16 +12,26 @@ use App\Models\Maintenance;
 use App\Models\PaymentMethod;
 use App\Models\Trip;
 use App\Models\User;
+use App\Service\Owner\MonthClosingService;
 use Illuminate\Support\Facades\DB;
 
 class ExpenseRepository
 {
     public function indexMetrics(): array
     {
-        $count = Expense::count();
-        $totalAmount = Expense::sum('final_price');
-        $paidAmount = Expense::where('status', 'paid')->sum('final_price');
-        $pendingAmount = Expense::where('status', 'pending')->sum('final_price');
+        $ownerId = (int) auth()->id();
+        $closing = app(MonthClosingService::class);
+        $openExpenses = function () use ($closing, $ownerId) {
+            $query = Expense::query();
+            $closing->excludeClosedMonths($query, 'date', $ownerId);
+
+            return $query;
+        };
+
+        $count = $openExpenses()->count();
+        $totalAmount = $openExpenses()->sum('final_price');
+        $paidAmount = $openExpenses()->where('status', 'paid')->sum('final_price');
+        $pendingAmount = $openExpenses()->where('status', 'pending')->sum('final_price');
         $avgPerExpense = $count > 0 ? $totalAmount / $count : 0;
 
         $topCategory = Expense::select('category_id')
@@ -318,7 +328,14 @@ class ExpenseRepository
 
     public function expensesQueryForDataTable($request)
     {
-        return Expense::with(['boat', 'category', 'vendor', 'paymentMethod'])
+        $hasFilters = $request->filled('boat_id')
+            || $request->filled('category_id')
+            || $request->filled('status')
+            || $request->filled('from_date')
+            || $request->filled('to_date')
+            || filled($request->input('search.value'));
+
+        $query = Expense::with(['boat', 'category', 'vendor', 'paymentMethod'])
             ->when($request->boat_id, fn ($q) => $q->where('boat_id', $request->boat_id))
             ->when($request->category_id, function ($q) use ($request) {
                 $q->whereHas('category', function ($query) use ($request) {
@@ -330,6 +347,12 @@ class ExpenseRepository
             ->when($request->from_date, fn ($q) => $q->whereDate('date', '>=', $request->from_date))
             ->when($request->to_date, fn ($q) => $q->whereDate('date', '<=', $request->to_date))
             ->orderByDesc('created_at');
+
+        if (! $hasFilters) {
+            app(MonthClosingService::class)->excludeClosedMonths($query, 'date', (int) auth()->id());
+        }
+
+        return $query;
     }
 
     public function changeStatus(Expense $expense, string $status): void

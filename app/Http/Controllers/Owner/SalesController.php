@@ -79,12 +79,17 @@ class SalesController extends Controller
      */
     public function printReport(Request $request): \Illuminate\Http\Response
     {
+        $hasFilters = $request->filled('from_date')
+            || $request->filled('to_date')
+            || $request->filled('fish_id');
+
         $sales = Sale::where('seller_type', 'owner')
             ->where('seller_id', auth()->id())
             ->with(['customer', 'paymentMethod', 'details', 'details.unit'])
             ->when($request->filled('from_date'), fn ($q) => $q->whereDate('sale_datetime', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn ($q) => $q->whereDate('sale_datetime', '<=', $request->to_date))
             ->when($request->filled('fish_id'), fn ($q) => $q->whereHas('details', fn ($d) => $d->where('fish_id', $request->fish_id)))
+            ->when(! $hasFilters, fn ($q) => app(\App\Service\Owner\MonthClosingService::class)->excludeClosedMonths($q, 'sale_datetime', (int) auth()->id()))
             ->orderByDesc('sale_datetime')
             ->get();
 

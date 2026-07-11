@@ -4,6 +4,7 @@ namespace App\DataTable\Owner;
 
 use App\Enums\TripStatus;
 use App\Models\Trip;
+use App\Service\Owner\MonthClosingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Yajra\DataTables\DataTables;
@@ -15,10 +16,20 @@ class TripDataTable extends DataTables
         if ($request->ajax()) {
             $owner_id = auth()->id();
 
+            $hasFilters = $request->filled('boat_id')
+                || $request->filled('status')
+                || $request->filled('from_date')
+                || $request->filled('to_date')
+                || filled($request->input('search.value'));
+
             $query = Trip::with(['sales', 'owner', 'boat.captain', 'catches'])
                 ->where('owner_id', $owner_id)
                 ->orderBy('start_date', 'desc')
                 ->orderBy('id', 'desc');
+
+            if (! $hasFilters) {
+                app(MonthClosingService::class)->excludeClosedMonths($query, 'start_date', $owner_id);
+            }
 
             if ($request->filled('boat_id')) {
                 $query->where('boat_id', $request->boat_id);
@@ -41,7 +52,16 @@ class TripDataTable extends DataTables
             $trip_count = $data->count();
             $trip_waiting_status = $data->where('status', TripStatus::New)->count();
             $trip_completed_status = $data->where('status', TripStatus::Sold)->count();
-            $trip_has_catches = Trip::whereHas('catches')->where('status', '!=', TripStatus::Cancelled->value)->where('owner_id', $owner_id)->count();
+
+            $hasCatchesQuery = Trip::whereHas('catches')
+                ->where('status', '!=', TripStatus::Cancelled->value)
+                ->where('owner_id', $owner_id);
+
+            if (! $hasFilters) {
+                app(MonthClosingService::class)->excludeClosedMonths($hasCatchesQuery, 'start_date', $owner_id);
+            }
+
+            $trip_has_catches = $hasCatchesQuery->count();
             $sales_amount = $data->sum(fn (Trip $trip) => $trip->sales->sum('net_owner_amount'));
 
             return Datatables::of($data)

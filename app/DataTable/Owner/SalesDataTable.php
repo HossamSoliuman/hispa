@@ -3,10 +3,10 @@
 namespace App\DataTable\Owner;
 
 use App\Models\Sale;
+use App\Service\Owner\MonthClosingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class SalesDataTable extends DataTables
@@ -55,10 +55,7 @@ class SalesDataTable extends DataTables
                 ->with(['details.unit', 'paymentMethod', 'catch.details.unit', 'trip.catches.details.unit']);
 
             if (! $hasFilters) {
-                $query->whereBetween(DB::raw('DATE(sale_datetime)'), [
-                    now()->startOfMonth()->toDateString(),
-                    now()->endOfMonth()->toDateString(),
-                ]);
+                app(MonthClosingService::class)->excludeClosedMonths($query, 'sale_datetime', (int) auth()->id());
             }
 
             if ($request->filled('from_date')) {

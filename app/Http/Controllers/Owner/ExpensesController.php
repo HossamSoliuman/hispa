@@ -99,6 +99,12 @@ class ExpensesController extends Controller
      */
     public function printReport(Request $request): \Illuminate\Http\Response
     {
+        $hasFilters = $request->filled('boat_id')
+            || $request->filled('category_id')
+            || $request->filled('status')
+            || $request->filled('from_date')
+            || $request->filled('to_date');
+
         $expenses = Expense::with(['boat', 'category.parent', 'vendor', 'paymentMethod'])
             ->when($request->filled('boat_id'), fn ($q) => $q->where('boat_id', $request->boat_id))
             ->when($request->filled('category_id'), function ($q) use ($request) {
@@ -110,6 +116,7 @@ class ExpensesController extends Controller
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('from_date'), fn ($q) => $q->whereDate('date', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn ($q) => $q->whereDate('date', '<=', $request->to_date))
+            ->when(! $hasFilters, fn ($q) => app(\App\Service\Owner\MonthClosingService::class)->excludeClosedMonths($q, 'date', (int) auth()->id()))
             ->orderByDesc('date')
             ->get();
 
