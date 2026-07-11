@@ -77,7 +77,11 @@ class CatchDataTable extends DataTables
                 ->addColumn('trip', fn ($row) => $row->name)
                 ->addColumn('boat', fn ($row) => $row->boat->name ?: '-')
                 ->addColumn('total_weight', fn ($row) => $this->weightBreakdown($row->catches?->details ?? collect()))
-                ->addColumn('total_amount', fn ($row) => number_format($row->sales->sum('total_price'), 2))
+                ->addColumn('total_amount', function ($row) {
+                    $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
+
+                    return number_format($row->sales->sum('total_price'), 2).' <span class="unit">'.$icon.'</span>';
+                })
                 ->addColumn('start_date', fn ($row) => optional($row->start_date)->format('Y-m-d'))
                 ->addColumn('end_date', fn ($row) => optional($row->end_date)->format('Y-m-d'))
                 ->addColumn('action', function ($row) {
@@ -126,7 +130,7 @@ class CatchDataTable extends DataTables
                         return $actions;
                     }
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'total_amount'])
                 ->with(['summary' => $summary])
                 ->make(true);
 

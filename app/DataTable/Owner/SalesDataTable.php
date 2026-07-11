@@ -141,7 +141,11 @@ class SalesDataTable extends DataTables
                 ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')
                 ->addColumn('labor_rate', fn ($row) => $row->labor_rate.'%')
 
-                ->addColumn('total_price', fn ($row) => number_format($row->total_price, 2))
+                ->addColumn('total_price', function ($row) {
+                    $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
+
+                    return number_format($row->total_price, 2).' <span class="unit">'.$icon.'</span>';
+                })
                 ->addColumn('net_owner_amount', fn ($row) => number_format($row->net_owner_amount, 2))
                 ->addColumn('remaining_total', fn ($row) => number_format($row->remaining_total, 2))
 
@@ -165,7 +169,7 @@ class SalesDataTable extends DataTables
                     'total_amount' => round($totalAmount, 2),
                     'summary' => $summary,
                 ])
-                ->rawColumns(['status', 'payment_status', 'seller', 'actions'])
+                ->rawColumns(['status', 'payment_status', 'seller', 'actions', 'total_price'])
                 ->make(true);
         }
     }

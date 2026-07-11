@@ -76,9 +76,15 @@ class TripDataTable extends DataTables
                 ->addColumn('boat', fn (Trip $trip) => $trip->boat->name ?? '--')
                 ->addColumn('captain', fn (Trip $trip) => $trip->boat?->captain?->name ?? '--')
                 ->addColumn('total_sales', function (Trip $trip) {
-                    $weight = $trip->sales->sum('net_owner_amount');
+                    $amount = $trip->sales->sum('net_owner_amount');
 
-                    return $weight > 0 ? $weight : '--';
+                    if ($amount <= 0) {
+                        return '--';
+                    }
+
+                    $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
+
+                    return number_format($amount, 2).' <span class="unit">'.$icon.'</span>';
                 })
                 ->addColumn('start_date', fn (Trip $trip) => $trip->start_date ? Carbon::parse($trip->start_date)->format('H:i:s Y-m-d') : '--')
                 ->addColumn('end_date', function (Trip $trip) {
@@ -100,7 +106,7 @@ class TripDataTable extends DataTables
                     'trip_has_catches' => $trip_has_catches,
                     'sales_amount' => $sales_amount,
                 ])
-                ->rawColumns(['status', 'number', 'actions'])
+                ->rawColumns(['status', 'number', 'actions', 'total_sales'])
                 ->make(true);
         }
     }

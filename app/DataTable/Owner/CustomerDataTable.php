@@ -33,13 +33,16 @@ class CustomerDataTable extends DataTables
                     return $data->type ?: '—';
                 })
                 ->addColumn('total_sales', function ($data) {
-                    return number_format($data->total_purchases ?? 0, 2);
+                    $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
+
+                    return number_format($data->total_purchases ?? 0, 2).' <span class="unit">'.$icon.'</span>';
                 })
                 ->addColumn('total_remaining', function ($data) {
                     $remaining = $data->total_remaining ?? 0;
                     $class = $remaining > 0 ? 'text-danger fw-bold' : 'text-success';
+                    $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
 
-                    return '<span class="'.$class.'">'.number_format($remaining, 2).'</span>';
+                    return '<span class="'.$class.'">'.number_format($remaining, 2).' <span class="unit">'.$icon.'</span></span>';
                 })
                 ->addColumn('order_count', function ($data) {
                     return $data->sales_count;
@@ -84,7 +87,7 @@ class CustomerDataTable extends DataTables
                     'total_sales' => number_format($total_sales, 2),
                     'total_orders' => $total_orders,
                 ])
-                ->rawColumns(['action', 'status', 'total_remaining'])
+                ->rawColumns(['action', 'status', 'total_remaining', 'total_sales'])
                 ->make(true);
         }
     }
