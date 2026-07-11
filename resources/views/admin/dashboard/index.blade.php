@@ -3,525 +3,244 @@
     {{ __('admin.dashboard.title') }}
 @endsection
 
+@php
+    $riyal = view('components.riyal-icon')->render();
+    $money = fn ($amount) => new \Illuminate\Support\HtmlString(
+        number_format((float) $amount, 0) . ' <span class="unit">' . $riyal . '</span>'
+    );
+@endphp
+
 @section('css')
-<style>
-/* ============================================================
-   HUD Dashboard — light mode, squared/sharp, notepad-grid style
-   Accent: brand blue #3675c2
-   ============================================================ */
-
-/* ---- tokens ---- */
-:root {
-    --hud-accent:       #3675c2;
-    --hud-accent-rgb:   54, 117, 194;
-    --hud-border:       rgba(0,0,0,.14);
-    --hud-border-inner: rgba(0,0,0,.12);
-    --hud-bg-card:      #ffffff;
-    --hud-text:         #1a1a2e;
-    --hud-text-muted:   rgba(0,0,0,.45);
-    --hud-grid:         rgba(0,0,0,.06);
-}
-
-/* ---- page wrapper ---- */
-.hud-dashboard {
-    padding-top: .25rem;
-}
-
-/* ---- page header ---- */
-.hud-page-header {
-    margin-bottom: 1.75rem;
-}
-.hud-page-header h1 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--hud-text);
-    margin-bottom: .15rem;
-}
-.hud-page-header .breadcrumb {
-    font-size: 12px;
-    margin-bottom: 0;
-    --bs-breadcrumb-divider-color: var(--hud-text-muted);
-}
-.hud-page-header .breadcrumb-item,
-.hud-page-header .breadcrumb-item.active { color: var(--hud-text-muted); }
-.hud-page-header .breadcrumb-item + .breadcrumb-item::before {
-    color: var(--hud-text-muted);
-}
-
-/* ---- section head (reference §-head) ---- */
-.hud-section-head {
-    display: flex;
-    align-items: center;
-    gap: .65rem;
-    margin: .25rem 0 1.1rem;
-}
-.hud-section-head .ico {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--hud-accent-rgb), .1);
-    border: 1px solid var(--hud-accent);
-    color: var(--hud-accent);
-    font-size: 15px;
-    flex-shrink: 0;
-}
-.hud-section-head h5 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--hud-text);
-    letter-spacing: .25px;
-}
-.hud-section-head .hud-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--hud-border-inner), transparent);
-}
-.hud-section-head small {
-    color: var(--hud-text-muted);
-    font-size: 11.5px;
-}
-
-/* ============================================================
-   HUD CARD — the core design element
-   Transparent background, thin full-rectangle border,
-   squared corners, 4 corner bracket accents
-   ============================================================ */
-.hud-card {
-    position: relative;
-    background: var(--hud-bg-card);
-    border-radius: 0;
-    border: none;
-}
-
-/* Thin horizontal border lines (top + bottom, inset) */
-.hud-card::before {
-    content: '';
-    position: absolute;
-    left:   12px;
-    right:  12px;
-    top:    0;
-    bottom: 0;
-    border-top:    1px solid var(--hud-border);
-    border-bottom: 1px solid var(--hud-border);
-    pointer-events: none;
-}
-
-/* Thin vertical border lines (left + right, inset) */
-.hud-card::after {
-    content: '';
-    position: absolute;
-    top:    12px;
-    bottom: 12px;
-    left:   0;
-    right:  0;
-    border-left:  1px solid var(--hud-border);
-    border-right: 1px solid var(--hud-border);
-    pointer-events: none;
-}
-
-/* Corner brackets */
-.hud-card-arrow {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-.hud-card-arrow > div {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-}
-.hud-card-arrow > div::before {
-    content: '';
-    position: absolute;
-    width: 2px;
-    height: 9px;
-    background: rgba(var(--hud-accent-rgb), .6);
-}
-.hud-card-arrow > div::after {
-    content: '';
-    position: absolute;
-    width: 9px;
-    height: 2px;
-    background: rgba(var(--hud-accent-rgb), .6);
-}
-.hud-arrow-tl           { top: 0;    left: 0;  }
-.hud-arrow-tl::before   { top: 2px;  left: 0;  }
-.hud-arrow-tl::after    { top: 0;    left: 0;  }
-.hud-arrow-tr           { top: 0;    right: 0; }
-.hud-arrow-tr::before   { top: 2px;  right: 0; }
-.hud-arrow-tr::after    { top: 0;    right: 0; }
-.hud-arrow-bl           { bottom: 0; left: 0;  }
-.hud-arrow-bl::before   { bottom: 2px; left: 0; }
-.hud-arrow-bl::after    { bottom: 0;  left: 0; }
-.hud-arrow-br           { bottom: 0; right: 0; }
-.hud-arrow-br::before   { bottom: 2px; right: 0; }
-.hud-arrow-br::after    { bottom: 0;  right: 0; }
-
-/* Card body */
-.hud-card-body {
-    padding: 1rem 1.1rem;
-    position: relative;
-    z-index: 1;
-}
-
-/* Card label (small header line inside card) */
-.hud-card-label {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--hud-text-muted);
-    flex: 1;
-    line-height: 1.3;
-    margin-bottom: .6rem;
-}
-
-/* Stat value */
-.hud-stat-value {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--hud-text);
-    line-height: 1.1;
-}
-.hud-stat-value .unit {
-    font-size: .9rem;
-    font-weight: 600;
-    opacity: .55;
-}
-
-/* Icon box inside stat card */
-.hud-icon-box {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--hud-accent-rgb), .08);
-    border: 1px solid rgba(var(--hud-accent-rgb), .25);
-    color: var(--hud-accent);
-    font-size: 15px;
-    flex-shrink: 0;
-}
-
-/* ---- Chart card (uses same hud-card frame) ---- */
-.hud-chart-card .hud-chart-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--hud-text);
-    margin-bottom: .2rem;
-}
-.hud-chart-card .hud-chart-sub {
-    font-size: 11px;
-    color: var(--hud-text-muted);
-    margin-bottom: .6rem;
-}
-
-/* ---- Table card ---- */
-.hud-table-card .hud-table-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .75rem 1.1rem;
-    border-bottom: 1px solid var(--hud-border);
-    position: relative;
-    z-index: 1;
-}
-.hud-table-card .hud-table-header h6 {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--hud-text);
-}
-.hud-table-card .table {
-    margin-bottom: 0;
-    font-size: 13px;
-}
-.hud-table-card .table thead th {
-    font-weight: 700;
-    font-size: 12px;
-    color: var(--hud-text-muted);
-    border-bottom: 1px solid var(--hud-border);
-    background: rgba(0,0,0,.025);
-    white-space: nowrap;
-}
-.hud-table-card .table td {
-    vertical-align: middle;
-    border-color: var(--hud-grid);
-}
-.hud-table-card .hud-table-body {
-    padding: 0 1.1rem 1rem;
-    position: relative;
-    z-index: 1;
-}
-
-/* ---- Badge overrides — restrained ---- */
-.hud-badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    padding: .2em .55em;
-    border-radius: 0;
-    background: transparent;
-    border: 1px solid var(--hud-border);
-    color: var(--hud-text);
-}
-.hud-badge-danger  { border-color: #dc3545; color: #dc3545; }
-.hud-badge-warning { border-color: #e6a817; color: #8a6200; }
-.hud-badge-info    { border-color: var(--hud-accent); color: var(--hud-accent); }
-
-/* ---- Empty state ---- */
-.hud-empty {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    color: var(--hud-text-muted);
-}
-.hud-empty i {
-    font-size: 2.5rem;
-    display: block;
-    margin-bottom: .5rem;
-    color: var(--hud-accent);
-    opacity: .4;
-}
-
-/* ---- Row gaps ---- */
-.hud-row {
-    --bs-gutter-x: .9rem;
-    --bs-gutter-y: .9rem;
-}
-
-/* ============================================================
-   Dark-mode token remap — keeps the HUD dashboard legible on the
-   dark navy page (light mode above is left untouched).
-   ============================================================ */
-[data-bs-theme="dark"] {
-    --hud-border:       rgba(255,255,255,.16);
-    --hud-border-inner: rgba(255,255,255,.14);
-    --hud-bg-card:      var(--bs-secondary-bg);
-    --hud-text:         var(--bs-emphasis-color);
-    --hud-text-muted:   var(--bs-secondary-color);
-    --hud-grid:         rgba(255,255,255,.07);
-}
-[data-bs-theme="dark"] .hud-table-card .table thead th {
-    background: rgba(255,255,255,.04);
-}
-[data-bs-theme="dark"] .hud-icon-box {
-    background: rgba(var(--hud-accent-rgb), .18);
-}
-</style>
+    <style>
+        /* Constrain chart canvases: Chart.js with maintainAspectRatio:false
+           sizes to its parent, so the wrapper must have an explicit height. */
+        .hud-chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 260px;
+        }
+        @media (max-width: 575.98px) {
+            .hud-chart-wrap { height: 220px; }
+        }
+    </style>
 @endsection
 
 @section('content')
-<div class="hud-dashboard">
+    <div class="hud-dashboard">
 
-    {{-- Page Header --}}
-    <div class="hud-page-header">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">{{ __('admin.title') }}</li>
-                <li class="breadcrumb-item active">{{ __('admin.dashboard.title') }}</li>
-            </ol>
-        </nav>
-        <h1>{{ __('admin.dashboard.title') }}</h1>
-        <p class="mb-0" style="font-size:13px;color:var(--hud-text-muted);">{{ __('admin.dashboard.subtitle') }}</p>
-    </div>
+        {{-- Page header --}}
+        <div class="mb-4">
+            <h1 class="h4 fw-bold mb-1">{{ __('admin.dashboard.title') }}</h1>
+            <p class="mb-0 text-muted small">{{ __('admin.dashboard.subtitle') }}</p>
+        </div>
 
-    {{-- ========== Section: KPI Stats ========== --}}
-    <div class="hud-section-head">
-        <span class="ico"><i class="bi bi-bar-chart-line"></i></span>
-        <h5>{{ __('admin.dashboard.title') }}</h5>
-        <span class="hud-line"></span>
-    </div>
+        {{-- ========== Overview KPIs ========== --}}
+        <div class="hud-section-head">
+            <span class="ico"><i class="bi bi-grid-1x2"></i></span>
+            <h5>{{ __('admin.dashboard.overview_section') }}</h5>
+            <span class="hud-line"></span>
+        </div>
 
-    <div class="row hud-row mb-4">
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.revenue_bank_transfer'),
-            'value'    => '<span class="unit">' . view('components.riyal-icon')->render() . '</span> ' . number_format($revenueByBankTransfer, 0),
-            'icon'     => 'bi bi-bank',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.total_subscriptions'),
-            'value'    => number_format($totalSubscriptions),
-            'icon'     => 'bi bi-people-fill',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.active_subscriptions'),
-            'value'    => number_format($activeSubscriptions),
-            'icon'     => 'bi bi-check-circle',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.total_invoices'),
-            'value'    => number_format($totalInvoices),
-            'icon'     => 'bi bi-file-earmark-text',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.paid_invoices'),
-            'value'    => number_format($paidInvoices),
-            'icon'     => 'bi bi-receipt',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.total_fishermen'),
-            'value'    => number_format($totalFishermen),
-            'icon'     => 'bi bi-person-badge',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.active_fishermen'),
-            'value'    => number_format($activeFishermen),
-            'icon'     => 'bi bi-person-check',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.total_trips'),
-            'value'    => number_format($totalTrips),
-            'icon'     => 'bi bi-ship',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.total_boats'),
-            'value'    => number_format($totalBoats),
-            'icon'     => 'bi bi-water',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.mrr_title'),
-            'value'    => '<span class="unit">' . view('components.riyal-icon')->render() . '</span> ' . number_format($mrr ?? 0, 0),
-            'icon'     => 'bi bi-cash-stack',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-        @include('admin.components.hud-stat-card', [
-            'title'    => __('admin.dashboard.churn_rate_title'),
-            'value'    => number_format($churnRate ?? 0, 2) . '<span class="unit">%</span>',
-            'icon'     => 'bi bi-exclamation-triangle',
-            'colClass' => 'col-6 col-md-4 col-xl-3 mb-0',
-        ])
-    </div>
+        <div class="row g-3 mb-4">
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.mrr_value'),
+                'value'    => $money($mrr),
+                'icon'     => 'bi bi-arrow-repeat',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.collected_revenue'),
+                'value'    => $money($collectedRevenue),
+                'icon'     => 'bi bi-cash-stack',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.pending_revenue'),
+                'value'    => $money($pendingRevenue),
+                'icon'     => 'bi bi-hourglass-split',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.active_subscriptions'),
+                'value'    => number_format($activeSubscriptions),
+                'icon'     => 'bi bi-patch-check',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.pending_subscriptions'),
+                'value'    => number_format($pendingSubscriptions),
+                'icon'     => 'bi bi-person-plus',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.expiring_soon'),
+                'value'    => number_format($expiringSoon->count()),
+                'icon'     => 'bi bi-alarm',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.total_owners'),
+                'value'    => number_format($totalOwners),
+                'icon'     => 'bi bi-people',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+            @include('admin.components.hud-stat-card', [
+                'title'    => __('admin.dashboard.active_packages'),
+                'value'    => number_format($activePackages),
+                'icon'     => 'bi bi-box-seam',
+                'colClass' => 'col-6 col-md-4 col-xl-3',
+            ])
+        </div>
 
-    {{-- ========== Section: Charts ========== --}}
-    <div class="hud-section-head">
-        <span class="ico"><i class="bi bi-graph-up"></i></span>
-        <h5>{{ __('admin.dashboard.mrr_chart_title') }}</h5>
-        <span class="hud-line"></span>
-    </div>
+        {{-- ========== Revenue & Analytics ========== --}}
+        <div class="hud-section-head">
+            <span class="ico"><i class="bi bi-graph-up"></i></span>
+            <h5>{{ __('admin.dashboard.revenue_analytics_section') }}</h5>
+            <span class="hud-line"></span>
+        </div>
 
-    <div class="row hud-row mb-4">
-        {{-- MRR Chart --}}
-        <div class="col-12 col-lg-6">
-            <div class="hud-card hud-chart-card h-100">
-                <div class="hud-card-body">
-                    <div class="hud-chart-title">
-                        <i class="bi bi-graph-up me-1" style="color:var(--hud-accent);"></i>
-                        {{ __('admin.dashboard.mrr_chart_title') }}
-                    </div>
-                    <div class="hud-chart-sub">{{ __('admin.dashboard.mrr_value') }}</div>
-
-                    @if(isset($mrrHistory) && count($mrrHistory) > 0)
-                        <canvas id="mrrChart" height="220"></canvas>
-                    @else
-                        <div class="hud-empty">
-                            <i class="bi bi-graph-up"></i>
-                            <span>{{ __('admin.dashboard.no_data') }}</span>
+        <div class="row g-3 mb-4">
+            {{-- MRR trend --}}
+            <div class="col-12 col-xl-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    <i class="bi bi-graph-up-arrow me-1 text-primary"></i>
+                                    {{ __('admin.dashboard.mrr_trend') }}
+                                </h6>
+                                <span class="text-muted small">{{ __('admin.dashboard.mrr_description') }}</span>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{!! $money($currentMonthRevenue) !!}</div>
+                                <small class="text-muted d-block">{{ __('admin.dashboard.revenue_this_month') }}</small>
+                                @if($revenueGrowth != 0)
+                                    <span class="badge {{ $revenueGrowth >= 0 ? 'bg-success' : 'bg-danger' }} bg-opacity-10 {{ $revenueGrowth >= 0 ? 'text-success' : 'text-danger' }} mt-1">
+                                        <i class="bi bi-arrow-{{ $revenueGrowth >= 0 ? 'up' : 'down' }}"></i>
+                                        {{ number_format(abs($revenueGrowth), 1) }}% {{ __('admin.dashboard.vs_last_month') }}
+                                    </span>
+                                @endif
+                            </div>
                         </div>
-                    @endif
+                        <div class="hud-chart-wrap">
+                            <canvas id="mrrChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div class="hud-card-arrow">
-                    <div class="hud-arrow-tl"></div>
-                    <div class="hud-arrow-tr"></div>
-                    <div class="hud-arrow-bl"></div>
-                    <div class="hud-arrow-br"></div>
+            </div>
+
+            {{-- Subscriptions by status --}}
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">
+                            <i class="bi bi-activity me-1 text-primary"></i>
+                            {{ __('admin.dashboard.subscription_status') }}
+                        </h6>
+                        <span class="text-muted small">{{ __('admin.dashboard.subscription_status_desc') }}</span>
+
+                        @if(($activeSubscriptions + $pendingSubscriptions + $trialSubscriptions + $expiredSubscriptions) > 0)
+                            <div class="hud-chart-wrap mt-3">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        @else
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-activity fs-1 d-block mb-2 opacity-50"></i>
+                                {{ __('admin.dashboard.no_data') }}
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Monthly collected revenue --}}
+            <div class="col-12 col-xl-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">
+                            <i class="bi bi-bar-chart-line me-1 text-primary"></i>
+                            {{ __('admin.dashboard.monthly_revenue') }}
+                        </h6>
+                        <span class="text-muted small">{{ __('admin.dashboard.monthly_revenue_desc') }}</span>
+                        <div class="hud-chart-wrap mt-3">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Subscriptions by plan --}}
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">
+                            <i class="bi bi-pie-chart me-1 text-primary"></i>
+                            {{ __('admin.dashboard.subscriptions_by_plan') }}
+                        </h6>
+                        <span class="text-muted small">{{ __('admin.dashboard.top_packages_description') }}</span>
+
+                        @if($subscriptionsByPlan->isNotEmpty())
+                            <div class="hud-chart-wrap mt-3">
+                                <canvas id="plansChart"></canvas>
+                            </div>
+                        @else
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-pie-chart fs-1 d-block mb-2 opacity-50"></i>
+                                {{ __('admin.dashboard.no_data') }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Packages Chart --}}
-        <div class="col-12 col-lg-6">
-            <div class="hud-card hud-chart-card h-100">
-                <div class="hud-card-body">
-                    <div class="hud-chart-title">
-                        <i class="bi bi-pie-chart me-1" style="color:var(--hud-accent);"></i>
-                        {{ __('admin.dashboard.top_packages_title') }}
-                    </div>
-                    <div class="hud-chart-sub">{{ __('admin.dashboard.top_packages_title') }}</div>
-
-                    @if(isset($packageSales) && $packageSales->count() > 0)
-                        <canvas id="packagesChart" height="220"></canvas>
-                    @else
-                        <div class="hud-empty">
-                            <i class="bi bi-pie-chart"></i>
-                            <span>{{ __('admin.dashboard.no_data') }}</span>
-                        </div>
-                    @endif
-                </div>
-                <div class="hud-card-arrow">
-                    <div class="hud-arrow-tl"></div>
-                    <div class="hud-arrow-tr"></div>
-                    <div class="hud-arrow-bl"></div>
-                    <div class="hud-arrow-br"></div>
-                </div>
-            </div>
+        {{-- ========== Action needed ========== --}}
+        <div class="hud-section-head">
+            <span class="ico"><i class="bi bi-bell"></i></span>
+            <h5>{{ __('admin.dashboard.action_needed_section') }}</h5>
+            <span class="hud-line"></span>
         </div>
-    </div>
 
-    {{-- ========== Section: Renewal Alerts ========== --}}
-    <div class="hud-section-head">
-        <span class="ico"><i class="bi bi-bell"></i></span>
-        <h5>{{ __('admin.dashboard.renewal_alerts') }}</h5>
-        <span class="hud-line"></span>
-        <small>{{ $expiringSoon->count() }} {{ __('admin.dashboard.renewal_alerts') }}</small>
-    </div>
-
-    <div class="row hud-row mb-4">
-        <div class="col-12">
-            <div class="hud-card hud-table-card">
-                <div class="hud-table-header">
-                    <h6>
-                        <i class="bi bi-bell-fill me-1" style="color:var(--hud-accent);"></i>
-                        {{ __('admin.dashboard.renewal_alerts') }}
-                    </h6>
-                    <span class="hud-badge hud-badge-warning">{{ $expiringSoon->count() }}</span>
-                </div>
-                <div class="hud-table-body">
-                    @if($expiringSoon->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0">
+        <div class="row g-3">
+            {{-- Pending invoices --}}
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="fw-bold mb-0">
+                                <i class="bi bi-receipt-cutoff me-1 text-warning"></i>
+                                {{ __('admin.dashboard.pending_invoices') }}
+                            </h6>
+                            <small class="text-muted">{{ __('admin.dashboard.pending_invoices_desc') }}</small>
+                        </div>
+                        @if($pendingInvoicesCount > 0)
+                            <a href="{{ route('admin.invoices.index', ['payment_status' => 'pending']) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                {{ __('admin.dashboard.view_all') }} ({{ $pendingInvoicesCount }})
+                            </a>
+                        @endif
+                    </div>
+                    <div class="card-body p-0">
+                        @if($pendingInvoices->isNotEmpty())
+                            <table class="table table-sm align-middle mb-0">
                                 <thead>
-                                    <tr>
+                                    <tr class="small text-muted">
                                         <th>{{ __('admin.dashboard.fisherman_name') }}</th>
-                                        <th>{{ __('admin.dashboard.phone') }}</th>
-                                        <th>{{ __('admin.dashboard.package') }}</th>
-                                        <th>{{ __('admin.dashboard.expires_in') }}</th>
-                                        <th class="text-center">{{ __('admin.actions.actions') }}</th>
+                                        <th>{{ __('admin.dashboard.invoice_number') }}</th>
+                                        <th class="text-end">{{ __('admin.dashboard.amount') }}</th>
+                                        <th class="text-center">{{ __('admin.dashboard.review') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($expiringSoon as $subscription)
+                                    @foreach($pendingInvoices as $invoice)
                                         <tr>
-                                            <td class="fw-medium">{{ $subscription->user->name ?? '--' }}</td>
-                                            <td>{{ $subscription->user->phone ?? '--' }}</td>
-                                            <td>
-                                                <span class="hud-badge hud-badge-info">
-                                                    {{ $subscription->package->name ?? '--' }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $daysLeft = \Carbon\Carbon::parse($subscription->end_date)
-                                                        ->diffInDays(\Carbon\Carbon::today());
-                                                @endphp
-                                                <span class="hud-badge {{ $daysLeft <= 3 ? 'hud-badge-danger' : 'hud-badge-warning' }}">
-                                                    {{ \Carbon\Carbon::parse($subscription->end_date)->diffForHumans() }}
-                                                </span>
-                                            </td>
+                                            <td class="fw-medium">{{ $invoice->user->name ?? '--' }}</td>
+                                            <td class="small text-muted">{{ $invoice->invoice_number }}</td>
+                                            <td class="text-end fw-semibold">{!! $money($invoice->total_amount) !!}</td>
                                             <td class="text-center">
-                                                <a href="{{ route('admin.subscriptions.show', $subscription->id) }}"
-                                                   class="btn btn-sm btn-outline-primary"
-                                                   style="border-radius:0;"
-                                                   title="{{ __('admin.actions.view') }}">
+                                                <a href="{{ route('admin.invoices.show', $invoice->id) }}"
+                                                   class="btn btn-sm btn-outline-primary" title="{{ __('admin.dashboard.review') }}">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             </td>
@@ -529,148 +248,242 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
-                    @else
-                        <div class="hud-empty">
-                            <i class="bi bi-check-circle"></i>
-                            <span>{{ __('admin.dashboard.no_expiring_subscriptions') }}</span>
-                        </div>
-                    @endif
+                        @else
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-check-circle-fill fs-1 d-block mb-2 text-success"></i>
+                                {{ __('admin.dashboard.no_pending_invoices') }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
+            </div>
 
-                <div class="hud-card-arrow">
-                    <div class="hud-arrow-tl"></div>
-                    <div class="hud-arrow-tr"></div>
-                    <div class="hud-arrow-bl"></div>
-                    <div class="hud-arrow-br"></div>
+            {{-- Expiring subscriptions --}}
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="fw-bold mb-0">
+                                <i class="bi bi-alarm me-1 text-danger"></i>
+                                {{ __('admin.dashboard.renewal_alerts') }}
+                            </h6>
+                            <small class="text-muted">{{ __('admin.dashboard.expiring_soon') }}</small>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        @if($expiringSoon->isNotEmpty())
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr class="small text-muted">
+                                        <th>{{ __('admin.dashboard.fisherman_name') }}</th>
+                                        <th>{{ __('admin.dashboard.package') }}</th>
+                                        <th>{{ __('admin.dashboard.expires_in') }}</th>
+                                        <th class="text-center">{{ __('admin.actions.view') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($expiringSoon as $subscription)
+                                        <tr>
+                                            <td class="fw-medium">{{ $subscription->user->name ?? '--' }}</td>
+                                            <td>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary">
+                                                    {{ $subscription->package->name ?? '--' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $daysLeft = (int) round($subscription->end_date->diffInDays(\Carbon\Carbon::today()));
+                                                @endphp
+                                                <span class="badge {{ $daysLeft <= 3 ? 'bg-danger' : 'bg-warning text-dark' }} bg-opacity-10 {{ $daysLeft <= 3 ? 'text-danger' : '' }}">
+                                                    {{ $subscription->end_date->diffForHumans() }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ route('admin.subscriptions.show', $subscription->id) }}"
+                                                   class="btn btn-sm btn-outline-primary" title="{{ __('admin.actions.view') }}">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-check-circle-fill fs-1 d-block mb-2 text-success"></i>
+                                {{ __('admin.dashboard.no_expiring_subscriptions') }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-</div>
+    </div>
 @endsection
 
 @section('script')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const IS_DARK = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-    const ACCENT = '#3675c2';
-    const ACCENT_MUTED = 'rgba(54,117,194,.12)';
-    const GRID   = IS_DARK ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
-    const LABEL  = IS_DARK ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.45)';
-    const CARD_BG = IS_DARK ? '#1b2a41' : '#fff';
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof Chart === 'undefined') { return; }
 
-    /* ---- MRR line chart ---- */
-    @if(isset($mrrHistory) && count($mrrHistory) > 0)
-    (function () {
-        const ctx = document.getElementById('mrrChart');
-        if (!ctx || typeof Chart === 'undefined') { return; }
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: @json(array_column($mrrHistory, 'month_label')),
-                datasets: [{
-                    label: '{{ __('admin.dashboard.mrr_value') }}',
-                    data: @json(array_column($mrrHistory, 'mrr')),
-                    borderColor: ACCENT,
-                    backgroundColor: ACCENT_MUTED,
-                    borderWidth: 2.5,
-                    pointRadius: 3,
-                    pointBackgroundColor: ACCENT,
-                    tension: .35,
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function (ctx) {
-                                return new Intl.NumberFormat('ar-SA', {
-                                    style: 'currency', currency: 'SAR', minimumFractionDigits: 0
-                                }).format(ctx.parsed.y);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: GRID },
-                        ticks: { color: LABEL, font: { size: 11 } }
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            const accent = '#3675c2';
+            const grid   = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+            const label  = isDark ? 'rgba(255,255,255,.6)'  : 'rgba(0,0,0,.5)';
+            const cardBg = isDark ? '#1b2a41' : '#fff';
+
+            const sar = new Intl.NumberFormat('{{ app()->getLocale() }}', {
+                style: 'currency', currency: 'SAR', maximumFractionDigits: 0
+            });
+
+            // ---- MRR trend ----
+            const mrrCanvas = document.getElementById('mrrChart');
+            if (mrrCanvas) {
+                new Chart(mrrCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: @json(array_column($mrrHistory, 'label')),
+                        datasets: [{
+                            label: "{{ __('admin.dashboard.mrr_value') }}",
+                            data: @json(array_column($mrrHistory, 'mrr')),
+                            borderColor: accent,
+                            backgroundColor: 'rgba(54,117,194,.12)',
+                            borderWidth: 2.5,
+                            pointRadius: 3,
+                            pointBackgroundColor: accent,
+                            tension: .35,
+                            fill: true,
+                        }]
                     },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: GRID },
-                        ticks: {
-                            color: LABEL,
-                            font: { size: 11 },
-                            callback: function (v) {
-                                return new Intl.NumberFormat('ar-SA', {
-                                    style: 'currency', currency: 'SAR', minimumFractionDigits: 0
-                                }).format(v);
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: c => sar.format(c.parsed.y) } }
+                        },
+                        scales: {
+                            x: { grid: { color: grid }, ticks: { color: label, font: { size: 11 } } },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: grid },
+                                ticks: { color: label, font: { size: 11 }, callback: v => sar.format(v) }
                             }
                         }
                     }
-                }
+                });
             }
-        });
-    }());
-    @endif
 
-    /* ---- Packages doughnut ---- */
-    @if(isset($packageSales) && $packageSales->count() > 0)
-    (function () {
-        const ctx = document.getElementById('packagesChart');
-        if (!ctx || typeof Chart === 'undefined') { return; }
-        const data = @json($packageSales);
-
-        /* Restrained blue-grey palette — no rainbow */
-        const palette = [
-            '#3675c2', '#5b92d4', '#7aaee2', '#9dc6ef',
-            '#c1d9f7', '#ddeafc', '#adb5bd', '#6c757d'
-        ];
-
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: data.map(function (p) {
-                    return p.package_name + ' (' + p.boats_count + ')';
-                }),
-                datasets: [{
-                    data: data.map(function (p) { return p.sales_count; }),
-                    backgroundColor: palette.slice(0, data.length),
-                    borderWidth: 1,
-                    borderColor: CARD_BG,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                cutout: '62%',
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: { font: { size: 11 }, color: LABEL, boxWidth: 10 }
+            // ---- Monthly collected revenue ----
+            const revenueCanvas = document.getElementById('revenueChart');
+            if (revenueCanvas) {
+                new Chart(revenueCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: @json(array_column($revenueHistory, 'label')),
+                        datasets: [{
+                            label: "{{ __('admin.dashboard.collected_revenue') }}",
+                            data: @json(array_column($revenueHistory, 'revenue')),
+                            backgroundColor: 'rgba(54,117,194,.7)',
+                            hoverBackgroundColor: accent,
+                            borderRadius: 6,
+                            maxBarThickness: 46,
+                        }]
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function (ctx) {
-                                return ctx.label + ': ' + ctx.parsed
-                                    + ' {{ __('admin.dashboard.sales_count') }}';
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: c => sar.format(c.parsed.y) } }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: label, font: { size: 11 } } },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: grid },
+                                ticks: { color: label, font: { size: 11 }, callback: v => sar.format(v) }
                             }
                         }
                     }
-                }
+                });
             }
+
+            // ---- Subscriptions by status ----
+            const statusCanvas = document.getElementById('statusChart');
+            if (statusCanvas) {
+                new Chart(statusCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            "{{ __('admin.dashboard.status_active') }}",
+                            "{{ __('admin.dashboard.status_pending') }}",
+                            "{{ __('admin.dashboard.status_trial') }}",
+                            "{{ __('admin.dashboard.status_expired') }}",
+                        ],
+                        datasets: [{
+                            data: [
+                                {{ (int) $activeSubscriptions }},
+                                {{ (int) $pendingSubscriptions }},
+                                {{ (int) $trialSubscriptions }},
+                                {{ (int) $expiredSubscriptions }},
+                            ],
+                            backgroundColor: ['#2e9e6b', '#e0a138', '#3675c2', '#adb5bd'],
+                            borderWidth: 1,
+                            borderColor: cardBg,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: label, font: { size: 11 }, boxWidth: 10 } },
+                            tooltip: {
+                                callbacks: {
+                                    label: c => c.label + ': ' + c.parsed + ' {{ __('admin.dashboard.subscription_unit') }}'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ---- Subscriptions by plan ----
+            const plansCanvas = document.getElementById('plansChart');
+            @if($subscriptionsByPlan->isNotEmpty())
+            if (plansCanvas) {
+                const plans = @json($subscriptionsByPlan);
+                const palette = ['#3675c2', '#5b92d4', '#7aaee2', '#9dc6ef', '#c1d9f7', '#adb5bd', '#6c757d'];
+                new Chart(plansCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: plans.map(p => p.name + ' (' + p.boats_count + ')'),
+                        datasets: [{
+                            data: plans.map(p => p.total),
+                            backgroundColor: palette.slice(0, plans.length),
+                            borderWidth: 1,
+                            borderColor: cardBg,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: label, font: { size: 11 }, boxWidth: 10 } },
+                            tooltip: {
+                                callbacks: {
+                                    label: c => c.label + ': ' + c.parsed + ' {{ __('admin.dashboard.subscription_unit') }}'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            @endif
         });
-    }());
-    @endif
-});
-</script>
+    </script>
 @endsection
