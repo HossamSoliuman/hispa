@@ -160,7 +160,7 @@ class User extends Authenticatable
         if ($key == '' || is_null($key)) {
             $firstLetter = strtoupper(mb_substr($this->name ?? 'U', 0, 1));
 
-            return 'https://ui-avatars.com/api/?name='.$firstLetter.'&background=random&color=fff';
+            return 'https://ui-avatars.com/api/?name=' . $firstLetter . '&background=random&color=fff';
         }
 
         return Storage::url($key);
@@ -375,7 +375,9 @@ class User extends Authenticatable
 
     public function hasBusinessStartupAccess(): bool
     {
-        return $this->role === 'owner';
+        $emails = array_map('trim', explode(',', env('BUSINESS_STARTUP_EMAILS', '')));
+
+        return in_array($this->email, $emails);
     }
 
     public function invoices()
