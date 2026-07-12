@@ -68,6 +68,7 @@ class FishHistoryReportDataTable extends DataTables
                 'totalWeight' => (float) $totalRemainingWeight,
 
             ])
+            ->rawColumns(['operation_type'])
             ->make(true);
     }
 

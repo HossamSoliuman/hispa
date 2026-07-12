@@ -14,8 +14,14 @@ use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OwnerController;
 use App\Http\Controllers\Admin\OwnerStockController;
+use App\Http\Controllers\Admin\Report\BoatReportController;
+use App\Http\Controllers\Admin\Report\FishHistoryReportController;
+use App\Http\Controllers\Admin\Report\OwnerReportController;
+use App\Http\Controllers\Admin\Report\ReportsHubController;
+use App\Http\Controllers\Admin\Report\RevenueReportController;
 use App\Http\Controllers\Admin\Report\SalesReportController;
 use App\Http\Controllers\Admin\Report\StockReportController;
+use App\Http\Controllers\Admin\Report\TripReportController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StockController;
@@ -186,6 +192,31 @@ Route::group([
             Route::get('stock-report', [StockReportController::class, 'index'])->name('stock-report');
             Route::get('stock-report/print', [StockReportController::class, 'print'])->name('stock-report.print');
             Route::get('getStockDataReport', [StockReportController::class, 'getStockData'])->name('getStockDataReport');
+
+            // Reports hub (landing page grouping every platform-wide report)
+            Route::get('reports', [ReportsHubController::class, 'index'])->name('reports-hub');
+
+            // Trip report (platform-wide)
+            Route::get('trip-report', [TripReportController::class, 'index'])->name('trip-report');
+            Route::get('trip-report/print/{trip_id?}', [TripReportController::class, 'print'])->name('trip-report.print');
+            Route::get('getTripDataReport', [TripReportController::class, 'getTripData'])->name('getTripDataReport');
+
+            // Fish stock history report (platform-wide)
+            Route::get('fish-history-report', [FishHistoryReportController::class, 'index'])->name('fish-history-report');
+            Route::get('fish-history-report/print', [FishHistoryReportController::class, 'print'])->name('fish-history-report.print');
+            Route::get('getFishHistoryDataReport', [FishHistoryReportController::class, 'getFishHistoryData'])->name('getFishHistoryDataReport');
+
+            // Boats report (platform-wide)
+            Route::get('boat-report', [BoatReportController::class, 'index'])->name('boat-report');
+            Route::get('boat-report/print', [BoatReportController::class, 'print'])->name('boat-report.print');
+
+            // Owners overview report (platform-wide)
+            Route::get('owner-report', [OwnerReportController::class, 'index'])->name('owner-report');
+            Route::get('owner-report/print', [OwnerReportController::class, 'print'])->name('owner-report.print');
+
+            // Subscriptions & revenue report (platform-wide)
+            Route::get('revenue-report', [RevenueReportController::class, 'index'])->name('revenue-report');
+            Route::get('revenue-report/print', [RevenueReportController::class, 'print'])->name('revenue-report.print');
 
             // Settings (tabbed: general, company, fish, categories, regions, governorates, ports)
             Route::resource('settings', SettingController::class);

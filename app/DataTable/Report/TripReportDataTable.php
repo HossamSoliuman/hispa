@@ -15,13 +15,17 @@ class TripReportDataTable extends DataTables
         Cache::forget('sidebar_trip_counts');
 
         if ($request->ajax()) {
-            $query = Trip::orderBy('created_at', 'desc');
+            $query = Trip::with(['owner', 'captain', 'counter', 'port', 'catches.details'])
+                ->orderBy('created_at', 'desc');
 
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
             }
             if ($request->has('status') && in_array($request->status, range(1, 8))) {
                 $query->where('status', $request->status);
+            }
+            if ($request->filled('boat_id')) {
+                $query->where('boat_id', $request->boat_id);
             }
 
             $data = $query->get();
@@ -49,12 +53,14 @@ class TripReportDataTable extends DataTables
                     return $trip->port->name ?? '--';
                 })
                 ->addColumn('item_count', function (Trip $trip) {
-                    return $trip->fishStocks->count() > 0 ? $trip->fishStocks->count() : '--';
+                    $count = ($trip->catches?->details ?? collect())->count();
+
+                    return $count > 0 ? $count : '--';
                 })
 
                 // return numeric weight (kg) so client formats display and sorting remains numeric
                 ->addColumn('item_weight', function (Trip $trip) {
-                    $weight = $trip->fishStocks->sum('weight');
+                    $weight = ($trip->catches?->details ?? collect())->sum('weight');
 
                     return (float) $weight;
                 })
@@ -111,9 +117,9 @@ class TripReportDataTable extends DataTables
 
                 ->with([
                     'trip_count' => $data->count(),
-                    'total_fish_count' => $data->sum(fn ($trip) => $trip->fishStocks->count()),
+                    'total_fish_count' => $data->sum(fn ($trip) => ($trip->catches?->details ?? collect())->count()),
                     // provide numeric totalWeight (kg) so client formats to ton/kg
-                    'totalWeight' => $data->sum(fn ($trip) => $trip->fishStocks->sum('weight')),
+                    'totalWeight' => $data->sum(fn ($trip) => ($trip->catches?->details ?? collect())->sum('weight')),
                 ])
 
                 ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'counter', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges

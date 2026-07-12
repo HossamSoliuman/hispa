@@ -1,0 +1,97 @@
+@extends('admin.layouts.master')
+@section('title')
+    {{ __('admin.report.boats.title') }}
+@endsection
+@section('content')
+    <div class="row mb-4 align-items-center justify-content-between">
+        <div class="col-md-6 col-sm-12 mb-2 mb-md-0">
+            <h2 class="fw-bold text-dark mb-1">{{ __('admin.report.boats.title') }}</h2>
+        </div>
+        <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
+            <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
+                <i class="bi bi-printer me-1"></i> {{ __('admin.report.boats.print') }}
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        @include('owner.components.stat-card', [
+            'title' => __('admin.report.boats.kpi.total_boats'),
+            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalBoats) . '</span>'),
+            'icon' => 'bi bi-water',
+            'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
+            'colClass' => 'col-md-3 col-sm-6',
+        ])
+        @include('owner.components.stat-card', [
+            'title' => __('admin.report.boats.kpi.active_boats'),
+            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($activeBoats) . '</span>'),
+            'icon' => 'bi bi-check-circle',
+            'gradient' => 'linear-gradient(135deg, #198754, #157347)',
+            'colClass' => 'col-md-3 col-sm-6',
+        ])
+        @include('owner.components.stat-card', [
+            'title' => __('admin.report.boats.kpi.total_maintenance_cost'),
+            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalMaintenanceCost, 2) . '</span> ' . view('components.riyal-icon')->render()),
+            'icon' => 'bi bi-tools',
+            'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
+            'colClass' => 'col-md-3 col-sm-6',
+        ])
+        @include('owner.components.stat-card', [
+            'title' => __('admin.report.boats.kpi.owners_covered'),
+            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($ownersCovered) . '</span>'),
+            'icon' => 'bi bi-people',
+            'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
+            'colClass' => 'col-md-3 col-sm-6',
+        ])
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover text-center align-middle">
+                    <thead>
+                        <tr>
+                            <th>{{ __('admin.report.boats.id') }}</th>
+                            <th>{{ __('admin.report.boats.name') }}</th>
+                            <th>{{ __('admin.report.boats.owner') }}</th>
+                            <th>{{ __('admin.report.boats.boat_type') }}</th>
+                            <th>{{ __('admin.report.boats.captain') }}</th>
+                            <th>{{ __('admin.report.boats.status') }}</th>
+                            <th>{{ __('admin.report.boats.maintenance_cost') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($boats as $index => $boat)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $boat->name }}</td>
+                                <td>{{ optional($boat->owner)->name ?? '---' }}</td>
+                                <td>{{ optional($boat->boat_type)->name ?? ($boat->type ?? '---') }}</td>
+                                <td>{{ optional($boat->captain)->name ?? '---' }}</td>
+                                <td>
+                                    @if ($boat->status == 1)
+                                        <span class="badge bg-success">{{ __('admin.report.boats.status_active') }}</span>
+                                    @else
+                                        <span class="badge bg-danger">{{ __('admin.report.boats.status_inactive') }}</span>
+                                    @endif
+                                </td>
+                                <td>{{ number_format($boat->maintenances->sum('cost'), 2) }} {!! view('components.riyal-icon')->render() !!}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-muted">{{ __('admin.report.boats.no_data') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('script')
+    <script type="text/javascript">
+        function printReport() {
+            window.open('{{ route('admin.boat-report.print') }}', '_blank');
+        }
+    </script>
+@endsection

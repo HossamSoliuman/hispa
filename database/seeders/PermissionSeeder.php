@@ -62,6 +62,9 @@ class PermissionSeeder extends Seeder
             'read_fish_stock_history_report',
             'read_trip_report',
             'read_sales_report',
+            'read_boat_report',
+            'read_owner_report',
+            'read_revenue_report',
         ]);
 
         $permissions = array_values(array_unique($permissions));

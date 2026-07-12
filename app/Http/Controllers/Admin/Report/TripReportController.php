@@ -3,48 +3,65 @@
 namespace App\Http\Controllers\Admin\Report;
 
 use App\DataTable\Report\TripReportDataTable;
+use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Boat;
 use App\Models\Fish;
+use App\Models\Setting;
+use App\Models\Trip;
+use App\Service\Owner\TripFinancialsService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 
 class TripReportController extends Controller
 {
-    private $datatable;
+    private TripReportDataTable $datatable;
 
     public function __construct()
     {
         $this->datatable = new TripReportDataTable;
         $this->middleware('permission:read_trip_report', ['only' => ['index', 'show']]);
-
     }
 
-    public function index()
+    public function index(): View
     {
         $fish = Fish::Active()->get(['id', 'name_ar', 'name_en']);
+        $boats = Boat::orderBy('id', 'desc')->get(['id', 'name_ar', 'name_en']);
 
-        return view('admin.report.tripe', compact('fish'));
+        return view('admin.report.trips', compact('fish', 'boats'));
     }
 
-    public function getTripData(Request $request)
+    public function getTripData(Request $request): ?JsonResponse
     {
         return $this->datatable->getData($request);
-
     }
 
     /**
-     * Print trip report (openable in new tab)
-     * Accepts optional filters: start_date, end_date, status, boat_id, trip_id
+     * Render the platform-wide printable trip report (all owners) using the shared
+     * standard-compliant view. Figures come from {@see TripFinancialsService} so the
+     * printed report matches the on-screen numbers, with no owner_id scoping applied.
      */
-    public function printTripReport(Request $request, $trip_id = null)
+    public function print(Request $request, ?int $trip_id = null): Response
     {
-        // Build query for trips according to filters
-        $query = \App\Models\Trip::with(['boat', 'captain', 'fishStocks.fish']);
+        $query = Trip::with([
+            'boat',
+            'captain',
+            'owner',
+            'port',
+            'catches.details.fish',
+            'catches.details.unit',
+            'sales.customer',
+            'sales.details',
+            'expenses.category',
+        ]);
 
         if ($trip_id) {
             $query->where('id', $trip_id);
         }
-
         if ($request->filled('start_date')) {
             $query->whereDate('start_date', '>=', Carbon::parse($request->start_date));
         }
@@ -60,7 +77,6 @@ class TripReportController extends Controller
 
         $trips = $query->orderBy('start_date', 'desc')->get();
 
-        // Prepare filters for diagnostics and view
         $filters = [
             'trip_id' => $trip_id,
             'from_date' => $request->filled('start_date') ? $request->start_date : null,
@@ -69,53 +85,76 @@ class TripReportController extends Controller
             'boat_id' => $request->filled('boat_id') ? $request->boat_id : null,
         ];
 
-        // Calculate statistics
+        $tripFinancials = app(TripFinancialsService::class);
+        $financials = $trips->mapWithKeys(function (Trip $trip) use ($tripFinancials): array {
+            return [$trip->id => $tripFinancials->compute($trip)];
+        });
+
         $statistics = [
             'total_trips' => $trips->count(),
-            'total_catch' => $trips->sum(function ($trip) {
-                return $trip->fishStocks->sum('weight');
-            }),
-            'total_revenue' => $trips->sum(function ($trip) {
-                return $trip->fishStocks->sum(function ($stock) {
-                    return $stock->fish ? ($stock->weight * ($stock->fish->price ?? 0)) : 0;
-                });
-            }),
-            'completed_trips' => $trips->where('status', 'completed')->count(),
-            'total_boats' => $trips->pluck('boat_id')->unique()->count(),
-            'fish_types' => $trips->flatMap(function ($trip) {
-                return $trip->fishStocks->pluck('fish_id');
+            'completed_trips' => $trips->filter(fn (Trip $trip): bool => $trip->status === TripStatus::Sold)->count(),
+            'total_boats' => $trips->pluck('boat_id')->filter()->unique()->count(),
+            'total_catch' => $financials->sum('catch_weight'),
+            'total_catch_by_unit' => $financials->reduce(function (Collection $carry, array $trip): Collection {
+                foreach ($trip['catch_weight_by_unit'] as $unit => $weight) {
+                    $carry[$unit] = ($carry[$unit] ?? 0) + $weight;
+                }
+
+                return $carry;
+            }, collect()),
+            'total_revenue' => $financials->sum('gross_revenue'),
+            'total_costs' => $financials->sum('total_costs'),
+            'net_profit' => $financials->sum('net_profit'),
+            'total_outstanding' => $financials->sum('outstanding'),
+            'fish_types' => $trips->flatMap(function (Trip $trip): Collection {
+                return $trip->catches?->details->pluck('fish_id') ?? collect();
             })->unique()->count(),
         ];
 
-        // Get settings for report header
-        $settings = [
-            'title' => \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'حسبة',
-            'address' => \App\Models\Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => \App\Models\Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => \App\Models\Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => \App\Models\Setting::where('key', 'logo')->value('value') ?? '',
-        ];
-
-        // Do not generate QR code for admin report prints (leave $qrCode empty so view won't render it)
-        $qrCode = null;
+        $settings = $this->getCompanySettings();
+        $qrCode = $settings['qr_code'] ?? null;
 
         $fromDate = $request->filled('start_date') ? Carbon::parse($request->start_date)->format('Y-m-d') : null;
         $toDate = $request->filled('end_date') ? Carbon::parse($request->end_date)->format('Y-m-d') : null;
 
         $trip = $trip_id ? $trips->first() : null;
 
-        return view('owner.reports.print.trip-report', compact(
+        $filename = $trip_id
+            ? 'trip-'.($trips->first()?->number ?? $trip_id).'.pdf'
+            : 'trips-report-'.($fromDate ?? 'all').'-to-'.($toDate ?? 'all').'.pdf';
+
+        return pdf_report(view('owner.reports.print.trip-report', compact(
             'trips',
             'statistics',
+            'financials',
             'settings',
             'qrCode',
             'fromDate',
             'toDate',
             'trip',
             'filters'
-        ));
+        )), [], $filename);
     }
 
-    // QR helpers removed for admin controller — owner controller retains its own helpers
+    /**
+     * Get platform company settings for the report header (admin oversees all owners,
+     * so these come from the global Setting table rather than a per-owner company).
+     *
+     * @return array<string, mixed>
+     */
+    private function getCompanySettings(): array
+    {
+        $companyName = Setting::where('key', 'site_name')->value('value') ?? config('app.name');
 
+        return [
+            'name' => $companyName,
+            'title' => $companyName,
+            'company_name' => $companyName,
+            'address' => Setting::where('key', 'address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'email')->value('value') ?? '',
+            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
+            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
+        ];
+    }
 }

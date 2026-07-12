@@ -129,13 +129,18 @@
             </div>
 
 
-            <div class="menu-item has-sub {{ request()->routeIs('admin.sales-report') || request()->routeIs('admin.stock-report') ? 'active' : '' }}">
+            <div class="menu-item has-sub {{ request()->routeIs('admin.reports-hub') || request()->routeIs('admin.sales-report*') || request()->routeIs('admin.stock-report*') || request()->routeIs('admin.trip-report*') || request()->routeIs('admin.fish-history-report*') || request()->routeIs('admin.boat-report*') || request()->routeIs('admin.owner-report*') || request()->routeIs('admin.revenue-report*') ? 'active' : '' }}">
                 <a href="#" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-graph-up"></i></span>
                     <span class="menu-text">{{ __('admin.menu.reports') }}</span>
                     <span class="menu-caret"><b class="caret"></b></span>
                 </a>
                 <div class="menu-submenu">
+                    <div class="menu-item {{ request()->routeIs('admin.reports-hub') ? 'active' : '' }}">
+                        <a href="{{ route('admin.reports-hub') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.reports_hub') }}</span>
+                        </a>
+                    </div>
                     <div class="menu-item {{ request()->routeIs('admin.sales-report*') ? 'active' : '' }}">
                         <a href="{{ route('admin.sales-report') }}" class="menu-link">
                             <span class="menu-text">{{ __('admin.menu.sales_report') }}</span>
@@ -144,6 +149,31 @@
                     <div class="menu-item {{ request()->routeIs('admin.stock-report*') ? 'active' : '' }}">
                         <a href="{{ route('admin.stock-report') }}" class="menu-link">
                             <span class="menu-text">{{ __('admin.menu.catch_report') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('admin.trip-report*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.trip-report') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.trips_report') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('admin.fish-history-report*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.fish-history-report') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.fish_history_report') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('admin.boat-report*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.boat-report') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.boats_report') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('admin.owner-report*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.owner-report') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.owners_report') }}</span>
+                        </a>
+                    </div>
+                    <div class="menu-item {{ request()->routeIs('admin.revenue-report*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.revenue-report') }}" class="menu-link">
+                            <span class="menu-text">{{ __('admin.menu.revenue_report') }}</span>
                         </a>
                     </div>
                 </div>
