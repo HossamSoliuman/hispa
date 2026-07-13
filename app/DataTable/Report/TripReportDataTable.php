@@ -5,21 +5,37 @@ namespace App\DataTable\Report;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Yajra\DataTables\DataTables;
 
 class TripReportDataTable extends DataTables
 {
+    /**
+     * Sum weight per unit and render it as a comma-separated breakdown
+     * (e.g. "100.00 كجم، 20.00 صندوق"), since weights are never converted between units.
+     */
+    private function weightBreakdown(Collection $details): string
+    {
+        $breakdown = $details
+            ->groupBy(fn ($detail) => $detail->unit->name ?: __('admin.units.kg'))
+            ->map(fn (Collection $group, $unitName) => number_format($group->sum('weight'), 2).' '.$unitName)
+            ->implode('، ');
+
+        return $breakdown ?: number_format(0, 2).' '.__('admin.units.kg');
+    }
+
     public function getData(Request $request)
     {
         Cache::forget('sidebar_trip_counts');
 
         if ($request->ajax()) {
-            $query = Trip::with(['owner', 'captain', 'counter', 'port', 'catches.details'])
+            $query = Trip::with(['owner', 'captain', 'counter', 'port', 'catches.details.unit'])
                 ->orderBy('created_at', 'desc');
 
             if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+                $query->whereDate('start_date', '>=', $request->start_date)
+                    ->whereDate('start_date', '<=', $request->end_date);
             }
             if ($request->has('status') && in_array($request->status, range(1, 8))) {
                 $query->where('status', $request->status);
@@ -52,32 +68,16 @@ class TripReportDataTable extends DataTables
                 ->addColumn('port', function (Trip $trip) {
                     return $trip->port->name ?? '--';
                 })
-                ->addColumn('item_count', function (Trip $trip) {
-                    $count = ($trip->catches?->details ?? collect())->count();
-
-                    return $count > 0 ? $count : '--';
-                })
-
-                // return numeric weight (kg) so client formats display and sorting remains numeric
                 ->addColumn('item_weight', function (Trip $trip) {
-                    $weight = ($trip->catches?->details ?? collect())->sum('weight');
-
-                    return (float) $weight;
+                    return $this->weightBreakdown($trip->catches?->details ?? collect());
                 })
 
                 ->addColumn('date', function (Trip $trip) {
                     if ($trip->start_date && $trip->end_date) {
-                        try {
-                            $start = formatHijriDate($trip->start_date, 'dd/MM/yyyy');
-                            $end = formatHijriDate($trip->end_date, 'dd/MM/yyyy');
+                        $start = Carbon::parse($trip->start_date)->format('d/m/Y');
+                        $end = Carbon::parse($trip->end_date)->format('d/m/Y');
 
-                            return $start.' - '.$end;
-                        } catch (\Throwable $e) {
-                            $start = Carbon::parse($trip->start_date)->format('d/m/Y');
-                            $end = Carbon::parse($trip->end_date)->format('d/m/Y');
-
-                            return $start.' - '.$end;
-                        }
+                        return $start.' - '.$end;
                     }
 
                     return '--';
@@ -117,9 +117,9 @@ class TripReportDataTable extends DataTables
 
                 ->with([
                     'trip_count' => $data->count(),
-                    'total_fish_count' => $data->sum(fn ($trip) => ($trip->catches?->details ?? collect())->count()),
-                    // provide numeric totalWeight (kg) so client formats to ton/kg
-                    'totalWeight' => $data->sum(fn ($trip) => ($trip->catches?->details ?? collect())->sum('weight')),
+                    'totalWeight' => $this->weightBreakdown(
+                        $data->flatMap(fn (Trip $trip) => $trip->catches?->details ?? collect())
+                    ),
                 ])
 
                 ->rawColumns(['action', 'status', 'name', 'port', 'owner', 'counter', 'captain', 'date', 'time', 'number']) // تأكد أن status أيضًا يحتوي على HTML مثل badges

@@ -29,21 +29,14 @@
             'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_trips">0</span>'),
             'icon' => 'bi bi-compass',
             'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-4 col-sm-6',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.trip.total_fish_count'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_fish">0</span>'),
-            'icon' => 'bi bi-basket',
-            'gradient' => 'linear-gradient(135deg, #6f42c1, #59339d)',
-            'colClass' => 'col-md-4 col-sm-6',
+            'colClass' => 'col-md-6 col-sm-6',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.trip.total_weight'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span> ' . __('admin.units.kg')),
+            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span>'),
             'icon' => 'bi bi-box-seam',
             'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-4 col-sm-6',
+            'colClass' => 'col-md-6 col-sm-6',
         ])
     </div>
 
@@ -95,7 +88,6 @@
                             <th>{{ __('admin.report.trip.owner') }}</th>
                             <th>{{ __('admin.report.trip.captain') }}</th>
                             <th>{{ __('admin.report.trip.port') }}</th>
-                            <th>{{ __('admin.report.trip.items_count') }}</th>
                             <th>{{ __('admin.report.trip.total_kg') }}</th>
                             <th>{{ __('admin.report.trip.status_th') }}</th>
                             <th>{{ __('admin.report.trip.start_end_date') }}</th>
@@ -139,8 +131,7 @@
                     },
                     dataSrc: function(json) {
                         if (json.trip_count !== undefined) $('#summary_total_trips').text(json.trip_count);
-                        if (json.total_fish_count !== undefined) $('#summary_total_fish').text(json.total_fish_count);
-                        if (json.totalWeight !== undefined) $('#summary_total_weight').text(parseFloat(json.totalWeight).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        if (json.totalWeight !== undefined) $('#summary_total_weight').text(json.totalWeight);
                         return json.data;
                     }
                 },
@@ -150,10 +141,7 @@
                     { data: 'owner', name: 'owner' },
                     { data: 'captain', name: 'captain' },
                     { data: 'port', name: 'port' },
-                    { data: 'item_count', name: 'item_count' },
-                    { data: 'item_weight', name: 'item_weight', render: function(data) {
-                        return parseFloat(data || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    } },
+                    { data: 'item_weight', name: 'item_weight' },
                     { data: 'status', name: 'status' },
                     { data: 'date', name: 'date' },
                     { data: 'date_count', name: 'date_count' }
