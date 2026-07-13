@@ -4,6 +4,7 @@
         :title="__('owner.stock_report.print_title')"
     />
 
+    @if ($showReportInfo ?? true)
     <x-report-info :settings="$settings" :from-date="$from" :to-date="$to">
         <x-slot:additionalInfo>
             <div class="info-row">
@@ -22,28 +23,25 @@
             </div>
         </x-slot:additionalInfo>
     </x-report-info>
+    @endif
 
     <x-report-stats :items="[
         ['label' => __('owner.stock_report.total_fish_types'), 'value' => $totalFishCount],
         ['label' => __('owner.stock_report.total_weight'), 'value' => number_format($totalWeight, 2) . ' ' . __('owner.stock_report.kg')],
     ]" />
 
-    <x-report-table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>{{ __('owner.stock_report.fish_name') }}</th>
-                <th>{{ __('owner.stock_report.captain_weight') }}</th>
-                <th>{{ __('owner.stock_report.counter_weight') }}</th>
-                <th>{{ __('owner.stock_report.total_weight') }}</th>
-                <th>{{ __('owner.stock_report.difference') }}</th>
-                <th>{{ __('owner.stock_report.added_by') }}</th>
-                <th>{{ __('owner.stock_report.corrected_by') }}</th>
-                <th>{{ __('owner.stock_report.date') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($stocks as $index => $stock)
+    <x-report-table :headers="[
+        '#',
+        __('owner.stock_report.fish_name'),
+        __('owner.stock_report.captain_weight'),
+        __('owner.stock_report.counter_weight'),
+        __('owner.stock_report.total_weight'),
+        __('owner.stock_report.difference'),
+        __('owner.stock_report.added_by'),
+        __('owner.stock_report.corrected_by'),
+        __('owner.stock_report.date'),
+    ]" :data="$stocks">
+        @foreach($stocks as $index => $stock)
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $stock->name }}</td>
@@ -55,14 +53,10 @@
                 <td>{{ $stock->correct_by ?? '---' }}</td>
                 <td>{{ $stock->date ? (class_exists('\\Alkoumi\\LaravelHijriDate\\Hijri') ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $stock->date) : \Carbon\Carbon::parse($stock->date)->format('d/m/Y')) : '---' }}</td>
             </tr>
-            @empty
-            <tr>
-                <td colspan="9" class="text-center">{{ __('owner.stock_report.no_data') }}</td>
-            </tr>
-            @endforelse
-        </tbody>
+        @endforeach
     </x-report-table>
 
+    @if ($showReportSummary ?? true)
     <x-report-summary :qr-code="$settings['qr_code'] ?? null">
         <x-report-summary-row
             :label="__('owner.stock_report.total_fish_types')"
@@ -74,4 +68,5 @@
             :highlight="true"
         />
     </x-report-summary>
+    @endif
 </x-report-layout>

@@ -83,7 +83,7 @@ class FishHistoryReportController extends Controller
 
         $filename = 'fish-history-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
 
-        return pdf_report(view('owner.report.fish_history_print', compact(
+        return pdf_report(view('owner.report.fish_history_print', array_merge(compact(
             'records',
             'totalRecords',
             'totalFishTypes',
@@ -93,7 +93,7 @@ class FishHistoryReportController extends Controller
             'from',
             'to',
             'fishName'
-        )), [], $filename);
+        ), ['showReportInfo' => false, 'showReportSummary' => false])), [], $filename);
     }
 
     /**

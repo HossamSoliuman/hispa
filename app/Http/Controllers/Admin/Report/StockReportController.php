@@ -55,7 +55,7 @@ class StockReportController extends Controller
 
         $filename = 'stock-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
 
-        return pdf_report(view('owner.report.stock_print', compact(
+        return pdf_report(view('owner.report.stock_print', array_merge(compact(
             'stocks',
             'totalFishCount',
             'totalWeight',
@@ -63,7 +63,7 @@ class StockReportController extends Controller
             'from',
             'to',
             'fishName'
-        )), [], $filename);
+        ), ['showReportInfo' => false, 'showReportSummary' => false])), [], $filename);
     }
 
     /**

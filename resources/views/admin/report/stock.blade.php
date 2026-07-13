@@ -3,20 +3,32 @@
     {{ __('admin.report.stock.title') }}
 @endsection
 @section('css')
-    <link href="{{ asset('dashboard/assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('dashboard/assets/plugins/datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('dashboard/assets/plugins/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css') }}" rel="stylesheet">
     <style>
-        #datatableDefault th, #datatableDefault td { text-align: center !important; vertical-align: middle; }
-        .small-text th, .small-text td { font-size: 12px; text-align: center !important; vertical-align: middle; font-weight: bold; }
+        #datatableDefault th,
+        #datatableDefault td {
+            text-align: center !important;
+            vertical-align: middle;
+        }
+
+        .small-text th,
+        .small-text td {
+            font-size: 12px;
+            text-align: center !important;
+            vertical-align: middle;
+            font-weight: bold;
+        }
     </style>
 @endsection
 @section('content')
-    <div class="row mb-4 align-items-center justify-content-between">
-        <div class="col-md-6 col-sm-12 mb-2 mb-md-0">
-            <h2 class="fw-bold text-dark mb-1">{{ __('admin.report.stock.title') }}</h2>
+    <div class="d-flex align-items-center mb-3">
+        <div>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.stock.report') }}</a></li>
+                <li class="breadcrumb-item active">{{ __('admin.report.stock.title') }}</li>
+            </ul>
+            <h1 class="page-header mb-0">{{ __('admin.report.stock.title') }}</h1>
         </div>
-        <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
+        <div class="ms-auto">
             <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
                 <i class="bi bi-printer me-1"></i> {{ __('admin.report.stock.print') }}
             </button>
@@ -29,28 +41,28 @@
             'value' => new \Illuminate\Support\HtmlString('<span id="totalFishCount">0</span>'),
             'icon' => 'bi bi-fish',
             'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.stock.total_weight'),
             'value' => new \Illuminate\Support\HtmlString('<span id="totalWeight">0</span> ' . __('admin.units.kg')),
             'icon' => 'bi bi-box-seam',
             'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.stock.added_by'),
             'value' => new \Illuminate\Support\HtmlString('<span id="totalRecords">0</span>'),
             'icon' => 'bi bi-list-ul',
             'gradient' => 'linear-gradient(135deg, #198754, #157347)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.stock.diff_kg'),
             'value' => new \Illuminate\Support\HtmlString('<span id="totalDiff">0</span>'),
             'icon' => 'bi bi-arrow-left-right',
             'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
     </div>
 
@@ -59,8 +71,8 @@
         $monthEnd = \Illuminate\Support\Carbon::now()->endOfMonth()->format('Y-m-d');
     @endphp
 
-    <div class="card">
-        <div class="card-body">
+    <div class="tab-content py-4">
+        <div class="tab-pane fade show active" id="allTab">
             <div class="row mb-3">
                 <div class="col-md-3">
                     <label for="start_date">{{ __('admin.report.stock.from_date') }}</label>
@@ -106,24 +118,35 @@
     </div>
 @endsection
 @section('script')
-    <script src="{{ asset('dashboard/assets/plugins/datatables.net/js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('dashboard/assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
     <script type="text/javascript">
         function printReport() {
-            var url = '{{ route("admin.stock-report.print") }}?';
+            var url = '{{ route('admin.stock-report.print') }}?';
             if ($('#start_date').val()) url += 'start_date=' + $('#start_date').val() + '&';
             if ($('#end_date').val()) url += 'end_date=' + $('#end_date').val() + '&';
             if ($('#fish_type_filter').val()) url += 'fish_type=' + $('#fish_type_filter').val() + '&';
             window.open(url, '_blank');
         }
+
         $(function() {
             var appLocale = '{{ app()->getLocale() }}';
             var languageOptions = appLocale === 'ar' ? { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json" } : {};
-            if ($.fn.DataTable.isDataTable('#datatableDefault')) $('#datatableDefault').DataTable().destroy();
+
+            if ($.fn.DataTable.isDataTable('#datatableDefault')) {
+                $('#datatableDefault').DataTable().destroy();
+            }
+
             var table = $('#datatableDefault').DataTable({
                 processing: true,
                 serverSide: true,
+                dom: "<'row mb-3'<'col-md-4'l><'col-md-4'f><'col-md-4 text-md-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row mt-2'<'col-sm-5'i><'col-sm-7'p>>",
                 language: languageOptions,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, '{{ __('admin.report.stock.all_label') }}']
+                ],
+                pageLength: 10,
                 ajax: {
                     url: "{{ route('admin.getStockDataReport') }}",
                     data: function(d) {
@@ -150,7 +173,9 @@
                     { data: 'correct_by', name: 'correct_by' },
                     { data: 'date', name: 'date' }
                 ],
-                responsive: true
+                buttons: [],
+                responsive: false,
+                scrollX: true
             });
             $('#filterBtn').on('click', function() { table.ajax.reload(); });
             $('#resetBtn').on('click', function() {

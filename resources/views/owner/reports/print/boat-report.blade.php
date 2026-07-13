@@ -6,6 +6,7 @@
         :settings="$settings"
     />
 
+    @if ($showReportInfo ?? true)
     <x-report-info :settings="$settings">
         <x-slot:additionalInfo>
             @if ($boat_id && isset($boats) && $boats->first())
@@ -25,6 +26,7 @@
             @endif
         </x-slot:additionalInfo>
     </x-report-info>
+    @endif
 
     <x-report-stats :items="[
         ['label' => __('owner.reports.total_boats'), 'value' => $statistics['total_boats']],
@@ -77,6 +79,7 @@
         @endforeach
     </x-report-table>
 
+    @if ($showReportSummary ?? true)
     <x-report-summary :qr-code="$qrCode">
         <x-report-summary-row
             :label="__('owner.reports.total_boats')"
@@ -93,5 +96,6 @@
             :highlight="true"
         />
     </x-report-summary>
+    @endif
 
 </x-report-layout>

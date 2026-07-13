@@ -13,11 +13,15 @@
         ];
     @endphp
 
-    <div class="row mb-4 align-items-center justify-content-between">
-        <div class="col-md-6 col-sm-12 mb-2 mb-md-0">
-            <h2 class="fw-bold text-dark mb-1">{{ __('admin.report.owners.title') }}</h2>
+    <div class="d-flex align-items-center mb-3">
+        <div>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.owners.report') }}</a></li>
+                <li class="breadcrumb-item active">{{ __('admin.report.owners.title') }}</li>
+            </ul>
+            <h1 class="page-header mb-0">{{ __('admin.report.owners.title') }}</h1>
         </div>
-        <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
+        <div class="ms-auto">
             <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
                 <i class="bi bi-printer me-1"></i> {{ __('admin.report.owners.print') }}
             </button>
@@ -30,33 +34,33 @@
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalOwners) . '</span>'),
             'icon' => 'bi bi-people',
             'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.owners.kpi.active_owners'),
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($activeOwners) . '</span>'),
             'icon' => 'bi bi-patch-check',
             'gradient' => 'linear-gradient(135deg, #198754, #157347)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.owners.kpi.total_boats'),
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalBoats) . '</span>'),
             'icon' => 'bi bi-water',
             'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.owners.kpi.total_quota'),
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalQuota) . '</span>'),
             'icon' => 'bi bi-diagram-3',
             'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
     </div>
 
-    <div class="card">
-        <div class="card-body">
+    <div class="tab-content py-4">
+        <div class="tab-pane fade show active" id="allTab">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered table-hover text-center align-middle">
                     <thead>

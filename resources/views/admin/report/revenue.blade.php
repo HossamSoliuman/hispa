@@ -9,11 +9,15 @@
     </style>
 @endsection
 @section('content')
-    <div class="row mb-4 align-items-center justify-content-between">
-        <div class="col-md-6 col-sm-12 mb-2 mb-md-0">
-            <h2 class="fw-bold text-dark mb-1">{{ __('admin.report.revenue.title') }}</h2>
+    <div class="d-flex align-items-center mb-3">
+        <div>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.revenue.report') }}</a></li>
+                <li class="breadcrumb-item active">{{ __('admin.report.revenue.title') }}</li>
+            </ul>
+            <h1 class="page-header mb-0">{{ __('admin.report.revenue.title') }}</h1>
         </div>
-        <div class="col-md-6 col-sm-12 text-md-end text-sm-start">
+        <div class="ms-auto">
             <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
                 <i class="bi bi-printer me-1"></i> {{ __('admin.report.revenue.print') }}
             </button>
@@ -26,33 +30,33 @@
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalInvoices) . '</span>'),
             'icon' => 'bi bi-receipt',
             'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.revenue.kpi.paid_revenue'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($paidRevenue, 2) . '</span> ' . view('components.riyal-icon')->render()),
+            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($paidRevenue, 2) . '</span> ' . view('components.riyal-icon', ['size' => 'sm'])->render()),
             'icon' => 'bi bi-cash-coin',
             'gradient' => 'linear-gradient(135deg, #198754, #157347)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.revenue.kpi.pending_amount'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($pendingAmount, 2) . '</span> ' . view('components.riyal-icon')->render()),
+            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($pendingAmount, 2) . '</span> ' . view('components.riyal-icon', ['size' => 'sm'])->render()),
             'icon' => 'bi bi-hourglass-split',
             'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.revenue.kpi.active_subscriptions'),
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($activeSubscriptions) . '</span>'),
             'icon' => 'bi bi-people',
             'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
-            'colClass' => 'col-md-3 col-sm-6',
+            'colClass' => 'col-md-6 col-lg-3',
         ])
     </div>
 
-    <div class="card">
-        <div class="card-body">
+    <div class="tab-content py-4">
+        <div class="tab-pane fade show active" id="allTab">
             <form method="GET" action="{{ route('admin.revenue-report') }}" class="row mb-3">
                 <div class="col-md-3">
                     <label for="start_date">{{ __('admin.report.revenue.from_date') }}</label>

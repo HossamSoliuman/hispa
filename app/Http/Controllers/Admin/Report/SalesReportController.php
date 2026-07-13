@@ -77,7 +77,7 @@ class SalesReportController extends Controller
         $filename = 'sales-report-'.($from ?? 'all').'-to-'.($to ?? 'all').'.pdf';
 
         // Reuse the shared, standard-compliant printable view (x-report-layout).
-        return pdf_report(view('owner.report.sales_print', compact(
+        return pdf_report(view('owner.report.sales_print', array_merge(compact(
             'sales',
             'totalSales',
             'totalWeight',
@@ -87,7 +87,7 @@ class SalesReportController extends Controller
             'from',
             'to',
             'status'
-        )), [], $filename);
+        ), ['showReportInfo' => false, 'showReportSummary' => false])), [], $filename);
     }
 
     /**

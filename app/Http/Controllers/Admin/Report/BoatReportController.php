@@ -70,13 +70,13 @@ class BoatReportController extends Controller
 
         $filename = 'boats-report-'.($boat_id ?? 'all').'.pdf';
 
-        return pdf_report(view('owner.reports.print.boat-report', compact(
+        return pdf_report(view('owner.reports.print.boat-report', array_merge(compact(
             'boats',
             'statistics',
             'settings',
             'qrCode',
             'boat_id'
-        )), [], $filename);
+        ), ['showReportInfo' => false, 'showReportSummary' => false])), [], $filename);
     }
 
     /**

@@ -6,7 +6,7 @@
 
 @section('content')
     <div class="mb-4">
-        <h2 class="fw-bold text-dark mb-1">{{ __('admin.report.hub.title') }}</h2>
+        <h2 class="mb-1">{{ __('admin.report.hub.title') }}</h2>
         <p class="text-muted mb-0">{{ __('admin.report.hub.subtitle') }}</p>
     </div>
 
@@ -57,8 +57,8 @@
             @endphp
             @if ($available->isNotEmpty())
                 <div class="col-md-6 col-xl-4">
-                    <div class="card h-100">
-                        <div class="card-header d-flex align-items-center gap-2">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-{{ $section['color'] }}-subtle border-0 d-flex align-items-center gap-2">
                             <i class="bi {{ $section['icon'] }} text-{{ $section['color'] }}"></i>
                             <span class="fw-bold">{{ $section['title'] }}</span>
                         </div>

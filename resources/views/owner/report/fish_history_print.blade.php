@@ -4,6 +4,7 @@
         :title="__('owner.fish_history_report.title')"
     />
 
+    @if ($showReportInfo ?? true)
     <x-report-info :settings="$settings" :from-date="$from" :to-date="$to">
         <x-slot:additionalInfo>
             <div class="info-row">
@@ -22,6 +23,7 @@
             </div>
         </x-slot:additionalInfo>
     </x-report-info>
+    @endif
 
     <x-report-stats :items="[
         ['label' => __('owner.stock_report.total_fish_types'), 'value' => $totalFishTypes ?? 0],
@@ -30,39 +32,31 @@
         ['label' => __('owner.reports.total_catch'), 'value' => number_format($totalCatch ?? 0, 2)],
     ]" />
 
-    <x-report-table>
-        <thead>
+    <x-report-table :headers="[
+        __('owner.fish_history_report.table.index'),
+        __('owner.fish_history_report.table.date'),
+        __('owner.fish_history_report.table.item'),
+        __('owner.fish_history_report.table.operation'),
+        __('owner.fish_history_report.table.weight'),
+        __('owner.fish_history_report.table.remaining_balance'),
+        __('owner.fish_history_report.table.user'),
+        __('owner.fish_history_report.table.notes'),
+    ]" :data="$records">
+        @foreach($records as $index => $r)
             <tr>
-                <th>{{ __('owner.fish_history_report.table.index') }}</th>
-                <th>{{ __('owner.fish_history_report.table.date') }}</th>
-                <th>{{ __('owner.fish_history_report.table.item') }}</th>
-                <th>{{ __('owner.fish_history_report.table.operation') }}</th>
-                <th>{{ __('owner.fish_history_report.table.weight') }}</th>
-                <th>{{ __('owner.fish_history_report.table.remaining_balance') }}</th>
-                <th>{{ __('owner.fish_history_report.table.user') }}</th>
-                <th>{{ __('owner.fish_history_report.table.notes') }}</th>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $r->created_at ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $r->created_at) : '---' }}</td>
+                <td>{{ $r->fish_name ?? ($r->name ?? '---') }}</td>
+                <td>{{ $r->operation_type ?? '---' }}</td>
+                <td>{{ number_format($r->changed_weight ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
+                <td>{{ number_format($r->remaining_weight ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
+                <td>{{ $r->user_name ?? ($r->added_by ?? '---') }}</td>
+                <td>{{ $r->notes ?? '---' }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @forelse($records as $index => $r)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $r->created_at ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $r->created_at) : '---' }}</td>
-                    <td>{{ $r->fish_name ?? ($r->name ?? '---') }}</td>
-                    <td>{{ $r->operation_type ?? '---' }}</td>
-                    <td>{{ number_format($r->changed_weight ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
-                    <td>{{ number_format($r->remaining_weight ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
-                    <td>{{ $r->user_name ?? ($r->added_by ?? '---') }}</td>
-                    <td>{{ $r->notes ?? '---' }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="8" class="text-center">{{ __('owner.fish_history_report.no_data') }}</td>
-                </tr>
-            @endforelse
-        </tbody>
+        @endforeach
     </x-report-table>
 
+    @if ($showReportSummary ?? true)
     <x-report-summary :qr-code="$settings['qr_code'] ?? null">
         <x-report-summary-row
             :label="__('owner.stock_report.total_fish_types')"
@@ -78,4 +72,5 @@
             :value="$totalRecords ?? ($records ? count($records) : 0)"
         />
     </x-report-summary>
+    @endif
 </x-report-layout>

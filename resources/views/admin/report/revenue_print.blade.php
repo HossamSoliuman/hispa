@@ -4,33 +4,6 @@
         :title="__('admin.report.revenue.print_title')"
     />
 
-    <x-report-info :settings="$settings" :from-date="$from" :to-date="$to">
-        <x-slot:additionalInfo>
-            <div class="info-row">
-                <div class="info-item">
-                    <span class="label">{{ __('admin.report.revenue.from_date') }}</span>
-                    <span class="value">{{ $from ? \Illuminate\Support\Carbon::parse($from)->format('Y-m-d') : __('admin.report.revenue.all_dates') }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">{{ __('admin.report.revenue.to_date') }}</span>
-                    <span class="value">{{ $to ? \Illuminate\Support\Carbon::parse($to)->format('Y-m-d') : __('admin.report.revenue.all_dates') }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">{{ __('admin.report.revenue.status') }}</span>
-                    <span class="value">
-                        @if($status === 'paid')
-                            {{ __('admin.report.revenue.paid') }}
-                        @elseif($status === 'pending')
-                            {{ __('admin.report.revenue.pending') }}
-                        @else
-                            {{ __('admin.report.revenue.all') }}
-                        @endif
-                    </span>
-                </div>
-            </div>
-        </x-slot:additionalInfo>
-    </x-report-info>
-
     <x-report-stats :items="[
         ['label' => __('admin.report.revenue.kpi.total_invoices'), 'value' => number_format($totalInvoices)],
         ['label' => __('admin.report.revenue.kpi.paid_revenue'), 'value' => $paidRevenue, 'money' => true, 'color' => '#16a085'],
@@ -65,27 +38,4 @@
             </tr>
         @endforeach
     </x-report-table>
-
-    <x-report-summary :qr-code="$settings['qr_code'] ?? null">
-        <x-report-summary-row
-            :label="__('admin.report.revenue.kpi.total_invoices')"
-            :value="number_format($totalInvoices)"
-        />
-        <x-report-summary-row
-            :label="__('admin.report.revenue.total_vat')"
-            :value="number_format($totalVat, 2)"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('admin.report.revenue.kpi.pending_amount')"
-            :value="number_format($pendingAmount, 2)"
-            :showCurrency="true"
-        />
-        <x-report-summary-row
-            :label="__('admin.report.revenue.kpi.paid_revenue')"
-            :value="number_format($paidRevenue, 2)"
-            :showCurrency="true"
-            :highlight="true"
-        />
-    </x-report-summary>
 </x-report-layout>

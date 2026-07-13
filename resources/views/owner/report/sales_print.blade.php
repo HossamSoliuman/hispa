@@ -4,6 +4,7 @@
         :title="__('owner.sales_report.print_title')"
     />
 
+    @if ($showReportInfo ?? true)
     <x-report-info :settings="$settings" :from-date="$from" :to-date="$to">
         <x-slot:additionalInfo>
             <div class="info-row">
@@ -22,6 +23,7 @@
             </div>
         </x-slot:additionalInfo>
     </x-report-info>
+    @endif
 
     @php $allDetails = $sales->flatMap(fn ($sale) => $sale->details); @endphp
 
@@ -32,37 +34,33 @@
         ['label' => __('owner.sales_report.net_owner_amount'), 'value' => $netOwnerAmount, 'money' => true, 'color' => '#16a085'],
     ]" />
 
-    <x-report-table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>{{ __('owner.sales_report.invoice_number') }}</th>
-                <th>{{ __('owner.sales_report.customer') }}</th>
-                <th>{{ __('owner.sales_report.payment_method') }}</th>
-                <th>{{ __('owner.sales_report.weight') }}</th>
-                <th>{{ __('owner.sales_report.total_price') }}</th>
-                <th>{{ __('owner.sales_report.date') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($sales as $index => $sale)
+    <x-report-table :headers="[
+        '#',
+        __('owner.sales_report.invoice_number'),
+        __('owner.sales_report.status'),
+        __('owner.sales_report.customer'),
+        __('owner.sales_report.payment_method'),
+        __('owner.sales_report.weight'),
+        __('owner.sales_report.total_price'),
+        __('owner.sales_report.date'),
+    ]" :data="$sales">
+        @foreach($sales as $index => $sale)
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $sale->number }}</td>
+                <td>
+                    <span class="badge {{ $sale->status == 2 ? 'bg-success' : ($sale->status == 1 ? 'bg-warning' : 'bg-secondary') }}">{{ \App\Models\Sale::statusText($sale->status) }}</span>
+                </td>
                 <td>{{ $sale->customer_name ?? optional($sale->customer)->name ?? '---' }}</td>
                 <td>{{ optional($sale->paymentMethod)->name ?? '---' }}</td>
                 <td>{{ formatWeightByUnit($sale->details) }}</td>
                 <td><x-report-money :amount="$sale->total_price" /></td>
                 <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '---' }}</td>
             </tr>
-            @empty
-            <tr>
-                <td colspan="7" class="text-center">{{ __('owner.sales_report.no_data') }}</td>
-            </tr>
-            @endforelse
-        </tbody>
+        @endforeach
     </x-report-table>
 
+    @if ($showReportSummary ?? true)
     <x-report-summary :qr-code="$settings['qr_code'] ?? null">
         <x-report-summary-row
             :label="__('owner.sales_report.total_sales')"
@@ -84,4 +82,5 @@
             :highlight="true"
         />
     </x-report-summary>
+    @endif
 </x-report-layout>

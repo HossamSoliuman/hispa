@@ -1283,6 +1283,7 @@ return [
         ],
         'boats' => [
             'title' => 'Boats Report',
+            'report' => 'Reports',
             'print' => 'Print',
             'kpi' => [
                 'total_boats' => 'Total Boats',
@@ -1301,6 +1302,7 @@ return [
         ],
         'owners' => [
             'title' => 'Owners Overview Report',
+            'report' => 'Reports',
             'print' => 'Print',
             'print_title' => 'Owners Overview Report',
             'from_date' => 'From Date',
@@ -1332,6 +1334,7 @@ return [
         ],
         'revenue' => [
             'title' => 'Subscriptions & Revenue Report',
+            'report' => 'Reports',
             'menu' => 'Subscriptions & Revenue',
             'print' => 'Print',
             'print_title' => 'Subscriptions & Revenue Report',
