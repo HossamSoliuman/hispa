@@ -47,16 +47,21 @@
         ])
     </div>
 
+    @php
+        $monthStart = \Illuminate\Support\Carbon::now()->startOfMonth()->format('Y-m-d');
+        $monthEnd = \Illuminate\Support\Carbon::now()->endOfMonth()->format('Y-m-d');
+    @endphp
+
     <div class="card">
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-3">
                     <label for="start_date">{{ __('admin.report.fish_history.from_date') }}</label>
-                    <input type="date" id="start_date" class="form-control">
+                    <input type="date" id="start_date" class="form-control" value="{{ $monthStart }}" data-default="{{ $monthStart }}">
                 </div>
                 <div class="col-md-3">
                     <label for="end_date">{{ __('admin.report.fish_history.to_date') }}</label>
-                    <input type="date" id="end_date" class="form-control">
+                    <input type="date" id="end_date" class="form-control" value="{{ $monthEnd }}" data-default="{{ $monthEnd }}">
                 </div>
                 <div class="col-md-3">
                     <label for="fish_filter">{{ __('admin.report.fish_history.fish_type') }}</label>
@@ -142,8 +147,8 @@
             });
             $('#filterBtn').on('click', function() { table.ajax.reload(); });
             $('#resetBtn').on('click', function() {
-                $('#start_date').val('');
-                $('#end_date').val('');
+                $('#start_date').val($('#start_date').data('default'));
+                $('#end_date').val($('#end_date').data('default'));
                 $('#fish_filter').val('');
                 table.ajax.reload();
             });

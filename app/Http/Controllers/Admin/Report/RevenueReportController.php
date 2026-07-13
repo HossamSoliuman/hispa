@@ -60,15 +60,12 @@ class RevenueReportController extends Controller
      */
     private function buildReport(Request $request): array
     {
-        $query = Invoice::with(['user', 'subscription.package']);
+        $from = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $to = $request->input('end_date', now()->endOfMonth()->toDateString());
 
-        if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
-        }
-
-        if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
-        }
+        $query = Invoice::with(['user', 'subscription.package'])
+            ->whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to);
 
         if ($request->filled('payment_status')) {
             $query->where('payment_status', $request->payment_status);
@@ -85,8 +82,8 @@ class RevenueReportController extends Controller
         ];
 
         $filters = [
-            'from' => $request->start_date ?: null,
-            'to' => $request->end_date ?: null,
+            'from' => $from,
+            'to' => $to,
             'status' => $request->payment_status ?: null,
         ];
 

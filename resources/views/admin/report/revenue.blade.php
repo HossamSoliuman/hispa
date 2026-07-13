@@ -56,11 +56,11 @@
             <form method="GET" action="{{ route('admin.revenue-report') }}" class="row mb-3">
                 <div class="col-md-3">
                     <label for="start_date">{{ __('admin.report.revenue.from_date') }}</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
+                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ $from }}">
                 </div>
                 <div class="col-md-3">
                     <label for="end_date">{{ __('admin.report.revenue.to_date') }}</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
+                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ $to }}">
                 </div>
                 <div class="col-md-3">
                     <label for="payment_status">{{ __('admin.report.revenue.status') }}</label>
