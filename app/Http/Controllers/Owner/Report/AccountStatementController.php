@@ -165,8 +165,8 @@ class AccountStatementController extends Controller
     {
         return Expense::where('vendor_id', $vendor->id)
             ->with(['category', 'trip'])
-            ->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('created_at', '<=', $to))
+            ->when($from, fn ($q) => $q->whereDate('date', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('date', '<=', $to))
             ->orderByDesc('created_at')
             ->get();
     }
