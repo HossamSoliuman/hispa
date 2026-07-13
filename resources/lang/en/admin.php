@@ -1287,7 +1287,6 @@ return [
             'kpi' => [
                 'total_boats' => 'Total Boats',
                 'active_boats' => 'Active Boats',
-                'total_maintenance_cost' => 'Total Maintenance Cost',
                 'owners_covered' => 'Owners Covered',
             ],
             'id' => '#',
@@ -1296,7 +1295,6 @@ return [
             'boat_type' => 'Boat Type',
             'captain' => 'Captain',
             'status' => 'Status',
-            'maintenance_cost' => 'Maintenance Cost',
             'status_active' => 'Active',
             'status_inactive' => 'Inactive',
             'no_data' => 'No boats found',

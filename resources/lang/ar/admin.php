@@ -1309,7 +1309,6 @@ return [
             'kpi' => [
                 'total_boats' => 'إجمالي القوارب',
                 'active_boats' => 'القوارب النشطة',
-                'total_maintenance_cost' => 'إجمالي تكلفة الصيانة',
                 'owners_covered' => 'عدد الملاك',
             ],
             'id' => '#',
@@ -1318,7 +1317,6 @@ return [
             'boat_type' => 'نوع القارب',
             'captain' => 'القبطان',
             'status' => 'الحالة',
-            'maintenance_cost' => 'تكلفة الصيانة',
             'status_active' => 'نشط',
             'status_inactive' => 'غير نشط',
             'no_data' => 'لا توجد قوارب',

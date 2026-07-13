@@ -30,13 +30,6 @@
             'colClass' => 'col-md-3 col-sm-6',
         ])
         @include('owner.components.stat-card', [
-            'title' => __('admin.report.boats.kpi.total_maintenance_cost'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalMaintenanceCost, 2) . '</span> ' . view('components.riyal-icon')->render()),
-            'icon' => 'bi bi-tools',
-            'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-3 col-sm-6',
-        ])
-        @include('owner.components.stat-card', [
             'title' => __('admin.report.boats.kpi.owners_covered'),
             'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($ownersCovered) . '</span>'),
             'icon' => 'bi bi-people',
@@ -57,7 +50,6 @@
                             <th>{{ __('admin.report.boats.boat_type') }}</th>
                             <th>{{ __('admin.report.boats.captain') }}</th>
                             <th>{{ __('admin.report.boats.status') }}</th>
-                            <th>{{ __('admin.report.boats.maintenance_cost') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,11 +67,10 @@
                                         <span class="badge bg-danger">{{ __('admin.report.boats.status_inactive') }}</span>
                                     @endif
                                 </td>
-                                <td>{{ number_format($boat->maintenances->sum('cost'), 2) }} {!! view('components.riyal-icon')->render() !!}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-muted">{{ __('admin.report.boats.no_data') }}</td>
+                                <td colspan="6" class="text-muted">{{ __('admin.report.boats.no_data') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

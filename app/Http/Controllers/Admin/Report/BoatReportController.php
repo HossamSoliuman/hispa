@@ -18,20 +18,18 @@ class BoatReportController extends Controller
      */
     public function index()
     {
-        $boats = Boat::with(['owner', 'boat_type', 'captain', 'maintenances'])
+        $boats = Boat::with(['owner', 'boat_type', 'captain'])
             ->orderBy('id', 'desc')
             ->get();
 
         $totalBoats = $boats->count();
         $activeBoats = $boats->where('status', 1)->count();
-        $totalMaintenanceCost = $boats->sum(fn (Boat $boat): float => (float) $boat->maintenances->sum('cost'));
         $ownersCovered = $boats->pluck('owner_id')->filter()->unique()->count();
 
         return view('admin.report.boats', compact(
             'boats',
             'totalBoats',
             'activeBoats',
-            'totalMaintenanceCost',
             'ownersCovered'
         ));
     }
