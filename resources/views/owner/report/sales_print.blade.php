@@ -40,10 +40,7 @@
                 <th>{{ __('owner.sales_report.customer') }}</th>
                 <th>{{ __('owner.sales_report.payment_method') }}</th>
                 <th>{{ __('owner.sales_report.weight') }}</th>
-                <th>{{ __('owner.sales_report.commission') }}</th>
-                <th>{{ __('owner.sales_report.labor') }}</th>
                 <th>{{ __('owner.sales_report.total_price') }}</th>
-                <th>{{ __('owner.sales_report.net_owner') }}</th>
                 <th>{{ __('owner.sales_report.date') }}</th>
             </tr>
         </thead>
@@ -55,15 +52,12 @@
                 <td>{{ $sale->customer_name ?? optional($sale->customer)->name ?? '---' }}</td>
                 <td>{{ optional($sale->paymentMethod)->name ?? '---' }}</td>
                 <td>{{ formatWeightByUnit($sale->details) }}</td>
-                <td>{{ $sale->commission_rate }}%</td>
-                <td>{{ $sale->labor_rate }}%</td>
                 <td><x-report-money :amount="$sale->total_price" /></td>
-                <td><x-report-money :amount="$sale->net_owner_amount" /></td>
                 <td>{{ $sale->sale_datetime ? \Illuminate\Support\Carbon::parse($sale->sale_datetime)->format('Y-m-d') : '---' }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="10" class="text-center">{{ __('owner.sales_report.no_data') }}</td>
+                <td colspan="7" class="text-center">{{ __('owner.sales_report.no_data') }}</td>
             </tr>
             @endforelse
         </tbody>

@@ -83,9 +83,8 @@ class TripDataTable extends DataTables
 
                 ->addColumn('date', function (Trip $trip) {
                     if ($trip->start_date && $trip->end_date) {
-                        // use Hijri formatting helper
-                        $start = formatHijriDate($trip->start_date);
-                        $end = formatHijriDate($trip->end_date);
+                        $start = Carbon::parse($trip->start_date)->format('Y-m-d');
+                        $end = Carbon::parse($trip->end_date)->format('Y-m-d');
 
                         return $start.' - '.$end;
                     }

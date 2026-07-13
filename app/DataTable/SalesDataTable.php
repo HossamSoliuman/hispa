@@ -116,20 +116,20 @@ class SalesDataTable extends DataTables
                 ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')
                 ->addColumn('labor_rate', fn ($row) => $row->labor_rate.'%')
 
-                ->addColumn('total_price', fn ($row) => number_format($row->total_price, 2))
-                ->addColumn('net_owner_amount', fn ($row) => number_format($row->net_owner_amount, 2))
-                ->addColumn('remaining_total', fn ($row) => number_format($row->remaining_total, 2))
+                ->addColumn('total_price', function ($row) {
+                    return number_format($row->total_price, 2).' '.view('components.riyal-icon', ['size' => 'sm'])->render();
+                })
+                ->addColumn('net_owner_amount', function ($row) {
+                    return number_format($row->net_owner_amount, 2).' '.view('components.riyal-icon', ['size' => 'sm'])->render();
+                })
+                ->addColumn('remaining_total', function ($row) {
+                    return number_format($row->remaining_total, 2).' '.view('components.riyal-icon', ['size' => 'sm'])->render();
+                })
 
                 ->addColumn('date', function ($row) {
-                    if (! $row->sale_datetime) {
-                        return '---';
-                    }
-                    // use Hijri formatting helper (include time)
-                    try {
-                        return formatHijriDate($row->sale_datetime, 'dd/MM/yyyy HH:mm');
-                    } catch (\Throwable $e) {
-                        return Carbon::parse($row->sale_datetime)->format('Y-m-d H:i');
-                    }
+                    return $row->sale_datetime
+                        ? Carbon::parse($row->sale_datetime)->format('Y-m-d H:i')
+                        : '---';
                 })
 
                 ->addColumn('details', function ($row) {
@@ -140,7 +140,7 @@ class SalesDataTable extends DataTables
                     'total_weight' => round($totalWeight, 2),
                     'total_amount' => round($totalAmount, 2),
                 ])
-                ->rawColumns(['status', 'seller', 'details'])
+                ->rawColumns(['status', 'seller', 'total_price', 'net_owner_amount', 'remaining_total', 'details'])
                 ->make(true);
         }
     }

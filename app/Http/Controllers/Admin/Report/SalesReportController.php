@@ -35,15 +35,16 @@ class SalesReportController extends Controller
      */
     public function print(Request $request)
     {
-        // Build query (admin can see all sales)
-        $query = Sale::with(['details', 'details.unit', 'paymentMethod', 'seller', 'customer']);
+        // Build query (admin oversees every owner's sales)
+        $query = Sale::with(['details', 'details.unit', 'paymentMethod', 'seller', 'customer'])
+            ->where('seller_type', 'owner');
 
-        // Date range filter
+        // Date range filter (on the sale date, not the created_at timestamp)
         if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
+            $query->whereDate('sale_datetime', '>=', $request->start_date);
         }
         if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
+            $query->whereDate('sale_datetime', '<=', $request->end_date);
         }
 
         // Status filter
@@ -55,7 +56,7 @@ class SalesReportController extends Controller
         if ($request->filled('sale_id')) {
             $sales = $query->where('id', $request->sale_id)->get();
         } else {
-            $sales = $query->orderBy('created_at', 'desc')->get();
+            $sales = $query->orderBy('sale_datetime', 'desc')->get();
         }
 
         // Calculate totals

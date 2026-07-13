@@ -11,22 +11,27 @@ class SalesReportDataTable extends DataTables
 {
     public function getData(Request $request)
     {
-
         if ($request->ajax()) {
-            $query = Sale::with(['details', 'paymentMethod', 'seller', 'customer']);
+            $query = Sale::with(['details', 'details.unit', 'paymentMethod', 'seller', 'customer'])
+                ->where('seller_type', 'owner');
 
-            if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('created_at', [
-                    $request->start_date,
-                    $request->end_date,
-                ]);
+            if ($request->filled('start_date')) {
+                $query->whereDate('sale_datetime', '>=', $request->start_date);
+            }
+            if ($request->filled('end_date')) {
+                $query->whereDate('sale_datetime', '<=', $request->end_date);
             }
 
-            // فلترة حسب الحالة
             if ($request->filled('status')) {
                 $query->where('status', $request->status);
             }
-            $data = $query->get();
+
+            $data = $query->orderBy('sale_datetime', 'desc')->get();
+
+            $totalSales = $data->count();
+            $totalWeight = formatWeightByUnit($data->flatMap(fn ($row) => $row->details));
+            $totalRevenue = $data->sum('total_price');
+            $netOwnerAmount = $data->sum('net_owner_amount');
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -41,38 +46,29 @@ class SalesReportDataTable extends DataTables
 
                     return '<span class="'.$class.'">'.$text.'</span>';
                 })
-                ->addColumn('seller', function ($row) {
-                    $name = optional($row->seller)->name ?? '---';
-
-                    return match ($row->seller_type) {
-                        'dalal' => '<span class="badge bg-info">'.$name.' - '.__('admin.sales.dalal').'</span>',
-                        'owner' => '<span class="badge bg-primary">'.$name.' - '.__('admin.sales.owner').'</span>',
-                        default => '<span class="badge bg-secondary">'.$name.' - '.__('admin.sales.unknown').'</span>',
-                    };
-                })
                 ->addColumn('customer', fn ($row) => $row->customer_name ?? optional($row->customer)->name)
                 ->addColumn('payment_method', fn ($row) => optional($row->paymentMethod)->name)
-                ->addColumn('total_weight', fn ($row) => $row->details->sum('weight').' '.__('admin.units.kg'))
-                ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')
-                ->addColumn('labor_rate', fn ($row) => $row->labor_rate.'%')
-                ->addColumn('total_price', fn ($row) => number_format($row->total_price, 2))
-                ->addColumn('net_owner_amount', fn ($row) => number_format($row->net_owner_amount, 2))
-                ->addColumn('remaining_total', fn ($row) => number_format($row->remaining_total, 2))
+                ->addColumn('total_weight', fn ($row) => formatWeightByUnit($row->details))
+                ->addColumn('total_price', function ($row) {
+                    $icon = view('components.riyal-icon', ['size' => 'sm'])->render();
+
+                    return number_format($row->total_price, 2).' <span class="unit">'.$icon.'</span>';
+                })
                 ->addColumn('date', function ($row) {
-                    if (! $row->sale_datetime) {
-                        return '---';
-                    }
-                    // Use Hijri formatting helper if available; include time
-                    try {
-                        return formatHijriDate($row->sale_datetime, 'dd/MM/yyyy HH:mm');
-                    } catch (\Throwable $e) {
-                        return Carbon::parse($row->sale_datetime)->format('Y-m-d h:i A');
-                    }
+                    return $row->sale_datetime
+                        ? Carbon::parse($row->sale_datetime)->format('Y-m-d h:i A')
+                        : '---';
                 })
                 ->addColumn('details', function ($row) {
                     return '<a href="'.route('admin.sales.show', $row->id).'" class="btn btn-sm btn-info"> '.__('admin.actions.show').'</a>';
                 })
-                ->rawColumns(['status', 'seller', 'details'])
+                ->rawColumns(['status', 'total_price', 'details'])
+                ->with([
+                    'total_sales' => $totalSales,
+                    'total_weight' => $totalWeight,
+                    'total_revenue' => $totalRevenue,
+                    'net_owner_amount' => $netOwnerAmount,
+                ])
                 ->make(true);
         }
     }

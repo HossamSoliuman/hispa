@@ -80,14 +80,9 @@ class StockReportDataTable extends DataTables
             ->addColumn('weight_difference', fn ($row) => '<span class="text-muted">0 '.__('admin.units.kg').'</span>')
             ->addColumn('correct_by', fn ($row) => '---')
             ->addColumn('date', function ($row) {
-                if (! $row->created_at) {
-                    return '---';
-                }
-                try {
-                    return formatHijriDate($row->created_at, 'dd/MM/yyyy HH:mm');
-                } catch (\Throwable $e) {
-                    return \Carbon\Carbon::parse($row->created_at)->format('Y-m-d h:i A');
-                }
+                return $row->created_at
+                    ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d h:i A')
+                    : '---';
             })
             ->with([
                 'total_fish_count' => $data->count(),
@@ -141,14 +136,9 @@ class StockReportDataTable extends DataTables
             })
             ->addColumn('correct_by', fn ($row) => $row->correct_by_name ?? '---')
             ->addColumn('date', function ($row) {
-                if (! $row->created_at) {
-                    return '---';
-                }
-                try {
-                    return formatHijriDate($row->created_at, 'dd/MM/yyyy HH:mm');
-                } catch (\Throwable $e) {
-                    return \Carbon\Carbon::parse($row->created_at)->format('Y-m-d h:i A');
-                }
+                return $row->created_at
+                    ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d h:i A')
+                    : '---';
             })
             ->with([
                 'total_fish_count' => $data->count(),

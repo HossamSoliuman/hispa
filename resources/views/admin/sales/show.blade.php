@@ -28,9 +28,9 @@
                     <p class="mb-1"><strong>{{ __('admin.sales.payment_status') ?? __('admin.invoices.payment_status') }}:</strong> {{ \App\Models\Sale::paymentStatusText($sale->payment_status) }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p class="mb-1"><strong>{{ __('admin.sales.total_price') ?? __('admin.owner_stock_fish_quantity.total_price') }}:</strong> {{ number_format($sale->total_price, 2) }}</p>
-                    <p class="mb-1"><strong>{{ __('admin.sales.net_owner_amount') ?? __('admin.invoices.amount') }}:</strong> {{ number_format($sale->net_owner_amount, 2) }}</p>
-                    <p class="mb-1"><strong>{{ __('admin.sales.remaining_total') ?? __('admin.invoices.pending') }}:</strong> {{ number_format($sale->remaining_total, 2) }}</p>
+                    <p class="mb-1"><strong>{{ __('admin.sales.total_price') ?? __('admin.owner_stock_fish_quantity.total_price') }}:</strong> {{ number_format($sale->total_price, 2) }} <x-riyal-icon size="sm" /></p>
+                    <p class="mb-1"><strong>{{ __('admin.sales.net_owner_amount') ?? __('admin.invoices.amount') }}:</strong> {{ number_format($sale->net_owner_amount, 2) }} <x-riyal-icon size="sm" /></p>
+                    <p class="mb-1"><strong>{{ __('admin.sales.remaining_total') ?? __('admin.invoices.pending') }}:</strong> {{ number_format($sale->remaining_total, 2) }} <x-riyal-icon size="sm" /></p>
                 </div>
             </div>
 
@@ -49,7 +49,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ optional($detail->fish)->name ?? '---' }}</td>
                             <td>{{ number_format($detail->weight ?? 0, 2) }} {{ __('admin.stocks_admin.unit_kg') }}</td>
-                            <td>{{ number_format($detail->total_price ?? 0, 2) }}</td>
+                            <td>{{ number_format($detail->total_price ?? 0, 2) }} <x-riyal-icon size="sm" /></td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -57,7 +57,7 @@
                     <tr>
                         <th colspan="2">{{ __('admin.catch.total') ?? __('admin.owner_stock_fish_quantity.total_price') }}</th>
                         <th>{{ number_format($sale->details->sum('weight'), 2) }} {{ __('admin.stocks_admin.unit_kg') }}</th>
-                        <th>{{ number_format($sale->details->sum('total_price'), 2) }}</th>
+                        <th>{{ number_format($sale->details->sum('total_price'), 2) }} <x-riyal-icon size="sm" /></th>
                     </tr>
                 </tfoot>
             </table>

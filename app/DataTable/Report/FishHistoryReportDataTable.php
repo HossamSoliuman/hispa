@@ -52,14 +52,9 @@ class FishHistoryReportDataTable extends DataTables
             ->addColumn('remaining_weight', fn ($row) => (float) $row->remaining_weight)
             ->editColumn('operation_type', fn ($row) => $this->getOperationTypeBadge($row->operation_type))
             ->editColumn('created_at', function ($row) {
-                if (! $row->created_at) {
-                    return '---';
-                }
-                try {
-                    return formatHijriDate($row->created_at, 'dd/MM/yyyy HH:mm');
-                } catch (\Throwable $e) {
-                    return $row->created_at->format('d/m/Y H:i');
-                }
+                return $row->created_at
+                    ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d H:i')
+                    : '---';
             })
             ->with([
                 'fish_history_count' => $totalRecords,

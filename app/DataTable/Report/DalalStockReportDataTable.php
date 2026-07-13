@@ -54,14 +54,10 @@ class DalalStockReportDataTable extends DataTables
                 ->addColumn('total_weight', fn ($row) => (float) $row->total_weight)
                 ->addColumn('date', function ($row) {
                     $source = $row->first_created_at ?? $row->created_date ?? null;
-                    if (! $source) {
-                        return '---';
-                    }
-                    try {
-                        return formatHijriDate($source, 'dd/MM/yyyy');
-                    } catch (\Throwable $e) {
-                        return \Carbon\Carbon::parse($source)->format('d/m/Y');
-                    }
+
+                    return $source
+                        ? \Carbon\Carbon::parse($source)->format('Y-m-d')
+                        : '---';
                 })
 
                 ->with([
