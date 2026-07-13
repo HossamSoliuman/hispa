@@ -6,7 +6,6 @@ use App\DataTable\Report\FishHistoryReportDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\Fish;
 use App\Models\FishStockHistory;
-use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -125,17 +124,6 @@ class FishHistoryReportController extends Controller
      */
     private function getCompanySettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? config('app.name');
-
-        return [
-            'name' => $companyName,
-            'title' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        return adminReportCompanySettings();
     }
 }

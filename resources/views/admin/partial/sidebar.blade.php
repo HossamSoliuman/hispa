@@ -143,13 +143,6 @@
                 </a>
             </div>
 
-            <div class="menu-item {{ request()->routeIs('admin.notifications') ? 'active' : '' }}">
-                <a href="{{ route('admin.notifications') }}" class="menu-link">
-                    <span class="menu-icon"><i class="bi bi-bell-fill"></i></span>
-                    <span class="menu-text">{{ __('admin.menu.notifications') }}</span>
-                </a>
-            </div>
-
             <div class="menu-item {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.profile.index') }}" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-person-circle"></i></span>

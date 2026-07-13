@@ -7,7 +7,6 @@ use App\Enums\TripStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
 use App\Models\Fish;
-use App\Models\Setting;
 use App\Models\Trip;
 use App\Service\Owner\TripFinancialsService;
 use Carbon\Carbon;
@@ -144,17 +143,6 @@ class TripReportController extends Controller
      */
     private function getCompanySettings(): array
     {
-        $companyName = Setting::where('key', 'site_name')->value('value') ?? config('app.name');
-
-        return [
-            'name' => $companyName,
-            'title' => $companyName,
-            'company_name' => $companyName,
-            'address' => Setting::where('key', 'address')->value('value') ?? '',
-            'phone' => Setting::where('key', 'phone')->value('value') ?? '',
-            'email' => Setting::where('key', 'email')->value('value') ?? '',
-            'logo' => Setting::where('key', 'logo')->value('value') ?? '',
-            'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
-        ];
+        return adminReportCompanySettings();
     }
 }

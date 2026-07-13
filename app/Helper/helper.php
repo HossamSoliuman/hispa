@@ -3,6 +3,7 @@
 use App\Models\Company;
 use App\Models\Sale;
 use App\Models\Scopes\OwnerScope;
+use App\Models\Setting;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -293,6 +294,49 @@ function ownerCompanySettings(array $overrides = []): array
         'record_number' => $company?->record_number ?? '',
         'vat_number' => $company?->vat_number ?? '',
         'website' => $company?->website ?? '',
+    ], $overrides);
+}
+
+/**
+ * Build the platform company header settings consumed by admin printable reports.
+ *
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function adminReportCompanySettings(array $overrides = []): array
+{
+    $settings = Setting::query()
+        ->whereIn('key', [
+            'title',
+            'title_en',
+            'site_name',
+            'commercial_registration_no',
+            'agri_record_no',
+            'address',
+            'phone',
+            'email',
+            'logo',
+        ])
+        ->pluck('value', 'key');
+
+    $nameAr = ($settings['title'] ?? '') ?: (($settings['site_name'] ?? '') ?: config('app.name'));
+    $nameEn = (string) (($settings['title_en'] ?? '') ?: '');
+    $companyName = app()->getLocale() === 'en' && $nameEn !== '' ? $nameEn : $nameAr;
+
+    return array_merge([
+        'name' => $companyName,
+        'title' => $companyName,
+        'title_en' => $nameEn,
+        'company_name' => $companyName,
+        'name_ar' => $nameAr,
+        'name_en' => $nameEn,
+        'address' => $settings['address'] ?? '',
+        'phone' => $settings['phone'] ?? '',
+        'email' => $settings['email'] ?? '',
+        'logo' => $settings['logo'] ?? '',
+        'cr_number' => $settings['commercial_registration_no'] ?? '',
+        'record_number' => $settings['agri_record_no'] ?? '',
+        'qr_code' => app(\App\Service\Owner\ReportQrService::class)->dataUri("Company: {$companyName}"),
     ], $overrides);
 }
 

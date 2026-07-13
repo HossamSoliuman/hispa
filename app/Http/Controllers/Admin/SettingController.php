@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CompanySettingsRequest;
 use App\Http\Requests\Admin\SettingRequest;
 use App\Models\BoatType;
 use App\Models\Category;
@@ -10,6 +11,7 @@ use App\Models\Governorate;
 use App\Models\Port;
 use App\Models\Region;
 use App\Models\Setting;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +27,7 @@ class SettingController extends Controller
     {
         $this->middleware('permission:read_settings', ['only' => ['index', 'show']]);
         $this->middleware('permission:create_settings', ['only' => ['create', 'store']]);
-        $this->middleware('permission:update_settings', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:update_settings', ['only' => ['edit', 'update', 'updateCompany']]);
         $this->middleware('permission:delete_settings', ['only' => ['destroy']]);
     }
 
@@ -49,6 +51,43 @@ class SettingController extends Controller
             'boatTypes',
             'parents'
         ));
+    }
+
+    public function updateCompany(CompanySettingsRequest $request): RedirectResponse
+    {
+        $settings = $request->safe()->except('logo');
+
+        if ($request->hasFile('logo')) {
+            $currentLogo = Setting::where('key', 'logo')->first();
+
+            if ($currentLogo?->getRawOriginal('value')) {
+                deleteFile($currentLogo->getRawOriginal('value'));
+            }
+
+            $settings['logo'] = UploadFile($request->file('logo'), 'uploads/settings');
+        }
+
+        DB::transaction(function () use ($settings): void {
+            foreach ($settings as $key => $value) {
+                $this->setSetting($key, (string) ($value ?? ''), $key === 'logo' ? 'image' : 'text');
+            }
+
+            if (array_key_exists('title', $settings)) {
+                $this->setSetting('site_name', (string) ($settings['title'] ?? ''), 'text');
+            }
+        });
+
+        return redirect()
+            ->route('admin.settings.index', ['tab' => 'company'])
+            ->with('success', __('admin.swal.saved_success'));
+    }
+
+    private function setSetting(string $key, string $value, string $type): void
+    {
+        Setting::query()->updateOrCreate(
+            ['key' => $key],
+            ['value' => $value, 'type' => $type]
+        );
     }
 
     /**
