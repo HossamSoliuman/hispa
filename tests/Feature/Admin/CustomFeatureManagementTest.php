@@ -146,10 +146,13 @@ class CustomFeatureManagementTest extends TestCase
     public function test_custom_feature_admin_ui_uses_neutral_icons_and_transparent_cards(): void
     {
         $layout = file_get_contents(resource_path('views/admin/layouts/master.blade.php'));
-        $featureViews = file_get_contents(resource_path('views/admin/custom-features/index.blade.php'))
+        $featureIndexView = file_get_contents(resource_path('views/admin/custom-features/index.blade.php'));
+        $featureViews = $featureIndexView
             .file_get_contents(resource_path('views/admin/custom-features/show.blade.php'));
 
         $this->assertStringContainsString('background: transparent !important;', $layout);
+        $this->assertStringContainsString('.feature-control-hero {', $featureIndexView);
+        $this->assertStringContainsString('background: transparent;', $featureIndexView);
         $this->assertStringContainsString('bi bi-diagram-3', $featureViews);
         $this->assertStringNotContainsString('bi-rocket', $featureViews);
     }

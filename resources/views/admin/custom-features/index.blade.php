@@ -11,10 +11,7 @@
             overflow: hidden;
             padding: 1.75rem;
             border: 1px solid rgba(54, 117, 194, .28);
-            background:
-                linear-gradient(90deg, rgba(54, 117, 194, .08) 1px, transparent 1px) 0 0 / 32px 32px,
-                linear-gradient(rgba(54, 117, 194, .08) 1px, transparent 1px) 0 0 / 32px 32px,
-                var(--bs-body-bg);
+            background: transparent;
         }
 
         .feature-control-hero::after {
@@ -86,9 +83,6 @@
             background-color: transparent;
         }
 
-        [data-bs-theme="dark"] .feature-control-hero {
-            background-color: #151923;
-        }
     </style>
 @endsection
 
