@@ -1,4 +1,4 @@
-@extends('owner.layouts.master')
+@extends(request()->routeIs('admin.*') ? 'admin.layouts.master' : 'owner.layouts.master')
 
 @section('title', __('owner.categories.title'))
 @section('css')
@@ -152,10 +152,10 @@
 
     <script>
         window.routes = {
-            categoriesData: "{{ route('owner.getCategoriesData') }}",
-            categoriesStore: "{{ route('owner.categories.store') }}",
-            categoriesUpdate: "{{ route('owner.categories.update', ':id') }}",
-            categoriesDestroy: "{{ route('owner.categories.destroy', ':id') }}",
+            categoriesData: "{{ route(request()->routeIs('admin.*') ? 'admin.getCategoriesData' : 'owner.getCategoriesData') }}",
+            categoriesStore: "{{ route(request()->routeIs('admin.*') ? 'admin.categories.store' : 'owner.categories.store') }}",
+            categoriesUpdate: "{{ route(request()->routeIs('admin.*') ? 'admin.categories.update' : 'owner.categories.update', ':id') }}",
+            categoriesDestroy: "{{ route(request()->routeIs('admin.*') ? 'admin.categories.destroy' : 'owner.categories.destroy', ':id') }}",
         };
     </script>
     <script>
