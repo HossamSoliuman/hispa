@@ -123,6 +123,30 @@ class CatchController extends Controller
             $trip = Trip::where('owner_id', auth()->id())->findOrFail($request->trip_id);
             $boatId = $trip->boat_id;
 
+            $existingStocks = FishQuantityStock::where('catch_id', $catch->id)->get();
+
+            // Snapshot each existing line BY POSITION, so editing a catch never
+            // resets its sold/paid state even when a row's fish or unit changes.
+            // Sold = landed weight minus the stock still remaining for that line.
+            $lineSnapshots = CatchDetail::where('catch_id', $catch->id)
+                ->orderBy('id')
+                ->get()
+                ->map(function (CatchDetail $detail) use ($existingStocks): array {
+                    $weight = (float) $detail->weight;
+                    $remaining = (float) ($existingStocks
+                        ->first(fn ($stock) => $stock->fish_id === $detail->fish_id && $stock->unit_id === $detail->unit_id)?->quantity ?? 0);
+
+                    return [
+                        'fish_id' => $detail->fish_id,
+                        'unit_id' => $detail->unit_id,
+                        'sold' => max($weight - $remaining, 0),
+                        'fully_sold' => $weight > 0 && $remaining <= 0,
+                        'price_per_kg' => (float) $detail->price_per_kg,
+                    ];
+                })
+                ->values()
+                ->all();
+
             CatchDetail::where('catch_id', $catch->id)->delete();
             FishQuantityStock::where('catch_id', $catch->id)->delete();
 
@@ -137,11 +161,21 @@ class CatchController extends Controller
 
             $defaultUnitId = Unit::defaultId();
             $totalWeight = 0;
+            $saleLineChanges = [];
 
             foreach ($request->fish_id as $index => $fishId) {
 
-                $weight = $request->weight[$index];
+                $weight = (float) $request->weight[$index];
                 $unitId = $request->unit_id[$index] ?? $defaultUnitId;
+
+                $snapshot = $lineSnapshots[$index] ?? null;
+                $oldSold = (float) ($snapshot['sold'] ?? 0);
+                $fullySold = (bool) ($snapshot['fully_sold'] ?? false);
+                $pricePerKg = (float) ($snapshot['price_per_kg'] ?? 0);
+
+                // A fully-sold line follows the new landed weight (its invoice is
+                // recomputed to match); a partially-sold line keeps what was sold.
+                $sold = $fullySold ? $weight : min($oldSold, $weight);
 
                 CatchDetail::create([
                     'catch_id' => $catch->id,
@@ -149,7 +183,11 @@ class CatchController extends Controller
                     'unit_id' => $unitId,
                     'fish_name' => optional(Fish::find($fishId))->name,
                     'weight' => $weight,
+                    'price_per_kg' => $pricePerKg,
+                    'total_price' => $pricePerKg * $weight,
                 ]);
+
+                $remainingQuantity = max($weight - $sold, 0);
 
                 $stock = FishQuantityStock::firstOrCreate(
                     [
@@ -163,7 +201,18 @@ class CatchController extends Controller
                         'quantity' => 0,
                     ]
                 );
-                $stock->increment('quantity', $weight);
+                $stock->increment('quantity', $remainingQuantity);
+
+                if ($snapshot !== null && $oldSold > 0) {
+                    $saleLineChanges[] = [
+                        'old_fish_id' => $snapshot['fish_id'],
+                        'old_unit_id' => $snapshot['unit_id'],
+                        'new_fish_id' => $fishId,
+                        'new_unit_id' => $unitId,
+                        'new_sold' => $sold,
+                        'rescale_weight' => $fullySold,
+                    ];
+                }
 
                 $totalWeight += $weight;
             }
@@ -171,6 +220,8 @@ class CatchController extends Controller
             $catch->update([
                 'total_weight' => $totalWeight,
             ]);
+
+            $this->syncSalesWithCatch($catch, $saleLineChanges);
 
             DB::commit();
 
@@ -183,6 +234,88 @@ class CatchController extends Controller
 
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Cascade catch-line edits (fish, unit, weight) onto the invoices sold from
+     * this catch, then recompute each affected invoice's totals so an edit keeps
+     * the catch and its sales consistent.
+     *
+     * @param  array<int, array{old_fish_id: int, old_unit_id: int, new_fish_id: int, new_unit_id: int, new_sold: float, rescale_weight: bool}>  $lineChanges
+     */
+    private function syncSalesWithCatch(CatchModel $catch, array $lineChanges): void
+    {
+        if ($lineChanges === []) {
+            return;
+        }
+
+        $saleIds = Sale::where('catch_id', $catch->id)->pluck('id');
+        if ($saleIds->isEmpty()) {
+            return;
+        }
+
+        $affectedSaleIds = [];
+
+        foreach ($lineChanges as $change) {
+            $details = SaleDetail::whereIn('sale_id', $saleIds)
+                ->where('fish_id', $change['old_fish_id'])
+                ->where('unit_id', $change['old_unit_id'])
+                ->get();
+
+            if ($details->isEmpty()) {
+                continue;
+            }
+
+            $fishName = optional(Fish::find($change['new_fish_id']))->name;
+            $currentSold = (float) $details->sum('weight');
+
+            foreach ($details as $detail) {
+                $weight = (float) $detail->weight;
+
+                if ($change['rescale_weight'] && $currentSold > 0) {
+                    $weight = round($change['new_sold'] * ((float) $detail->weight / $currentSold), 2);
+                }
+
+                $detail->update([
+                    'fish_id' => $change['new_fish_id'],
+                    'unit_id' => $change['new_unit_id'],
+                    'fish_name' => $fishName,
+                    'weight' => $weight,
+                    'total_price' => round((float) $detail->price_per_kilo * $weight, 2),
+                ]);
+
+                $affectedSaleIds[$detail->sale_id] = true;
+            }
+        }
+
+        Sale::with('details')
+            ->whereIn('id', array_keys($affectedSaleIds))
+            ->get()
+            ->each(fn (Sale $sale) => $this->recalculateSaleTotals($sale));
+    }
+
+    private function recalculateSaleTotals(Sale $sale): void
+    {
+        $previouslyPaid = (float) $sale->total_price - (float) $sale->remaining_total;
+
+        $totalPrice = round((float) $sale->details->sum('total_price'), 2);
+        $commissionAmount = round($totalPrice * (float) $sale->commission_rate / 100, 2);
+        $laborAmount = round($totalPrice * (float) $sale->labor_rate / 100, 2);
+        $netOwnerAmount = round($totalPrice - $commissionAmount - $laborAmount, 2);
+
+        $paidAmount = match ($sale->payment_status) {
+            'paid' => $totalPrice,
+            'partially_paid' => min($previouslyPaid, $totalPrice),
+            default => 0.0,
+        };
+
+        $sale->updateQuietly([
+            'total_price' => $totalPrice,
+            'commission_amount' => $commissionAmount,
+            'labor_amount' => $laborAmount,
+            'net_owner_amount' => $netOwnerAmount,
+            'remaining_total' => round(max($totalPrice - $paidAmount, 0), 2),
+        ]);
     }
 
     public function store(CatchRequest $request, TripTransitionService $tripTransition)
