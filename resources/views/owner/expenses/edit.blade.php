@@ -1,8 +1,15 @@
 @extends('owner.layouts.master')
 
-@section('title', '{{ __('owner.generated.edit_expense') }}')
+@section('title', __('owner.generated.edit_expense'))
 
 @section('content')
+    @php
+        $expenseCategory = $expense->category;
+        $expenseType = $expenseCategory?->parent?->type ?? $expenseCategory?->type;
+        $expenseCategoryName = $expenseCategory?->name ?? __('owner.generated.undefined');
+        $expenseCategoryGroupName = $expenseCategory?->parent?->name ?? $expenseCategoryName;
+    @endphp
+
 <div class="container-fluid py-4">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
@@ -13,7 +20,7 @@
                 </ol>
             </nav>
         </div>
-        <div class="badge bg-primary fs-6">{{ $expense->category->name ?? '{{ __('owner.generated.undefined') }}' }}</div>
+        <div class="badge bg-primary fs-6">{{ $expenseCategoryName }}</div>
     </div>
 
     <!-- {{ __('owner.generated.item_c356fe') }} -->
@@ -24,14 +31,14 @@
                     <i class="fas fa-receipt me-2"></i>
                     {{ __('owner.generated.item_b6a5be') }}: {{ $expense->number }}
                 </h5>
-                <span class="badge bg-light text-dark">{{ $expense->category->parent->name }}</span>
+                <span class="badge bg-light text-dark">{{ $expenseCategoryGroupName }}</span>
             </div>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3">
                     <h6 class="text-muted mb-1">{{ __('owner.catch.filters.boat') }}</h6>
-                    <p class="mb-0 fw-bold">{{ $expense->boat->name ?? __('owner.general') }}</p>
+                    <p class="mb-0 fw-bold">{{ $expense->boat?->name ?? __('owner.general') }}</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-muted mb-1">{{ __('owner.sales.date') }}</h6>
@@ -39,7 +46,7 @@
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-muted mb-1">{{ __('owner.expenses.table.vendor') }}</h6>
-                    <p class="mb-0">{{ $expense->vendor->name ?? '{{ __('owner.generated.undefined') }}' }}</p>
+                    <p class="mb-0">{{ $expense->vendor?->name ?? __('owner.generated.undefined') }}</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-muted mb-1">{{ __('owner.assets.status') }}</h6>
@@ -56,7 +63,7 @@
         @method('PUT')
 
         <!-- {{ __('owner.generated.item_312b56') }} -->
-        @if($expense->category->parent->type === 'general' || $expense->category->parent->type === 'government' || ($expense->category->parent->type == 'operating' && $expense->category->type != 'operating-equipments'))
+        @if($expenseType === 'general' || $expenseType === 'government' || ($expenseType === 'operating' && $expenseCategory?->type !== 'operating-equipments'))
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-header bg-success text-white">
                 <h6 class="mb-0 text-white">
@@ -107,7 +114,7 @@
             @endif
 
             <!-- {{ __('owner.generated.equipment') }} -->
-            @if($expense->category->parent->type == 'operating' && $expense->category->type == 'operating-equipments')
+        @if($expenseType === 'operating' && $expenseCategory?->type === 'operating-equipments')
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-info text-white">
                     <div class="d-flex justify-content-between align-items-center">
@@ -209,7 +216,7 @@
             </div>
             @endif
 
-            @if($expense->category->type === 'maintenance')
+        @if($expenseType === 'maintenance')
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-warning text-dark">
                     <h6 class="mb-0">

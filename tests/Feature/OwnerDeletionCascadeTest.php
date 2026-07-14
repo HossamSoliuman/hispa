@@ -2,12 +2,21 @@
 
 namespace Tests\Feature;
 
+use App\Models\Admin;
+use App\Models\Boat;
+use App\Models\CatchDetail;
+use App\Models\CatchModel;
 use App\Models\Company;
+use App\Models\Fish;
 use App\Models\Invoice;
+use App\Models\Sale;
+use App\Models\SaleDetail;
 use App\Models\Subscription;
 use App\Models\SubscriptionPackage;
+use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class OwnerDeletionCascadeTest extends TestCase
@@ -153,5 +162,95 @@ class OwnerDeletionCascadeTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $captain->id]);
         $this->assertDatabaseHas('subscriptions', ['id' => $subscription->id]);
         $this->assertDatabaseHas('invoices', ['subscription_id' => $subscription->id]);
+    }
+
+    public function test_admin_can_delete_an_owner_and_their_billing_records(): void
+    {
+        $this->withoutMiddleware([
+            \Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect::class,
+            \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
+        ]);
+
+        $owner = $this->makeOwner();
+        $subscription = $this->makeSubscriptionWithInvoice($owner, $this->makePackage());
+        $admin = Admin::create([
+            'name' => 'Administrator',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
+            'status' => 1,
+            'roles_name' => [],
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->delete(route('admin.owner.destroy', $owner))
+            ->assertOk();
+
+        $this->assertDatabaseMissing('users', ['id' => $owner->id]);
+        $this->assertDatabaseMissing('subscriptions', ['id' => $subscription->id]);
+        $this->assertDatabaseMissing('invoices', ['subscription_id' => $subscription->id]);
+    }
+
+    public function test_deleting_owner_purges_nested_trip_catch_and_sale_records(): void
+    {
+        Notification::fake();
+
+        $owner = $this->makeOwner();
+        $boat = Boat::create([
+            'owner_id' => $owner->id,
+            'name_ar' => 'قارب الاختبار',
+            'number' => 'BOAT-'.uniqid(),
+        ]);
+        $trip = Trip::factory()->create([
+            'owner_id' => $owner->id,
+            'boat_id' => $boat->id,
+        ]);
+        $fish = Fish::create([
+            'name_ar' => 'سمك اختبار',
+            'name_en' => 'Test fish',
+            'owner_id' => $owner->id,
+            'status' => 1,
+        ]);
+        $catch = CatchModel::create([
+            'owner_id' => $owner->id,
+            'trip_id' => $trip->id,
+            'catch_date' => now(),
+            'total_weight' => 10,
+        ]);
+        $catchDetail = CatchDetail::create([
+            'catch_id' => $catch->id,
+            'fish_id' => $fish->id,
+            'weight' => 10,
+        ]);
+        $sale = Sale::create([
+            'number' => 'SALE-'.uniqid(),
+            'seller_type' => 'owner',
+            'seller_id' => $owner->id,
+            'trip_id' => $trip->id,
+            'catch_id' => $catch->id,
+            'boat_id' => $boat->id,
+            'status' => 2,
+            'total_price' => 500,
+            'net_owner_amount' => 500,
+            'remaining_total' => 0,
+            'sale_datetime' => now(),
+        ]);
+        $saleDetail = SaleDetail::create([
+            'sale_id' => $sale->id,
+            'fish_id' => $fish->id,
+            'fish_name' => 'سمك اختبار',
+            'weight' => 10,
+            'price_per_kilo' => 50,
+            'total_price' => 500,
+        ]);
+
+        $owner->delete();
+
+        $this->assertDatabaseMissing('boats', ['id' => $boat->id]);
+        $this->assertDatabaseMissing('trips', ['id' => $trip->id]);
+        $this->assertDatabaseMissing('catch_models', ['id' => $catch->id]);
+        $this->assertDatabaseMissing('catch_details', ['id' => $catchDetail->id]);
+        $this->assertDatabaseMissing('sales', ['id' => $sale->id]);
+        $this->assertDatabaseMissing('sale_details', ['id' => $saleDetail->id]);
+        $this->assertDatabaseMissing('fish', ['id' => $fish->id]);
     }
 }

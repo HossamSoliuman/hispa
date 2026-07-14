@@ -112,14 +112,16 @@ class ExpenseRepository
         $fishingEquipments = collect();
         $maintenances = collect();
 
-        if ($expense->category->type === 'general') {
+        $expenseType = $expense->category?->parent?->type ?? $expense->category?->type;
+
+        if ($expenseType === 'general') {
             $categories = Category::active()
                 ->where('type', 'general')
                 ->whereNotNull('parent_id')
                 ->get();
-        } elseif ($expense->category->type === 'equipment') {
+        } elseif ($expenseType === 'operating' && $expense->category?->type === 'operating-equipments') {
             $fishingEquipments = FishingEquipment::where('owner_id', $ownerId)->active()->get();
-        } elseif ($expense->category->type === 'maintenance') {
+        } elseif ($expenseType === 'maintenance') {
             $maintenances = Maintenance::where('owner_id', $ownerId)
                 ->where('boat_id', $expense->boat_id)
                 ->get();

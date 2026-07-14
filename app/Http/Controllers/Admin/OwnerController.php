@@ -210,4 +210,18 @@ class OwnerController extends Controller
             ->route('admin.owner.show', $owner->id)
             ->with('success', __('admin.owner.updated_successfully'));
     }
+
+    /**
+     * Permanently delete an owner and the complete data set owned by them.
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        $owner = $this->findOwner($id);
+
+        DB::transaction(function () use ($owner): void {
+            $owner->delete();
+        });
+
+        return response()->json(['message' => __('admin.owner.deleted_successfully')]);
+    }
 }

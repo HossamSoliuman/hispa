@@ -128,6 +128,7 @@ Route::group([
             Route::get('getOwnerData', [OwnerController::class, 'getOwnerData'])->name('getOwnerData');
             Route::get('owner/{id}/edit', [OwnerController::class, 'edit'])->name('owner.edit');
             Route::match(['put', 'patch'], 'owner/{id}', [OwnerController::class, 'update'])->name('owner.update');
+            Route::delete('owner/{id}', [OwnerController::class, 'destroy'])->name('owner.destroy');
             Route::get('owner/{id}', [OwnerController::class, 'show'])->name('owner.show');
 
             // Locations (for captain/crew forms)
