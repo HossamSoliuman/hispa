@@ -106,6 +106,24 @@ class MonthlyFinancialsServiceTest extends TestCase
         $this->assertSame(40000.0, $distribution['dues']['b']);
     }
 
+    public function test_per_fisherman_uses_the_crew_average_when_a_member_has_a_custom_share(): void
+    {
+        $owner = $this->makeOwner();
+        $this->makeSale($owner, 100000, 100000, '2026-06-15 10:00:00');
+        User::factory()->create([
+            'role' => 'crew',
+            'owner_id' => $owner->id,
+            'salary_type' => 'percentage',
+            'custom_share_percent' => 100.0,
+        ]);
+
+        $result = $this->service->compute($owner->id, '2026-06-01', '2026-06-30');
+
+        $this->assertSame(1, $result['crew_count']);
+        $this->assertSame(50000.0, $result['crew_share']);
+        $this->assertSame(50000.0, $result['per_fisherman']);
+    }
+
     public function test_tenancy_isolation(): void
     {
         $ownerA = $this->makeOwner();

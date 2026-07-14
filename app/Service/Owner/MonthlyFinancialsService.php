@@ -107,9 +107,8 @@ class MonthlyFinancialsService
 
         $distribution = $this->crewDistribution($ownerId, $crewShare, $boatId);
         $crewCount = $distribution['members']->count();
-        $shareMemberCount = $distribution['members']->whereNull('custom_percent')->count();
-        $perFisherman = $shareMemberCount > 0
-            ? round($distribution['remaining_pool'] / $shareMemberCount, 2)
+        $perFisherman = $crewCount > 0
+            ? round($crewShare / $crewCount, 2)
             : 0.0;
 
         return [
