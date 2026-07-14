@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\BoatTypeController;
 use App\Http\Controllers\Admin\CaptainController as AdminCaptainController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CrewController as AdminCrewController;
+use App\Http\Controllers\Admin\CustomFeatureController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FishController as AdminFishController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -80,6 +81,15 @@ Route::group([
             Route::post('subscriptions/{subscription}/suspend', [SubscriptionController::class, 'suspend'])->name('subscriptions.suspend');
             Route::post('subscriptions/{subscription}/unsuspend', [SubscriptionController::class, 'unsuspend'])->name('subscriptions.unsuspend');
             Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
+
+            // Custom Features
+            Route::get('custom-features', [CustomFeatureController::class, 'index'])->name('custom-features.index');
+            Route::get('custom-features/{feature}', [CustomFeatureController::class, 'show'])->name('custom-features.show');
+            Route::get('custom-features/{feature}/owners/search', [CustomFeatureController::class, 'searchOwners'])->name('custom-features.owners.search');
+            Route::post('custom-features/{feature}/access', [CustomFeatureController::class, 'store'])->name('custom-features.access.store');
+            Route::patch('custom-features/{feature}/access/{access}/pause', [CustomFeatureController::class, 'pause'])->name('custom-features.access.pause');
+            Route::patch('custom-features/{feature}/access/{access}/resume', [CustomFeatureController::class, 'resume'])->name('custom-features.access.resume');
+            Route::delete('custom-features/{feature}/access/{access}', [CustomFeatureController::class, 'destroy'])->name('custom-features.access.destroy');
 
             // Invoices (static paths must precede the resource so they aren't shadowed by invoices/{invoice})
             Route::get('invoices-export', [InvoiceController::class, 'export'])->name('invoices.export');

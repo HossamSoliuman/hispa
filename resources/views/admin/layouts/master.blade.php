@@ -434,15 +434,15 @@
         }
     </style>
 
-    {{-- ── Glassy panels: make every card (and the tables inside them) translucent
-         so the page background shows through, exactly like the top KPI stat cards.
-         The accent-tint fill is the same one used by .hud-stat-card above. ── --}}
+    {{-- Transparent admin panels keep the page background visible through cards and tables. --}}
     <style>
-        .card {
-            background: rgba(var(--hud-accent-rgb), .07) !important;
+        .card,
+        .hud-card,
+        .card.hud-stat-card:not(.border-0) {
+            background: transparent !important;
         }
         .card-header {
-            background: rgba(var(--hud-accent-rgb), .12) !important;
+            background: transparent !important;
         }
         .card .table,
         .card table {

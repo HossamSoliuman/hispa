@@ -36,6 +36,13 @@
                 </a>
             </div>
 
+            <div class="menu-item {{ request()->routeIs('admin.custom-features.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.custom-features.index') }}" class="menu-link">
+                    <span class="menu-icon"><i class="bi bi-toggles2"></i></span>
+                    <span class="menu-text">{{ __('admin.menu.custom_features') }}</span>
+                </a>
+            </div>
+
             <div class="menu-item {{ request()->routeIs('admin.trips.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.trips.index') }}" class="menu-link">
                     <span class="menu-icon"><i class="bi bi-map"></i></span>

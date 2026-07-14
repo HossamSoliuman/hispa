@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Owner\Startup;
 
+use App\Enums\CustomFeature;
+use App\Models\CustomFeatureAccess;
 use App\Models\Startup\Expense;
 use App\Models\Startup\ExpenseCategory;
 use App\Models\Startup\Loan;
@@ -34,6 +36,10 @@ class StartupProjectWorkflowTest extends TestCase
         $this->owner = User::factory()->create([
             'role' => 'owner',
             'email' => 'startup-owner@example.test',
+        ]);
+        CustomFeatureAccess::factory()->create([
+            'user_id' => $this->owner->id,
+            'feature' => CustomFeature::BusinessStartup,
         ]);
         $this->owner->assignRole('owner');
         $this->actingAs($this->owner, 'owner');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\CustomFeature;
 use App\Traits\CheckRelationShip;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -160,7 +161,7 @@ class User extends Authenticatable
         if ($key == '' || is_null($key)) {
             $firstLetter = strtoupper(mb_substr($this->name ?? 'U', 0, 1));
 
-            return 'https://ui-avatars.com/api/?name=' . $firstLetter . '&background=random&color=fff';
+            return 'https://ui-avatars.com/api/?name='.$firstLetter.'&background=random&color=fff';
         }
 
         return Storage::url($key);
@@ -375,9 +376,22 @@ class User extends Authenticatable
 
     public function hasBusinessStartupAccess(): bool
     {
-        $emails = array_map('trim', explode(',', env('BUSINESS_STARTUP_EMAILS', '')));
+        return $this->hasCustomFeatureAccess(CustomFeature::BusinessStartup);
+    }
 
-        return in_array($this->email, $emails);
+    public function customFeatureAccesses(): HasMany
+    {
+        return $this->hasMany(CustomFeatureAccess::class);
+    }
+
+    public function hasCustomFeatureAccess(CustomFeature|string $feature): bool
+    {
+        $featureValue = $feature instanceof CustomFeature ? $feature->value : $feature;
+
+        return $this->customFeatureAccesses()
+            ->where('feature', $featureValue)
+            ->where('status', 'active')
+            ->exists();
     }
 
     public function invoices()
