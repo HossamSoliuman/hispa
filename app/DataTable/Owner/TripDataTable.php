@@ -50,7 +50,9 @@ class TripDataTable extends DataTables
             $data = $query->get();
 
             $trip_count = $data->count();
-            $trip_waiting_status = $data->where('status', TripStatus::New)->count();
+            $trip_waiting_status = $data
+                ->reject(fn (Trip $trip) => $trip->status->isTerminal())
+                ->count();
             $trip_completed_status = $data->where('status', TripStatus::Sold)->count();
 
             $hasCatchesQuery = Trip::whereHas('catches')
