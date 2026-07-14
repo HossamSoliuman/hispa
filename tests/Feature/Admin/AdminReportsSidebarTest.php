@@ -9,6 +9,15 @@ use Tests\TestCase;
 
 class AdminReportsSidebarTest extends TestCase
 {
+    public function test_inventory_section_is_not_rendered_in_the_admin_sidebar(): void
+    {
+        $html = Blade::render(file_get_contents(resource_path('views/admin/partial/sidebar.blade.php')));
+
+        $this->assertStringNotContainsString('href="'.route('admin.stocks.index').'"', $html);
+        $this->assertStringNotContainsString('href="'.route('admin.owner-stock.index').'"', $html);
+        $this->assertStringNotContainsString('bi bi-box2', $html);
+    }
+
     public function test_reports_menu_is_a_single_link_to_the_reports_hub(): void
     {
         $request = Request::create(route('admin.reports-hub'));
