@@ -1,89 +1,89 @@
 @extends('site.layouts.app')
-@section('title', __('site.processing.title', ['default' => 'معالجة الطلب']) . ' - ' . __('site.meta.title'))
+
+@section('title', __('site.processing.title') . ' - ' . __('site.meta.title'))
 
 @section('content')
-<main class="min-h-screen flex flex-col items-center py-10 px-4 pt-6 bg-gray-50">
-    <div class="w-full flex justify-center mb-10">
-        <div class="flex items-center justify-center space-x-10 rtl:space-x-reverse">
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white text-base font-semibold shadow-sm" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>
-                </div>
-                <span class="mt-2 text-sm text-center text-gray-500">اختيار الباقة</span>
-            </div>
-            <div class="h-[2px] w-5 sm:w-20 md:w-28 rounded-full" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);"></div>
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white text-base font-semibold shadow-sm" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>
-                </div>
-                <span class="mt-2 text-sm text-center text-gray-500">الدفع</span>
-            </div>
-            <div class="h-[2px] w-5 sm:w-20 md:w-28 rounded-full" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);"></div>
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white text-base font-semibold shadow-sm scale-110" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>
-                </div>
-                <span class="mt-2 text-sm text-center text-black font-medium">التوجه إلى لوحة التحكم</span>
+@php
+    $pending = session('pending_subscription');
+@endphp
+
+<main class="bg-transparent py-14 md:py-20">
+    <div class="site-shell">
+        <div class="mx-auto max-w-4xl">
+            <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-start gap-2" aria-label="{{ __('marketing.checkout.step_label', ['current' => 3]) }}">
+                @foreach([
+                    ['number' => 1, 'label' => __('marketing.checkout.steps.plan')],
+                    ['number' => 2, 'label' => __('marketing.checkout.steps.account')],
+                    ['number' => 3, 'label' => __('marketing.checkout.steps.activation')],
+                ] as $step)
+                    <div class="flex flex-col items-center text-center">
+                        <span class="grid h-9 w-9 place-items-center rounded-full bg-tide text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
+                        </span>
+                        <span @class(['mt-2 text-[0.62rem] font-bold sm:text-xs', 'text-ink' => $loop->last, 'text-ink/42' => ! $loop->last])>{{ $step['label'] }}</span>
+                    </div>
+                    @if(! $loop->last)
+                        <span class="mt-[1.1rem] h-px w-full bg-tide"></span>
+                    @endif
+                @endforeach
             </div>
         </div>
-    </div>
 
-    @php $pending = session('pending_subscription'); @endphp
-    <div class="w-full max-w-4xl">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-10">
-            <div class="flex flex-col items-center text-center space-y-4">
-                <div class="w-14 h-14 rounded-full flex items-center justify-center shadow-inner bg-gradient-to-r from-[#3778BC] to-[#4BAEE5]">
-                    <span class="iconify" data-icon="mdi:clock-check-outline" style="font-size: 28px; color: white;"></span>
-                </div>
-                <div class="max-w-md">
-                    <h2 class="text-xl font-semibold text-gray-800 mt-2">{{ __('site.processing.received_title') }}</h2>
-                    <p class="text-[#717171] text-xs mt-2 leading-relaxed">{{ __('site.processing.received_desc') }}</p>
-                </div>
+        <div class="hud-panel mx-auto mt-12 max-w-4xl overflow-hidden bg-white/90">
+            <div class="bg-ocean px-6 py-10 text-center text-white sm:px-10 sm:py-12">
+                <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-sand text-ink shadow-[0_0_0_10px_rgba(242,184,75,.1)]">
+                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
+                </span>
+                <p class="mt-7 text-xs font-bold text-sand">{{ __('marketing.processing.eyebrow') }}</p>
+                <h1 class="mx-auto mt-3 max-w-2xl text-2xl font-extrabold leading-tight tracking-[-0.03em] sm:text-4xl">{{ __('marketing.processing.title') }}</h1>
+                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/58">{{ __('marketing.processing.description') }}</p>
+            </div>
+
+            <div class="p-6 sm:p-10">
                 @if($pending)
-                <div class="w-full border border-[#AFAFAF]/50 rounded-xl p-4 bg-[#FCFDFD] shadow-sm text-right">
-                    <div class="flex flex-row flex-wrap justify-center items-center text-center gap-6">
-                        @if(!empty($pending['invoice_number']))
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[#7C7C7C] text-xs">{{ __('site.processing.invoice_number') }}</span>
-                            <span class="font-bold text-base text-[#3C74BE]">{{ $pending['invoice_number'] }}</span>
-                        </div>
+                    <dl class="grid gap-px overflow-hidden rounded-2xl border border-ink/8 bg-ink/8 sm:grid-cols-2 lg:grid-cols-4">
+                        @if(! empty($pending['invoice_number']))
+                            <div class="bg-white p-5 text-start">
+                                <dt class="text-[0.65rem] font-bold text-ink/42">{{ __('site.processing.invoice_number') }}</dt>
+                                <dd class="mt-2 text-sm font-extrabold text-ocean" dir="ltr">{{ $pending['invoice_number'] }}</dd>
+                            </div>
                         @endif
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[#7C7C7C] text-xs">{{ __('site.processing.plan') }}</span>
-                            <span class="font-bold">{{ $pending['package'] ?? '--' }}</span>
+                        <div class="bg-white p-5 text-start">
+                            <dt class="text-[0.65rem] font-bold text-ink/42">{{ __('site.processing.plan') }}</dt>
+                            <dd class="mt-2 text-sm font-extrabold text-ink">{{ $pending['package'] ?? '—' }}</dd>
                         </div>
-                        @if(!empty($pending['duration']))
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[#7C7C7C] text-xs">{{ __('site.processing.duration') }}</span>
-                            <span class="font-bold text-sm">{{ __('site.order_review.durations.' . $pending['duration']) }}</span>
-                        </div>
+                        @if(! empty($pending['duration']))
+                            <div class="bg-white p-5 text-start">
+                                <dt class="text-[0.65rem] font-bold text-ink/42">{{ __('site.processing.duration') }}</dt>
+                                <dd class="mt-2 text-sm font-extrabold text-ink">{{ __('site.order_review.durations.' . $pending['duration']) }}</dd>
+                            </div>
                         @endif
-                        @if(!empty($pending['boats_count']))
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[#7C7C7C] text-xs">{{ __('site.processing.boats_count') }}</span>
-                            <span class="font-bold text-sm">{{ $pending['boats_count'] }}</span>
+                        <div class="bg-white p-5 text-start">
+                            <dt class="text-[0.65rem] font-bold text-ink/42">{{ __('marketing.processing.status') }}</dt>
+                            <dd class="mt-2 inline-flex items-center gap-2 text-sm font-extrabold text-[#9a651b]"><span class="h-2 w-2 rounded-full bg-sand"></span>{{ __('marketing.processing.pending') }}</dd>
                         </div>
-                        @endif
-                    </div>
-                </div>
+                    </dl>
                 @endif
-                <div class="flex flex-col w-full border border-[#BEDBFF] bg-gradient-to-r from-[#EFF6FF] to-[#FEFFFF] rounded-xl p-3 text-sm text-[#597EED]">
-                    <div class="flex flex-row gap-1 items-center">
-                        <span class="iconify" data-icon="mdi:information-outline" style="font-size: 22px; color: #2F6FFC;"></span>
-                        <span class="text-[#1C39AB] font-bold">{{ __('site.processing.next_title') }}</span>
+
+                <div class="mt-7 flex items-start gap-4 rounded-2xl bg-mist/70 p-5 text-start">
+                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ocean text-white">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19V5m4 14v-6m4 6V9m4 10v-8m4 8v-3" /></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-sm font-extrabold text-ink">{{ __('marketing.processing.next_title') }}</h2>
+                        <p class="mt-2 text-xs leading-6 text-ink/58">{{ __('marketing.processing.next_description') }}</p>
                     </div>
-                    <span class="text-xs text-[#597EED] leading-relaxed text-start ms-5">{{ __('site.processing.next_desc') }}</span>
                 </div>
-                <div class="flex w-full md:flex-row gap-5 mt-5">
-                    <a href="{{ route('landing-page') }}" class="flex-1 border p-3 text-black border-[#E6E6E6] bg-[#F8F9FA] hover:shadow-md transition-all duration-300 rounded-lg text-center">{{ __('site.processing.home') }}</a>
-                    <a href="{{ route('owner.dashboard') }}" class="flex-1 bg-gradient-to-r from-[#3778BC] to-[#4BAEE5] p-3 text-white hover:shadow-xl transition-all duration-300 rounded-lg text-center">{{ __('site.processing.go_dashboard') }}</a>
+
+                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a href="{{ route('owner.dashboard') }}" class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 bg-ocean px-5 py-3 text-sm font-bold text-white hover:-translate-y-0.5 hover:bg-ocean-deep">
+                        {{ __('site.processing.go_dashboard') }}
+                        <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                    </a>
+                    <a href="{{ route('landing-page') }}" class="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl border border-ink/12 bg-white px-5 py-3 text-sm font-bold text-ink hover:border-ocean/35 hover:text-ocean">{{ __('site.processing.home') }}</a>
                 </div>
             </div>
         </div>
     </div>
 </main>
-
-@push('scripts')
-<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-@endpush
 @endsection

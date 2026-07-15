@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Invoice;
 use App\Models\Subscription;
 use App\Models\SubscriptionPackage;
+use App\Models\Unit;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,5 +71,7 @@ class RegisterWithPlanTest extends TestCase
 
         $owner = User::where('email', 'plain@example.com')->firstOrFail();
         $this->assertSame(0, Subscription::where('user_id', $owner->id)->count());
+        $this->assertSame(5, Unit::where('owner_id', $owner->id)->count());
+        $this->assertSame(1, Unit::where('owner_id', $owner->id)->where('is_default', true)->count());
     }
 }

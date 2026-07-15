@@ -1,24 +1,31 @@
-<section id="features" class="bg-white">
-    <div class="mx-auto max-w-5xl px-6 py-12 md:py-16">
-        <div class="flex items-center justify-center gap-2">
-            <span class="h-[2px] w-7 bg-slate-200"></span>
-            <span class="text-2xl font-semibold text-primary">{{ __('site.features.heading') }}</span>
-            <span class="h-[2px] w-7 bg-slate-200"></span>
+<section id="features" class="py-28 md:py-36">
+    <div class="site-shell">
+        <div class="max-w-3xl text-start">
+            <span class="eyebrow text-ocean">{{ __('marketing.features.eyebrow') }}</span>
+            <h2 class="mt-6 text-3xl font-bold leading-tight tracking-[-0.035em] text-ink md:text-5xl">{{ __('marketing.features.title') }}</h2>
+            <p class="mt-6 max-w-2xl text-base leading-8 text-ink/55">{{ __('marketing.features.description') }}</p>
         </div>
-        <h2 class="mt-3 text-center text-2xl font-bold text-[#424242] md:text-3xl">{{ __('site.features.title') }}</h2>
-        <div class="relative mt-10">
-            <div class="pointer-events-none absolute left-0 right-0 top-[18px] mx-auto hidden w-[92%] border-t border-dashed border-slate-300 md:block z-0"></div>
-            <div class="grid gap-10 md:grid-cols-4 md:gap-6">
-                @foreach([1, 2, 3, 4] as $i)
-                <div class="text-center">
-                    <div class="flex items-center justify-center relative z-10">
-                        <span class="grid h-9 w-9 place-items-center rounded-full bg-blue-50 text-sm font-bold text-blue-600 ring-2 ring-white relative z-20">{{ $i }}</span>
+
+        <div class="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            @foreach([
+                ['number' => '01', 'title' => __('marketing.features.trip_title'), 'description' => __('marketing.features.trip_desc'), 'icon' => 'M4 19V5m4 14v-6m4 6V9m4 10v-8m4 8v-3'],
+                ['number' => '02', 'title' => __('marketing.features.money_title'), 'description' => __('marketing.features.money_desc'), 'icon' => 'M4 7h16v10H4zM8 12h.01M16 12h.01M12 10v4'],
+                ['number' => '03', 'title' => __('marketing.features.fleet_title'), 'description' => __('marketing.features.fleet_desc'), 'icon' => 'M3 17h18l-2 4H5l-2-4Zm3 0V9l6-4 6 4v8M9 12h6'],
+                ['number' => '04', 'title' => __('marketing.features.reports_title'), 'description' => __('marketing.features.reports_desc'), 'icon' => 'M5 19V9m7 10V5m7 14v-7'],
+            ] as $feature)
+                <article class="hud-panel flex min-h-72 flex-col p-7 text-start sm:p-8">
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="grid h-11 w-11 place-items-center border border-ocean/25 bg-ocean/[0.07] text-ocean">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $feature['icon'] }}" /></svg>
+                        </span>
+                        <span class="text-xs font-bold text-ocean/55">{{ $feature['number'] }}</span>
                     </div>
-                    <h3 class="mt-3 text-sm font-bold text-slate-900">{{ __('site.features.' . $i . '_title') }}</h3>
-                    <p class="mt-2 text-xs leading-6 text-slate-500">{{ __('site.features.' . $i . '_desc') }}</p>
-                </div>
-                @endforeach
-            </div>
+                    <div class="mt-auto pt-14">
+                        <h3 class="text-xl font-bold leading-8 text-ink">{{ $feature['title'] }}</h3>
+                        <p class="mt-3 text-sm leading-7 text-ink/52">{{ $feature['description'] }}</p>
+                    </div>
+                </article>
+            @endforeach
         </div>
     </div>
 </section>

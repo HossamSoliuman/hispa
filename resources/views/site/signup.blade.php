@@ -1,137 +1,162 @@
 @extends('site.layouts.auth')
-@section('title', __('site.signup.title') . ' - ' . __('site.meta.title'))
+
+@section('title', __('marketing.signup.title') . ' - ' . __('site.meta.title'))
 
 @section('content')
-<main class="min-h-screen">
-    <div class="grid min-h-screen w-full lg:grid-cols-2">
-        {{-- RIGHT: Promo Panel --}}
-        <section class="relative hidden lg:block overflow-hidden bg-[#3B74B8] px-6 py-10 text-white">
-            <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10"></div>
-            <div class="mx-auto flex h-full max-w-md flex-col justify-center gap-10">
-                <div class="relative min-h-[280px]">
-                    <div class="rounded-lg bg-white p-6 text-right text-slate-900 shadow-md">
-                        <h2 class="text-base font-extrabold text-[#2F6FDB] md:text-2xl">{{ __('site.hero.title') }}</h2>
-                        <p class="mt-3 text-sm leading-7 text-[#718096]">{{ __('site.hero.subtitle') }}</p>
-                        <div class="mt-5">
-                            <a href="{{ route('landing-page') }}#home" class="rounded-full bg-[linear-gradient(98.7deg,#3778BC_19.22%,#4BAEE5_73.07%)] px-8 py-3 text-sm font-semibold text-white hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-all inline-block">{{ __('site.login.explore') }}</a>
-                        </div>
-                    </div>
-                    <div class="absolute -left-10 -bottom-8 w-44 rounded-md bg-white p-2 text-slate-900 shadow-xl border border-slate-100/50">
-                        <div class="flex items-center justify-start gap-2">
-                            <span class="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-[#3576BC]/5 text-[#3B74B8]">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path d="M4 19V5" /><path d="M8 19v-6" /><path d="M12 19V9" /><path d="M16 19v-8" /><path d="M20 19v-3" /></svg>
-                            </span>
+<main class="min-h-screen bg-transparent">
+    <div class="grid min-h-screen lg:grid-cols-[0.8fr_1.2fr]">
+        <aside class="relative overflow-hidden bg-ocean px-5 py-7 text-white sm:px-8 lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-12 lg:py-10">
+            <div class="marine-grid pointer-events-none absolute inset-0 opacity-45"></div>
+            <div class="pointer-events-none absolute -start-28 top-28 h-80 w-80 rounded-full bg-tide/20 blur-3xl"></div>
+            <div class="relative z-10 flex items-center justify-between">
+                <a href="{{ route('landing-page') }}" class="inline-flex">
+                    <img src="{{ asset('site/assets/footer-logo.png') }}" alt="{{ __('site.meta.title') }}" class="h-auto w-24 object-contain" />
+                </a>
+                <a href="{{ route('site.pricing') }}" class="text-xs font-bold text-white/62 underline decoration-white/20 underline-offset-4 hover:text-sand">{{ __('marketing.checkout.change_plan') }}</a>
+            </div>
+
+            <div class="relative z-10 mt-10 lg:my-auto lg:max-w-md">
+                <p class="text-xs font-bold text-sand">{{ __('marketing.signup.plan_summary') }}</p>
+
+                @if($selectedPackage)
+                    <div class="mt-4 border border-white/20 bg-white/[0.07] p-5 backdrop-blur-sm sm:p-6">
+                        <div class="flex items-start justify-between gap-5">
                             <div class="text-start">
-                                <p class="text-xs text-[#3C74BE]">{{ __('site.login.net_profit') }}</p>
-                                <p class="text-lg font-extrabold whitespace-nowrap" style="background: linear-gradient(104.3deg, #0179B4 7.76%, #88D8FF 90.48%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ __('site.login.net_profit_sample') }}</p>
+                                <h2 class="text-2xl font-extrabold text-white">{{ $selectedPackage->name }}</h2>
+                                <p class="mt-2 text-xs leading-6 text-white/52">{{ $selectedPackage->boatsLabel() }} · {{ __('site.pricing.durations.' . $selectedPackage->duration_type) }}</p>
+                            </div>
+                            <div class="shrink-0 text-end">
+                                <p class="text-2xl font-extrabold text-sand" dir="ltr">{{ number_format((float) $selectedPackage->effective_price, 0) }}</p>
+                                <p class="mt-1 text-[0.6rem] text-white/45">{{ __('site.pricing.per.' . $selectedPackage->duration_type) }}</p>
                             </div>
                         </div>
+
+                        <div class="mt-6 h-px bg-white/10"></div>
+
+                        <h3 class="mt-5 text-sm font-extrabold text-white">{{ __('marketing.signup.creates_title') }}</h3>
+                        <ul class="mt-4 grid gap-3">
+                            @foreach([__('marketing.signup.creates_1'), __('marketing.signup.creates_2'), __('marketing.signup.creates_3')] as $item)
+                                <li class="flex items-start gap-3 text-xs leading-6 text-white/62">
+                                    <span class="mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-tide/20 text-[#70d7c9]">
+                                        <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
+                                    </span>
+                                    <span>{{ $item }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
-                </div>
-                <div class="text-right">
-                    <h3 class="text-lg font-extrabold">{{ __('site.login.features_title') }}</h3>
-                    <p id="featureText" class="mt-1 text-sm leading-7 text-white/80 transition-opacity duration-300 min-h-[100px] flex items-center">{{ __('site.login.feature_1') }}</p>
-                    <div class="mt-6 flex items-center justify-center gap-4">
-                        <button id="nextFeature" type="button" class="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all" aria-label="{{ __('site.aria.next') }}">
-                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" /></svg>
-                        </button>
-                        <div id="featureDots" class="flex items-center gap-2"></div>
-                        <button id="prevFeature" type="button" class="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all" aria-label="{{ __('site.aria.prev') }}">
-                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6" /></svg>
-                        </button>
+                @else
+                    <div class="mt-4 border border-sand/30 bg-sand/10 p-5 sm:p-6">
+                        <h2 class="text-lg font-extrabold text-white">{{ __('marketing.signup.no_plan_title') }}</h2>
+                        <p class="mt-2 text-xs leading-6 text-white/58">{{ __('marketing.signup.no_plan_description') }}</p>
+                        <a href="{{ route('site.pricing') }}" class="mt-5 inline-flex rounded-xl bg-sand px-4 py-2.5 text-xs font-extrabold text-ink">{{ __('marketing.signup.choose_plan') }}</a>
                     </div>
-                </div>
+                @endif
             </div>
-        </section>
 
-        {{-- LEFT: Signup Form --}}
-        <section class="flex items-center justify-center bg-white px-6 py-10">
-            <div class="w-full max-w-md">
-                <div class="flex justify-start">
-                    <img src="{{ asset('site/assets/logo.png') }}" alt="{{ __('site.aria.logo') }}" class="h-fit w-28 object-contain">
+            <p class="relative z-10 mt-8 hidden text-xs leading-6 text-white/40 lg:block">{{ __('marketing.hero.note') }}</p>
+        </aside>
+
+        <section class="flex items-center justify-center px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
+            <div class="w-full max-w-2xl">
+                <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-start gap-2" aria-label="{{ __('marketing.checkout.step_label', ['current' => 2]) }}">
+                    @foreach([
+                        ['number' => 1, 'label' => __('marketing.checkout.steps.plan'), 'state' => 'done'],
+                        ['number' => 2, 'label' => __('marketing.checkout.steps.account'), 'state' => 'active'],
+                        ['number' => 3, 'label' => __('marketing.checkout.steps.activation'), 'state' => 'next'],
+                    ] as $step)
+                        <div class="flex flex-col items-center text-center">
+                            <span @class([
+                                'grid h-9 w-9 place-items-center rounded-full text-xs font-extrabold',
+                                'bg-tide text-white' => $step['state'] === 'done',
+                                'bg-ink text-white shadow-lg' => $step['state'] === 'active',
+                                'border border-ink/15 bg-white text-ink/38' => $step['state'] === 'next',
+                            ])>
+                                @if($step['state'] === 'done')
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
+                                @else
+                                    {{ $step['number'] }}
+                                @endif
+                            </span>
+                            <span @class(['mt-2 text-[0.62rem] font-bold sm:text-xs', 'text-ink' => $step['state'] === 'active', 'text-ink/42' => $step['state'] !== 'active'])>{{ $step['label'] }}</span>
+                        </div>
+                        @if(! $loop->last)
+                            <span @class(['mt-[1.1rem] h-px w-full', 'bg-tide' => $step['state'] === 'done', 'bg-ink/12' => $step['state'] !== 'done'])></span>
+                        @endif
+                    @endforeach
                 </div>
-                <h1 class="mt-6 text-start text-3xl font-extrabold text-slate-900">{{ __('site.signup.title') }}</h1>
-                <p class="mt-3 text-start text-sm text-slate-500">
-                    {{ __('site.signup.has_account') }}
-                    <a href="{{ route('frontend.show_login_form') }}" class="font-semibold underline text-blue-600 hover:text-blue-700">{{ __('site.signup.login_link') }}</a>
-                </p>
 
-                @if(!empty($selectedPackage))
-                    <div class="mt-6 flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
-                        <div class="text-start">
-                            <p class="text-xs text-blue-600">{{ __('site.signup.selected_plan') }}</p>
-                            <p class="text-base font-bold text-slate-900">{{ $selectedPackage->name }}</p>
-                            <p class="text-xs text-slate-500">{{ $selectedPackage->boatsLabel() }}</p>
-                        </div>
-                        <div class="text-end">
-                            <p class="text-lg font-extrabold text-blue-600">{{ number_format((float) $selectedPackage->effective_price, 0) }} {{ __('site.pricing.currency', ['default' => 'ر.س']) }}</p>
-                            <a href="{{ route('site.pricing') }}" class="text-xs text-blue-600 underline hover:text-blue-700">{{ __('site.signup.change_plan') }}</a>
-                        </div>
+                <div class="mt-10 text-start">
+                    <span class="eyebrow text-ocean">{{ __('marketing.checkout.step_label', ['current' => 2]) }}</span>
+                    <h1 class="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-ink md:text-4xl">{{ __('marketing.signup.title') }}</h1>
+                    <div class="mt-3 flex flex-col gap-2 text-sm text-ink/52 sm:flex-row sm:items-center sm:justify-between">
+                        <p>{{ __('marketing.signup.description') }}</p>
+                        <p class="shrink-0">{{ __('site.signup.has_account') }} <a href="{{ route('frontend.show_login_form') }}" class="font-bold text-ocean underline decoration-ocean/25 underline-offset-4">{{ __('site.signup.login_link') }}</a></p>
+                    </div>
+                </div>
+
+                @if($errors->any())
+                    <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-start text-sm text-red-700" role="alert">
+                        {{ $errors->first() }}
                     </div>
                 @endif
 
-                <form id="signupForm" action="{{ route('frontend.register') }}" method="post" class="mt-8 space-y-4">
+                <form id="signupForm" action="{{ route('frontend.register') }}" method="post" class="mt-8 grid gap-5 sm:grid-cols-2">
                     @csrf
-                    @if(isset($guard))<input type="hidden" name="guard" value="{{ $guard }}" />@endif
-                    @if(!empty($selectedPackage))<input type="hidden" name="package_id" value="{{ $selectedPackage->id }}" />@endif
-                    <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('site.signup.name') }}</label>
-                        <input id="fullNameInput" name="name" type="text" placeholder="{{ __('site.signup.name_placeholder') }}" value="{{ old('name') }}"
-                            class="h-11 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none ring-blue-500/30 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4" />
-                        <p id="fullNameInputError" class="mt-1 text-xs text-rose-600 hidden"></p>
-                        @error('name')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                    <input type="hidden" name="guard" value="{{ $guard ?? 'owner' }}" />
+                    @if($selectedPackage)
+                        <input type="hidden" name="package_id" value="{{ $selectedPackage->id }}" />
+                    @endif
+
+                    <div class="sm:col-span-2">
+                        <label for="fullNameInput" class="mb-2 block text-xs font-bold text-ink/72">{{ __('site.signup.name') }}</label>
+                        <input id="fullNameInput" name="name" type="text" value="{{ old('name') }}" placeholder="{{ __('site.signup.name_placeholder') }}" class="checkout-field" autocomplete="name" required autofocus />
+                        @error('name')<p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
+
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('site.signup.email') }}</label>
-                        <input id="emailInput" name="email" type="email" placeholder="{{ __('site.signup.email_placeholder') }}" value="{{ old('email') }}"
-                            class="h-11 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none ring-blue-500/30 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4" />
-                        <p id="emailInputError" class="mt-1 text-xs text-rose-600 hidden"></p>
-                        @error('email')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                        <label for="emailInput" class="mb-2 block text-xs font-bold text-ink/72">{{ __('site.signup.email') }}</label>
+                        <input id="emailInput" name="email" type="email" value="{{ old('email') }}" placeholder="{{ __('site.signup.email_placeholder') }}" class="checkout-field text-left" dir="ltr" autocomplete="email" required />
+                        @error('email')<p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
+
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('site.signup.phone') }}</label>
-                        <input id="phoneInput" name="phone" type="tel" inputmode="tel" dir="rtl" placeholder="{{ __('site.signup.phone_placeholder') }}" value="{{ old('phone') }}"
-                            class="h-11 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none ring-blue-500/30 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4" />
-                        <p id="phoneInputError" class="mt-1 text-xs text-rose-600 hidden"></p>
-                        @error('phone')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                        <label for="phoneInput" class="mb-2 block text-xs font-bold text-ink/72">{{ __('site.signup.phone') }}</label>
+                        <input id="phoneInput" name="phone" type="tel" value="{{ old('phone') }}" placeholder="{{ __('site.signup.phone_placeholder') }}" class="checkout-field text-left" dir="ltr" inputmode="tel" autocomplete="tel" required />
+                        @error('phone')<p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
+
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('site.signup.password') }}</label>
+                        <label for="passwordInput" class="mb-2 block text-xs font-bold text-ink/72">{{ __('site.signup.password') }}</label>
                         <div class="relative">
-                            <input id="passwordInput" name="password" type="password" placeholder="{{ __('site.signup.password_placeholder') }}"
-                                class="h-11 w-full rounded-md border border-slate-200 bg-white px-4 pe-11 text-sm text-slate-900 outline-none ring-blue-500/30 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4" />
-                            <button id="togglePassword" type="button" class="absolute inset-y-0 left-2 inline-flex items-center justify-center rounded-md px-2 text-slate-500 hover:text-slate-700" aria-label="{{ __('site.aria.toggle_password') }}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /></svg>
+                            <input id="passwordInput" name="password" type="password" placeholder="{{ __('site.signup.password_placeholder') }}" class="checkout-field pe-11" autocomplete="new-password" minlength="8" required />
+                            <button type="button" class="absolute inset-y-0 end-2 grid w-9 place-items-center text-ink/38 hover:text-ocean" data-password-toggle="passwordInput" aria-label="{{ __('site.aria.toggle_password') }}">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>
                             </button>
                         </div>
-                        <p id="passwordInputError" class="mt-1 text-xs text-rose-600 hidden"></p>
-                        @error('password')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                        @error('password')<p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
+
                     <div>
-                        <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('site.signup.password_confirm') }}</label>
+                        <label for="confirmPasswordInput" class="mb-2 block text-xs font-bold text-ink/72">{{ __('site.signup.password_confirm') }}</label>
                         <div class="relative">
-                            <input id="confirmPasswordInput" name="password_confirmation" type="password" placeholder="{{ __('site.signup.password_confirm_placeholder') }}"
-                                class="h-11 w-full rounded-md border border-slate-200 bg-white px-4 pe-11 text-sm text-slate-900 outline-none ring-blue-500/30 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4" />
-                            <button id="toggleConfirmPassword" type="button" class="absolute inset-y-0 left-2 inline-flex items-center justify-center rounded-md px-2 text-slate-500 hover:text-slate-700" aria-label="{{ __('site.aria.toggle_password_confirm') }}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /></svg>
+                            <input id="confirmPasswordInput" name="password_confirmation" type="password" placeholder="{{ __('site.signup.password_confirm_placeholder') }}" class="checkout-field pe-11" autocomplete="new-password" minlength="8" required />
+                            <button type="button" class="absolute inset-y-0 end-2 grid w-9 place-items-center text-ink/38 hover:text-ocean" data-password-toggle="confirmPasswordInput" aria-label="{{ __('site.aria.toggle_password_confirm') }}">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>
                             </button>
                         </div>
-                        <p id="confirmPasswordInputError" class="mt-1 text-xs text-rose-600 hidden"></p>
                     </div>
-                    <div>
-                        <div class="flex items-start gap-2 pt-1">
-                            <input id="agreeTerms" name="agree_terms" type="checkbox" value="1" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" {{ old('agree_terms') ? 'checked' : '' }} />
-                            <label for="agreeTerms" class="text-sm text-slate-600 cursor-pointer">
-                                {{ __('site.signup.agree') }}
-                                <a href="#terms" class="text-blue-600 hover:text-blue-700 underline">{{ __('site.signup.terms') }}</a>
-                                {{ __('site.signup.and') }}
-                                <a href="#privacy" class="text-blue-600 hover:text-blue-700 underline">{{ __('site.signup.privacy') }}</a>
-                            </label>
+
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="inline-flex min-h-13 w-full items-center justify-center gap-2 bg-ocean px-6 py-3.5 text-sm font-bold text-white shadow-[0_12px_28px_rgba(54,117,194,.16)] hover:-translate-y-0.5 hover:bg-ocean-deep">
+                            {{ $selectedPackage ? __('marketing.signup.submit_with_plan') : __('marketing.signup.submit_without_plan') }}
+                            <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                        </button>
+                        <div class="mt-4 flex flex-col items-center gap-1 text-center text-[0.68rem] leading-5 text-ink/42 sm:flex-row sm:justify-between sm:text-start">
+                            <p>{{ __('marketing.signup.terms_note') }}</p>
+                            <p class="shrink-0 font-semibold text-ocean">{{ __('marketing.signup.privacy_note') }}</p>
                         </div>
-                        <p id="agreeTermsError" class="mt-1 text-xs text-rose-600 hidden"></p>
                     </div>
-                    <button type="submit" class="mt-2 h-11 w-full rounded-md bg-[#3B74B8] text-sm font-semibold text-white shadow-sm hover:bg-[#336aa9] focus:outline-none focus:ring-4 focus:ring-blue-500/30">{{ __('site.signup.submit') }}</button>
-                    <p id="formMsg" class="hidden text-center text-sm"></p>
                 </form>
             </div>
         </section>
@@ -140,49 +165,15 @@
 
 @push('scripts')
 <script>
-(function() {
-    const passwordInput = document.getElementById("passwordInput");
-    const togglePassword = document.getElementById("togglePassword");
-    if (togglePassword) togglePassword.addEventListener("click", () => { passwordInput.type = passwordInput.type === "password" ? "text" : "password"; });
-    const confirmPasswordInput = document.getElementById("confirmPasswordInput");
-    const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
-    if (toggleConfirmPassword) toggleConfirmPassword.addEventListener("click", () => { confirmPasswordInput.type = confirmPasswordInput.type === "password" ? "text" : "password"; });
+    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var input = document.getElementById(button.dataset.passwordToggle);
 
-    const features = [
-        @json(__('site.login.feature_1')),
-        @json(__('site.login.feature_2')),
-        @json(__('site.login.feature_3'))
-    ];
-    const featureText = document.getElementById("featureText");
-    const featureDots = document.getElementById("featureDots");
-    const prevFeature = document.getElementById("prevFeature");
-    const nextFeature = document.getElementById("nextFeature");
-    let idx = 0;
-    function renderDots() {
-        if (!featureDots) return;
-        featureDots.innerHTML = "";
-        const ariaFeatureNum = {{ json_encode(__('site.aria.feature_num', ['num' => '__NUM__'])) }};
-        features.forEach((_, i) => {
-            const dot = document.createElement("button");
-            dot.type = "button";
-            dot.className = "h-2.5 w-2.5 rounded-full transition " + (i === idx ? "bg-white" : "bg-white/40 hover:bg-white/70");
-            dot.setAttribute("aria-label", ariaFeatureNum.replace('__NUM__', i + 1));
-            dot.addEventListener("click", () => { idx = i; updateFeature(); });
-            featureDots.appendChild(dot);
+            if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+            }
         });
-    }
-    function updateFeature() {
-        if (featureText) featureText.style.opacity = '0';
-        setTimeout(() => {
-            if (featureText) featureText.textContent = features[idx];
-            renderDots();
-            if (featureText) featureText.style.opacity = '1';
-        }, 150);
-    }
-    if (prevFeature) prevFeature.addEventListener("click", () => { idx = (idx - 1 + features.length) % features.length; updateFeature(); });
-    if (nextFeature) nextFeature.addEventListener("click", () => { idx = (idx + 1) % features.length; updateFeature(); });
-    updateFeature();
-})();
+    });
 </script>
 @endpush
 @endsection
