@@ -114,6 +114,19 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response->assertSee(route('site.contact'), false);
     }
 
+    public function test_pricing_displays_three_packages_in_a_single_desktop_row(): void
+    {
+        $this->createPackage(['sort_order' => 1]);
+        $this->createPackage(['name_en' => 'Fleet', 'sort_order' => 2]);
+        $this->createPackage(['name_en' => 'Fleet Plus', 'sort_order' => 3]);
+
+        $response = $this->get(route('site.pricing'));
+
+        $response->assertOk();
+        $response->assertSee('lg:grid-cols-3', false);
+        $response->assertSee('lg:col-span-3', false);
+    }
+
     public function test_login_guides_new_owners_to_choose_a_subscription_plan(): void
     {
         $response = $this->get(route('frontend.show_login_form'));

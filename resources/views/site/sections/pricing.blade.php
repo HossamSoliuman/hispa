@@ -6,15 +6,15 @@
             <p class="mx-auto mt-6 max-w-xl text-base leading-8 text-ink/55">{{ __('marketing.pricing.description') }}</p>
         </div>
 
-        <div class="mt-16 grid items-start gap-8 lg:grid-cols-[0.68fr_1.32fr]">
-            <aside class="hud-panel bg-mist/80 p-7 text-start sm:p-9">
+        <div class="mt-16 grid items-start gap-8 lg:grid-cols-3">
+            <aside class="order-2 hud-panel bg-mist/80 p-7 text-start sm:p-9 lg:col-span-3">
                 <div class="flex items-center gap-3">
                     <span class="grid h-10 w-10 place-items-center border border-ocean/25 bg-ocean text-white">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
                     </span>
                     <h3 class="text-lg font-bold text-ink">{{ __('marketing.pricing.included_title') }}</h3>
                 </div>
-                <ul class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+                <ul class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach(trans('marketing.pricing.included') as $item)
                         <li class="flex items-start gap-3 text-sm font-medium leading-6 text-ink/68">
                             <svg class="mt-1 h-4 w-4 shrink-0 text-ocean" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
@@ -24,7 +24,11 @@
                 </ul>
             </aside>
 
-            <div @class(['grid gap-5', 'md:grid-cols-2' => ($subscriptionPackages ?? collect())->count() > 1])>
+            <div @class([
+                'order-1 grid gap-5 lg:col-span-3',
+                'md:grid-cols-2' => ($subscriptionPackages ?? collect())->count() > 1,
+                'lg:grid-cols-3' => ($subscriptionPackages ?? collect())->count() > 2,
+            ])>
                 @forelse($subscriptionPackages ?? [] as $package)
                     <article @class([
                         'price-card relative flex h-full flex-col overflow-hidden p-7 text-start sm:p-9',
