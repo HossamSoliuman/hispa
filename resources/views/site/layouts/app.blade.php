@@ -19,7 +19,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="min-h-screen text-ink antialiased">
+<body class="public-site min-h-screen text-ink antialiased">
     <a href="#main-content" class="fixed start-4 top-4 z-[100] -translate-y-24 rounded-lg bg-white px-4 py-3 text-sm font-bold text-ink shadow-xl focus:translate-y-0">
         {{ __('marketing.a11y.skip') }}
     </a>
@@ -30,8 +30,6 @@
     <div id="main-content">
         @yield('content')
     </div>
-
-    @include('site.partials.footer')
 
     @stack('scripts')
 </body>

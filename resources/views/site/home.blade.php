@@ -6,5 +6,7 @@
 @section('content')
     @include('site.sections.hero')
     @include('site.sections.features')
+    @include('site.sections.about')
     @include('site.sections.pricing')
+    @include('site.sections.contact')
 @endsection

@@ -12,11 +12,11 @@
                 <a href="{{ route('landing-page') }}" class="inline-flex">
                     <img src="{{ asset('site/assets/footer-logo.png') }}" alt="{{ __('site.meta.title') }}" class="h-auto w-24 object-contain" />
                 </a>
-                <a href="{{ route('site.pricing') }}" class="text-xs font-bold text-white/62 underline decoration-white/20 underline-offset-4 hover:text-sand">{{ __('marketing.checkout.change_plan') }}</a>
+                <a href="{{ route('landing-page') }}#pricing" class="text-xs font-bold text-white/62 underline decoration-white/20 underline-offset-4 hover:text-white">{{ __('marketing.checkout.change_plan') }}</a>
             </div>
 
             <div class="relative z-10 mt-10 lg:my-auto lg:max-w-md">
-                <p class="text-xs font-bold text-sand">{{ __('marketing.signup.plan_summary') }}</p>
+                <p class="text-xs font-bold text-tide">{{ __('marketing.signup.plan_summary') }}</p>
 
                 @if($selectedPackage)
                     <div class="mt-4 border border-white/20 bg-white/[0.07] p-5 backdrop-blur-sm sm:p-6">
@@ -26,7 +26,7 @@
                                 <p class="mt-2 text-xs leading-6 text-white/52">{{ $selectedPackage->boatsLabel() }} · {{ __('site.pricing.durations.' . $selectedPackage->duration_type) }}</p>
                             </div>
                             <div class="shrink-0 text-end">
-                                <p class="text-2xl font-extrabold text-sand" dir="ltr">{{ number_format((float) $selectedPackage->effective_price, 0) }}</p>
+                                <p class="text-2xl font-extrabold text-[#9ee8d3]" dir="ltr">{{ number_format((float) $selectedPackage->effective_price, 0) }}</p>
                                 <p class="mt-1 text-[0.6rem] text-white/45">{{ __('site.pricing.per.' . $selectedPackage->duration_type) }}</p>
                             </div>
                         </div>
@@ -46,10 +46,10 @@
                         </ul>
                     </div>
                 @else
-                    <div class="mt-4 border border-sand/30 bg-sand/10 p-5 sm:p-6">
+                    <div class="mt-4 border border-tide/30 bg-tide/10 p-5 sm:p-6">
                         <h2 class="text-lg font-extrabold text-white">{{ __('marketing.signup.no_plan_title') }}</h2>
                         <p class="mt-2 text-xs leading-6 text-white/58">{{ __('marketing.signup.no_plan_description') }}</p>
-                        <a href="{{ route('site.pricing') }}" class="mt-5 inline-flex rounded-xl bg-sand px-4 py-2.5 text-xs font-extrabold text-ink">{{ __('marketing.signup.choose_plan') }}</a>
+                        <a href="{{ route('landing-page') }}#pricing" class="mt-5 inline-flex rounded-xl bg-tide px-4 py-2.5 text-xs font-extrabold text-white">{{ __('marketing.signup.choose_plan') }}</a>
                     </div>
                 @endif
             </div>

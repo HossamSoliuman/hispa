@@ -42,10 +42,20 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response->assertSee('family=Tajawal', false);
         $response->assertSee('data-theme-toggle', false);
         $response->assertSee('public_theme', false);
+        $response->assertSee('theme-dashboard-preview-dark', false);
+        $response->assertSee('id="about"', false);
+        $response->assertSee('id="pricing"', false);
+        $response->assertSee('id="contact"', false);
+        $response->assertSee(route('landing-page').'#about', false);
+        $response->assertSee(route('landing-page').'#pricing', false);
+        $response->assertSee(route('landing-page').'#contact', false);
+        $response->assertSee('min-h-56', false);
         $response->assertSee('/en', false);
         $response->assertDontSee('family=Alexandria', false);
-        $response->assertDontSee('id="about"', false);
+        $response->assertDontSee('بلا ازدحام.');
         $response->assertDontSee('id="forwho"', false);
+        $response->assertDontSee('pt-14', false);
+        $response->assertDontSee('<footer', false);
         $this->assertFileExists(public_path('site/assets/owner-dashboard.png'));
     }
 
@@ -111,7 +121,7 @@ class PublicSubscriptionExperienceTest extends TestCase
 
         $response->assertOk();
         $response->assertSee(__('marketing.pricing.empty_title'));
-        $response->assertSee(route('site.contact'), false);
+        $response->assertSee(route('landing-page').'#contact', false);
     }
 
     public function test_pricing_displays_three_packages_in_a_single_desktop_row(): void
@@ -133,8 +143,20 @@ class PublicSubscriptionExperienceTest extends TestCase
 
         $response->assertOk();
         $response->assertSee(__('marketing.hero.title'));
-        $response->assertSee(route('site.pricing'), false);
+        $response->assertSee(route('landing-page').'#pricing', false);
         $response->assertSee(__('marketing.nav.plans'));
+    }
+
+    public function test_public_dark_mode_uses_transparent_surfaces_and_a_matching_dashboard_preview(): void
+    {
+        $css = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertIsString($css);
+        $this->assertStringContainsString("html[data-theme='dark'] .public-site-section", $css);
+        $this->assertStringContainsString("html[data-theme='dark'] .theme-dashboard-preview-dark", $css);
+        $this->assertStringContainsString('rgba(10, 29, 48, 0.46)', $css);
+        $this->assertStringNotContainsString("html[data-theme='dark'] [class*='bg-white']", $css);
+        $this->assertStringNotContainsString('--color-sand', $css);
     }
 
     public function test_processing_page_clearly_shows_the_pending_activation_state(): void

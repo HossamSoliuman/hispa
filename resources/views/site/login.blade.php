@@ -14,7 +14,7 @@
             </a>
 
             <div class="relative z-10 my-auto max-w-md text-start">
-                <span class="eyebrow text-sand">{{ __('marketing.preview.label') }}</span>
+                <span class="eyebrow text-tide">{{ __('marketing.preview.label') }}</span>
                 <h2 class="mt-5 text-4xl font-extrabold leading-tight tracking-[-0.04em]">{{ __('marketing.hero.title') }}</h2>
                 <div class="mt-8 grid gap-3">
                     @foreach([__('marketing.hero.proof_1'), __('marketing.hero.proof_2'), __('marketing.hero.proof_3')] as $proof)
@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('site.pricing') }}" class="relative z-10 inline-flex items-center gap-2 self-start text-xs font-bold text-white/52 hover:text-sand">
+            <a href="{{ route('landing-page') }}#pricing" class="relative z-10 inline-flex items-center gap-2 self-start text-xs font-bold text-white/52 hover:text-white">
                 {{ __('marketing.hero.primary_cta') }}
                 <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
             </a>
@@ -44,7 +44,7 @@
                 <h1 class="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-ink md:text-4xl">{{ __('site.login.title') }}</h1>
                 <p class="mt-3 text-sm leading-7 text-ink/52">
                     {{ __('site.login.no_account') }}
-                    <a href="{{ route('site.pricing') }}" class="font-bold text-ocean underline decoration-ocean/25 underline-offset-4">{{ __('marketing.nav.plans') }}</a>
+                    <a href="{{ route('landing-page') }}#pricing" class="font-bold text-ocean underline decoration-ocean/25 underline-offset-4">{{ __('marketing.nav.plans') }}</a>
                 </p>
 
                 @if($errors->any())

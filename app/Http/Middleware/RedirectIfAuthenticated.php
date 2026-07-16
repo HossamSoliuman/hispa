@@ -27,7 +27,6 @@ class RedirectIfAuthenticated extends MiddlewareRedirectIfAuthenticated
                     'owner' => route('owner.dashboard'),
                     'dalal' => route('dalal.dashboard'),
                     //                    'counter' => route('counter.dashboard'),
-                    'gov' => route('gov.dashboard'),
                     default => route('landing-page'),
                 };
 

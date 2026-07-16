@@ -49,7 +49,7 @@
                                 <h2 class="mt-2 text-2xl font-extrabold text-ink">{{ $selectedPackage->name }}</h2>
                                 <p class="mt-2 text-sm text-ink/48">{{ $selectedPackage->boatsLabel() }} · {{ __('site.pricing.durations.' . $selectedPackage->duration_type) }}</p>
                             </div>
-                            <a href="{{ route('site.pricing') }}" class="inline-flex items-center gap-1 text-xs font-bold text-ocean underline decoration-ocean/25 underline-offset-4 hover:text-ocean-deep">{{ __('marketing.checkout.change_plan') }}</a>
+                            <a href="{{ route('landing-page') }}#pricing" class="inline-flex items-center gap-1 text-xs font-bold text-ocean underline decoration-ocean/25 underline-offset-4 hover:text-ocean-deep">{{ __('marketing.checkout.change_plan') }}</a>
                         </div>
 
                         <div class="py-7">
@@ -111,7 +111,7 @@
 
                         <div class="mt-6 border-t border-white/10 pt-5 text-center">
                             <p class="text-xs text-white/45">{{ __('marketing.checkout.help') }}</p>
-                            <a href="{{ route('site.contact') }}" class="mt-1 inline-flex text-xs font-bold text-white underline decoration-white/25 underline-offset-4 hover:text-white/70">{{ __('marketing.checkout.contact') }}</a>
+                            <a href="{{ route('landing-page') }}#contact" class="mt-1 inline-flex text-xs font-bold text-white underline decoration-white/25 underline-offset-4 hover:text-white/70">{{ __('marketing.checkout.contact') }}</a>
                         </div>
                     </aside>
                 </div>
@@ -119,7 +119,7 @@
                 <div class="price-card mx-auto mt-10 max-w-xl p-8 text-center">
                     <h2 class="text-xl font-extrabold text-ink">{{ __('marketing.pricing.empty_title') }}</h2>
                     <p class="mt-2 text-sm leading-7 text-ink/55">{{ __('marketing.pricing.empty_description') }}</p>
-                    <a href="{{ route('site.contact') }}" class="mt-6 inline-flex bg-ocean px-5 py-3 text-sm font-bold text-white">{{ __('site.pricing.contact_us') }}</a>
+                    <a href="{{ route('landing-page') }}#contact" class="mt-6 inline-flex bg-ocean px-5 py-3 text-sm font-bold text-white">{{ __('site.pricing.contact_us') }}</a>
                 </div>
             @endif
         </div>
