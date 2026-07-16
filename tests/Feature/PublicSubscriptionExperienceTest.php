@@ -142,9 +142,12 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response = $this->get(route('frontend.show_login_form'));
 
         $response->assertOk();
-        $response->assertSee(__('marketing.hero.title'));
         $response->assertSee(route('landing-page').'#pricing', false);
         $response->assertSee(__('marketing.nav.plans'));
+        $response->assertSee('auth-form-card', false);
+        $response->assertSee('auth-theme-toggle', false);
+        $response->assertSee('data-theme-toggle', false);
+        $response->assertDontSee('auth-promo-panel', false);
     }
 
     public function test_public_dark_mode_uses_transparent_surfaces_and_a_matching_dashboard_preview(): void
@@ -154,6 +157,7 @@ class PublicSubscriptionExperienceTest extends TestCase
         $this->assertIsString($css);
         $this->assertStringContainsString("html[data-theme='dark'] .public-site-section", $css);
         $this->assertStringContainsString("html[data-theme='dark'] .theme-dashboard-preview-dark", $css);
+        $this->assertStringContainsString("html[data-theme='dark'] .auth-form-card", $css);
         $this->assertStringContainsString('rgba(10, 29, 48, 0.46)', $css);
         $this->assertStringNotContainsString("html[data-theme='dark'] [class*='bg-white']", $css);
         $this->assertStringNotContainsString('--color-sand', $css);

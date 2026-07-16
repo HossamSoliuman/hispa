@@ -221,6 +221,10 @@
         color: #8a9a9f;
     }
 
+    .auth-form-card {
+        box-shadow: 0 24px 70px rgba(45, 77, 115, 0.1);
+    }
+
     .hero-rise {
         animation: hero-rise 650ms both cubic-bezier(0.2, 0.8, 0.2, 1);
     }
@@ -349,6 +353,32 @@ html[data-theme='dark'] .price-card::after {
 
 html[data-theme='dark'] .checkout-field::placeholder {
     color: #8290a2;
+}
+
+html[data-theme='dark'] .auth-form-card {
+    background: rgba(8, 24, 40, 0.34) !important;
+    border-color: rgba(148, 191, 237, 0.2);
+    box-shadow: 0 24px 70px rgba(0, 8, 19, 0.2);
+}
+
+html[data-theme='dark'] .auth-theme-toggle-form {
+    background: rgba(10, 29, 48, 0.52) !important;
+    border-color: rgba(148, 191, 237, 0.24);
+    color: var(--color-ocean);
+}
+
+html[data-theme='dark'] .auth-error {
+    background: rgba(127, 29, 29, 0.22) !important;
+    border-color: rgba(248, 113, 113, 0.32);
+    color: #fecaca;
+}
+
+html[data-theme='dark'] .checkout-field:-webkit-autofill,
+html[data-theme='dark'] .checkout-field:-webkit-autofill:hover,
+html[data-theme='dark'] .checkout-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-ink);
+    box-shadow: 0 0 0 1000px rgba(18, 42, 67, 0.86) inset;
+    caret-color: var(--color-ink);
 }
 
 @keyframes hero-rise {
