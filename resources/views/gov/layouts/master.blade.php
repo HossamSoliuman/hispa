@@ -1,6 +1,7 @@
+@php $govTheme = request()->cookie('gov_theme') === 'light' ? 'light' : 'dark'; @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
-    data-bs-theme="light">
+    data-bs-theme="{{ $govTheme }}">
 
 <head>
     <meta charset="utf-8">
@@ -21,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- ================== END core-css ================== -->
 
-    {{-- Government operations theme: compact, formal, and reference-led. --}}
+    {{-- Government operations theme: a maritime command surface with luminous card rails. --}}
     <style>
         :root {
             --gov-green: #16865f;
@@ -32,9 +33,32 @@
             --gov-muted: #74817b;
             --gov-canvas: #f6f8f5;
             --gov-surface: #ffffff;
+            --gov-surface-raised: #f8fbf9;
             --gov-border: #e4e9e5;
+            --gov-header: rgba(255, 255, 255, .96);
+            --gov-sidebar: rgba(255, 255, 255, .97);
+            --gov-grid: rgba(31, 45, 39, .022);
+            --gov-shadow: rgba(19, 55, 42, .08);
             --gov-header-height: 4rem;
             --gov-sidebar-width: 13.5rem;
+        }
+
+        [data-bs-theme='dark'] {
+            color-scheme: dark;
+            --gov-green: #2ed19b;
+            --gov-green-rgb: 46, 209, 155;
+            --gov-green-dark: #7be7c1;
+            --gov-gold: #f2aa3c;
+            --gov-ink: #edf8fb;
+            --gov-muted: #91a8b5;
+            --gov-canvas: #071722;
+            --gov-surface: #0c2433;
+            --gov-surface-raised: #112d3e;
+            --gov-border: rgba(122, 166, 184, .22);
+            --gov-header: rgba(10, 43, 68, .96);
+            --gov-sidebar: rgba(7, 27, 40, .97);
+            --gov-grid: rgba(100, 170, 194, .045);
+            --gov-shadow: rgba(0, 0, 0, .34);
         }
 
         html,
@@ -49,10 +73,13 @@
         body {
             background-color: var(--gov-canvas);
             background-image:
-                linear-gradient(rgba(31, 45, 39, .018) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(31, 45, 39, .018) 1px, transparent 1px);
-            background-size: 34px 34px;
+                radial-gradient(circle at 58% 16%, rgba(var(--gov-green-rgb), .09), transparent 30rem),
+                linear-gradient(var(--gov-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--gov-grid) 1px, transparent 1px);
+            background-attachment: fixed;
+            background-size: auto, 34px 34px, 34px 34px;
             color: var(--gov-ink);
+            transition: background-color .2s ease, color .2s ease;
         }
 
         .app {
@@ -62,9 +89,10 @@
 
         .app-header {
             height: var(--gov-header-height);
-            background: #fff !important;
+            background: var(--gov-header) !important;
+            backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--gov-border);
-            box-shadow: 0 4px 18px rgba(32, 56, 45, .045);
+            box-shadow: 0 8px 28px var(--gov-shadow);
         }
 
         .app-header .desktop-toggler {
@@ -87,7 +115,13 @@
             width: 3.9rem;
             height: 2.75rem !important;
             margin: 0;
+            mix-blend-mode: multiply;
             object-fit: contain;
+        }
+
+        [data-bs-theme='dark'] .app-header .brand .brand-logo img {
+            filter: invert(1) grayscale(1) brightness(3);
+            mix-blend-mode: screen;
         }
 
         .app-header .menu-toggler .bar { background: var(--gov-green) !important; }
@@ -100,7 +134,7 @@
         }
 
         .app-header .menu .menu-item .menu-link .menu-icon,
-        .app-header .menu .menu-item .menu-link .menu-text { color: #334155; }
+        .app-header .menu .menu-item .menu-link .menu-text { color: var(--gov-ink); }
 
         .app-header .menu .menu-item .menu-link:hover .menu-icon,
         .app-header .menu .menu-item .menu-link:hover .menu-text { color: var(--gov-green); }
@@ -117,7 +151,7 @@
         .gov-avatar {
             align-items: center;
             background: var(--gov-gold);
-            border: 3px solid #fff7df;
+            border: 3px solid rgba(255, 247, 223, .86);
             border-radius: 50%;
             color: #fff;
             display: inline-flex;
@@ -131,7 +165,7 @@
 
         .gov-notification-dot {
             background: var(--gov-gold);
-            border: 2px solid #fff;
+            border: 2px solid var(--gov-header);
             border-radius: 50%;
             height: .55rem;
             inset-inline-end: -.1rem;
@@ -141,9 +175,10 @@
         }
 
         .app-sidebar {
-            background: rgba(255, 255, 255, .97);
+            background: var(--gov-sidebar);
+            backdrop-filter: blur(18px);
             border-inline-end: 1px solid var(--gov-border);
-            box-shadow: -8px 0 26px rgba(32, 56, 45, .025);
+            box-shadow: -8px 0 30px var(--gov-shadow);
             inset-inline-end: auto;
             inset-inline-start: 0;
             top: var(--gov-header-height);
@@ -153,7 +188,7 @@
         .app-sidebar .menu { padding: .75rem 0 1.25rem; }
 
         .app-sidebar .menu .menu-header {
-            color: #9aa59f;
+            color: var(--gov-muted);
             font-size: .65rem;
             font-weight: 700;
             letter-spacing: .03em;
@@ -163,7 +198,7 @@
         .app-sidebar .menu .menu-item .menu-link {
             border-inline-start: 3px solid transparent;
             border-radius: 5px;
-            color: #637069;
+            color: var(--gov-muted);
             font-size: .82rem;
             font-weight: 500;
             justify-content: flex-start;
@@ -173,7 +208,7 @@
         }
 
         .app-sidebar .menu .menu-item .menu-link .menu-icon {
-            color: #8d9993;
+            color: var(--gov-muted);
             font-size: .98rem;
             height: 1.75rem;
             margin: 0;
@@ -211,11 +246,65 @@
             background: var(--gov-surface);
             border: 1px solid var(--gov-border) !important;
             border-radius: 8px;
-            box-shadow: 0 7px 22px rgba(37, 57, 48, .045) !important;
+            box-shadow: 0 14px 34px var(--gov-shadow), 0 0 24px rgba(var(--gov-green-rgb), .045) !important;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            background: linear-gradient(90deg, #2a8de8 0 76%, var(--gov-gold) 76% 100%);
+            box-shadow: 0 0 15px rgba(42, 141, 232, .32);
+            content: '';
+            height: 3px;
+            inset: 0 0 auto;
+            pointer-events: none;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .dropdown-menu {
+            background: var(--gov-surface-raised);
+            border-color: var(--gov-border);
+            box-shadow: 0 14px 32px var(--gov-shadow);
+            color: var(--gov-ink);
+        }
+
+        .dropdown-item { color: var(--gov-ink); }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background: rgba(var(--gov-green-rgb), .1);
+            color: var(--gov-green-dark);
+        }
+
+        .dropdown-divider { border-color: var(--gov-border); }
+
+        .gov-theme-toggle {
+            background: transparent;
+            border: 0;
+            width: auto;
+        }
+
+        .gov-theme-toggle .menu-icon {
+            align-items: center;
+            background: rgba(var(--gov-green-rgb), .08);
+            border: 1px solid rgba(var(--gov-green-rgb), .18);
+            border-radius: 50%;
+            display: flex;
+            height: 2.25rem;
+            justify-content: center;
+            transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+            width: 2.25rem;
+        }
+
+        .gov-theme-toggle:hover .menu-icon {
+            background: rgba(var(--gov-green-rgb), .15);
+            box-shadow: 0 0 18px rgba(var(--gov-green-rgb), .18);
+            transform: rotate(8deg);
         }
 
         .app-footer {
-            color: #94a09a;
+            color: var(--gov-muted);
             font-size: .75rem;
             font-weight: 500;
         }
@@ -311,6 +400,16 @@
     <script src="{{ asset('dashboard/assets/js/vendor.min.js') }}"></script>
     <script src="{{ asset('dashboard/assets/js/app.min.js') }}"></script>
     <!-- ================== END core-js ================== -->
+
+    <script>
+        function govToggleTheme() {
+            var html = document.documentElement;
+            var nextTheme = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+
+            document.cookie = 'gov_theme=' + nextTheme + ';path=/;max-age=31536000;SameSite=Lax';
+            window.location.reload();
+        }
+    </script>
 
     @yield('script')
 </body>

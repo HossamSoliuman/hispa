@@ -1,3 +1,4 @@
+@php $isGovDarkTheme = request()->cookie('gov_theme') !== 'light'; @endphp
 @extends('gov.layouts.master-auth')
 
 @section('title')
@@ -6,25 +7,50 @@
 
 @section('css')
     <style>
+        html, body, button, input { font-family: 'Tajawal', sans-serif !important; }
         .invalid-feedback { display: block; }
         .auth-card { max-width: 440px; margin: 0 auto; }
         .login-page {
             min-height: 100vh;
-            background: linear-gradient(135deg, #064e3b 0%, #0a5c3a 35%, #0b7a4b 70%, #10b981 100%);
+            background:
+                radial-gradient(circle at 22% 18%, rgba(46, 209, 155, .18), transparent 28rem),
+                linear-gradient(135deg, #edf7f2 0%, #d9eee6 100%);
             position: relative;
             overflow: hidden;
+        }
+        [data-bs-theme='dark'] .login-page {
+            background:
+                radial-gradient(circle at 22% 18%, rgba(46, 209, 155, .15), transparent 28rem),
+                linear-gradient(135deg, #061620 0%, #0a2739 56%, #0b3c45 100%);
         }
         .login-page::before {
             content: '';
             position: absolute; inset: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
+            background-image:
+                linear-gradient(rgba(75, 140, 151, .07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(75, 140, 151, .07) 1px, transparent 1px);
+            background-size: 34px 34px;
         }
         .login-content { position: relative; z-index: 1; }
-        .login-card { border: 0; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); overflow: hidden; }
-        .login-card .card-body { padding: 2.25rem 2rem; background: #fff; }
+        .login-card {
+            background: #fff; border: 1px solid rgba(42, 141, 232, .28); border-radius: 8px;
+            box-shadow: 0 25px 55px rgba(7, 30, 39, .18), 0 0 28px rgba(42, 141, 232, .08);
+            overflow: hidden; position: relative;
+        }
+        .login-card::before {
+            background: linear-gradient(90deg, #2a8de8 0 76%, #f2aa3c 76% 100%);
+            box-shadow: 0 0 16px rgba(42, 141, 232, .46); content: '';
+            height: 4px; inset: 0 0 auto; position: absolute; z-index: 2;
+        }
+        .login-card .card-body { padding: 2.25rem 2rem; background: transparent; }
+        [data-bs-theme='dark'] .login-card {
+            background: linear-gradient(145deg, rgba(42, 141, 232, .1), rgba(11, 34, 48, .98) 38%);
+            border-color: rgba(42, 141, 232, .42);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, .35), 0 0 34px rgba(42, 141, 232, .13);
+        }
         .login-logo-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
-        .login-logo { max-height: 64px; width: auto; object-fit: contain; display: block; }
+        .login-logo { max-height: 64px; width: auto; object-fit: contain; display: block; mix-blend-mode: multiply; }
+        [data-bs-theme='dark'] .login-logo { filter: invert(1) grayscale(1) brightness(3); mix-blend-mode: screen; }
         .login-badge {
             display: inline-block;
             background: linear-gradient(135deg, #0a5c3a 0%, #0b7a4b 100%);
@@ -34,8 +60,17 @@
         }
         .login-title { font-size: 1.5rem; font-weight: 700; color: #0a5c3a; margin-bottom: 0.35rem; }
         .login-subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem; }
-        .login-page .form-control { border-radius: 10px; padding: 0.6rem 0.9rem; border: 1px solid #e2e8f0; }
+        .login-page .form-control { background: rgba(255, 255, 255, .82); border-radius: 7px; padding: 0.6rem 0.9rem; border: 1px solid #dbe6e1; }
         .login-page .form-control:focus { border-color: #0b7a4b; box-shadow: 0 0 0 3px rgba(11, 122, 75, 0.2); }
+        [data-bs-theme='dark'] .login-title { color: #edf8fb; }
+        [data-bs-theme='dark'] .login-subtitle,
+        [data-bs-theme='dark'] .login-page .form-label,
+        [data-bs-theme='dark'] .login-page .form-check-label { color: #91a8b5; }
+        [data-bs-theme='dark'] .login-page .form-control {
+            background: rgba(6, 24, 36, .7); border-color: rgba(122, 166, 184, .28); color: #edf8fb;
+        }
+        [data-bs-theme='dark'] .login-page .form-control::placeholder { color: #718895; }
+        [data-bs-theme='dark'] .login-page .form-control:focus { border-color: #2ed19b; box-shadow: 0 0 0 3px rgba(46, 209, 155, .14); }
         .login-page .btn-primary {
             border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600;
             background: linear-gradient(135deg, #0a5c3a 0%, #0b7a4b 100%);
@@ -47,11 +82,26 @@
         }
         .login-page .form-check-input:checked { background-color: #0b7a4b; border-color: #0b7a4b; }
         .login-page .form-label { font-weight: 500; color: #334155; }
+        .login-theme-toggle {
+            align-items: center; background: rgba(255, 255, 255, .82); border: 1px solid rgba(11, 122, 75, .2);
+            border-radius: 50%; color: #0a5c3a; display: flex; font-size: 1.05rem; height: 2.75rem;
+            inset-inline-end: 1.25rem; justify-content: center; position: absolute; top: 1.25rem;
+            transition: box-shadow .2s ease, transform .2s ease; width: 2.75rem; z-index: 2;
+        }
+        .login-theme-toggle:hover { box-shadow: 0 0 20px rgba(46, 209, 155, .22); transform: rotate(8deg); }
+        [data-bs-theme='dark'] .login-theme-toggle {
+            background: rgba(11, 42, 59, .85); border-color: rgba(46, 209, 155, .24); color: #7be7c1;
+        }
     </style>
 @endsection
 
 @section('content')
     <div class="login-page d-flex align-items-center justify-content-center py-4">
+        <button type="button" class="login-theme-toggle" data-gov-theme-toggle onclick="govToggleTheme()"
+            title="{{ __('gov.theme.toggle') }}" aria-label="{{ __('gov.theme.toggle') }}"
+            aria-pressed="{{ $isGovDarkTheme ? 'true' : 'false' }}">
+            <i class="bi {{ $isGovDarkTheme ? 'bi-sun' : 'bi-moon-stars' }}" aria-hidden="true"></i>
+        </button>
         <div class="login-content w-100 auth-card px-3">
             <div class="card login-card shadow">
                 <div class="card-body">

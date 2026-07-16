@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class GovDashboardDesignTest extends TestCase
 {
-    public function test_dashboard_renders_the_compact_government_layout(): void
+    public function test_dashboard_renders_the_dark_government_command_surface(): void
     {
         app()->setLocale('ar');
 
@@ -50,8 +50,12 @@ class GovDashboardDesignTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('dir="rtl"', $html);
+        $this->assertStringContainsString('data-bs-theme="dark"', $html);
         $this->assertStringContainsString("font-family: 'Tajawal', sans-serif !important", $html);
         $this->assertStringContainsString('--gov-sidebar-width: 13.5rem', $html);
+        $this->assertStringContainsString('--gov-canvas: #071722', $html);
+        $this->assertStringContainsString('data-gov-theme-toggle', $html);
+        $this->assertStringContainsString("document.cookie = 'gov_theme=' + nextTheme", $html);
         $this->assertStringContainsString('gov-dashboard-shell', $html);
         $this->assertStringContainsString('gov-banner-title', $html);
         $this->assertStringContainsString('color: #fff', $html);
@@ -62,8 +66,44 @@ class GovDashboardDesignTest extends TestCase
         $this->assertStringContainsString('gov-card-ports', $html);
         $this->assertStringContainsString('gov-card-seasons', $html);
         $this->assertStringContainsString('gov-card-sales', $html);
+        $this->assertStringContainsString('linear-gradient(90deg, var(--stat-accent) 0 76%, var(--stat-tail) 76% 100%)', $html);
+        $this->assertStringContainsString('0 0 26px rgba(var(--stat-accent-rgb), .13)', $html);
         $this->assertStringContainsString('gov-chart-card', $html);
         $this->assertStringContainsString('dashboard/assets/plugins/chart.js/dist/chart.umd.js', $html);
+        $this->assertStringContainsString("var isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark'", $html);
         $this->assertStringContainsString('الجهة الحكومية', $html);
+    }
+
+    public function test_government_portal_respects_the_saved_light_theme(): void
+    {
+        app()->setLocale('en');
+        request()->cookies->set('gov_theme', 'light');
+
+        auth('gov')->setUser(new User([
+            'name' => 'Gov Test',
+            'email' => 'gov@example.com',
+        ]));
+
+        $html = view('gov.layouts.master', [
+            'errors' => new ViewErrorBag,
+        ])->render();
+
+        $this->assertStringContainsString('data-bs-theme="light"', $html);
+        $this->assertStringContainsString('aria-pressed="false"', $html);
+        $this->assertStringContainsString('bi-moon-stars', $html);
+    }
+
+    public function test_government_login_uses_the_same_dark_card_language(): void
+    {
+        app()->setLocale('en');
+
+        $html = view('gov.auth.login', [
+            'errors' => new ViewErrorBag,
+        ])->render();
+
+        $this->assertStringContainsString('data-bs-theme="dark"', $html);
+        $this->assertStringContainsString('login-theme-toggle', $html);
+        $this->assertStringContainsString('linear-gradient(90deg, #2a8de8 0 76%, #f2aa3c 76% 100%)', $html);
+        $this->assertStringContainsString("document.cookie = 'gov_theme=' + nextTheme", $html);
     }
 }

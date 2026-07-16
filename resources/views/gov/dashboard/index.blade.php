@@ -26,6 +26,12 @@
             position: relative;
         }
 
+        [data-bs-theme='dark'] .gov-banner {
+            background: linear-gradient(115deg, rgba(17, 72, 75, .94) 0%, rgba(11, 50, 67, .96) 100%);
+            border-color: rgba(var(--gov-green-rgb), .28);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, .25), 0 0 30px rgba(var(--gov-green-rgb), .07);
+        }
+
         .gov-banner::before {
             background-image:
                 linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px),
@@ -88,40 +94,66 @@
         .gov-card-grid > [class*='col-']:nth-child(6) { animation-delay: .2s; }
 
         .gov-stat {
-            border: 1px solid rgba(255, 255, 255, .1);
+            --stat-accent: #168a59;
+            --stat-accent-rgb: 22, 138, 89;
+            --stat-tail: #e6a526;
+            background: linear-gradient(145deg, rgba(var(--stat-accent-rgb), .09), var(--gov-surface) 38%);
+            border: 1px solid rgba(var(--stat-accent-rgb), .34);
             border-radius: 7px;
-            box-shadow: 0 9px 22px rgba(32, 55, 45, .1);
-            color: #fff;
+            box-shadow: 0 14px 30px var(--gov-shadow), 0 0 22px rgba(var(--stat-accent-rgb), .09);
+            color: var(--gov-ink);
             height: 100%;
             min-height: 10.4rem;
             overflow: hidden;
-            padding: 1rem 1.1rem;
+            padding: 1.15rem 1.1rem 1rem;
             position: relative;
             transition: box-shadow .2s ease, transform .2s ease;
         }
 
         .gov-stat::before {
-            border: 1px solid rgba(255, 255, 255, .09);
+            background: radial-gradient(circle, rgba(var(--stat-accent-rgb), .13), transparent 68%);
+            border: 1px solid rgba(var(--stat-accent-rgb), .12);
             border-radius: 50%;
             content: '';
-            height: 8rem;
-            inset-inline-end: -5.5rem;
+            height: 9rem;
+            inset-inline-end: -5rem;
+            pointer-events: none;
             position: absolute;
-            top: -4.75rem;
-            width: 8rem;
+            top: -5.25rem;
+            width: 9rem;
+        }
+
+        .gov-stat::after {
+            background: linear-gradient(90deg, var(--stat-accent) 0 76%, var(--stat-tail) 76% 100%);
+            box-shadow: 0 0 16px rgba(var(--stat-accent-rgb), .46);
+            content: '';
+            height: 4px;
+            inset: 0 0 auto;
+            pointer-events: none;
+            position: absolute;
+        }
+
+        [data-bs-theme='dark'] .gov-stat {
+            background: linear-gradient(145deg, rgba(var(--stat-accent-rgb), .14), rgba(12, 36, 51, .97) 40%);
+            border-color: rgba(var(--stat-accent-rgb), .42);
+            box-shadow:
+                0 18px 38px rgba(0, 0, 0, .28),
+                0 0 26px rgba(var(--stat-accent-rgb), .13),
+                inset 0 1px 0 rgba(255, 255, 255, .035);
         }
 
         .gov-stat:hover {
-            box-shadow: 0 13px 28px rgba(32, 55, 45, .14);
-            transform: translateY(-2px);
+            border-color: rgba(var(--stat-accent-rgb), .58);
+            box-shadow: 0 20px 42px var(--gov-shadow), 0 0 32px rgba(var(--stat-accent-rgb), .18);
+            transform: translateY(-3px);
         }
 
-        .gov-stat--green { background: linear-gradient(135deg, #168a59, #087345); }
-        .gov-stat--cyan  { background: linear-gradient(135deg, #18b7cc, #0799b0); }
-        .gov-stat--blue  { background: linear-gradient(135deg, #2681ed, #095fd2); }
-        .gov-stat--red   { background: linear-gradient(135deg, #dc4250, #c32639); }
-        .gov-stat--teal  { background: linear-gradient(135deg, #27bd91, #0aa779); }
-        .gov-stat--gold  { background: linear-gradient(135deg, #f7b916, #e89c00); }
+        .gov-stat--green { --stat-accent: #2bc586; --stat-accent-rgb: 43, 197, 134; }
+        .gov-stat--cyan  { --stat-accent: #24c7dc; --stat-accent-rgb: 36, 199, 220; }
+        .gov-stat--blue  { --stat-accent: #3695f6; --stat-accent-rgb: 54, 149, 246; }
+        .gov-stat--red   { --stat-accent: #ef5867; --stat-accent-rgb: 239, 88, 103; }
+        .gov-stat--teal  { --stat-accent: #35d2a0; --stat-accent-rgb: 53, 210, 160; }
+        .gov-stat--gold  { --stat-accent: #f2b339; --stat-accent-rgb: 242, 179, 57; --stat-tail: #3695f6; }
 
         .gov-stat-top {
             align-items: flex-start;
@@ -132,10 +164,10 @@
         }
 
         .gov-stat-label {
+            color: var(--gov-muted);
             font-size: .76rem;
             font-weight: 700;
             margin-bottom: .45rem;
-            opacity: .92;
         }
 
         .gov-stat-value {
@@ -155,9 +187,11 @@
 
         .gov-stat-ico {
             align-items: center;
-            background: rgba(255, 255, 255, .18);
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 50%;
+            background: rgba(var(--stat-accent-rgb), .12);
+            border: 1px solid rgba(var(--stat-accent-rgb), .25);
+            border-radius: 6px;
+            box-shadow: inset 0 0 18px rgba(var(--stat-accent-rgb), .06);
+            color: var(--stat-accent);
             display: flex;
             flex-shrink: 0;
             font-size: 1.3rem;
@@ -174,8 +208,8 @@
         }
 
         .gov-stat-cell {
-            background: rgba(255, 255, 255, .105);
-            border: 1px solid rgba(255, 255, 255, .035);
+            background: rgba(var(--stat-accent-rgb), .06);
+            border: 1px solid rgba(var(--stat-accent-rgb), .13);
             border-radius: 4px;
             flex: 1;
             min-width: 0;
@@ -184,9 +218,9 @@
         }
 
         .gov-stat-cell .k {
+            color: var(--gov-muted);
             display: block;
             font-size: .65rem;
-            opacity: .82;
         }
 
         .gov-stat-cell .v {
@@ -198,8 +232,8 @@
 
         .gov-stat-bar {
             align-items: center;
-            background: rgba(255, 255, 255, .11);
-            border: 1px solid rgba(255, 255, 255, .035);
+            background: rgba(var(--stat-accent-rgb), .07);
+            border: 1px solid rgba(var(--stat-accent-rgb), .14);
             border-radius: 4px;
             display: flex;
             font-size: .69rem;
@@ -217,23 +251,24 @@
         }
 
         .gov-stat-progress .lbl {
+            color: var(--gov-muted);
             display: flex;
             font-size: .65rem;
             justify-content: space-between;
             margin-bottom: .28rem;
-            opacity: .92;
         }
 
         .gov-stat-progress .track {
-            background: rgba(255, 255, 255, .2);
+            background: rgba(var(--stat-accent-rgb), .15);
             border-radius: 1rem;
             height: .38rem;
             overflow: hidden;
         }
 
         .gov-stat-progress .fill {
-            background: rgba(255, 255, 255, .9);
+            background: var(--stat-accent);
             border-radius: 1rem;
+            box-shadow: 0 0 12px rgba(var(--stat-accent-rgb), .45);
             height: 100%;
         }
 
@@ -430,6 +465,9 @@
 
             var labels = @json($productionTrend['labels']);
             var data = @json($productionTrend['data']);
+            var isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            var chartTextColor = isDarkMode ? '#91a8b5' : '#617069';
+            var chartGridColor = isDarkMode ? 'rgba(137, 184, 201, .12)' : 'rgba(31, 45, 39, .06)';
 
             var gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
             gradient.addColorStop(0, 'rgba(25, 161, 195, 0.2)');
@@ -464,7 +502,7 @@
                             labels: {
                                 boxHeight: 8,
                                 boxWidth: 24,
-                                color: '#617069',
+                                color: chartTextColor,
                                 font: { family: 'Tajawal', size: 11, weight: '600' },
                             },
                         },
@@ -473,13 +511,13 @@
                         y: {
                             beginAtZero: true,
                             border: { display: false },
-                            grid: { color: 'rgba(31,45,39,.06)' },
-                            ticks: { color: '#829089', font: { family: 'Tajawal', size: 10 } },
+                            grid: { color: chartGridColor },
+                            ticks: { color: chartTextColor, font: { family: 'Tajawal', size: 10 } },
                         },
                         x: {
                             border: { display: false },
                             grid: { display: false },
-                            ticks: { color: '#829089', font: { family: 'Tajawal', size: 10 } },
+                            ticks: { color: chartTextColor, font: { family: 'Tajawal', size: 10 } },
                         },
                     }
                 }

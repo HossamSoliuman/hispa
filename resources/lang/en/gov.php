@@ -3,6 +3,10 @@
 return [
     'title' => 'Hawat Platform',
 
+    'theme' => [
+        'toggle' => 'Switch light or dark mode',
+    ],
+
     'meta' => [
         'description' => 'Hawat Platform - Government supervision panel for marine fishing',
     ],

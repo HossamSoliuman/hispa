@@ -37,6 +37,17 @@
 
     <!-- BEGIN menu -->
     <div class="menu">
+        {{-- Persistent portal theme --}}
+        <div class="menu-item">
+            <button type="button" class="menu-link gov-theme-toggle" data-gov-theme-toggle
+                onclick="govToggleTheme()" title="{{ __('gov.theme.toggle') }}"
+                aria-label="{{ __('gov.theme.toggle') }}" aria-pressed="{{ $govTheme === 'dark' ? 'true' : 'false' }}">
+                <span class="menu-icon">
+                    <i class="bi {{ $govTheme === 'dark' ? 'bi-sun' : 'bi-moon-stars' }} nav-icon" aria-hidden="true"></i>
+                </span>
+            </button>
+        </div>
+
         {{-- Language --}}
         <div class="menu-item dropdown dropdown-mobile-full">
             <a href="#" data-bs-toggle="dropdown" data-bs-display="static" class="menu-link">
