@@ -23,18 +23,29 @@ class UserSeeder extends Seeder
         // Actual login roles from routes:
         //   admin  → Auth::guard('admin')  → /admin/*   (seeded in AdminTableSeeder)
         //   owner  → Auth::guard('owner')  → /owner/*   (seeded here)
+        //   gov    → Auth::guard('gov')    → /gov/*     (seeded here)
         //
-        // captain/counter/dalal/gov are data columns (users.role) managed within
-        // the owner panel — they have no dedicated route panel of their own.
-        $owner = User::create([
-            'name' => 'Owner User',
-            'email' => 'owner@example.com',
-            'phone' => '0500000001',
+        // captain/counter/dalal are data columns (users.role) managed within the
+        // owner panel — they have no dedicated route panel of their own.
+        // $owner = User::create([
+        //     'name' => 'Owner User',
+        //     'email' => 'owner@example.com',
+        //     'phone' => '0500000001',
+        //     'password' => Hash::make('password'),
+        //     'role' => 'owner',
+        //     'status' => 1,
+        // ]);
+
+        // $owner->assignRole('owner');
+
+        // Government supervisor — signs in at /gov/login and lands on the gov panel.
+        User::create([
+            'name' => 'Gov Test',
+            'email' => 'gov@example.com',
+            'phone' => '0500000099',
             'password' => Hash::make('password'),
-            'role' => 'owner',
+            'role' => 'gov',
             'status' => 1,
         ]);
-
-        $owner->assignRole('owner');
     }
 }

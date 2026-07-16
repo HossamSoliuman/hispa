@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/owner.php'));
             Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
+            Route::middleware('web')
+                ->group(base_path('routes/gov.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -43,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'lang' => LanguageMiddleware::class,
             'captain' => CaptainRole::class,
             'owner' => OwnerRole::class,
+            'gov' => \App\Http\Middleware\GovRole::class,
             'dalal' => DalalRole::class,
             'guest' => RedirectIfAuthenticated::class,
             'check-owner-active' => CheckOwnerAndActive::class,
