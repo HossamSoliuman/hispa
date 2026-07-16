@@ -44,7 +44,7 @@ return [
     ],
     'features' => [
         'eyebrow' => 'Inside the system',
-        'title' => 'Everything an owner needs. No clutter.',
+        'title' => 'Everything an owner needs.',
         'description' => 'Four connected workspaces built around boats and trips.',
         'trip_title' => 'Trips and catch',
         'trip_desc' => 'From trip opening to final profitability.',

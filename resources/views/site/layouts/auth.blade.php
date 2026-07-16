@@ -19,7 +19,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="min-h-screen text-ink antialiased">
+<body class="public-site min-h-screen text-ink antialiased">
     @yield('content')
     @stack('scripts')
 </body>

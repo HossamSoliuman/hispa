@@ -31,10 +31,10 @@
 
         <div class="hud-panel mx-auto mt-12 max-w-4xl overflow-hidden bg-white/90">
             <div class="bg-ocean px-6 py-10 text-center text-white sm:px-10 sm:py-12">
-                <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-sand text-ink shadow-[0_0_0_10px_rgba(242,184,75,.1)]">
+                <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-tide text-white shadow-[0_0_0_10px_rgba(79,196,159,.1)]">
                     <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
                 </span>
-                <p class="mt-7 text-xs font-bold text-sand">{{ __('marketing.processing.eyebrow') }}</p>
+                <p class="mt-7 text-xs font-bold text-[#9ee8d3]">{{ __('marketing.processing.eyebrow') }}</p>
                 <h1 class="mx-auto mt-3 max-w-2xl text-2xl font-extrabold leading-tight tracking-[-0.03em] sm:text-4xl">{{ __('marketing.processing.title') }}</h1>
                 <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/58">{{ __('marketing.processing.description') }}</p>
             </div>
@@ -60,7 +60,7 @@
                         @endif
                         <div class="bg-white p-5 text-start">
                             <dt class="text-[0.65rem] font-bold text-ink/42">{{ __('marketing.processing.status') }}</dt>
-                            <dd class="mt-2 inline-flex items-center gap-2 text-sm font-extrabold text-[#9a651b]"><span class="h-2 w-2 rounded-full bg-sand"></span>{{ __('marketing.processing.pending') }}</dd>
+                            <dd class="mt-2 inline-flex items-center gap-2 text-sm font-extrabold text-tide"><span class="h-2 w-2 rounded-full bg-tide"></span>{{ __('marketing.processing.pending') }}</dd>
                         </div>
                     </dl>
                 @endif

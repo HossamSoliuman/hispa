@@ -1,15 +1,16 @@
 @php($switchLocale = app()->getLocale() === 'ar' ? 'en' : 'ar')
 
-<header class="sticky top-0 z-50 border-b border-white/15 bg-ocean text-white shadow-[0_5px_18px_rgba(35,74,120,.14)]">
-    <div class="site-shell flex h-[4.75rem] items-center justify-between gap-6">
+<header class="sticky top-0 z-50 border-b border-white/15 bg-ocean/95 text-white shadow-[0_5px_18px_rgba(35,74,120,.14)] backdrop-blur-md">
+    <div class="site-shell flex h-[4.5rem] items-center justify-between gap-5">
         <a href="{{ route('landing-page') }}" class="inline-flex shrink-0 items-center" aria-label="{{ __('site.meta.title') }}">
             <img src="{{ asset('site/assets/footer-logo.png') }}" alt="{{ __('site.meta.title') }}" class="h-auto w-[5.7rem] object-contain" />
         </a>
 
-        <nav class="hidden items-center gap-7 lg:flex" aria-label="{{ __('site.nav.menu') }}">
+        <nav class="hidden items-center gap-6 lg:flex" aria-label="{{ __('site.nav.menu') }}">
             <a href="{{ route('landing-page') }}#features" class="text-sm font-medium text-white/75 hover:text-white">{{ __('marketing.nav.product') }}</a>
-            <a href="{{ route('site.pricing') }}" class="text-sm font-medium text-white/75 hover:text-white">{{ __('site.nav.pricing') }}</a>
-            <a href="{{ route('site.contact') }}" class="text-sm font-medium text-white/75 hover:text-white">{{ __('site.nav.contact') }}</a>
+            <a href="{{ route('landing-page') }}#about" class="text-sm font-medium text-white/75 hover:text-white">{{ __('site.nav.about') }}</a>
+            <a href="{{ route('landing-page') }}#pricing" class="text-sm font-medium text-white/75 hover:text-white">{{ __('site.nav.pricing') }}</a>
+            <a href="{{ route('landing-page') }}#contact" class="text-sm font-medium text-white/75 hover:text-white">{{ __('site.nav.contact') }}</a>
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3">
@@ -43,7 +44,7 @@
                 <a href="{{ route('frontend.show_login_form') }}" class="hidden px-2 py-2.5 text-sm font-semibold text-white/75 hover:text-white sm:inline-flex">
                     {{ __('site.nav.login') }}
                 </a>
-                <a href="{{ route('site.pricing') }}" class="nav-primary-action hidden items-center gap-2 bg-white px-4 py-2.5 text-sm font-bold text-ocean shadow-[0_8px_22px_rgba(35,74,120,.16)] hover:-translate-y-0.5 hover:bg-mist sm:inline-flex">
+                <a href="{{ route('landing-page') }}#pricing" class="nav-primary-action hidden items-center gap-2 bg-white px-4 py-2.5 text-sm font-bold text-ocean shadow-[0_8px_22px_rgba(35,74,120,.16)] hover:-translate-y-0.5 hover:bg-mist sm:inline-flex">
                     {{ __('marketing.nav.plans') }}
                     <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
                 </a>

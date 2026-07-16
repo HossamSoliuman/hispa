@@ -2,7 +2,7 @@
 
 <div id="mobileMenuOverlay" class="fixed inset-0 z-[60] hidden bg-ink/55 backdrop-blur-sm lg:hidden" aria-hidden="true"></div>
 <aside id="mobileMenuSheet" class="marine-grid fixed inset-y-0 end-0 z-[70] flex w-[88%] max-w-sm {{ app()->getLocale() === 'ar' ? '-translate-x-full' : 'translate-x-full' }} flex-col bg-shell shadow-2xl transition-transform duration-300 lg:hidden" role="dialog" aria-modal="true" aria-label="{{ __('site.nav.menu') }}">
-    <div class="flex h-[4.75rem] items-center justify-between border-b border-ink/10 px-5">
+    <div class="flex h-[4.5rem] items-center justify-between border-b border-ink/10 px-5">
         <a href="{{ route('landing-page') }}" class="inline-flex items-center">
             <img src="{{ asset('site/assets/logo.png') }}" alt="{{ __('site.meta.title') }}" class="theme-logo-light h-auto w-[5.7rem] object-contain" />
             <img src="{{ asset('site/assets/footer-logo.png') }}" alt="" class="theme-logo-dark h-auto w-[5.7rem] object-contain" aria-hidden="true" />
@@ -37,15 +37,16 @@
         </div>
 
         <a href="{{ route('landing-page') }}#features" class="rounded-xl px-4 py-3.5 text-base font-semibold text-ink hover:bg-white hover:text-ocean">{{ __('marketing.nav.product') }}</a>
-        <a href="{{ route('site.pricing') }}" class="rounded-xl px-4 py-3.5 text-base font-semibold text-ink hover:bg-white hover:text-ocean">{{ __('site.nav.pricing') }}</a>
-        <a href="{{ route('site.contact') }}" class="rounded-xl px-4 py-3.5 text-base font-semibold text-ink hover:bg-white hover:text-ocean">{{ __('site.nav.contact') }}</a>
+        <a href="{{ route('landing-page') }}#about" class="rounded-xl px-4 py-3.5 text-base font-semibold text-ink hover:bg-white hover:text-ocean">{{ __('site.nav.about') }}</a>
+        <a href="{{ route('landing-page') }}#pricing" class="rounded-xl px-4 py-3.5 text-base font-semibold text-ink hover:bg-white hover:text-ocean">{{ __('site.nav.pricing') }}</a>
+        <a href="{{ route('landing-page') }}#contact" class="rounded-xl px-4 py-3.5 text-base font-semibold text-ink hover:bg-white hover:text-ocean">{{ __('site.nav.contact') }}</a>
     </nav>
 
     <div class="grid gap-3 border-t border-ink/10 p-5">
         @auth('owner')
             <a href="{{ route('owner.dashboard') }}" class="inline-flex items-center justify-center bg-ocean px-4 py-3.5 text-sm font-bold text-white">{{ __('site.nav.dashboard') }}</a>
         @else
-            <a href="{{ route('site.pricing') }}" class="inline-flex items-center justify-center bg-ocean px-4 py-3.5 text-sm font-bold text-white">{{ __('marketing.nav.plans') }}</a>
+            <a href="{{ route('landing-page') }}#pricing" class="inline-flex items-center justify-center bg-ocean px-4 py-3.5 text-sm font-bold text-white">{{ __('marketing.nav.plans') }}</a>
             <a href="{{ route('frontend.show_login_form') }}" class="inline-flex items-center justify-center rounded-xl border border-ink/12 bg-white px-4 py-3.5 text-sm font-bold text-ink">{{ __('site.nav.login') }}</a>
         @endauth
     </div>
