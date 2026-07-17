@@ -194,7 +194,7 @@ class AssetController extends Controller
         $filters = $this->registerFilters($request);
 
         $register = $this->depreciation->register($ownerId, $filters['boat_id'], $filters['type']);
-        $boats = Boat::where('owner_id', $ownerId)->orderBy('name')->get();
+        $boats = Boat::where('owner_id', $ownerId)->orderBy('name_ar')->get();
 
         return view('owner.assets.register', compact('register', 'boats', 'filters'));
     }
