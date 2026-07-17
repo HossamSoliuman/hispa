@@ -70,15 +70,21 @@ class DatabaseBackup extends Command
     }
 
     /**
-     * Dump a MySQL/MariaDB database's data (INSERT rows only) to a gzipped SQL
-     * file using the app's own PDO connection, so no external mysqldump binary
-     * or shell access is needed.
+     * Dump a MySQL/MariaDB database's data (INSERT rows only, no schema) to a
+     * gzipped SQL file using the app's own PDO connection, so no external
+     * mysqldump binary or shell access is needed.
+     *
+     * The reads run inside a single consistent snapshot so the row counts used
+     * to verify the dump match the rows actually written. If any table comes up
+     * short the file is deleted and the command fails loudly, so a truncated or
+     * empty backup can never be mistaken for a good one.
      */
     protected function backupMysql(string $connection, string $directory, string $timestamp): string
     {
         $db = DB::connection($connection);
         $database = $db->getDatabaseName();
         $path = "{$directory}/{$database}_{$timestamp}.sql.gz";
+        $tables = $this->baseTables($db);
 
         $handle = gzopen($path, 'wb9');
         if ($handle === false) {
@@ -87,29 +93,97 @@ class DatabaseBackup extends Command
 
         $pdo = $db->getPdo();
         $bufferedByDefault = $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
-        $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
 
         try {
+            $pdo->exec('START TRANSACTION WITH CONSISTENT SNAPSHOT');
+
+            $expected = $this->rowCounts($pdo, $tables);
+
             gzwrite($handle, "-- Data-only backup of `{$database}` at ".Carbon::now()->toDateTimeString()."\n");
             gzwrite($handle, "SET NAMES utf8mb4;\n");
             gzwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n\n");
 
-            foreach ($this->baseTables($db) as $table) {
-                $this->dumpTableData($pdo, $handle, $table);
+            gzwrite($handle, "-- Clear existing data so a single import fully restores the database\n");
+            foreach ($tables as $table) {
+                gzwrite($handle, "TRUNCATE TABLE `{$table}`;\n");
+            }
+            gzwrite($handle, "\n");
+
+            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+
+            $written = [];
+            foreach ($tables as $table) {
+                $written[$table] = $this->dumpTableData($pdo, $handle, $table);
             }
 
+            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $bufferedByDefault);
+
             gzwrite($handle, "SET FOREIGN_KEY_CHECKS=1;\n");
+
+            $pdo->exec('COMMIT');
+
+            $this->assertBackupComplete($expected, $written);
         } catch (\Throwable $e) {
+            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $bufferedByDefault);
+            $this->rollBackQuietly($pdo);
             gzclose($handle);
             File::delete($path);
             throw $e;
-        } finally {
-            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $bufferedByDefault);
         }
 
         gzclose($handle);
 
         return $path;
+    }
+
+    /**
+     * Count the rows of every table within the current snapshot.
+     *
+     * @param  list<string>  $tables
+     * @return array<string, int>
+     */
+    protected function rowCounts(\PDO $pdo, array $tables): array
+    {
+        $counts = [];
+
+        foreach ($tables as $table) {
+            $counts[$table] = (int) $pdo->query('SELECT COUNT(*) FROM `'.$table.'`')->fetchColumn();
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Fail if any table wrote fewer rows than it holds, deleting a partial dump.
+     *
+     * @param  array<string, int>  $expected
+     * @param  array<string, int>  $written
+     */
+    protected function assertBackupComplete(array $expected, array $written): void
+    {
+        $mismatches = [];
+
+        foreach ($expected as $table => $count) {
+            if (($written[$table] ?? 0) !== $count) {
+                $mismatches[] = "{$table} (expected {$count}, wrote ".($written[$table] ?? 0).')';
+            }
+        }
+
+        if ($mismatches !== []) {
+            throw new \RuntimeException('Backup is incomplete; row counts do not match for: '.implode(', ', $mismatches));
+        }
+    }
+
+    /**
+     * Roll back the snapshot transaction without masking the original error.
+     */
+    protected function rollBackQuietly(\PDO $pdo): void
+    {
+        try {
+            $pdo->exec('ROLLBACK');
+        } catch (\Throwable) {
+            // The connection is script-scoped and closes with the command.
+        }
     }
 
     /**
@@ -133,27 +207,57 @@ class DatabaseBackup extends Command
     }
 
     /**
-     * Write an INSERT statement for every row of a single table.
+     * Stream a single table's rows into batched multi-row INSERT statements and
+     * return how many rows were written. Rows are flushed once a batch grows
+     * past ~500 KB so restores stay well under the server's max_allowed_packet.
      *
      * @param  resource  $handle
      */
-    protected function dumpTableData(\PDO $pdo, $handle, string $table): void
+    protected function dumpTableData(\PDO $pdo, $handle, string $table): int
     {
         $statement = $pdo->query('SELECT * FROM `'.$table.'`');
         $columns = null;
+        $tuples = [];
+        $bytes = 0;
+        $written = 0;
 
         while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
             if ($columns === null) {
                 $columns = '`'.implode('`, `', array_keys($row)).'`';
             }
 
-            $values = implode(', ', array_map(
+            $tuple = '('.implode(', ', array_map(
                 fn ($value): string => $value === null ? 'NULL' : $pdo->quote((string) $value),
                 array_values($row)
-            ));
+            )).')';
 
-            gzwrite($handle, "INSERT INTO `{$table}` ({$columns}) VALUES ({$values});\n");
+            $tuples[] = $tuple;
+            $bytes += strlen($tuple);
+            $written++;
+
+            if ($bytes >= 500_000) {
+                $this->writeInsert($handle, $table, $columns, $tuples);
+                $tuples = [];
+                $bytes = 0;
+            }
         }
+
+        if ($tuples !== []) {
+            $this->writeInsert($handle, $table, $columns, $tuples);
+        }
+
+        return $written;
+    }
+
+    /**
+     * Write one multi-row INSERT statement for a batch of value tuples.
+     *
+     * @param  resource  $handle
+     * @param  list<string>  $tuples
+     */
+    protected function writeInsert($handle, string $table, string $columns, array $tuples): void
+    {
+        gzwrite($handle, "INSERT INTO `{$table}` ({$columns}) VALUES\n".implode(",\n", $tuples).";\n");
     }
 
     /**
