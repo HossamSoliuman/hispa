@@ -17,18 +17,20 @@ class RedirectIfAuthenticated extends MiddlewareRedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
+        // The frontend login only ever authenticates the storefront guards. The
+        // gov and admin panels have their own separate `guest:gov` / `guest:admin`
+        // logins, so a session on one of those panels must NOT be treated as
+        // "already authenticated" here — otherwise it blocks an owner from
+        // logging in through the frontend (shared session cookie conflict).
         if (empty($guards)) {
-            $guards = ['owner', 'dalal', 'gov'];
+            $guards = ['web', 'owner', 'dalal'];
         }
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                $target = match ($guard) {
-                    'owner' => route('owner.dashboard'),
-                    'dalal' => route('dalal.dashboard'),
-                    //                    'counter' => route('counter.dashboard'),
-                    default => route('landing-page'),
-                };
+                $target = $guard === 'owner'
+                    ? route('owner.dashboard')
+                    : route('landing-page');
 
                 return redirect()->intended($target);
             }
