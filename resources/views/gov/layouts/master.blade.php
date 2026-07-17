@@ -8,7 +8,7 @@
     <title>{{ __('gov.title') }} | @yield('title')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="{{ __('gov.meta.description') }}" />
-    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- ================== BEGIN core-css ================== -->
@@ -22,43 +22,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- ================== END core-css ================== -->
 
-    {{-- Government operations theme: a maritime command surface with luminous card rails. --}}
+    {{-- Government operations theme: a maritime intelligence workspace with blueprint depth. --}}
     <style>
         :root {
-            --gov-green: #16865f;
-            --gov-green-rgb: 22, 134, 95;
-            --gov-green-dark: #0d6346;
-            --gov-gold: #e6a526;
-            --gov-ink: #1f2d27;
-            --gov-muted: #74817b;
-            --gov-canvas: #f6f8f5;
+            --gov-green: #167a5a;
+            --gov-green-rgb: 22, 122, 90;
+            --gov-green-dark: #0f6047;
+            --gov-gold: #b98524;
+            --gov-ink: #1c2b25;
+            --gov-muted: #6f7e77;
+            --gov-canvas: #f3f6f4;
             --gov-surface: #ffffff;
-            --gov-surface-raised: #f8fbf9;
-            --gov-border: #e4e9e5;
-            --gov-header: rgba(255, 255, 255, .96);
-            --gov-sidebar: rgba(255, 255, 255, .97);
-            --gov-grid: rgba(31, 45, 39, .022);
-            --gov-shadow: rgba(19, 55, 42, .08);
-            --gov-header-height: 4rem;
-            --gov-sidebar-width: 13.5rem;
+            --gov-surface-soft: #f0f4f2;
+            --gov-surface-raised: #f8faf9;
+            --gov-panel: rgba(255, 255, 255, .86);
+            --gov-panel-strong: rgba(255, 255, 255, .93);
+            --gov-border: #dfe6e2;
+            --gov-header: rgba(255, 255, 255, .97);
+            --gov-sidebar: #f8faf9;
+            --gov-shadow: rgba(18, 47, 36, .07);
+            --gov-header-height: 4.25rem;
+            --gov-sidebar-width: 14.5rem;
         }
 
         [data-bs-theme='dark'] {
             color-scheme: dark;
-            --gov-green: #2ed19b;
-            --gov-green-rgb: 46, 209, 155;
-            --gov-green-dark: #7be7c1;
-            --gov-gold: #f2aa3c;
-            --gov-ink: #edf8fb;
-            --gov-muted: #91a8b5;
-            --gov-canvas: #071722;
-            --gov-surface: #0c2433;
-            --gov-surface-raised: #112d3e;
-            --gov-border: rgba(122, 166, 184, .22);
-            --gov-header: rgba(10, 43, 68, .96);
-            --gov-sidebar: rgba(7, 27, 40, .97);
-            --gov-grid: rgba(100, 170, 194, .045);
-            --gov-shadow: rgba(0, 0, 0, .34);
+            --gov-green: #43c796;
+            --gov-green-rgb: 67, 199, 150;
+            --gov-green-dark: #76d9b5;
+            --gov-gold: #d6a246;
+            --gov-ink: #eef5f3;
+            --gov-muted: #8fa49d;
+            --gov-canvas: #09151c;
+            --gov-surface: #101f27;
+            --gov-surface-soft: #152a34;
+            --gov-surface-raised: #172932;
+            --gov-panel: rgba(14, 34, 45, .76);
+            --gov-panel-strong: rgba(14, 34, 45, .88);
+            --gov-border: rgba(165, 193, 184, .15);
+            --gov-header: rgba(11, 25, 33, .97);
+            --gov-sidebar: #0d1b23;
+            --gov-shadow: rgba(0, 0, 0, .22);
         }
 
         html,
@@ -70,16 +74,31 @@
             font-family: 'Tajawal', sans-serif !important;
         }
 
+        html::before,
+        html::after,
+        body::before {
+            background-image: none !important;
+            content: none !important;
+        }
+
         body {
             background-color: var(--gov-canvas);
             background-image:
-                radial-gradient(circle at 58% 16%, rgba(var(--gov-green-rgb), .09), transparent 30rem),
-                linear-gradient(var(--gov-grid) 1px, transparent 1px),
-                linear-gradient(90deg, var(--gov-grid) 1px, transparent 1px);
+                radial-gradient(circle at 72% -8%, rgba(var(--gov-green-rgb), .07), transparent 32rem),
+                radial-gradient(circle at 8% 95%, rgba(38, 111, 136, .035), transparent 26rem);
             background-attachment: fixed;
-            background-size: auto, 34px 34px, 34px 34px;
             color: var(--gov-ink);
             transition: background-color .2s ease, color .2s ease;
+        }
+
+        [data-bs-theme='dark'] body {
+            background-image:
+                linear-gradient(rgba(6, 19, 27, .84), rgba(6, 19, 27, .92)),
+                linear-gradient(rgba(122, 167, 184, .04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(122, 167, 184, .04) 1px, transparent 1px),
+                url('{{ asset('dashboard/assets/css/images/cover-dark.jpg') }}');
+            background-position: center, center, center, center 4rem;
+            background-size: auto, 36px 36px, 36px 36px, cover;
         }
 
         .app {
@@ -90,9 +109,9 @@
         .app-header {
             height: var(--gov-header-height);
             background: var(--gov-header) !important;
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--gov-border);
-            box-shadow: 0 8px 28px var(--gov-shadow);
+            box-shadow: 0 2px 12px var(--gov-shadow);
         }
 
         .app-header .desktop-toggler {
@@ -101,8 +120,8 @@
         }
 
         .app-header .brand {
-            width: calc(var(--gov-sidebar-width) - 3.5rem);
-            padding: 0 .5rem;
+            width: calc(var(--gov-sidebar-width) - 3rem);
+            padding: 0 .75rem;
         }
 
         .app-header .brand .brand-logo {
@@ -112,8 +131,8 @@
         }
 
         .app-header .brand .brand-logo img {
-            width: 3.9rem;
-            height: 2.75rem !important;
+            width: 3.65rem;
+            height: 2.5rem !important;
             margin: 0;
             mix-blend-mode: multiply;
             object-fit: contain;
@@ -130,7 +149,7 @@
 
         .app-header .menu .menu-item .menu-link {
             min-height: var(--gov-header-height);
-            padding: .5rem .8rem;
+            padding: .5rem .7rem;
         }
 
         .app-header .menu .menu-item .menu-link .menu-icon,
@@ -141,7 +160,7 @@
 
         .gov-brand-name {
             color: var(--gov-green-dark);
-            font-size: .86rem;
+            font-size: .82rem;
             font-weight: 800;
             letter-spacing: 0;
             line-height: 1.25;
@@ -150,82 +169,74 @@
 
         .gov-avatar {
             align-items: center;
-            background: var(--gov-gold);
-            border: 3px solid rgba(255, 247, 223, .86);
+            background: var(--gov-surface-soft);
+            border: 1px solid var(--gov-border);
             border-radius: 50%;
-            color: #fff;
+            color: var(--gov-green-dark);
             display: inline-flex;
             flex: 0 0 auto;
             font-size: .85rem;
             font-weight: 800;
-            height: 2.25rem;
+            height: 2.35rem;
             justify-content: center;
-            width: 2.25rem;
-        }
-
-        .gov-notification-dot {
-            background: var(--gov-gold);
-            border: 2px solid var(--gov-header);
-            border-radius: 50%;
-            height: .55rem;
-            inset-inline-end: -.1rem;
-            position: absolute;
-            top: -.15rem;
-            width: .55rem;
+            width: 2.35rem;
         }
 
         .app-sidebar {
             background: var(--gov-sidebar);
-            backdrop-filter: blur(18px);
             border-inline-end: 1px solid var(--gov-border);
-            box-shadow: -8px 0 30px var(--gov-shadow);
+            box-shadow: none;
             inset-inline-end: auto;
             inset-inline-start: 0;
             top: var(--gov-header-height);
             width: var(--gov-sidebar-width) !important;
         }
 
-        .app-sidebar .menu { padding: .75rem 0 1.25rem; }
+        .app-sidebar .menu { padding: .85rem .7rem 1.5rem; }
 
         .app-sidebar .menu .menu-header {
             color: var(--gov-muted);
-            font-size: .65rem;
+            font-size: .62rem;
             font-weight: 700;
-            letter-spacing: .03em;
-            padding: .75rem 1.2rem .45rem;
+            letter-spacing: .025em;
+            padding: .85rem .75rem .35rem;
+        }
+
+        .app-sidebar .menu .gov-menu-section:first-child .menu-header {
+            padding-top: .25rem;
         }
 
         .app-sidebar .menu .menu-item .menu-link {
-            border-inline-start: 3px solid transparent;
-            border-radius: 5px;
+            border: 1px solid transparent;
+            border-radius: 8px;
             color: var(--gov-muted);
-            font-size: .82rem;
+            font-size: .78rem;
             font-weight: 500;
             justify-content: flex-start;
-            margin: .1rem .65rem;
-            min-height: 2.55rem;
-            padding: .45rem .7rem;
+            margin: .05rem 0;
+            min-height: 2.35rem;
+            padding: .35rem .65rem;
         }
 
         .app-sidebar .menu .menu-item .menu-link .menu-icon {
             color: var(--gov-muted);
-            font-size: .98rem;
-            height: 1.75rem;
+            font-size: .92rem;
+            height: 1.65rem;
             margin: 0;
-            margin-inline-end: .7rem;
-            width: 1.75rem;
+            margin-inline-end: .6rem;
+            width: 1.65rem;
         }
 
         .app-sidebar .menu .menu-item .menu-link:hover {
-            background: rgba(var(--gov-green-rgb), .055);
+            background: rgba(var(--gov-green-rgb), .06);
             color: var(--gov-green-dark);
         }
 
         .app-sidebar .menu .menu-item .menu-link:hover .menu-icon { color: var(--gov-green); }
 
         .app-sidebar .menu .menu-item.active > .menu-link {
-            background: rgba(var(--gov-green-rgb), .095);
-            border-inline-start-color: var(--gov-green);
+            background: rgba(var(--gov-green-rgb), .1);
+            border-color: rgba(var(--gov-green-rgb), .14);
             color: var(--gov-green-dark);
             font-weight: 700;
         }
@@ -234,32 +245,26 @@
 
         .app-sidebar .menu .gov-menu-separator {
             border-top: 1px solid var(--gov-border);
-            margin: .75rem 1rem;
+            margin: 1rem .5rem .65rem;
         }
 
         .app-content {
             min-width: 0;
-            padding: 1.75rem 2.25rem 2.5rem;
+            padding: 2rem 2.25rem 2.75rem;
         }
 
         .card {
-            background: var(--gov-surface);
+            background: var(--gov-panel);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--gov-border) !important;
-            border-radius: 8px;
-            box-shadow: 0 14px 34px var(--gov-shadow), 0 0 24px rgba(var(--gov-green-rgb), .045) !important;
+            border-radius: 12px;
+            box-shadow: 0 10px 28px var(--gov-shadow) !important;
             overflow: hidden;
             position: relative;
         }
 
         .card::before {
-            background: linear-gradient(90deg, #2a8de8 0 76%, var(--gov-gold) 76% 100%);
-            box-shadow: 0 0 15px rgba(42, 141, 232, .32);
-            content: '';
-            height: 3px;
-            inset: 0 0 auto;
-            pointer-events: none;
-            position: absolute;
-            z-index: 2;
+            content: none;
         }
 
         .dropdown-menu {
@@ -287,8 +292,8 @@
 
         .gov-theme-toggle .menu-icon {
             align-items: center;
-            background: rgba(var(--gov-green-rgb), .08);
-            border: 1px solid rgba(var(--gov-green-rgb), .18);
+            background: var(--gov-surface-soft);
+            border: 1px solid var(--gov-border);
             border-radius: 50%;
             display: flex;
             height: 2.25rem;
@@ -298,9 +303,8 @@
         }
 
         .gov-theme-toggle:hover .menu-icon {
-            background: rgba(var(--gov-green-rgb), .15);
-            box-shadow: 0 0 18px rgba(var(--gov-green-rgb), .18);
-            transform: rotate(8deg);
+            background: rgba(var(--gov-green-rgb), .11);
+            transform: rotate(6deg);
         }
 
         .app-footer {
@@ -357,7 +361,7 @@
 
             .app-content {
                 margin: 0;
-                padding: 1rem;
+                padding: 1.15rem;
             }
 
             .app-footer { margin-inline: 1rem; }

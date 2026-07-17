@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class GovDashboardDesignTest extends TestCase
 {
-    public function test_dashboard_renders_the_dark_government_command_surface(): void
+    public function test_dashboard_renders_a_calm_dark_government_overview(): void
     {
         app()->setLocale('ar');
 
@@ -52,13 +52,22 @@ class GovDashboardDesignTest extends TestCase
         $this->assertStringContainsString('dir="rtl"', $html);
         $this->assertStringContainsString('data-bs-theme="dark"', $html);
         $this->assertStringContainsString("font-family: 'Tajawal', sans-serif !important", $html);
-        $this->assertStringContainsString('--gov-sidebar-width: 13.5rem', $html);
-        $this->assertStringContainsString('--gov-canvas: #071722', $html);
+        $this->assertStringContainsString('--gov-sidebar-width: 14.5rem', $html);
+        $this->assertStringContainsString('--gov-canvas: #09151c', $html);
+        $this->assertStringContainsString('--gov-surface-soft: #152a34', $html);
+        $this->assertStringContainsString('html::before', $html);
+        $this->assertStringContainsString('background-image: none !important', $html);
+        $this->assertStringContainsString('dashboard/assets/css/images/cover-dark.jpg', $html);
+        $this->assertStringContainsString('--gov-panel: rgba(14, 34, 45, .76)', $html);
+        $this->assertStringContainsString('href="'.asset('favicon.ico').'"', $html);
         $this->assertStringContainsString('data-gov-theme-toggle', $html);
         $this->assertStringContainsString("document.cookie = 'gov_theme=' + nextTheme", $html);
+        $this->assertStringContainsString('gov-menu-section', $html);
         $this->assertStringContainsString('gov-dashboard-shell', $html);
         $this->assertStringContainsString('gov-banner-title', $html);
-        $this->assertStringContainsString('color: #fff', $html);
+        $this->assertStringContainsString('background: var(--gov-panel)', $html);
+        $this->assertStringContainsString('.gov-stat::after', $html);
+        $this->assertStringContainsString('top left / 16px 2px no-repeat', $html);
         $this->assertStringContainsString('gov-card-grid', $html);
         $this->assertStringContainsString('gov-card-production', $html);
         $this->assertStringContainsString('gov-card-sailors', $html);
@@ -66,12 +75,15 @@ class GovDashboardDesignTest extends TestCase
         $this->assertStringContainsString('gov-card-ports', $html);
         $this->assertStringContainsString('gov-card-seasons', $html);
         $this->assertStringContainsString('gov-card-sales', $html);
-        $this->assertStringContainsString('linear-gradient(90deg, var(--stat-accent) 0 76%, var(--stat-tail) 76% 100%)', $html);
-        $this->assertStringContainsString('0 0 26px rgba(var(--stat-accent-rgb), .13)', $html);
+        $this->assertStringContainsString('.gov-stat-cell + .gov-stat-cell', $html);
+        $this->assertStringContainsString('border-inline-start: 1px solid var(--gov-border)', $html);
+        $this->assertStringNotContainsString('linear-gradient(90deg, var(--stat-accent) 0 76%', $html);
+        $this->assertStringNotContainsString('0 0 26px rgba(var(--stat-accent-rgb), .13)', $html);
         $this->assertStringContainsString('gov-chart-card', $html);
         $this->assertStringContainsString('dashboard/assets/plugins/chart.js/dist/chart.umd.js', $html);
         $this->assertStringContainsString("var isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark'", $html);
-        $this->assertStringContainsString('الجهة الحكومية', $html);
+        $this->assertStringContainsString('display: false', $html);
+        $this->assertStringContainsString('نظرة عامة', $html);
     }
 
     public function test_government_portal_respects_the_saved_light_theme(): void

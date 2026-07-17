@@ -33,6 +33,13 @@ return [
         'logout' => 'تسجيل الخروج',
     ],
 
+    'menu_sections' => [
+        'overview' => 'نظرة عامة',
+        'operations' => 'عمليات الصيد',
+        'management' => 'الإدارة',
+        'account' => 'الحساب',
+    ],
+
     'auth' => [
         'badge' => 'الجهة الحكومية',
         'login' => 'تسجيل الدخول',

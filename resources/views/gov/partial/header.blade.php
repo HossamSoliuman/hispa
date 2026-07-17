@@ -64,16 +64,6 @@
             </div>
         </div>
 
-        {{-- Notifications (placeholder bell) --}}
-        <div class="menu-item">
-            <a href="{{ route('gov.analytics') }}" class="menu-link" title="{{ __('gov.menu.analytics') }}">
-                <div class="menu-icon position-relative">
-                    <i class="bi bi-bell nav-icon"></i>
-                    <span class="gov-notification-dot" aria-hidden="true"></span>
-                </div>
-            </a>
-        </div>
-
         {{-- Supervisor identity --}}
         <div class="menu-item dropdown dropdown-mobile-full">
             <a href="#" data-bs-toggle="dropdown" data-bs-display="static" class="menu-link d-flex align-items-center gap-2">

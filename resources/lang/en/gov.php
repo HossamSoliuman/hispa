@@ -33,6 +33,13 @@ return [
         'logout' => 'Logout',
     ],
 
+    'menu_sections' => [
+        'overview' => 'Overview',
+        'operations' => 'Fishing operations',
+        'management' => 'Administration',
+        'account' => 'Account',
+    ],
+
     'auth' => [
         'badge' => 'Government Authority',
         'login' => 'Sign In',
