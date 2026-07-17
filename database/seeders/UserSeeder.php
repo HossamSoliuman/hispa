@@ -15,10 +15,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        Schema::disableForeignKeyConstraints();
-        DB::table('model_has_roles')->where('model_type', User::class)->delete();
-        DB::table('users')->truncate();
-        Schema::enableForeignKeyConstraints();
+        // Schema::disableForeignKeyConstraints();
+        // DB::table('model_has_roles')->where('model_type', User::class)->delete();
+        // DB::table('users')->truncate();
+        // Schema::enableForeignKeyConstraints();
 
         // Actual login roles from routes:
         //   admin  → Auth::guard('admin')  → /admin/*   (seeded in AdminTableSeeder)
@@ -27,16 +27,16 @@ class UserSeeder extends Seeder
         
         // captain/counter/dalal are data columns (users.role) managed within the
         // owner panel — they have no dedicated route panel of their own.
-        $owner = User::create([
-            'name' => 'Owner User',
-            'email' => 'owner@example.com',
-            'phone' => '0500000001',
-            'password' => Hash::make('password'),
-            'role' => 'owner',
-            'status' => 1,
-        ]);
+        // $owner = User::create([
+        //     'name' => 'Owner User',
+        //     'email' => 'owner@example.com',
+        //     'phone' => '0500000001',
+        //     'password' => Hash::make('password'),
+        //     'role' => 'owner',
+        //     'status' => 1,
+        // ]);
 
-        $owner->assignRole('owner');
+        // $owner->assignRole('owner');
 
         // Government supervisor — signs in at /gov/login and lands on the gov panel.
         User::create([
