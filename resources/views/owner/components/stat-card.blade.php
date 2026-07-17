@@ -83,10 +83,10 @@
         font-weight: 600;
         color: rgba(0,0,0,.5);
         line-height: 1.25;
-        margin-bottom: .35rem;
+        margin-bottom: .75rem;
     }
     .hud-sc-value {
-        font-size: 1.45rem;
+        font-size: 1rem;
         font-weight: 800;
         color: #1a1a2e;
         line-height: 1.1;

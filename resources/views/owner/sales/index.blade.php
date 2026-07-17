@@ -288,7 +288,7 @@
                         orderable: false
                     },
                 ],
-                responsive: false, scrollX: true,
+                responsive: false, scrollX: false,
 
                 buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
