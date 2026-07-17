@@ -2,8 +2,6 @@
 
 namespace App\DataTable\Owner;
 
-use App\Models\CatchModel;
-use App\Models\FishQuantityStock;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -33,7 +31,7 @@ class CatchDataTable extends DataTables
             $owner_id = $owner->id;
             $trips = Trip::with([
                 'catches.details.unit',
-                'sales' => fn ($q) => $q->where('seller_type', 'owner')->where('seller_id', $owner_id),
+                'sales' => fn ($q) => $q->where('seller_type', 'owner')->where('seller_id', $owner_id)->with('details'),
             ])
                 ->whereNotNull('end_date')
                 ->where('owner_id', $owner_id)
@@ -93,13 +91,12 @@ class CatchDataTable extends DataTables
                                     <i class="bi bi-trash"></i>
                                 </a>';
                     } else {
-                        $catch = CatchModel::where('trip_id', $row->id)->first();
-                        $remaining = 0;
-                        if ($catch) {
-                            $remaining = FishQuantityStock::where('catch_id', $row->catches->id)
-                                ->where('trip_id', $row->id)
-                                ->sum('quantity');
-                        }
+                        // Base the "sell" button on the true remaining (landed weight minus
+                        // what was actually sold) instead of FishQuantityStock, whose rows
+                        // could linger on a fully-sold catch after the old catch-edit conflict.
+                        $landed = (float) ($row->catches?->details?->sum('weight') ?? 0);
+                        $sold = (float) $row->sales->sum(fn ($sale) => $sale->details->sum('weight'));
+                        $remaining = max($landed - $sold, 0);
                         $actions = '<a href="'.route('owner.catch.show', $row->catches?->id).'" class="btn btn-sm btn-outline-success">
                                         <i class="bi bi-eye"></i> '.__('owner.catch.view').'
                                     </a>
