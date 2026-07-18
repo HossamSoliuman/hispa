@@ -158,7 +158,22 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response->assertSee('auth-form-card', false);
         $response->assertSee('auth-theme-toggle', false);
         $response->assertSee('data-theme-toggle', false);
+        $response->assertSee('owner-login-showcase', false);
+        $response->assertSee('owner-login-form-panel', false);
+        $response->assertSee('owner-login-radar', false);
+        $response->assertSee('owner-login-viewport', false);
         $response->assertDontSee('auth-promo-panel', false);
+    }
+
+    public function test_arabic_login_uses_the_correct_brand_name(): void
+    {
+        app()->setLocale('ar');
+
+        $response = $this->get(route('frontend.show_login_form'));
+
+        $response->assertOk();
+        $response->assertSee('حِسبة');
+        $response->assertDontSee('حسبية');
     }
 
     public function test_public_dark_mode_uses_transparent_surfaces_and_a_matching_dashboard_preview(): void
@@ -172,6 +187,19 @@ class PublicSubscriptionExperienceTest extends TestCase
         $this->assertStringContainsString('rgba(10, 29, 48, 0.46)', $css);
         $this->assertStringNotContainsString("html[data-theme='dark'] [class*='bg-white']", $css);
         $this->assertStringNotContainsString('--color-sand', $css);
+    }
+
+    public function test_login_and_checkout_use_the_site_ocean_palette_in_light_mode(): void
+    {
+        $css = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertIsString($css);
+        $this->assertStringContainsString('--checkout-accent: #3675c2', $css);
+        $this->assertStringContainsString('.owner-login-submit', $css);
+        $this->assertStringContainsString('.owner-login-viewport body', $css);
+        $this->assertStringContainsString('overscroll-behavior: none', $css);
+        $this->assertStringNotContainsString('#a94720', $css);
+        $this->assertStringNotContainsString('#873719', $css);
     }
 
     public function test_legacy_processing_url_uses_the_single_checkout_viewport(): void
