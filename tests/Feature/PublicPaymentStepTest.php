@@ -52,6 +52,18 @@ class PublicPaymentStepTest extends TestCase
         $response->assertSee('data-start-step="2"', false);
     }
 
+    public function test_checkout_refreshes_and_retries_a_stale_csrf_token_before_showing_an_error(): void
+    {
+        [$owner] = $this->ownerWithPendingInvoice();
+
+        $response = $this->actingAs($owner, 'owner')->get(route('site.checkout'));
+
+        $response->assertOk();
+        $response->assertSee('X-CSRF-TOKEN', false);
+        $response->assertSee('response.status === 419', false);
+        $response->assertSee('refreshCsrfToken', false);
+    }
+
     public function test_checkout_creates_owner_subscription_and_invoice_without_leaving_the_page(): void
     {
         $package = $this->createPackage();

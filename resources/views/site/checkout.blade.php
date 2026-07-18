@@ -718,19 +718,73 @@
                 }
             }
 
+            function csrfToken() {
+                return document.querySelector('meta[name="csrf-token"]')?.content
+                    || root.querySelector('input[name="_token"]')?.value
+                    || '';
+            }
+
+            function updateCsrfToken(token) {
+                if (!token) {
+                    return;
+                }
+
+                document.querySelectorAll('meta[name="csrf-token"]').forEach(function (meta) {
+                    meta.content = token;
+                });
+
+                root.querySelectorAll('input[name="_token"]').forEach(function (input) {
+                    input.value = token;
+                });
+            }
+
+            async function refreshCsrfToken() {
+                var response = await fetch(window.location.href, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                    cache: 'no-store'
+                });
+
+                if (!response.ok) {
+                    return false;
+                }
+
+                var documentFragment = new DOMParser().parseFromString(await response.text(), 'text/html');
+                var token = documentFragment.querySelector('input[name="_token"]')?.value;
+
+                if (!token) {
+                    return false;
+                }
+
+                updateCsrfToken(token);
+
+                return true;
+            }
+
+            async function sendForm(form) {
+                return fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': csrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+            }
+
             async function submitForm(form, button, onSuccess) {
                 clearErrors(form);
                 setButtonLoading(button, true);
 
                 try {
-                    var response = await fetch(form.action, {
-                        method: 'POST',
-                        body: new FormData(form),
-                        headers: {
-                            Accept: 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
+                    var response = await sendForm(form);
+
+                    if (response.status === 419 && await refreshCsrfToken()) {
+                        response = await sendForm(form);
+                    }
+
                     var payload = await response.json().catch(function () {
                         return {};
                     });
