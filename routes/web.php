@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Frontend\Auth\LoginController;
 use App\Http\Controllers\Frontend\Auth\RegisterController;
+use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\LandingPageController;
 use App\Http\Controllers\Frontend\PageController;
@@ -17,9 +18,16 @@ Route::group([
     Route::get('/about', [LandingPageController::class, 'about'])->name('site.about');
     Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('site.pricing');
     Route::get('/contact', [LandingPageController::class, 'contact'])->name('site.contact');
-    Route::get('/order-review', [LandingPageController::class, 'orderReview'])->name('site.order-review');
-    Route::get('/payment', [LandingPageController::class, 'payment'])->name('site.payment');
-    Route::get('/processing', [LandingPageController::class, 'processing'])->name('site.processing');
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('site.checkout');
+    Route::post('/checkout/account', [CheckoutController::class, 'register'])->name('site.checkout.register');
+    Route::get('/order-review', [CheckoutController::class, 'show'])->name('site.order-review');
+    Route::get('/processing', [CheckoutController::class, 'show'])->name('site.processing');
+
+    Route::middleware(['auth:owner', 'role:owner'])->group(function () {
+        Route::post('/checkout/receipt', [CheckoutController::class, 'payment'])->name('site.checkout.payment');
+        Route::get('/payment', [CheckoutController::class, 'show'])->name('site.payment');
+        Route::post('/payment', [CheckoutController::class, 'payment'])->name('site.payment.store');
+    });
     Route::get('/coming_soon', [LandingPageController::class, 'comingSoon'])->name('coming-soon');
     Route::post('/contact', [ContactController::class, 'store'])->name('frontend-contact.store');
     Route::get('/page/{slug}', [PageController::class, 'index'])->name('frontend.page');

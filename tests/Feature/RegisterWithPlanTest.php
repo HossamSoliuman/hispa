@@ -42,7 +42,7 @@ class RegisterWithPlanTest extends TestCase
             'package_id' => $package->id,
         ]);
 
-        $response->assertRedirect(route('site.processing'));
+        $response->assertRedirect(route('site.checkout'));
 
         $owner = User::where('email', 'newowner@example.com')->firstOrFail();
 

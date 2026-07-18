@@ -1,195 +1,248 @@
 @extends('site.layouts.app')
-@section('title', __('site.payment.title', ['default' => 'الدفع']) . ' - ' . __('site.meta.title'))
+
+@section('title', __('site.payment.title') . ' - ' . __('site.meta.title'))
+
+@php
+    $package = $invoice?->subscription?->package;
+    $total = $invoice ? (float) $invoice->total_amount : 0;
+    $currency = __('site.pricing.currency');
+    $hasBank = $bank['account_number'] !== '' || $bank['bank_name'] !== '' || $bank['account_name'] !== '';
+@endphp
 
 @section('content')
-<main class="min-h-screen flex flex-col items-center py-10 px-4 pt-6 bg-gray-50">
-    <div class="w-full flex justify-center mb-10">
-        <div class="flex items-center justify-center space-x-10 rtl:space-x-reverse">
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white text-base font-semibold shadow-sm" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>
-                </div>
-                <span class="mt-2 text-sm text-center text-gray-500">اختيار الباقة</span>
-            </div>
-            <div class="h-[2px] w-5 sm:w-20 md:w-28 rounded-full" style="background: linear-gradient(98.7deg, #3778BC 19.22%, #4BAEE5 73.07%);"></div>
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white text-base bg-gradient-to-r from-[#3778BC] to-[#4BAEE5] font-semibold shadow-sm scale-110">2</div>
-                <span class="mt-2 text-sm text-center text-black font-medium">الدفع</span>
-            </div>
-            <div class="h-[2px] w-5 sm:w-20 md:w-28 rounded-full bg-[#E5E7EB]"></div>
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 flex items-center justify-center rounded-full text-[#99A1AF] border border-[#D3D7DE] text-base font-semibold shadow-sm bg-white">3</div>
-                <span class="mt-2 text-sm text-center text-gray-500">التوجه إلى لوحة التحكم</span>
+<main class="bg-transparent py-10 md:py-14">
+    <div class="site-shell">
+        <div class="mx-auto max-w-4xl">
+            <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-start gap-2" aria-label="{{ __('marketing.checkout.step_label', ['current' => 2]) }}">
+                @foreach([
+                    ['number' => 1, 'label' => __('marketing.checkout.steps.plan'), 'state' => 'done'],
+                    ['number' => 2, 'label' => __('marketing.checkout.steps.payment'), 'state' => 'active'],
+                    ['number' => 3, 'label' => __('marketing.checkout.steps.dashboard'), 'state' => 'next'],
+                ] as $step)
+                    <div class="flex flex-col items-center text-center">
+                        <span @class([
+                            'grid h-9 w-9 place-items-center rounded-full text-xs font-extrabold',
+                            'bg-tide text-white' => $step['state'] === 'done',
+                            'bg-ink text-white shadow-lg' => $step['state'] === 'active',
+                            'border border-ink/15 bg-white text-ink/38' => $step['state'] === 'next',
+                        ])>
+                            @if($step['state'] === 'done')
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
+                            @else
+                                {{ $step['number'] }}
+                            @endif
+                        </span>
+                        <span @class(['mt-2 text-[0.62rem] font-bold sm:text-xs', 'text-ink' => $step['state'] === 'active', 'text-ink/42' => $step['state'] !== 'active'])>{{ $step['label'] }}</span>
+                    </div>
+                    @if(! $loop->last)
+                        <span @class(['mt-[1.1rem] h-px w-full', 'bg-tide' => $step['state'] === 'done', 'bg-ink/12' => $step['state'] !== 'done'])></span>
+                    @endif
+                @endforeach
             </div>
         </div>
-    </div>
 
-    <div class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <aside class="lg:col-span-1 order-1 lg:order-2">
-            <div class="bg-white rounded-lg shadow-md border border-[#E5E7EB] p-6">
-                <h3 class="font-semibold text-xl mb-3">ملخص الطلب</h3>
-                <span class="text-sm text-[#939393]" id="sidebarPackageName">باقة الاشتراك</span>
-                <div class="flex justify-between text-sm text-gray-600 mt-4">
-                    <span class="text-[#939393] text-xs">سعر الباقة</span>
-                    <span id="sidebarPrice" class="font-bold text-[#3C74BE]">500 ريال</span>
-                </div>
-                <div class="flex justify-between text-sm text-gray-600 mb-3 mt-2">
-                    <span class="text-[#939393] text-xs">رسوم المعاملة</span>
-                    <span class="text-[#00B503] font-bold">مجانا</span>
-                </div>
-                <div class="border-t my-5"></div>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm">الإجمالي</span>
-                    <span id="sidebarTotal" class="text-[#3C74BE] text-2xl font-bold">500 ريال</span>
-                </div>
+        @if(! $invoice)
+            <div class="hud-panel mx-auto mt-12 max-w-xl p-8 text-center">
+                <span class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-mist text-ocean">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 12h6m-3-3v6m9-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                </span>
+                <h1 class="mt-5 text-xl font-extrabold text-ink">{{ __('marketing.payment.no_invoice_title') }}</h1>
+                <p class="mt-2 text-sm leading-7 text-ink/55">{{ __('marketing.payment.no_invoice_description') }}</p>
+                <a href="{{ route('landing-page') }}#pricing" class="mt-6 inline-flex bg-ocean px-5 py-3 text-sm font-bold text-white hover:bg-ocean-deep">{{ __('marketing.payment.choose_plan') }}</a>
             </div>
-        </aside>
-
-        <div class="lg:col-span-2 order-2 lg:order-1">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-semibold mb-4">الدفع</h2>
-                <div id="paymentLoading" class="flex items-center justify-center py-12">
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="relative">
-                            <div class="w-12 h-12 border-4 border-[#3C74BE]/20 rounded-full"></div>
-                            <div class="absolute top-0 left-0 w-12 h-12 border-4 border-transparent border-t-[#3C74BE] rounded-full animate-spin"></div>
-                        </div>
-                        <span class="text-[#3C74BE] font-medium">جاري تحميل معلومات البنك...</span>
-                    </div>
+        @else
+            <div class="mx-auto mt-10 max-w-5xl">
+                <div class="text-center">
+                    <span class="eyebrow text-ocean">{{ __('marketing.payment.eyebrow') }}</span>
+                    <h1 class="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-ink md:text-4xl">{{ __('marketing.payment.title') }}</h1>
+                    <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-ink/55">{{ __('marketing.payment.description') }}</p>
                 </div>
-                <div id="paymentContent" class="w-full flex flex-col gap-6 hidden">
-                    <div class="bg-[#3C74BE]/5 rounded-xl p-6">
-                        <h3 class="text-base font-semibold mb-4 text-gray-800">معلومات الحساب البنكي</h3>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الحساب البنكي</label>
-                            <div class="flex items-center gap-3 bg-white rounded-lg p-4 border border-gray-200">
-                                <span id="bankAccountNumber" class="text-2xl font-bold text-[#3C74BE]">1234567890</span>
-                                <button type="button" id="copyAccountBtn" class="mr-auto text-[#3C74BE] hover:opacity-80 transition-colors">
-                                    <span class="iconify" data-icon="mdi:content-copy" style="font-size: 24px;"></span>
+
+                @if($errors->any())
+                    <div class="mx-auto mt-6 max-w-3xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-start text-sm text-red-700" role="alert">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form action="{{ route('site.payment.store') }}" method="post" enctype="multipart/form-data" id="paymentForm" class="mt-10 grid items-start gap-6 lg:grid-cols-[1.15fr_.85fr]">
+                    @csrf
+
+                    <section class="hud-panel p-6 sm:p-8">
+                        <h2 class="text-base font-extrabold text-ink">{{ __('marketing.payment.bank_info_title') }}</h2>
+
+                        @if(! $hasBank)
+                            <div class="mt-5 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-start text-sm text-amber-800">
+                                {{ __('marketing.payment.not_configured') }}
+                            </div>
+                        @else
+                            <dl class="mt-5 grid gap-4">
+                                @if($bank['bank_name'] !== '')
+                                    <div class="flex items-center justify-between gap-4 border-b border-ink/8 pb-4">
+                                        <dt class="text-xs font-bold text-ink/48">{{ __('marketing.payment.bank_name') }}</dt>
+                                        <dd class="text-sm font-extrabold text-ink">{{ $bank['bank_name'] }}</dd>
+                                    </div>
+                                @endif
+                                @if($bank['account_name'] !== '')
+                                    <div class="flex items-center justify-between gap-4 border-b border-ink/8 pb-4">
+                                        <dt class="text-xs font-bold text-ink/48">{{ __('marketing.payment.account_holder') }}</dt>
+                                        <dd class="text-sm font-extrabold text-ink">{{ $bank['account_name'] }}</dd>
+                                    </div>
+                                @endif
+                                @if($bank['account_number'] !== '')
+                                    <div>
+                                        <dt class="text-xs font-bold text-ink/48">{{ __('marketing.payment.account_number') }}</dt>
+                                        <dd class="mt-2 flex items-center gap-3 rounded-xl border border-ocean/15 bg-mist/60 p-4">
+                                            <span id="accountNumber" class="text-lg font-extrabold tracking-wide text-ocean" dir="ltr">{{ $bank['account_number'] }}</span>
+                                            <button type="button" id="copyAccountBtn" class="ms-auto inline-flex items-center gap-1.5 text-xs font-bold text-ocean hover:text-ocean-deep" data-copy="{{ $bank['account_number'] }}">
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
+                                                <span data-copy-label>{{ __('marketing.payment.copy') }}</span>
+                                            </button>
+                                        </dd>
+                                    </div>
+                                @endif
+                            </dl>
+
+                            @if($qrCode)
+                                <div class="mt-6 flex flex-col items-center rounded-xl border border-ocean/15 bg-white p-5">
+                                    <img src="{{ $qrCode }}" alt="{{ __('marketing.payment.account_number') }}" class="h-40 w-40" />
+                                    <p class="mt-3 text-center text-xs text-ink/55">{{ __('marketing.payment.scan_hint') }}</p>
+                                </div>
+                            @endif
+
+                            <div class="mt-6 flex items-start gap-3 rounded-xl border border-ocean/14 bg-mist/65 p-4 text-start">
+                                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-ocean text-white">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 8v4m0 4h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                                </span>
+                                <p class="text-xs leading-6 text-ink/62">{{ __('marketing.payment.instructions', ['amount' => number_format($total, 0) . ' ' . $currency]) }}</p>
+                            </div>
+
+                            @if($bank['instructions'] !== '')
+                                <p class="mt-3 whitespace-pre-line text-xs leading-6 text-ink/55">{{ $bank['instructions'] }}</p>
+                            @endif
+                        @endif
+
+                        <div class="mt-8">
+                            <h3 class="text-base font-extrabold text-ink">{{ __('marketing.payment.upload_title') }}</h3>
+                            <input type="file" name="bank_transfer_receipt" id="receiptInput" accept="image/png,image/jpeg,image/gif" class="sr-only" required />
+
+                            <label for="receiptInput" id="uploadArea" class="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ocean/30 bg-white/60 px-6 py-10 text-center transition hover:border-ocean hover:bg-mist/40">
+                                <span class="grid h-11 w-11 place-items-center rounded-full bg-mist text-ocean">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0 4 4m-4-4-4 4" /><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></svg>
+                                </span>
+                                <span class="text-sm font-bold text-ink/70">{{ __('marketing.payment.upload_hint') }}</span>
+                                <span class="text-xs text-ink/42">{{ __('marketing.payment.upload_formats') }}</span>
+                            </label>
+
+                            <div id="filePreview" class="mt-4 hidden items-center gap-4 rounded-xl border border-ocean/25 bg-white p-4">
+                                <img id="previewImage" src="" alt="" class="h-16 w-16 rounded-lg object-cover" />
+                                <div class="min-w-0">
+                                    <p id="fileName" class="truncate text-sm font-bold text-ink"></p>
+                                    <p id="fileSize" class="text-xs text-ink/45"></p>
+                                </div>
+                                <button type="button" id="removeFileBtn" class="ms-auto inline-flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                                    {{ __('marketing.payment.remove') }}
                                 </button>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">رمز الباركود</label>
-                            <div class="bg-white rounded-xl p-2 border-2 border-[#3C74BE]/30 flex flex-col items-center justify-center shadow-md">
-                                <div class="bg-white p-2 rounded-lg"><canvas id="qrCodeCanvas" class="rounded-lg"></canvas></div>
-                                <p class="text-xs text-gray-600 mt-4 text-center font-medium">يمكنك مسح هذا الباركود لتسهيل عملية الدفع</p>
+                    </section>
+
+                    <aside class="checkout-summary p-6 text-white sm:p-8 lg:sticky lg:top-28">
+                        <p class="text-xs font-bold text-white/72">{{ __('marketing.payment.order_summary') }}</p>
+                        <h2 class="mt-2 text-xl font-extrabold">{{ $package?->name ?? '—' }}</h2>
+
+                        <dl class="mt-7 grid gap-4 text-sm">
+                            <div class="flex items-center justify-between gap-4">
+                                <dt class="text-white/52">{{ __('marketing.payment.plan_price') }}</dt>
+                                <dd class="font-bold" dir="ltr">{{ number_format($total, 0) }} {{ $currency }}</dd>
                             </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <dt class="text-white/52">{{ __('marketing.payment.fees') }}</dt>
+                                <dd class="font-bold text-[#6ed0bd]">{{ __('marketing.payment.free') }}</dd>
+                            </div>
+                        </dl>
+
+                        <div class="my-6 h-px bg-white/12"></div>
+
+                        <div class="flex items-end justify-between gap-4">
+                            <span class="text-sm font-bold text-white/72">{{ __('marketing.payment.total') }}</span>
+                            <strong class="text-3xl font-extrabold" dir="ltr">{{ number_format($total, 0) }} {{ $currency }}</strong>
                         </div>
-                        <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div class="flex items-start gap-2">
-                                <span class="iconify" data-icon="mdi:information" style="font-size: 20px; color: #2563eb;"></span>
-                                <p class="text-sm text-blue-800">قم بتحويل المبلغ <span id="paymentAmount">500</span> ريال إلى الحساب البنكي أعلاه ثم قم برفع إيصال التحويل في الحقل أدناه</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-xl p-6">
-                        <h3 class="text-base font-semibold mb-4 text-gray-800">رفع إيصال الدفع</h3>
-                        <div class="mb-4">
-                            <input type="file" accept="image/*" id="paymentReceiptInput" class="hidden" />
-                            <div id="uploadArea" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-[#3C74BE]/30 rounded-xl cursor-pointer hover:border-[#3C74BE] hover:bg-gray-50 transition-colors">
-                                <span class="iconify" data-icon="mdi:cloud-upload-outline" style="font-size: 48px; color: #9ca3af;"></span>
-                                <span class="text-sm text-gray-600 mt-2">انقر لاختيار ملف أو اسحب الملف هنا</span>
-                                <span class="text-xs text-gray-400">PNG, JPG, GIF حتى 5 ميجابايت</span>
-                            </div>
-                            <div id="filePreview" class="hidden relative w-full border-2 border-[#3C74BE] rounded-xl p-4 bg-gray-50 mt-2">
-                                <div id="previewImageContainer" class="relative w-full h-48 mb-3"></div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="iconify" data-icon="mdi:file-image" style="font-size: 24px; color: #3C74BE;"></span>
-                                        <span id="fileName" class="text-sm text-gray-700"></span>
-                                        <span id="fileSize" class="text-xs text-gray-500"></span>
-                                    </div>
-                                    <button type="button" id="removeFileBtn" class="text-red-500 hover:text-red-700"><span class="iconify" data-icon="mdi:delete" style="font-size: 24px;"></span></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="paymentError" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"></div>
-                    <a href="#" id="completePaymentBtn" class="w-full mt-6 text-center text-white bg-gradient-to-r from-[#3778BC] to-[#4BAEE5] hover:opacity-90 transition-opacity py-3 rounded-lg disabled:opacity-50 inline-block">إتمام الدفع</a>
-                </div>
-                <div id="paymentErrorState" class="hidden p-6 bg-red-50 border border-red-200 rounded-lg text-red-600">
-                    <p>فشل في تحميل معلومات البنك. يرجى المحاولة مرة أخرى.</p>
-                    <button onclick="window.location.reload()" class="mt-3 text-sm underline">إعادة تحميل الصفحة</button>
-                </div>
+
+                        <button type="submit" id="completePaymentBtn" class="checkout-summary-action mt-7 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-center text-sm font-extrabold hover:-translate-y-0.5">
+                            {{ __('marketing.payment.complete') }}
+                            <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                        </button>
+
+                        <p class="mt-4 text-center text-[0.65rem] leading-5 text-white/45" dir="ltr">{{ $invoice->invoice_number }}</p>
+                    </aside>
+                </form>
             </div>
-        </div>
+        @endif
     </div>
 </main>
 
 @push('scripts')
-<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
-(function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('orderId') || 'ORDER' + Date.now();
-    const amount = urlParams.get('amount') || 500;
-    let bankInfo = { bankAccountNumber: 'SA0380000000608010167519' };
-    let selectedFile = null;
+(function () {
+    var input = document.getElementById('receiptInput');
+    if (!input) { return; }
 
-    document.getElementById('sidebarPrice').textContent = amount + ' ريال';
-    document.getElementById('sidebarTotal').textContent = amount + ' ريال';
-    document.getElementById('paymentAmount').textContent = amount;
+    var uploadArea = document.getElementById('uploadArea');
+    var preview = document.getElementById('filePreview');
+    var previewImage = document.getElementById('previewImage');
+    var fileName = document.getElementById('fileName');
+    var fileSize = document.getElementById('fileSize');
+    var removeBtn = document.getElementById('removeFileBtn');
 
-    const paymentLoading = document.getElementById('paymentLoading');
-    const paymentContent = document.getElementById('paymentContent');
-    const paymentErrorState = document.getElementById('paymentErrorState');
-
-    function loadBankInfo() {
-        paymentLoading.classList.remove('hidden');
-        paymentContent.classList.add('hidden');
-        paymentErrorState.classList.add('hidden');
-        setTimeout(function() {
-            document.getElementById('bankAccountNumber').textContent = bankInfo.bankAccountNumber;
-            if (typeof QRCode !== 'undefined') {
-                QRCode.toCanvas(document.getElementById('qrCodeCanvas'), bankInfo.bankAccountNumber, { width: 200, margin: 2 }, function(err) { if (err) console.error(err); });
-            }
-            paymentLoading.classList.add('hidden');
-            paymentContent.classList.remove('hidden');
-        }, 800);
-    }
-
-    document.getElementById('uploadArea').addEventListener('click', function() { document.getElementById('paymentReceiptInput').click(); });
-    document.getElementById('paymentReceiptInput').addEventListener('change', function(e) {
-        const file = e.target.files && e.target.files[0];
-        if (!file || !file.type.startsWith('image/')) return;
-        if (file.size > 5 * 1024 * 1024) { alert('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت'); return; }
-        selectedFile = file;
-        const reader = new FileReader();
-        reader.onloadend = function() {
-            document.getElementById('previewImageContainer').innerHTML = '<img src="' + reader.result + '" alt="Preview" class="w-full h-full object-contain rounded-lg" />';
-            document.getElementById('uploadArea').classList.add('hidden');
-            document.getElementById('filePreview').classList.remove('hidden');
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileSize').textContent = '(' + (file.size / 1024).toFixed(2) + ' KB)';
-            document.getElementById('completePaymentBtn').classList.remove('disabled');
+    function showFile(file) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            previewImage.src = reader.result;
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+            uploadArea.classList.add('hidden');
+            preview.classList.remove('hidden');
+            preview.classList.add('flex');
         };
         reader.readAsDataURL(file);
-    });
-    document.getElementById('removeFileBtn').addEventListener('click', function() {
-        selectedFile = null;
-        document.getElementById('paymentReceiptInput').value = '';
-        document.getElementById('uploadArea').classList.remove('hidden');
-        document.getElementById('filePreview').classList.add('hidden');
-        document.getElementById('completePaymentBtn').classList.add('disabled');
-    });
-    document.getElementById('copyAccountBtn').addEventListener('click', function() {
-        navigator.clipboard.writeText(bankInfo.bankAccountNumber);
-        alert('تم نسخ رقم الحساب');
-    });
-    document.getElementById('completePaymentBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        if (!selectedFile) { alert('يرجى رفع إيصال الدفع'); return; }
-        const btn = this;
-        btn.classList.add('opacity-50', 'pointer-events-none');
-        btn.textContent = 'جاري المعالجة...';
-        setTimeout(function() {
-            window.location.href = '{{ route("site.processing") }}?orderId=' + encodeURIComponent(orderId);
-        }, 1000);
+    }
+
+    input.addEventListener('change', function () {
+        if (input.files && input.files[0]) { showFile(input.files[0]); }
     });
 
-    loadBankInfo();
+    removeBtn && removeBtn.addEventListener('click', function () {
+        input.value = '';
+        preview.classList.add('hidden');
+        preview.classList.remove('flex');
+        uploadArea.classList.remove('hidden');
+    });
+
+    ['dragenter', 'dragover'].forEach(function (evt) {
+        uploadArea.addEventListener(evt, function (e) { e.preventDefault(); uploadArea.classList.add('border-ocean'); });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+        uploadArea.addEventListener(evt, function (e) { e.preventDefault(); uploadArea.classList.remove('border-ocean'); });
+    });
+    uploadArea.addEventListener('drop', function (e) {
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            input.files = e.dataTransfer.files;
+            showFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    var copyBtn = document.getElementById('copyAccountBtn');
+    if (copyBtn && navigator.clipboard) {
+        copyBtn.addEventListener('click', function () {
+            navigator.clipboard.writeText(copyBtn.dataset.copy).then(function () {
+                var label = copyBtn.querySelector('[data-copy-label]');
+                var original = label.textContent;
+                label.textContent = @json(__('marketing.payment.copied'));
+                setTimeout(function () { label.textContent = original; }, 1500);
+            });
+        });
+    }
 })();
 </script>
 @endpush

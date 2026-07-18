@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CompanySettingsRequest;
+use App\Http\Requests\Admin\PaymentSettingsRequest;
 use App\Http\Requests\Admin\SettingRequest;
 use App\Models\BoatType;
 use App\Models\Category;
@@ -27,7 +28,7 @@ class SettingController extends Controller
     {
         $this->middleware('permission:read_settings', ['only' => ['index', 'show']]);
         $this->middleware('permission:create_settings', ['only' => ['create', 'store']]);
-        $this->middleware('permission:update_settings', ['only' => ['edit', 'update', 'updateCompany']]);
+        $this->middleware('permission:update_settings', ['only' => ['edit', 'update', 'updateCompany', 'updatePayment']]);
         $this->middleware('permission:delete_settings', ['only' => ['destroy']]);
     }
 
@@ -79,6 +80,26 @@ class SettingController extends Controller
 
         return redirect()
             ->route('admin.settings.index', ['tab' => 'company'])
+            ->with('success', __('admin.swal.saved_success'));
+    }
+
+    /**
+     * Persist the bank-transfer details shown on the public subscription
+     * payment page. Stored as plain key/value settings so the payment view can
+     * read them from the globally shared $settings array.
+     */
+    public function updatePayment(PaymentSettingsRequest $request): RedirectResponse
+    {
+        $settings = $request->validated();
+
+        DB::transaction(function () use ($settings): void {
+            foreach ($settings as $key => $value) {
+                $this->setSetting($key, (string) ($value ?? ''), 'text');
+            }
+        });
+
+        return redirect()
+            ->route('admin.settings.index', ['tab' => 'payment'])
             ->with('success', __('admin.swal.saved_success'));
     }
 

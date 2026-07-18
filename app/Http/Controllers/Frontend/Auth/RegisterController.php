@@ -123,23 +123,15 @@ class RegisterController extends Controller
     }
 
     /**
-     * After registering, send owners who selected a plan to the "request
-     * received" page which explains the pending-confirmation status.
+     * Continue plan registrations inside the focused checkout.
      */
     protected function registered(\Illuminate\Http\Request $request, $user)
     {
         if ($user->role === 'owner') {
-            $subscription = $user->subscriptions()->with('package')->latest('id')->first();
+            $subscription = $user->subscriptions()->latest('id')->first();
 
             if ($subscription && $subscription->isPending()) {
-                session()->flash('pending_subscription', [
-                    'package' => $subscription->package?->name,
-                    'duration' => $subscription->package?->duration_type,
-                    'boats_count' => $subscription->package?->boats_count,
-                    'invoice_number' => $subscription->invoices()->latest('id')->value('invoice_number'),
-                ]);
-
-                return redirect()->route('site.processing');
+                return redirect()->route('site.checkout');
             }
         }
 

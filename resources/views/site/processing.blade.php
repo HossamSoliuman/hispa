@@ -13,8 +13,8 @@
             <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-start gap-2" aria-label="{{ __('marketing.checkout.step_label', ['current' => 3]) }}">
                 @foreach([
                     ['number' => 1, 'label' => __('marketing.checkout.steps.plan')],
-                    ['number' => 2, 'label' => __('marketing.checkout.steps.account')],
-                    ['number' => 3, 'label' => __('marketing.checkout.steps.activation')],
+                    ['number' => 2, 'label' => __('marketing.checkout.steps.payment')],
+                    ['number' => 3, 'label' => __('marketing.checkout.steps.dashboard')],
                 ] as $step)
                     <div class="flex flex-col items-center text-center">
                         <span class="grid h-9 w-9 place-items-center rounded-full bg-tide text-white">

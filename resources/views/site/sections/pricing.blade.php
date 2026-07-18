@@ -67,7 +67,7 @@
 
                         <div class="mt-auto pt-5">
                             @if($package->original_price !== null || $package->price !== null)
-                                <a href="{{ route('site.order-review', ['package_id' => $package->id]) }}" class="inline-flex min-h-12 w-full items-center justify-center gap-2 bg-ocean px-5 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(54,117,194,.14)] hover:-translate-y-0.5 hover:bg-ocean-deep" data-plan="{{ $package->id }}">
+                                <a href="{{ route('site.checkout', ['package_id' => $package->id]) }}" class="inline-flex min-h-12 w-full items-center justify-center gap-2 bg-ocean px-5 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(54,117,194,.14)] hover:-translate-y-0.5 hover:bg-ocean-deep" data-plan="{{ $package->id }}">
                                     {{ __('marketing.pricing.choose') }}
                                     <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
                                 </a>

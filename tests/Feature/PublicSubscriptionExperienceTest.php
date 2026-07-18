@@ -37,7 +37,7 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response->assertSee(__('marketing.features.reports_title'));
         $response->assertSee($package->name);
         $response->assertSee('2,500');
-        $response->assertSee(route('site.order-review', ['package_id' => $package->id]), false);
+        $response->assertSee(route('site.checkout', ['package_id' => $package->id]), false);
         $response->assertSee('site/assets/owner-dashboard.png', false);
         $response->assertSee('family=Tajawal', false);
         $response->assertSee('data-theme-toggle', false);
@@ -59,7 +59,7 @@ class PublicSubscriptionExperienceTest extends TestCase
         $this->assertFileExists(public_path('site/assets/owner-dashboard.png'));
     }
 
-    public function test_order_review_preserves_the_selected_plan_for_account_creation(): void
+    public function test_checkout_keeps_the_selected_plan_and_all_steps_in_one_viewport(): void
     {
         $this->createPackage();
         $selectedPackage = $this->createPackage([
@@ -70,18 +70,29 @@ class PublicSubscriptionExperienceTest extends TestCase
             'sort_order' => 2,
         ]);
 
-        $response = $this->get(route('site.order-review', ['package_id' => $selectedPackage->id]));
+        $response = $this->get(route('site.checkout', ['package_id' => $selectedPackage->id]));
 
         $response->assertOk();
         $response->assertSee($selectedPackage->name);
         $response->assertSee('6,200');
-        $response->assertSee('package_id='.$selectedPackage->id, false);
-        $response->assertSee('guard=owner', false);
-        $response->assertSee(__('marketing.checkout.activation_title'));
-        $response->assertSee('checkout-summary', false);
-        $response->assertSee('checkout-summary-action', false);
-        $response->assertDontSee('bg-sand', false);
-        $response->assertDontSee('المستندات المطلوبة');
+        $response->assertSee('checkout-frame', false);
+        $response->assertSee('data-checkout-step="1"', false);
+        $response->assertSee('data-checkout-step="2"', false);
+        $response->assertSee('data-checkout-step="3"', false);
+        $response->assertSee(route('site.checkout.register'), false);
+        $response->assertSee(route('site.checkout.payment'), false);
+        $response->assertSee('checkout-viewport', false);
+        $response->assertDontSee(route('frontend.show_register_form', [
+            'package_id' => $selectedPackage->id,
+            'guard' => 'owner',
+        ]), false);
+
+        $css = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertIsString($css);
+        $this->assertStringContainsString('.checkout-viewport body', $css);
+        $this->assertStringContainsString('height: 100dvh', $css);
+        $this->assertStringContainsString('overscroll-behavior: none', $css);
     }
 
     public function test_english_public_pages_use_the_owner_interface_font(): void
@@ -163,22 +174,16 @@ class PublicSubscriptionExperienceTest extends TestCase
         $this->assertStringNotContainsString('--color-sand', $css);
     }
 
-    public function test_processing_page_clearly_shows_the_pending_activation_state(): void
+    public function test_legacy_processing_url_uses_the_single_checkout_viewport(): void
     {
-        $response = $this->withSession([
-            'pending_subscription' => [
-                'package' => 'Hawat',
-                'duration' => 'yearly',
-                'boats_count' => 1,
-                'invoice_number' => 'INV-1001',
-            ],
-        ])->get(route('site.processing'));
+        $package = $this->createPackage();
+
+        $response = $this->get(route('site.processing', ['package_id' => $package->id]));
 
         $response->assertOk();
-        $response->assertSee(__('marketing.processing.title'));
-        $response->assertSee(__('marketing.processing.pending'));
-        $response->assertSee('INV-1001');
-        $response->assertSee(route('owner.dashboard'), false);
+        $response->assertSee('checkout-frame', false);
+        $response->assertSee('checkout-viewport', false);
+        $response->assertSee($package->name);
     }
 
     /**

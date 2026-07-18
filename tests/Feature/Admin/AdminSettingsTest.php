@@ -41,6 +41,27 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('hispa.test', $settings['domain']);
     }
 
+    public function test_bank_transfer_settings_are_saved_from_the_admin_payment_tab(): void
+    {
+        $this->withoutMiddleware();
+
+        $response = $this->post(route('admin.settings.payment'), [
+            'bank_name' => 'Al Rajhi Bank',
+            'bank_account_name' => 'Hesba Platform',
+            'bank_account_number' => 'SA0380000000608010167519',
+            'payment_instructions' => 'Transfer then upload the receipt.',
+        ]);
+
+        $response->assertRedirect(route('admin.settings.index', ['tab' => 'payment']));
+
+        $settings = Setting::query()->pluck('value', 'key');
+
+        $this->assertSame('Al Rajhi Bank', $settings['bank_name']);
+        $this->assertSame('Hesba Platform', $settings['bank_account_name']);
+        $this->assertSame('SA0380000000608010167519', $settings['bank_account_number']);
+        $this->assertSame('Transfer then upload the receipt.', $settings['payment_instructions']);
+    }
+
     public function test_admin_settings_page_no_longer_renders_the_general_settings_tab(): void
     {
         $settingsIndex = file_get_contents(resource_path('views/admin/settings/index.blade.php'));

@@ -229,8 +229,9 @@ Route::group([
             Route::get('revenue-report', [RevenueReportController::class, 'index'])->name('revenue-report');
             Route::get('revenue-report/print', [RevenueReportController::class, 'print'])->name('revenue-report.print');
 
-            // Settings (tabbed: company, fish, categories, regions, governorates, ports)
+            // Settings (tabbed: company, payment, fish, categories, regions, governorates, ports)
             Route::post('settings/company', [SettingController::class, 'updateCompany'])->name('settings.company');
+            Route::post('settings/payment', [SettingController::class, 'updatePayment'])->name('settings.payment');
             Route::resource('settings', SettingController::class);
             Route::resource('regions', RegionController::class)->only(['store', 'update', 'destroy']);
             Route::resource('governorates', GovernorateController::class)->only(['store', 'update', 'destroy']);

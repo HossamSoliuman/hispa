@@ -57,14 +57,6 @@ class LandingPageController extends Controller
     }
 
     /**
-     * Payment page (step 2).
-     */
-    public function payment(): View
-    {
-        return view('site.payment');
-    }
-
-    /**
      * Processing / success page (step 3).
      */
     public function processing(): View

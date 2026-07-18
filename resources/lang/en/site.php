@@ -162,6 +162,9 @@ return [
         'agree_terms' => 'I agree to the privacy policy and terms',
         'send' => 'Send message',
     ],
+    'payment' => [
+        'title' => 'Payment',
+    ],
     'order_review' => [
         'title' => 'Order review',
         'description' => 'Review your subscription order',

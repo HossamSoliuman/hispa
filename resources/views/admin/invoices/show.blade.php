@@ -100,7 +100,15 @@
                             @if($invoice->bank_transfer_receipt)
                                 <tr>
                                     <th>{{ __('admin.invoices.bank_transfer_receipt') }}</th>
-                                    <td>{{ $invoice->bank_transfer_receipt }}</td>
+                                    <td>
+                                        @if(\Illuminate\Support\Str::contains($invoice->bank_transfer_receipt, 'uploads/'))
+                                            <a href="{{ \Illuminate\Support\Facades\Storage::url($invoice->bank_transfer_receipt) }}" target="_blank" rel="noopener">
+                                                <img src="{{ \Illuminate\Support\Facades\Storage::url($invoice->bank_transfer_receipt) }}" alt="{{ __('admin.invoices.bank_transfer_receipt') }}" class="rounded border" style="max-height: 220px; max-width: 100%;">
+                                            </a>
+                                        @else
+                                            {{ $invoice->bank_transfer_receipt }}
+                                        @endif
+                                    </td>
                                 </tr>
                             @endif
                             @if($invoice->payment_notes)

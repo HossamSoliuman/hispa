@@ -12,7 +12,7 @@
 
 @section('content')
     @php
-        $activeTab = in_array(request('tab'), ['company', 'fish', 'categories', 'regions', 'governorates', 'ports'], true)
+        $activeTab = in_array(request('tab'), ['company', 'payment', 'fish', 'categories', 'regions', 'governorates', 'ports'], true)
             ? request('tab')
             : 'company';
     @endphp
@@ -25,6 +25,11 @@
             <li class="nav-item" role="presentation">
                 <a class="nav-link {{ $activeTab == 'company' ? 'active' : '' }}" href="?tab=company" id="company-tab" aria-controls="company" aria-selected="{{ $activeTab == 'company' ? 'true' : 'false' }}">
                     <i class="bi bi-building me-1"></i> {{ __('admin.settings.tabs.company') }}
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link {{ $activeTab == 'payment' ? 'active' : '' }}" href="?tab=payment" id="payment-tab" aria-controls="payment" aria-selected="{{ $activeTab == 'payment' ? 'true' : 'false' }}">
+                    <i class="bi bi-bank me-1"></i> {{ __('admin.settings.tabs.payment') }}
                 </a>
             </li>
             <li class="nav-item" role="presentation">
@@ -58,6 +63,9 @@
         <div class="tab-content" id="settingsTabsContent">
             <div class="tab-pane fade {{ $activeTab == 'company' ? 'show active' : '' }}" id="company" role="tabpanel" aria-labelledby="company-tab">
                 @include('admin.settings.tabs.company')
+            </div>
+            <div class="tab-pane fade {{ $activeTab == 'payment' ? 'show active' : '' }}" id="payment" role="tabpanel" aria-labelledby="payment-tab">
+                @include('admin.settings.tabs.payment')
             </div>
             <div class="tab-pane fade {{ $activeTab == 'fish' ? 'show active' : '' }}" id="fish" role="tabpanel" aria-labelledby="fish-tab">
                 @include('admin.settings.tabs.fish')
