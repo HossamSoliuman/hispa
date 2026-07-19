@@ -1,6 +1,6 @@
 @php($switchLocale = app()->getLocale() === 'ar' ? 'en' : 'ar')
 
-<header class="sticky top-0 z-50 border-b border-white/15 bg-ocean/95 text-white shadow-[0_5px_18px_rgba(35,74,120,.14)] backdrop-blur-md">
+<header class="sticky top-0 z-50 border-b border-white/15 bg-ocean/95 text-white shadow-[0_4px_12px_rgba(35,74,120,.1)] backdrop-blur-sm">
     <div class="site-shell flex h-[4.5rem] items-center justify-between gap-5">
         <a href="{{ route('landing-page') }}" class="inline-flex shrink-0 items-center" aria-label="{{ __('site.meta.title') }}">
             <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('site.meta.title') }}" class="h-auto w-[5.7rem] object-contain" />
@@ -16,7 +16,7 @@
         <div class="flex items-center gap-2 sm:gap-3">
             <a
                 href="{{ \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL($switchLocale, null, [], true) }}"
-                class="inline-flex h-10 items-center justify-center gap-2 border border-white/25 bg-white/10 px-3 text-xs font-bold text-white hover:bg-white hover:text-ocean"
+                class="inline-flex h-9 items-center justify-center gap-2 border border-white/25 bg-white/10 px-2.5 text-[0.7rem] font-bold text-white hover:bg-white hover:text-ocean"
                 lang="{{ $switchLocale }}"
                 hreflang="{{ $switchLocale }}"
                 aria-label="{{ __('marketing.nav.change_language') }}"
@@ -27,7 +27,7 @@
 
             <button
                 type="button"
-                class="inline-grid h-10 w-10 place-items-center border border-white/25 bg-white/10 text-white hover:bg-white hover:text-ocean"
+                class="inline-grid h-9 w-9 place-items-center border border-white/25 bg-white/10 text-white hover:bg-white hover:text-ocean"
                 data-theme-toggle
                 aria-label="{{ __('marketing.nav.toggle_theme') }}"
                 aria-pressed="false"
@@ -37,20 +37,20 @@
             </button>
 
             @auth('owner')
-                <a href="{{ route('owner.dashboard') }}" class="hidden border border-white/35 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white hover:text-ocean sm:inline-flex">
+                <a href="{{ route('owner.dashboard') }}" class="hidden border border-white/35 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white hover:text-ocean sm:inline-flex">
                     {{ __('site.nav.dashboard') }}
                 </a>
             @else
-                <a href="{{ route('frontend.show_login_form') }}" class="hidden px-2 py-2.5 text-sm font-semibold text-white/75 hover:text-white sm:inline-flex">
+                <a href="{{ route('frontend.show_login_form') }}" class="hidden px-2 py-2 text-xs font-semibold text-white/75 hover:text-white sm:inline-flex">
                     {{ __('site.nav.login') }}
                 </a>
-                <a href="{{ route('landing-page') }}#pricing" class="nav-primary-action hidden items-center gap-2 bg-white px-4 py-2.5 text-sm font-bold text-ocean shadow-[0_8px_22px_rgba(35,74,120,.16)] hover:-translate-y-0.5 hover:bg-mist sm:inline-flex">
+                <a href="{{ route('landing-page') }}#pricing" class="nav-primary-action hidden items-center gap-2 bg-white px-3.5 py-2 text-xs font-bold text-ocean shadow-[0_5px_14px_rgba(35,74,120,.12)] hover:-translate-y-0.5 hover:bg-mist sm:inline-flex">
                     {{ __('marketing.nav.plans') }}
                     <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
                 </a>
             @endauth
 
-            <button id="menuBtn" type="button" class="inline-grid h-10 w-10 place-items-center border border-white/30 bg-white/10 text-white hover:bg-white hover:text-ocean lg:hidden" aria-label="{{ __('site.nav.open_menu') }}" aria-expanded="false" aria-controls="mobileMenuSheet">
+            <button id="menuBtn" type="button" class="inline-grid h-9 w-9 place-items-center border border-white/30 bg-white/10 text-white hover:bg-white hover:text-ocean lg:hidden" aria-label="{{ __('site.nav.open_menu') }}" aria-expanded="false" aria-controls="mobileMenuSheet">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             </button>
         </div>

@@ -7,39 +7,12 @@
 @section('content')
 <main class="owner-login-page">
     <div class="auth-form-card owner-login-shell">
-        <aside class="owner-login-showcase" aria-label="{{ __('site.login.features_title') }}">
-            <div class="owner-login-showcase-grid" aria-hidden="true"></div>
-
-            <a href="{{ route('landing-page') }}" class="owner-login-brand">
-                <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('site.meta.title') }}" />
-            </a>
-
-            <div class="owner-login-showcase-copy">
-                <span class="owner-login-kicker"><i></i>{{ __('site.login.features_title') }}</span>
-                <h2>{{ __('site.login.feature_1') }}</h2>
-            </div>
-
-            <div class="owner-login-radar" aria-hidden="true">
-                <span class="owner-login-radar-sweep"></span>
-                <span class="owner-login-radar-point"></span>
-                <svg viewBox="0 0 90 48" fill="none">
-                    <path d="M9 28h59l-8 11H25L9 28Z" fill="currentColor" />
-                    <path d="M33 28V17h19l7 11M42 17V9m0 0 13 5M42 9v19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M4 43c9-5 17 5 26 0s17 5 26 0 17 5 26 0" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity=".62" />
-                </svg>
-            </div>
-
-            <div class="owner-login-snapshot">
-                <div>
-                    <small>{{ __('site.login.net_profit') }}</small>
-                    <strong dir="ltr">{{ __('site.login.net_profit_sample') }}</strong>
-                </div>
-                <svg viewBox="0 0 74 32" fill="none" aria-hidden="true">
-                    <path d="m3 27 15-9 13 5 14-14 10 6L71 3" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="m61 3h10v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </div>
-        </aside>
+        <span class="owner-login-shell-corners" aria-hidden="true">
+            <i class="owner-login-corner-top-start"></i>
+            <i class="owner-login-corner-top-end"></i>
+            <i class="owner-login-corner-bottom-start"></i>
+            <i class="owner-login-corner-bottom-end"></i>
+        </span>
 
         <section class="owner-login-form-panel">
             <div class="owner-login-form-topbar">
@@ -59,7 +32,6 @@
             </div>
 
             <div class="owner-login-form-content">
-                <span class="owner-login-form-kicker">{{ __('site.login.title') }}</span>
                 <h1>{{ __('site.login.title') }}</h1>
                 <p class="owner-login-intro">
                     {{ __('site.login.no_account') }}

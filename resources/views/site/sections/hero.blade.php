@@ -5,7 +5,7 @@
     <div class="site-shell relative z-10 grid items-center gap-10 py-14 lg:grid-cols-[0.78fr_1.22fr] lg:py-16 xl:gap-14">
         <div class="hero-rise text-start">
             <span class="eyebrow text-ocean">{{ __('marketing.hero.eyebrow') }}</span>
-            <h1 class="mt-5 max-w-xl text-[clamp(2.5rem,5.5vw,4.7rem)] font-bold leading-[1.08] tracking-[-0.045em] text-ink">
+            <h1 class="mt-5 max-w-lg text-[clamp(2.15rem,4.2vw,3.6rem)] font-bold leading-[1.14] tracking-[-0.04em] text-ink">
                 {{ __('marketing.hero.title') }}
             </h1>
             <p class="mt-5 max-w-lg text-base leading-8 text-ink/62 md:text-lg">
@@ -13,11 +13,11 @@
             </p>
 
             <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <a href="#pricing" class="inline-flex min-h-12 items-center justify-center gap-2 bg-ocean px-6 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(54,117,194,.18)] hover:-translate-y-0.5 hover:bg-ocean-deep">
+                <a href="#pricing" class="inline-flex min-h-11 items-center justify-center gap-2 bg-ocean px-5 py-2.5 text-xs font-bold text-white shadow-[0_6px_12px_rgba(54,117,194,.12)] hover:-translate-y-0.5 hover:bg-ocean-deep">
                     {{ __('marketing.hero.primary_cta') }}
                     <svg class="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
                 </a>
-                <a href="#features" class="hero-secondary-action inline-flex min-h-12 items-center justify-center border border-ocean/30 bg-white/75 px-6 py-3 text-sm font-semibold text-ocean hover:border-ocean hover:bg-white">
+                <a href="#features" class="hero-secondary-action inline-flex min-h-11 items-center justify-center border border-ocean/30 bg-white/75 px-5 py-2.5 text-xs font-semibold text-ocean hover:border-ocean hover:bg-white">
                     {{ __('marketing.hero.secondary_cta') }}
                 </a>
             </div>

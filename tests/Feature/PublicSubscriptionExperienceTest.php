@@ -43,6 +43,9 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response->assertSee('data-theme-toggle', false);
         $response->assertSee('public_theme', false);
         $response->assertSee('theme-dashboard-preview-dark', false);
+        $response->assertSee('text-[clamp(2.15rem,4.2vw,3.6rem)]', false);
+        $response->assertSee('shadow-[0_6px_12px_rgba(54,117,194,.12)]', false);
+        $response->assertSee('backdrop-blur-sm', false);
         $response->assertSee('id="about"', false);
         $response->assertSee('id="pricing"', false);
         $response->assertSee('id="contact"', false);
@@ -158,10 +161,11 @@ class PublicSubscriptionExperienceTest extends TestCase
         $response->assertSee('auth-form-card', false);
         $response->assertSee('auth-theme-toggle', false);
         $response->assertSee('data-theme-toggle', false);
-        $response->assertSee('owner-login-showcase', false);
         $response->assertSee('owner-login-form-panel', false);
-        $response->assertSee('owner-login-radar', false);
         $response->assertSee('owner-login-viewport', false);
+        $response->assertDontSee('owner-login-form-kicker', false);
+        $response->assertDontSee('owner-login-showcase', false);
+        $response->assertDontSee('owner-login-radar', false);
         $response->assertDontSee('auth-promo-panel', false);
     }
 
@@ -189,17 +193,44 @@ class PublicSubscriptionExperienceTest extends TestCase
         $this->assertStringNotContainsString('--color-sand', $css);
     }
 
-    public function test_login_and_checkout_use_the_site_ocean_palette_in_light_mode(): void
+    public function test_login_and_checkout_use_the_owner_dashboard_theme(): void
     {
         $css = file_get_contents(resource_path('css/app.css'));
 
         $this->assertIsString($css);
         $this->assertStringContainsString('--checkout-accent: #3675c2', $css);
+        $this->assertStringContainsString('--owner-login-accent: #3675c2', $css);
+        $this->assertStringContainsString("url('/dashboard/assets/css/images/cover-new.jpg')", $css);
+        $this->assertStringContainsString("url('/dashboard/assets/css/images/pattern-dark.png')", $css);
+        $this->assertStringContainsString('.checkout-frame-corners', $css);
+        $this->assertStringContainsString('.checkout-theme-toggle', $css);
+        $this->assertStringContainsString("html[data-theme='dark'] .checkout-workspace", $css);
+        $this->assertStringContainsString('grid-template-rows: min-content min-content', $css);
+        $this->assertStringContainsString('.owner-login-shell-corners', $css);
+        $this->assertStringContainsString('.owner-login-form-panel', $css);
+        $this->assertStringContainsString('background: transparent', $css);
+        $this->assertStringContainsString('height: min(37rem', $css);
+        $this->assertStringContainsString('height: 2.75rem', $css);
         $this->assertStringContainsString('.owner-login-submit', $css);
         $this->assertStringContainsString('.owner-login-viewport body', $css);
         $this->assertStringContainsString('overscroll-behavior: none', $css);
         $this->assertStringNotContainsString('#a94720', $css);
         $this->assertStringNotContainsString('#873719', $css);
+
+        $login = $this->get(route('frontend.show_login_form'));
+
+        $login->assertOk();
+        $login->assertSee('family=Tajawal', false);
+        $login->assertSee('owner-login-shell-corners', false);
+
+        $this->createPackage();
+
+        $checkout = $this->get(route('site.checkout'));
+
+        $checkout->assertOk();
+        $checkout->assertSee('checkout-frame-corners', false);
+        $checkout->assertSee('checkout-theme-toggle', false);
+        $checkout->assertSee('data-theme-toggle', false);
     }
 
     public function test_legacy_processing_url_uses_the_single_checkout_viewport(): void
