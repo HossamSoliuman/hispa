@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Page;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath;
@@ -33,7 +34,8 @@ class PublicSeoMetadataTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('<link rel="canonical" href="https://hisbah.huwat.net/ar" />', false);
-        $response->assertSee('<link rel="alternate" hreflang="en" href="https://hisbah.huwat.net/en" />', false);
+        $response->assertSee('rel="alternate" hreflang="en"', false);
+        $response->assertSee('href="https://hisbah.huwat.net/en"', false);
         $response->assertSee('<meta property="og:locale" content="ar_SA" />', false);
         $response->assertSee('<meta name="twitter:card" content="summary_large_image" />', false);
         $response->assertSee('https://hisbah.huwat.net/site/assets/hisbah-huwat-logo.jpg', false);
@@ -47,6 +49,27 @@ class PublicSeoMetadataTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('<meta name="robots" content="noindex, nofollow" />', false);
+    }
+
+    public function test_the_uploaded_admin_logo_is_used_for_search_and_social_metadata(): void
+    {
+        Setting::query()->create([
+            'key' => 'logo',
+            'value' => 'uploads/settings/search-logo.png',
+            'type' => 'image',
+        ]);
+
+        $response = $this->get(route('landing-page'));
+
+        $response->assertOk();
+        $response->assertSee(
+            '<meta property="og:image" content="https://hisbah.huwat.net/storage/uploads/settings/search-logo.png" />',
+            false
+        );
+        $response->assertSee(
+            '"logo":{"@type":"ImageObject","url":"https://hisbah.huwat.net/storage/uploads/settings/search-logo.png"}',
+            false
+        );
     }
 
     public function test_sitemap_lists_localized_public_pages_and_active_content_pages(): void

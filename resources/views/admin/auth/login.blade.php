@@ -117,7 +117,7 @@
                 <div class="card-body">
                     <div class="login-logo-wrap">
                         <span class="login-admin-badge">{{ __('admin.auth.admin_panel') }}</span>
-                        <img src="{{ asset('logo/' . (app()->getLocale() == 'ar' ? 'arabic' : 'english') . '/main.png') }}" alt="{{ __('admin.dashboard.title') }}" class="login-logo" />
+                        <img src="{{ $platformLogoUrl }}" alt="{{ __('admin.dashboard.title') }}" class="login-logo" />
                     </div>
                     <h1 class="login-title text-center">{{ __('admin.auth.login') }}</h1>
                     <p class="login-subtitle text-center">{{ __('admin.auth.login_subtitle') }}</p>

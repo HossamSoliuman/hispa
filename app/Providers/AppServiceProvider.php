@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         Page::observe(PageObserver::class);
+
+        $this->app->scoped('platform.settings', function (): array {
+            try {
+                return Schema::hasTable('settings')
+                    ? Setting::all()->pluck('value', 'key')->toArray()
+                    : [];
+            } catch (\Exception) {
+                return [];
+            }
+        });
 
         // Bind the SupportServiceManager so it can be resolved via the container
         $this->app->singleton(\App\Services\SupportServiceManager::class, function ($app) {
@@ -43,17 +54,41 @@ class AppServiceProvider extends ServiceProvider
             return new FirebaseChannel;
         });
         Schema::defaultStringLength(191);
-        // Avoid database queries during composer scripts, migrations or when the
-        // settings table does not exist yet (fresh install or during migrations).
-        try {
-            $settings = Schema::hasTable('settings')
-                ? Setting::all()->pluck('value', 'key')->toArray()
-                : [];
 
-            View::share('settings', $settings);
-        } catch (\Exception $e) {
-            View::share('settings', []);
-        }
+        View::composer('*', function ($view): void {
+            if (! array_key_exists('settings', $view->getData())) {
+                $view->with('settings', app('platform.settings'));
+            }
+        });
+
+        View::composer([
+            'site.*',
+            'admin.auth.login',
+            'admin.layouts.master',
+            'admin.layouts.master-auth',
+            'admin.partial.header',
+            'owner.layouts.master',
+            'owner.layouts.master-auth',
+            'owner.partial.header',
+        ], function ($view): void {
+            $settings = app('platform.settings');
+            $uploadedLogoPath = filled($settings['logo'] ?? null)
+                ? (string) $settings['logo']
+                : null;
+            $uploadedLogoUrl = $uploadedLogoPath === null
+                ? null
+                : (
+                    Str::startsWith($uploadedLogoPath, ['http://', 'https://', '//'])
+                        ? $uploadedLogoPath
+                        : asset($uploadedLogoPath)
+                );
+
+            $view->with([
+                'platformLogoUrl' => $uploadedLogoUrl ?? asset('site/assets/hisbah-huwat-logo.png'),
+                'platformLogoOnDarkUrl' => $uploadedLogoUrl ?? asset('site/assets/hisbah-huwat-logo-white.png'),
+                'platformLogoSeoPath' => $uploadedLogoPath ?? config('seo.default_image_path'),
+            ]);
+        });
 
         // Blade directive to format currency consistently across views.
         // Usage in Blade templates: @money($amount)

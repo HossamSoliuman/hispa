@@ -1,6 +1,4 @@
 @php
-    $siteLogoUrl = asset('site/assets/hisbah-huwat-logo-white.png');
-    $siteFaviconUrl = asset('site/assets/hisbah-huwat-logo.png');
     $siteUrl = rtrim(config('seo.site_url'), '/');
     $supportedLocales = array_keys(config('laravellocalization.supportedLocales', []));
     $pathSegments = array_values(array_filter(explode('/', trim(request()->path(), '/'))));
@@ -17,8 +15,12 @@
         ' ',
         strip_tags($__env->yieldContent('description', __('site.meta.description'))),
     );
-    $seoImage = trim($__env->yieldContent('seo_image', config('seo.default_image_path')));
+    $seoImage = trim($__env->yieldContent('seo_image'));
+    $seoImage = $seoImage !== '' ? $seoImage : $platformLogoSeoPath;
     $seoImageUrl = str_starts_with($seoImage, 'http') ? $seoImage : $siteUrl . '/' . ltrim($seoImage, '/');
+    $platformLogoSearchUrl = str_starts_with($platformLogoSeoPath, 'http')
+        ? $platformLogoSeoPath
+        : $siteUrl . '/' . ltrim($platformLogoSeoPath, '/');
     $robots = trim($__env->yieldContent('robots', 'index, follow'));
     $isIndexable = !str_contains($robots, 'noindex');
 @endphp
@@ -67,7 +69,7 @@
     <meta name="twitter:title" content="{{ $seoTitle }}" />
     <meta name="twitter:description" content="{{ $seoDescription }}" />
     <meta name="twitter:image" content="{{ $seoImageUrl }}" />
-    <link rel="icon" href="{{ $siteFaviconUrl }}" />
+    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
     @if ($isIndexable)
         <script type="application/ld+json">{!! json_encode([
             '@'.'context' => 'https://schema.org',
@@ -83,6 +85,10 @@
                 '@'.'type' => 'Organization',
                 'name' => __('site.meta.title'),
                 'url' => $siteUrl,
+                'logo' => [
+                    '@'.'type' => 'ImageObject',
+                    'url' => $platformLogoSearchUrl,
+                ],
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     @endif

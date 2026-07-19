@@ -10,7 +10,7 @@
     <meta name="description" content="{{ __('admin.generated.meta_desc_hasbah') }}" />
     <meta name="author" content="{{ __('admin.generated.meta_author') }}" />
     <meta name="keywords" content="{{ __('admin.generated.meta_keywords') }}" />
-    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- ================== BEGIN core-css ================== -->
@@ -71,7 +71,6 @@
 
         .app-header .brand .brand-logo img {
             height: 65px !important;
-            filter: brightness(0) invert(1);
         }
 
         .app-header .menu-toggler .bar {

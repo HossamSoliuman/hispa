@@ -38,7 +38,7 @@
         <aside class="checkout-rail">
             <div class="checkout-brand-row">
                 <a href="{{ route('landing-page') }}" class="checkout-brand" aria-label="{{ __('site.meta.title') }}">
-                    <img src="{{ asset('site/assets/hisbah-huwat-logo-white.png') }}" alt="{{ __('site.meta.title') }}" />
+                    <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('site.meta.title') }}" />
                 </a>
                 <span class="checkout-quiet-label">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">

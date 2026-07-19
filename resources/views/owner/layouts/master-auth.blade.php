@@ -8,7 +8,7 @@
     <meta name="{{ __('owner.generated.meta_desc_hasbah') }}" />
     <meta name="{{ __('owner.generated.meta_author') }}" />
     <meta name="{{ __('owner.generated.meta_keywords') }}" />
-    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
 
     <!-- ================== BEGIN core-css ================== -->
     <link href="{{asset('dashboard/assets/css/vendor.min.css')}}" rel="stylesheet">

@@ -11,7 +11,7 @@
             <div class="owner-login-showcase-grid" aria-hidden="true"></div>
 
             <a href="{{ route('landing-page') }}" class="owner-login-brand">
-                <img src="{{ asset('site/assets/hisbah-huwat-logo-white.png') }}" alt="{{ __('site.meta.title') }}" />
+                <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('site.meta.title') }}" />
             </a>
 
             <div class="owner-login-showcase-copy">
@@ -44,7 +44,7 @@
         <section class="owner-login-form-panel">
             <div class="owner-login-form-topbar">
                 <a href="{{ route('landing-page') }}" class="owner-login-mobile-brand">
-                    <img src="{{ asset('site/assets/hisbah-huwat-logo.png') }}" alt="{{ __('site.meta.title') }}" />
+                    <img src="{{ $platformLogoUrl }}" alt="{{ __('site.meta.title') }}" />
                 </a>
                 <button
                     type="button"

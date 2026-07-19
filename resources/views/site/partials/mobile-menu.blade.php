@@ -4,8 +4,8 @@
 <aside id="mobileMenuSheet" class="marine-grid fixed inset-y-0 end-0 z-[70] flex w-[88%] max-w-sm {{ app()->getLocale() === 'ar' ? '-translate-x-full' : 'translate-x-full' }} flex-col bg-shell shadow-2xl transition-transform duration-300 lg:hidden" role="dialog" aria-modal="true" aria-label="{{ __('site.nav.menu') }}">
     <div class="flex h-[4.5rem] items-center justify-between border-b border-ink/10 px-5">
         <a href="{{ route('landing-page') }}" class="inline-flex items-center">
-            <img src="{{ asset('site/assets/hisbah-huwat-logo.png') }}" alt="{{ __('site.meta.title') }}" class="theme-logo-light h-auto w-[5.7rem] object-contain" />
-            <img src="{{ asset('site/assets/hisbah-huwat-logo-white.png') }}" alt="" class="theme-logo-dark h-auto w-[5.7rem] object-contain" aria-hidden="true" />
+            <img src="{{ $platformLogoUrl }}" alt="{{ __('site.meta.title') }}" class="theme-logo-light h-auto w-[5.7rem] object-contain" />
+            <img src="{{ $platformLogoOnDarkUrl }}" alt="" class="theme-logo-dark h-auto w-[5.7rem] object-contain" aria-hidden="true" />
         </a>
         <button id="closeMenuBtn" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-white text-ink" aria-label="{{ __('site.nav.close_menu') }}">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>

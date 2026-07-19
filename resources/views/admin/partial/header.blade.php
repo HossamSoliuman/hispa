@@ -30,13 +30,7 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
     <!-- BEGIN brand -->
     <div class="brand">
         <a href="{{ route('admin.dashboard') }}" class="brand-logo d-flex align-items-center">
-            @php
-                $locale = app()->getLocale();
-                $logoPath = filled($settings['logo'] ?? null)
-                    ? asset($settings['logo'])
-                    : ($locale === 'ar' ? asset('logo/arabic/main.png') : asset('logo/english/main.png'));
-            @endphp
-            <img src="{{ $logoPath }}" alt="{{ __('admin.title') }}"
+            <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('admin.title') }}"
                 style="height: 120px; width: auto; object-fit: contain;">
         </a>
     </div>
