@@ -9,6 +9,8 @@
     </script>
     <title>@yield('title', __('site.meta.title'))</title>
     <meta name="description" content="@yield('description', __('site.meta.description'))" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />

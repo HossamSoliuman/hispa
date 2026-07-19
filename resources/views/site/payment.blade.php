@@ -1,6 +1,7 @@
 @extends('site.layouts.app')
 
 @section('title', __('site.payment.title') . ' - ' . __('site.meta.title'))
+@section('robots', 'noindex, nofollow')
 
 @php
     $package = $invoice?->subscription?->package;

@@ -2,6 +2,7 @@
 
 @section('title', __('site.order_review.title') . ' - ' . __('site.meta.title'))
 @section('description', __('site.order_review.description'))
+@section('robots', 'noindex, nofollow')
 
 @php
     $selectedPackage = $subscriptionPackages->firstWhere('id', (int) request('package_id')) ?? $subscriptionPackages->first();

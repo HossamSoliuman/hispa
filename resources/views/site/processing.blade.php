@@ -1,6 +1,7 @@
 @extends('site.layouts.app')
 
 @section('title', __('site.processing.title') . ' - ' . __('site.meta.title'))
+@section('robots', 'noindex, nofollow')
 
 @section('content')
 @php

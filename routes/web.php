@@ -6,9 +6,12 @@ use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\LandingPageController;
 use App\Http\Controllers\Frontend\PageController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::group([
     'prefix' => LaravelLocalization::setLocale(),
