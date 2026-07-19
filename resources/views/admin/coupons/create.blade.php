@@ -144,7 +144,6 @@
             var previewAmountEl = document.getElementById('preview_amount');
             var previewDiscountEl = document.getElementById('preview_discount');
             var previewFinalEl = document.getElementById('preview_final');
-            var sar = @json(__('admin.units.sar'));
 
             function updateHint() {
                 var hint = document.getElementById('value_hint');

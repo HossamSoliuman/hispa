@@ -95,7 +95,7 @@ class DalalDataTable extends DataTables
 
     public function showData($id)
     {
-        $query = Sale::with(['trip', 'details'])
+        $query = Sale::with(['trip', 'details.unit'])
             ->where('seller_id', $id);
 
         return DataTables::of($query)
@@ -119,16 +119,14 @@ class DalalDataTable extends DataTables
                 return '<a href="#" class="show-sale-details" data-sale-id="'.$row->id.'">'.$row->details->count().'</a>';
             })
             ->addColumn('total_weight', function ($row) {
-                $weight = $row->details->sum('weight');
-
-                return '<span class="text-primary fw-bold">'.number_format($weight, 2).' '.__('admin.units.kg').'</span>';
+                return '<span class="text-primary fw-bold">'.formatWeightByUnit($row->details).'</span>';
             })
             ->addColumn('price_per_kilo', function ($row) {
                 $weight = $row->details->sum('weight');
                 if ($weight > 0) {
                     $avgPrice = $row->total_price / $weight;
 
-                    return number_format($avgPrice, 2).' '.view('components.riyal-icon')->render().'/ '.__('admin.units.each');
+                    return number_format($avgPrice, 2).' '.view('components.riyal-icon')->render().'/ '.formatWeightByUnit($row->details);
                 }
 
                 return '---';

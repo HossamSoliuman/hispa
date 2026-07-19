@@ -45,7 +45,7 @@
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.stock.total_weight'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="totalWeight">0</span> ' . __('admin.units.kg')),
+            'value' => new \Illuminate\Support\HtmlString('<span id="totalWeight">0</span>'),
             'icon' => 'bi bi-box-seam',
             'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
             'colClass' => 'col-md-6 col-lg-3',

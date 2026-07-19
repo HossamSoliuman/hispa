@@ -20,7 +20,7 @@ class DalalStockReportDataTable extends DataTables
                     'dalal.name as dalal_name',
                     'dsd.fish_name',
                     DB::raw('SUM(dsd.weight) as total_weight'),
-                    DB::raw('"كغم" as unit'),
+                    DB::raw("'".__('admin.units.each')."' as unit"),
                     'ds.owner_id',
                     'ds.dalal_id',
                     DB::raw('DATE(ds.created_at) as created_date'),  // هنا نحول التاريخ لليوم فقط بدون وقت

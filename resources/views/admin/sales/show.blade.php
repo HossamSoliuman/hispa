@@ -48,7 +48,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ optional($detail->fish)->name ?? '---' }}</td>
-                            <td>{{ number_format($detail->weight ?? 0, 2) }} {{ __('admin.stocks_admin.unit_kg') }}</td>
+                            <td>{{ number_format($detail->weight ?? 0, 2) }} {{ $detail->unit?->name ?: __('admin.units.kg') }}</td>
                             <td>{{ number_format($detail->total_price ?? 0, 2) }} <x-riyal-icon size="sm" /></td>
                         </tr>
                     @endforeach
@@ -56,7 +56,7 @@
                 <tfoot>
                     <tr>
                         <th colspan="2">{{ __('admin.catch.total') ?? __('admin.owner_stock_fish_quantity.total_price') }}</th>
-                        <th>{{ number_format($sale->details->sum('weight'), 2) }} {{ __('admin.stocks_admin.unit_kg') }}</th>
+                        <th>{{ formatWeightByUnit($sale->details) }}</th>
                         <th>{{ number_format($sale->details->sum('total_price'), 2) }} <x-riyal-icon size="sm" /></th>
                     </tr>
                 </tfoot>

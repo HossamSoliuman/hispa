@@ -50,7 +50,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center text-white p-3">
                     <div>
                         <h6 class="mb-1 opacity-90">{{ __('admin.sales.total_amount') ?? __('admin.owner_stock_fish_quantity.total_value') }}</h6>
-                        <h4 class="mb-0" id="sales_total_amount">0</h4>
+                        <h4 class="mb-0"><span id="sales_total_amount">0</span> <x-riyal-icon size="sm" /></h4>
                     </div>
                     <i class="bi bi-currency-exchange fs-3 opacity-75"></i>
                 </div>
@@ -130,7 +130,7 @@
                     },
                     dataSrc: function (json) {
                         $('#sales_total_items').text(json.total_items ?? 0);
-                        $('#sales_total_weight').text((parseFloat(json.total_weight) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' {{ __("admin.stocks_admin.unit_kg") }}');
+                        $('#sales_total_weight').text(json.total_weight ?? '0');
                         $('#sales_total_amount').text((parseFloat(json.total_amount) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }));
                         return json.data ?? [];
                     }
@@ -141,7 +141,7 @@
                     { data: 'seller' },
                     { data: 'customer' },
                     { data: 'payment_method' },
-                    { data: 'total_weight', render: function (d) { return (parseFloat(d) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' {{ __("admin.stocks_admin.unit_kg") }}'; } },
+                    { data: 'total_weight' },
                     { data: 'total_price' },
                     { data: 'net_owner_amount' },
                     { data: 'date' },

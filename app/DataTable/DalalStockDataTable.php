@@ -21,7 +21,7 @@ class DalalStockDataTable extends DataTables
                     'dalal.name as dalal_name',
                     'dsd.fish_name',
                     DB::raw('SUM(dsd.weight) as total_weight'),
-                    DB::raw("'".__('admin.units.kg')."' as unit"),
+                    DB::raw("'".__('admin.units.each')."' as unit"),
                     'ds.owner_id',
                     'ds.dalal_id'
                 )
@@ -63,7 +63,7 @@ class DalalStockDataTable extends DataTables
                 'dsd.fish_name',
                 'dsd.weight',
                 'dsd.created_at',
-                DB::raw("'".__('admin.units.kg')."' as unit"),
+                DB::raw("'".__('admin.units.each')."' as unit"),
             )
             ->get();
 

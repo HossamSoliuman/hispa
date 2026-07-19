@@ -129,8 +129,7 @@
                     data: function () { return { from: from, to: to, owner_id: ownerId }; },
                     dataSrc: function (json) {
                         $('#owner_stock_total_owners').text(json.total_owners ?? 0);
-                        const qty = parseFloat(json.total_quantity) || 0;
-                        $('#owner_stock_total_quantity').text(qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                        $('#owner_stock_total_quantity').text(json.total_quantity ?? '0');
                         const val = parseFloat(json.total_value) || 0;
                         $('#owner_stock_total_value').text(val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                         return json.data ?? [];

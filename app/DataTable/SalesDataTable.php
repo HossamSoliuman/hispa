@@ -16,7 +16,7 @@ class SalesDataTable extends DataTables
 
         if ($request->ajax()) {
 
-            $query = Sale::with(['details', 'paymentMethod']);
+            $query = Sale::with(['details.unit', 'paymentMethod']);
 
             if ($request->type == 'owner') {
                 $query->where('seller_type', 'owner');
@@ -69,13 +69,12 @@ class SalesDataTable extends DataTables
             $totalItems = $countQuery->count();
 
             // لجلب المجموعات بشكل منفصل
-            $totalWeight = $query->get()->flatMap->details->sum('weight');
-
             // حساب مجموع السعر
             $totalAmount = $query->sum('total_price');
 
             // جلب البيانات للـ DataTables
             $data = $query->get();
+            $totalWeight = formatWeightByUnit($data->flatMap->details);
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -108,10 +107,7 @@ class SalesDataTable extends DataTables
 
                 ->addColumn('payment_method', fn ($row) => optional($row->paymentMethod)->name)
 
-                ->addColumn('total_weight', function ($row) {
-                    // return numeric weight only (in kg). Let client format units (kg/ton) for display.
-                    return $row->details->sum('weight');
-                })
+                ->addColumn('total_weight', fn ($row) => formatWeightByUnit($row->details))
 
                 ->addColumn('commission_rate', fn ($row) => $row->commission_rate.'%')
                 ->addColumn('labor_rate', fn ($row) => $row->labor_rate.'%')
@@ -137,7 +133,7 @@ class SalesDataTable extends DataTables
                 })
                 ->with([
                     'total_items' => $totalItems,
-                    'total_weight' => round($totalWeight, 2),
+                    'total_weight' => $totalWeight,
                     'total_amount' => round($totalAmount, 2),
                 ])
                 ->rawColumns(['status', 'seller', 'total_price', 'net_owner_amount', 'remaining_total', 'details'])

@@ -113,8 +113,8 @@
                         <tr>
                             <td><a href="{{ route('admin.invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
                             <td>{{ $inv->user?->name ?? '—' }}</td>
-                            <td>{{ number_format($inv->amount, 2) }}</td>
-                            <td>{{ number_format($inv->total_amount, 2) }}</td>
+                            <td>{{ number_format($inv->amount, 2) }} <x-riyal-icon /></td>
+                            <td>{{ number_format($inv->total_amount, 2) }} <x-riyal-icon /></td>
                             <td><span class="badge bg-{{ $inv->payment_status === 'paid' ? 'success' : 'warning' }}">{{ $inv->payment_status }}</span></td>
                             <td>{{ $inv->paid_at ? $inv->paid_at->format('Y-m-d') : '—' }}</td>
                         </tr>

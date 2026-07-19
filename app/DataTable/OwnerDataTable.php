@@ -321,7 +321,7 @@ class OwnerDataTable extends DataTables
     public function showData($id)
     {
 
-        $query = Sale::with(['trip', 'details'])
+        $query = Sale::with(['trip', 'details.unit'])
             ->where('seller_id', $id);
 
         return DataTables::of($query)
@@ -346,7 +346,7 @@ class OwnerDataTable extends DataTables
             })
             ->rawColumns(['items_count'])
             ->addColumn('total_weight', function ($row) {
-                return '<span class="text-primary fw-bold">'.number_format($row->details->sum('weight'), 2).' كغم</span>';
+                return '<span class="text-primary fw-bold">'.formatWeightByUnit($row->details).'</span>';
             })
             ->addColumn('total_price', function ($row) {
                 return '<span class="text-success fw-bold">'.number_format($row->total_price, 2).' '.view('components.riyal-icon')->render().'</span>';

@@ -2,7 +2,7 @@
 
 namespace App\DataTable\Owner;
 
-use App\Models\FishStock;
+use App\Models\FishQuantityStock;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
@@ -11,26 +11,26 @@ class StockDataTable extends DataTables
     public function getData(Request $request)
     {
         if ($request->ajax()) {
-
-            // تجميع حسب fish_id
-            $query = FishStock::selectRaw('fish_id, SUM(weight) as total_weight')
-                ->groupBy('fish_id')
-                ->with('fish') // لتحميل اسم السمك
-                ->orderByDesc('total_weight'); // ترتيب حسب الوزن إن أحببت
+            $query = FishQuantityStock::query()
+                ->selectRaw('fish_id, unit_id, SUM(quantity) as total_weight')
+                ->groupBy('fish_id', 'unit_id')
+                ->with(['fish', 'unit'])
+                ->orderByDesc('total_weight');
 
             $data = $query->get();
-
-            // إحصائيات
-            $totalItems = $data->count(); // عدد الأسماك المجمعة
-            $totalWeight = $data->sum('total_weight'); // مجموع كل الأوزان المجمعة
+            $totalItems = $data->pluck('fish_id')->unique()->count();
+            $totalWeight = formatWeightByUnit($data->map(fn ($row) => (object) [
+                'weight' => $row->total_weight,
+                'unit' => $row->unit,
+            ]));
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('name', fn ($row) => $row->fish->name ?? '---')
-                ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' كغم')
-                ->addColumn('unit', fn ($row) => 'كغم')
+                ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).' '.($row->unit?->name ?: __('admin.units.kg')))
+                ->addColumn('unit', fn ($row) => $row->unit?->name ?: __('admin.units.kg'))
                 ->addColumn('details', function ($row) {
-                    return '<a href="'.route('admin.stocks.show', $row->fish_id).'" class="btn btn-sm btn-info">عرض</a>';
+                    return '<a href="'.route('admin.stocks.show', $row->fish_id).'" class="btn btn-sm btn-info">'.__('admin.actions.show').'</a>';
                 })
                 ->with([
                     'total_items' => $totalItems,
@@ -39,38 +39,40 @@ class StockDataTable extends DataTables
                 ->rawColumns(['total_weight', 'unit', 'details'])
                 ->make(true);
         }
+
+        return null;
     }
 
-    public function getShowData(Request $request, $fish_id)
+    public function getShowData(Request $request, int $fishId)
     {
         if ($request->ajax()) {
-            // جلب كل الإدخالات المرتبطة بالسمكة المحددة
-            $query = FishStock::where('fish_id', $fish_id)
-                ->with(['fish', 'addedBy', 'correctedBy']) // تأكد من العلاقات موجودة
-                ->orderByDesc('created_at');
+            $data = FishQuantityStock::query()
+                ->where('fish_id', $fishId)
+                ->with(['fish', 'unit', 'trip.boat.captain'])
+                ->orderByDesc('created_at')
+                ->get();
 
-            $data = $query->get();
-
-            // الإحصائيات
-            $totalItems = $data->count();
-            $totalWeight = $data->sum('weight');
+            $totalWeight = formatWeightByUnit($data->map(fn ($row) => (object) [
+                'weight' => $row->quantity,
+                'unit' => $row->unit,
+            ]));
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('name', fn ($row) => $row->fish->name ?? '---')
-                ->addColumn('captain_name', fn ($row) => $row->addedBy->name ?? '---')
-                ->addColumn('weight_captain', fn ($row) => $row->weight_captain ? number_format($row->weight_captain, 2).' كغم' : '---')
-                ->addColumn('counter_name', fn ($row) => $row->correctedBy->name ?? '---')
-                ->addColumn('weight_counter', fn ($row) => $row->weight_counter ? number_format($row->weight_counter, 2).' كغم' : '---')
-                ->addColumn('weight', fn ($row) => number_format($row->weight, 2).' كغم')
-                ->addColumn('unit', fn ($row) => $row->unit ?? 'كغم')
+                ->addColumn('captain_name', fn ($row) => $row->trip?->boat?->captain?->name ?? '---')
+                ->addColumn('weight_captain', fn ($row) => number_format($row->quantity, 2).' '.($row->unit?->name ?: __('admin.units.kg')))
+                ->addColumn('counter_name', fn () => '---')
+                ->addColumn('weight_counter', fn () => '---')
+                ->addColumn('weight', fn ($row) => number_format($row->quantity, 2).' '.($row->unit?->name ?: __('admin.units.kg')))
+                ->addColumn('unit', fn ($row) => $row->unit?->name ?: __('admin.units.kg'))
                 ->with([
-                    'total_items' => $totalItems,
+                    'total_items' => $data->count(),
                     'total_weight' => $totalWeight,
                 ])
-                ->rawColumns(['details'])
                 ->make(true);
         }
 
+        return null;
     }
 }

@@ -77,7 +77,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center text-white p-3">
                     <div>
                         <h6 class="mb-1 opacity-90">{{ __('admin.owner_stock_fish_quantity.total_quantity') }}</h6>
-                        <h4 class="mb-0" id="detail_total_quantity">0</h4>
+                        <h4 class="mb-0"><span id="detail_total_quantity">0</span></h4>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center text-white p-3">
                     <div>
                         <h6 class="mb-1 opacity-90">{{ __('admin.owner_stock_fish_quantity.total_value') }}</h6>
-                        <h4 class="mb-0" id="detail_total_value">0</h4>
+                        <h4 class="mb-0"><span id="detail_total_value">0</span> <x-riyal-icon size="sm" /></h4>
                     </div>
                 </div>
             </div>
@@ -150,8 +150,7 @@
                         return { from: from, to: to, boat_id: boatId, trip_id: tripId, fish_id: fishId };
                     },
                     dataSrc: function (json) {
-                        const qty = parseFloat(json.total_quantity) || 0;
-                        $('#detail_total_quantity').text(qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                        $('#detail_total_quantity').text(json.total_quantity ?? '0');
                         const val = parseFloat(json.total_value) || 0;
                         $('#detail_total_value').text(val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                         return json.data ?? [];

@@ -109,8 +109,8 @@
                                 @forelse($subscription->invoices ?? [] as $invoice)
                                     <tr>
                                         <td>{{ $invoice->invoice_number }}</td>
-                                        <td>{{ number_format($invoice->amount, 2) }}</td>
-                                        <td>{{ number_format($invoice->total_amount, 2) }}</td>
+                                        <td>{{ number_format($invoice->amount, 2) }} <x-riyal-icon /></td>
+                                        <td>{{ number_format($invoice->total_amount, 2) }} <x-riyal-icon /></td>
                                         <td>
                                             @if($invoice->payment_status == 'paid')
                                                 <span class="badge bg-success">{{ __('admin.invoices.paid') }}</span>

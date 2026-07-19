@@ -290,7 +290,7 @@
                                             <td>{{ $sale->number ?? '—' }}</td>
                                             <td>{{ $sale->trip->name ?? $sale->trip->number ?? '—' }}</td>
                                             <td>{{ $sale->customer_name ?? $sale->customer->name ?? '—' }}</td>
-                                            <td>{{ number_format($sale->total_price ?? 0, 2) }}</td>
+                                            <td>{{ number_format($sale->total_price ?? 0, 2) }} <x-riyal-icon /></td>
                                             <td>{{ $sale->sale_datetime?->format('Y-m-d H:i') ?? $sale->created_at?->format('Y-m-d H:i') ?? '—' }}</td>
                                             <td>
                                                 <a href="{{ route('admin.sales.show', $sale->id) }}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>

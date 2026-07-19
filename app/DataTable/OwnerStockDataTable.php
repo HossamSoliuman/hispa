@@ -3,6 +3,7 @@
 namespace App\DataTable;
 
 use App\Models\FishQuantityStock;
+use App\Models\Unit;
 use App\Models\User;
 use App\Services\Admin\OwnerStockService;
 use Illuminate\Http\JsonResponse;
@@ -31,6 +32,7 @@ class OwnerStockDataTable extends DataTables
         $query = FishQuantityStock::query()
             ->select([
                 DB::raw('COALESCE(trips.owner_id, boats.owner_id) as owner_id'),
+                'fish_quantity_stocks.unit_id',
                 DB::raw('SUM(fish_quantity_stocks.quantity) as total_quantity'),
                 DB::raw('SUM(fish_quantity_stocks.quantity * fish_quantity_stocks.price_per_kg) as total_value'),
             ])
@@ -41,7 +43,7 @@ class OwnerStockDataTable extends DataTables
             ->where(function ($q) {
                 $q->whereNotNull('trips.owner_id')->orWhereNotNull('boats.owner_id');
             })
-            ->groupBy(DB::raw('COALESCE(trips.owner_id, boats.owner_id)'));
+            ->groupBy(DB::raw('COALESCE(trips.owner_id, boats.owner_id)'), 'fish_quantity_stocks.unit_id');
 
         if ($request->filled('owner_id')) {
             $query->having('owner_id', '=', $request->input('owner_id'));
@@ -56,7 +58,21 @@ class OwnerStockDataTable extends DataTables
             $query->where('fish_quantity_stocks.fish_id', $request->input('fish_id'));
         }
 
-        $rows = $query->get();
+        $stockRows = $query->get();
+        $units = Unit::query()
+            ->whereIn('id', $stockRows->pluck('unit_id')->filter()->unique())
+            ->get()
+            ->keyBy('id');
+        $rows = $stockRows->groupBy('owner_id')->map(function ($ownerRows) use ($units) {
+            return (object) [
+                'owner_id' => $ownerRows->first()->owner_id,
+                'total_quantity' => formatWeightByUnit($ownerRows->map(fn ($row) => (object) [
+                    'weight' => $row->total_quantity,
+                    'unit' => $units->get($row->unit_id),
+                ])),
+                'total_value' => $ownerRows->sum('total_value'),
+            ];
+        })->values();
         $ownerIds = $rows->pluck('owner_id')->filter()->unique()->values();
         $owners = User::query()
             ->ownerRole()
@@ -64,7 +80,10 @@ class OwnerStockDataTable extends DataTables
             ->get()
             ->keyBy('id');
 
-        $totalQuantity = $rows->sum('total_quantity');
+        $totalQuantity = formatWeightByUnit($stockRows->map(fn ($row) => (object) [
+            'weight' => $row->total_quantity,
+            'unit' => $units->get($row->unit_id),
+        ]));
         $totalValue = $rows->sum('total_value');
 
         return DataTables::of($rows)
@@ -76,11 +95,9 @@ class OwnerStockDataTable extends DataTables
 
                 return '<a href="'.e($url).'" class="text-decoration-none fw-medium">'.e($name).'</a>';
             })
-            ->addColumn('total_quantity', function ($row) {
-                return number_format((float) $row->total_quantity, 2);
-            })
+            ->addColumn('total_quantity', fn ($row) => $row->total_quantity)
             ->addColumn('total_value', function ($row) {
-                return number_format((float) $row->total_value, 2);
+                return number_format((float) $row->total_value, 2).' '.view('components.riyal-icon', ['size' => 'sm'])->render();
             })
             ->addColumn('details', function ($row) {
                 $url = route('admin.owner-stock.show', $row->owner_id);
@@ -93,7 +110,7 @@ class OwnerStockDataTable extends DataTables
                 'total_quantity' => $totalQuantity,
                 'total_value' => $totalValue,
             ])
-            ->rawColumns(['owner_name', 'details'])
+            ->rawColumns(['owner_name', 'total_value', 'details'])
             ->make(true);
     }
 
@@ -111,10 +128,11 @@ class OwnerStockDataTable extends DataTables
 
         $data = $query->with(['fish', 'unit'])->orderByDesc('created_at')->get();
 
-        $totalQuantity = (float) $data->sum('quantity');
+        $totalQuantity = formatWeightByUnit($data->map(fn ($row) => (object) [
+            'weight' => $row->quantity,
+            'unit' => $row->unit,
+        ]));
         $totalValue = (float) $data->sum(fn ($row) => (float) $row->quantity * (float) $row->price_per_kg);
-
-        $unit = __('admin.stocks_admin.unit_kg');
 
         return DataTables::of($data)
             ->addIndexColumn()
@@ -128,19 +146,19 @@ class OwnerStockDataTable extends DataTables
             })
             ->addColumn('stock_date', fn ($row) => $row->created_at ? $row->created_at->format('Y-m-d H:i') : '---')
             ->addColumn('fish_name', fn ($row) => $row->fish ? ($row->fish->name ?? '---') : '---')
-            ->addColumn('unit_name', fn ($row) => $row->unit_id ? $row->unit->name : $unit)
+            ->addColumn('unit_name', fn ($row) => $row->unit?->name ?: __('admin.units.kg'))
             ->addColumn('quantity', fn ($row) => number_format((float) $row->quantity, 2))
-            ->addColumn('price_per_kg', fn ($row) => number_format((float) $row->price_per_kg, 2))
+            ->addColumn('price_per_kg', fn ($row) => number_format((float) $row->price_per_kg, 2).' '.view('components.riyal-icon', ['size' => 'sm'])->render())
             ->addColumn('total_price', function ($row) {
                 $total = (float) $row->quantity * (float) $row->price_per_kg;
 
-                return number_format($total, 2);
+                return number_format($total, 2).' '.view('components.riyal-icon', ['size' => 'sm'])->render();
             })
             ->with([
                 'total_quantity' => $totalQuantity,
                 'total_value' => $totalValue,
-                'unit' => $unit,
             ])
+            ->rawColumns(['price_per_kg', 'total_price'])
             ->make(true);
     }
 }

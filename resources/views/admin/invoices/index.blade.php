@@ -114,7 +114,7 @@
                             <td>{{ number_format($invoice->amount, 2) }} <x-riyal-icon /></td>
                             <td>
                                 @if(($invoice->discount_amount ?? 0) > 0)
-                                    <span class="text-success">-{{ number_format($invoice->discount_amount, 2) }}</span>
+                                    <span class="text-success">-{{ number_format($invoice->discount_amount, 2) }} <x-riyal-icon /></span>
                                     @if($invoice->coupon)
                                         <br><code class="small">{{ $invoice->coupon->code }}</code>
                                     @endif

@@ -45,7 +45,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center text-white p-3">
                     <div>
                         <h6 class="mb-1 opacity-90">{{ __('admin.stocks_admin.stats.total_weight') }}</h6>
-                        <h4 class="mb-0" id="stock_total_weight"><span id="stock_total_weight_value">0</span> {{ __('admin.stocks_admin.unit_kg') }}</h4>
+                        <h4 class="mb-0" id="stock_total_weight"><span id="stock_total_weight_value">0</span></h4>
                     </div>
                     <i class="bi bi-speedometer2 fs-3 opacity-75"></i>
                 </div>
@@ -90,7 +90,6 @@
     <script>
         $(function () {
             const appLocale = '{{ app()->getLocale() }}';
-            const unitKg = @json(__('admin.stocks_admin.unit_kg'));
             const noData = @json(__('admin.stocks_admin.no_data'));
             const languageOptions = (appLocale === 'ar')
                 ? { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json" }
@@ -107,8 +106,7 @@
                     url: "{{ route('admin.getStockData') }}",
                     dataSrc: function (json) {
                         $('#stock_total_items').text(json.total_items ?? 0);
-                        const weight = parseFloat(json.total_weight) || 0;
-                        $('#stock_total_weight_value').text(weight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                        $('#stock_total_weight_value').text(json.total_weight ?? '0');
                         return json.data ?? [];
                     }
                 },

@@ -27,7 +27,7 @@
 
     <x-report-stats :items="[
         ['label' => __('owner.stock_report.total_fish_types'), 'value' => $totalFishCount],
-        ['label' => __('owner.stock_report.total_weight'), 'value' => number_format($totalWeight, 2) . ' ' . __('owner.stock_report.kg')],
+        ['label' => __('owner.stock_report.total_weight'), 'value' => $totalWeight],
     ]" />
 
     <x-report-table :headers="[
@@ -45,10 +45,10 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $stock->name }}</td>
-                <td>{{ number_format($stock->weight_captain ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
-                <td>{{ number_format($stock->weight_counter ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
-                <td>{{ number_format($stock->total_weight ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
-                <td>{{ number_format($stock->weight_difference ?? 0, 2) }} {{ __('owner.stock_report.kg') }}</td>
+                <td>{{ number_format($stock->weight_captain ?? 0, 2) }} {{ $stock->unit_display ?? __('owner.stock_report.kg') }}</td>
+                <td>{{ $stock->weight_counter === null ? '---' : number_format($stock->weight_counter, 2) . ' ' . ($stock->unit_display ?? __('owner.stock_report.kg')) }}</td>
+                <td>{{ number_format($stock->total_weight ?? 0, 2) }} {{ $stock->unit_display ?? __('owner.stock_report.kg') }}</td>
+                <td>{{ $stock->weight_difference === null ? '---' : number_format($stock->weight_difference, 2) . ' ' . ($stock->unit_display ?? __('owner.stock_report.kg')) }}</td>
                 <td>{{ $stock->added_by ?? '---' }}</td>
                 <td>{{ $stock->correct_by ?? '---' }}</td>
                 <td>{{ $stock->date ? (class_exists('\\Alkoumi\\LaravelHijriDate\\Hijri') ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $stock->date) : \Carbon\Carbon::parse($stock->date)->format('d/m/Y')) : '---' }}</td>
@@ -64,7 +64,7 @@
         />
         <x-report-summary-row
             :label="__('owner.stock_report.total_weight')"
-            :value="number_format($totalWeight, 2) . ' ' . __('owner.stock_report.kg')"
+            :value="$totalWeight"
             :highlight="true"
         />
     </x-report-summary>

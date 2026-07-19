@@ -55,7 +55,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold">{{ $stock->fish->name ?? $stock->fish_name ?? '—' }}</div>
-                                    <div class="text-muted small">{{ number_format($stock->quantity ?? 0, 2) }} {{ display_string(__('admin.units.kg'), 'كغم') }}</div>
+                                    <div class="text-muted small">{{ number_format($stock->quantity ?? 0, 2) }} {{ $stock->unit?->name ?: __('admin.units.kg') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                 </div>
                 <div class="card-footer text-muted small text-center">
                     {{ display_string(__('admin.trips.total_items'), 'عدد العناصر') }}: {{ $data->fishQuantityStocks->count() }} |
-                    {{ display_string(__('admin.trips.total_weight'), 'إجمالي الوزن') }}: {{ number_format($data->fishQuantityStocks->sum('quantity'), 2) }} {{ display_string(__('admin.units.kg'), 'كغم') }}
+                    {{ display_string(__('admin.trips.total_weight'), 'إجمالي الوزن') }}: {{ formatWeightByUnit($data->fishQuantityStocks->map(fn ($stock) => (object) ['weight' => $stock->quantity, 'unit' => $stock->unit])) }}
                 </div>
             </div>
 

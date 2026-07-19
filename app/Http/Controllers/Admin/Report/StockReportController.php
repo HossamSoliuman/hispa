@@ -6,7 +6,7 @@ use App\DataTable\Report\StockReportDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\CatchDetail;
 use App\Models\Fish;
-use App\Models\FishStock;
+use App\Models\FishQuantityStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -43,7 +43,7 @@ class StockReportController extends Controller
         $stocks = $this->stocksForPrint($request);
 
         $totalFishCount = $stocks->pluck('name')->unique()->count();
-        $totalWeight = $stocks->sum('total_weight');
+        $totalWeight = formatWeightByUnit($stocks);
 
         $settings = $this->getCompanySettings();
 
@@ -76,7 +76,7 @@ class StockReportController extends Controller
      */
     private function stocksForPrint(Request $request): Collection
     {
-        if (Schema::hasTable('fish_stocks')) {
+        if (Schema::hasTable('fish_quantity_stocks')) {
             return $this->stocksFromFishStocks($request);
         }
         if (Schema::hasTable('catch_details')) {
@@ -91,7 +91,7 @@ class StockReportController extends Controller
      */
     private function stocksFromFishStocks(Request $request): Collection
     {
-        $query = FishStock::with(['fish', 'trip', 'addedBy', 'correctedBy']);
+        $query = FishQuantityStock::with(['fish', 'unit', 'trip.boat.captain']);
 
         if ($request->filled('start_date')) {
             $query->whereDate('created_at', '>=', $request->start_date);
@@ -106,12 +106,14 @@ class StockReportController extends Controller
         return $query->orderBy('created_at', 'desc')->get()->map(function ($stock) {
             return (object) [
                 'name' => optional($stock->fish)->name ?? '---',
-                'weight_captain' => $stock->weight_captain,
-                'weight_counter' => $stock->weight_counter,
-                'total_weight' => $stock->weight,
-                'weight_difference' => abs(($stock->weight_captain ?? 0) - ($stock->weight_counter ?? 0)),
-                'added_by' => optional($stock->addedBy)->name ?? '---',
-                'correct_by' => optional($stock->correctedBy)->name ?? '---',
+                'weight_captain' => $stock->quantity,
+                'weight_counter' => null,
+                'total_weight' => $stock->quantity,
+                'weight_difference' => null,
+                'unit' => $stock->unit,
+                'unit_display' => $stock->unit?->name ?: __('admin.units.kg'),
+                'added_by' => optional($stock->trip?->boat?->captain)->name ?? '---',
+                'correct_by' => '---',
                 'date' => $stock->created_at,
             ];
         });
@@ -151,6 +153,8 @@ class StockReportController extends Controller
                 'weight_counter' => $row->total_weight,
                 'total_weight' => $row->total_weight,
                 'weight_difference' => 0,
+                'unit' => null,
+                'unit_display' => __('admin.units.kg'),
                 'added_by' => $row->added_by_name ?? '---',
                 'correct_by' => '---',
                 'date' => $row->created_at,

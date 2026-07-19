@@ -2,149 +2,53 @@
 
 namespace App\DataTable\Report;
 
-use App\Models\CatchDetail;
+use App\Models\FishQuantityStock;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\DataTables;
 
 class StockReportDataTable extends DataTables
 {
-    /**
-     * تقرير المخزون: يستخدم fish_stocks إن وُجد، وإلا catch_details (مع fish و catch_models).
-     */
     public function getData(Request $request)
     {
-        if (Schema::hasTable('fish_stocks')) {
-            return $this->getDataFromFishStocks($request);
-        }
-        if (Schema::hasTable('catch_details')) {
-            return $this->getDataFromCatchDetails($request);
+        if (! $request->ajax()) {
+            return null;
         }
 
-        return $this->emptyResponse();
-    }
+        $query = FishQuantityStock::query()
+            ->with(['fish', 'unit', 'trip.boat.captain'])
+            ->orderByDesc('created_at');
 
-    private function emptyResponse()
-    {
-        return DataTables::of(collect([]))
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+        if ($request->filled('fish_type')) {
+            $query->where('fish_id', $request->fish_type);
+        }
+
+        $data = $query->get();
+        $totalWeight = formatWeightByUnit($data->map(fn ($row) => (object) [
+            'weight' => $row->quantity,
+            'unit' => $row->unit,
+        ]));
+
+        return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('name', fn () => '---')
-            ->addColumn('total_weight', fn () => '0 '.__('admin.units.kg'))
-            ->addColumn('added_by', fn () => '---')
-            ->addColumn('weight_captain', fn () => '0 '.__('admin.units.kg'))
-            ->addColumn('weight_counter', fn () => '0 '.__('admin.units.kg'))
-            ->addColumn('weight_difference', fn () => '<span class="text-muted">0 '.__('admin.units.kg').'</span>')
+            ->addColumn('name', fn ($row) => $row->fish?->name ?? '---')
+            ->addColumn('total_weight', fn ($row) => number_format($row->quantity, 2).' '.($row->unit?->name ?: __('admin.units.kg')))
+            ->addColumn('added_by', fn ($row) => $row->trip?->boat?->captain?->name ?? '---')
+            ->addColumn('weight_captain', fn ($row) => number_format($row->quantity, 2).' '.($row->unit?->name ?: __('admin.units.kg')))
+            ->addColumn('weight_counter', fn () => '---')
+            ->addColumn('weight_difference', fn () => '<span class="text-muted">---</span>')
             ->addColumn('correct_by', fn () => '---')
-            ->addColumn('date', fn () => '---')
-            ->with(['total_fish_count' => 0, 'totalWeight' => '0 '.__('admin.units.kg')])
+            ->addColumn('date', fn ($row) => $row->created_at?->format('Y-m-d h:i A') ?? '---')
+            ->with([
+                'total_fish_count' => $data->pluck('fish_id')->unique()->count(),
+                'totalWeight' => $totalWeight,
+            ])
             ->rawColumns(['weight_difference'])
-            ->make(true);
-    }
-
-    /**
-     * جلب البيانات من catch_details + fish + catch_models (جداول موجودة).
-     */
-    private function getDataFromCatchDetails(Request $request)
-    {
-        $query = CatchDetail::query()
-            ->selectRaw(
-                'catch_details.fish_id,
-                fish.name_ar as fish_name_ar,
-                fish.name_en as fish_name_en,
-                MAX(addedUser.name) as added_by_name,
-                MAX(catch_details.created_at) as created_at,
-                SUM(catch_details.weight) as total_weight'
-            )
-            ->join('fish', 'catch_details.fish_id', '=', 'fish.id')
-            ->leftJoin('catch_models', 'catch_details.catch_id', '=', 'catch_models.id')
-            ->leftJoin('users as addedUser', 'catch_models.owner_id', '=', 'addedUser.id')
-            ->groupBy('catch_details.fish_id', 'fish.name_ar', 'fish.name_en')
-            ->orderByDesc('total_weight');
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('catch_details.created_at', [$request->start_date, $request->end_date]);
-        }
-        if ($request->filled('fish_type')) {
-            $query->where('catch_details.fish_id', $request->fish_type);
-        }
-
-        $data = $query->get();
-
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('name', fn ($row) => (app()->getLocale() === 'en' ? $row->fish_name_en : $row->fish_name_ar) ?: '---')
-            ->addColumn('total_weight', fn ($row) => number_format((float) $row->total_weight, 2).__('admin.units.kg'))
-            ->addColumn('added_by', fn ($row) => $row->added_by_name ?? '---')
-            ->addColumn('weight_captain', fn ($row) => number_format((float) $row->total_weight, 2).__('admin.units.kg'))
-            ->addColumn('weight_counter', fn ($row) => number_format((float) $row->total_weight, 2).__('admin.units.kg'))
-            ->addColumn('weight_difference', fn ($row) => '<span class="text-muted">0 '.__('admin.units.kg').'</span>')
-            ->addColumn('correct_by', fn ($row) => '---')
-            ->addColumn('date', function ($row) {
-                return $row->created_at
-                    ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d h:i A')
-                    : '---';
-            })
-            ->with([
-                'total_fish_count' => $data->count(),
-                'totalWeight' => number_format($data->sum('total_weight'), 2).__('admin.units.kg'),
-            ])
-            ->rawColumns(['added_by', 'correct_by', 'total_weight', 'weight_difference'])
-            ->make(true);
-    }
-
-    /**
-     * جلب البيانات من fish_stocks عند توفر الجدول.
-     */
-    private function getDataFromFishStocks(Request $request)
-    {
-        $query = \App\Models\FishStock::selectRaw(
-            'fish_stocks.fish_id, fish.name_ar as fish_name_ar, fish.name_en as fish_name_en,
-         addedUser.name as added_by_name,
-         correctUser.name as correct_by_name,
-         fish_stocks.created_at,
-        MAX(fish_stocks.weight_captain) AS weight_captain,
-    MAX(fish_stocks.weight_counter) AS weight_counter,
-         SUM(fish_stocks.weight) as total_weight'
-        )
-            ->join('fish', 'fish_stocks.fish_id', '=', 'fish.id')
-            ->leftJoin('users as addedUser', 'fish_stocks.added_by', '=', 'addedUser.id')
-            ->leftJoin('users as correctUser', 'fish_stocks.corrected_by', '=', 'correctUser.id')
-            ->groupBy('fish_stocks.fish_id', 'fish.name_ar', 'fish.name_en', 'addedUser.name', 'correctUser.name', 'fish_stocks.created_at')
-            ->orderByDesc('total_weight');
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('fish_stocks.created_at', [$request->start_date, $request->end_date]);
-        }
-        if ($request->filled('fish_type')) {
-            $query->where('fish_stocks.fish_id', $request->fish_type);
-        }
-
-        $data = $query->get();
-
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('name', fn ($row) => (app()->getLocale() === 'en' ? $row->fish_name_en : $row->fish_name_ar) ?: '---')
-            ->addColumn('total_weight', fn ($row) => number_format($row->total_weight, 2).__('admin.units.kg'))
-            ->addColumn('added_by', fn ($row) => $row->added_by_name ?? '---')
-            ->addColumn('weight_captain', fn ($row) => number_format($row->weight_captain ?? 0, 2).__('admin.units.kg'))
-            ->addColumn('weight_counter', fn ($row) => number_format($row->weight_counter ?? 0, 2).__('admin.units.kg'))
-            ->addColumn('weight_difference', function ($row) {
-                $diff = ($row->weight_counter ?? 0) - ($row->weight_captain ?? 0);
-                $color = $diff > 0 ? 'text-success' : ($diff < 0 ? 'text-danger' : 'text-muted');
-
-                return '<span class="'.$color.'">'.number_format($diff, 2).' '.__('admin.units.kg').'</span>';
-            })
-            ->addColumn('correct_by', fn ($row) => $row->correct_by_name ?? '---')
-            ->addColumn('date', function ($row) {
-                return $row->created_at
-                    ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d h:i A')
-                    : '---';
-            })
-            ->with([
-                'total_fish_count' => $data->count(),
-                'totalWeight' => number_format($data->sum('total_weight'), 2).__('admin.units.kg'),
-            ])
-            ->rawColumns(['added_by', 'correct_by', 'total_weight', 'weight_difference'])
             ->make(true);
     }
 }

@@ -51,7 +51,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center text-white p-3">
                     <div>
                         <h6 class="mb-1 opacity-90">{{ __('admin.stocks_admin.detail.total_weight') }}</h6>
-                        <h4 class="mb-0"><span id="detail_total_weight_value">0</span> {{ __('admin.stocks_admin.unit_kg') }}</h4>
+                        <h4 class="mb-0"><span id="detail_total_weight_value">0</span></h4>
                     </div>
                     <i class="bi bi-speedometer2 fs-3 opacity-75"></i>
                 </div>
@@ -108,8 +108,7 @@
                     url: "{{ route('admin.stocks.detail', ['id' => $id]) }}",
                     dataSrc: function (json) {
                         $('#detail_total_items').text(json.total_items ?? 0);
-                        const weight = parseFloat(json.total_weight) || 0;
-                        $('#detail_total_weight_value').text(weight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                        $('#detail_total_weight_value').text(json.total_weight ?? '0');
                         return json.data ?? [];
                     }
                 },

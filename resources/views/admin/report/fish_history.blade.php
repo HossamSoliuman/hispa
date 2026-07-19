@@ -52,7 +52,7 @@
         ])
         @include('owner.components.stat-card', [
             'title' => __('admin.report.fish_history.total_remaining_weight'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span> ' . __('admin.units.kg')),
+            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span>'),
             'icon' => 'bi bi-box-seam',
             'gradient' => 'linear-gradient(135deg, #198754, #157347)',
             'colClass' => 'col-md-6 col-lg-4',
