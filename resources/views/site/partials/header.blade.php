@@ -3,7 +3,7 @@
 <header class="sticky top-0 z-50 border-b border-white/15 bg-ocean/95 text-white shadow-[0_5px_18px_rgba(35,74,120,.14)] backdrop-blur-md">
     <div class="site-shell flex h-[4.5rem] items-center justify-between gap-5">
         <a href="{{ route('landing-page') }}" class="inline-flex shrink-0 items-center" aria-label="{{ __('site.meta.title') }}">
-            <img src="{{ asset('site/assets/hisbah-huwat-logo-white.png') }}" alt="{{ __('site.meta.title') }}" class="h-auto w-[5.7rem] object-contain" />
+            <img src="{{ $siteLogoUrl }}" alt="{{ __('site.meta.title') }}" class="h-auto w-[5.7rem] object-contain" />
         </a>
 
         <nav class="hidden items-center gap-6 lg:flex" aria-label="{{ __('site.nav.menu') }}">
