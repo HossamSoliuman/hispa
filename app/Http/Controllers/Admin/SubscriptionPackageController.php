@@ -67,7 +67,9 @@ class SubscriptionPackageController extends Controller
 
     public function create(): View
     {
-        return view('admin.subscription-packages.create');
+        $nextSortOrder = ((int) SubscriptionPackage::max('sort_order')) + 1;
+
+        return view('admin.subscription-packages.create', compact('nextSortOrder'));
     }
 
     public function store(StoreSubscriptionPackageRequest $request): RedirectResponse

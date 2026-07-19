@@ -23,6 +23,7 @@ class SubscriptionPackage extends Model
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
         'boats_count' => 'integer',
+        'sort_order' => 'integer',
         'price' => 'decimal:2',
         'original_price' => 'decimal:2',
     ];

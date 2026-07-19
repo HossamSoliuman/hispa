@@ -84,6 +84,7 @@
                             <th>{{ __('admin.subscription_packages.boats_count') }}</th>
                             <th>{{ __('admin.subscription_packages.price') }}</th>
                             <th>{{ __('admin.subscription_packages.duration_type') }}</th>
+                            <th>{{ __('admin.subscription_packages.sort_order') }}</th>
                             <th>{{ __('admin.subscription_packages.status') }}</th>
                             <th>{{ __('admin.subscription_packages.actions') }}</th>
                         </tr>
@@ -109,6 +110,9 @@
                                 <x-riyal-icon />
                             </td>
                             <td>{{ __('admin.subscription_packages.duration_types.' . $package->duration_type) }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ $package->sort_order }}</span>
+                            </td>
                             <td>
                                 @if($package->is_active)
                                     <span class="badge bg-success">{{ __('admin.status.active') }}</span>
@@ -136,7 +140,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center">{{ __('admin.subscription_packages.no_packages') }}</td>
+                            <td colspan="8" class="text-center">{{ __('admin.subscription_packages.no_packages') }}</td>
                         </tr>
                         @endforelse
                     </tbody>

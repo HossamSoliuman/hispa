@@ -61,7 +61,8 @@
                     </div>
                     <div class="col-md-6">
                         <label for="sort_order" class="form-label">{{ __('admin.subscription_packages.sort_order') }}</label>
-                        <input type="number" name="sort_order" id="sort_order" class="form-control" value="{{ old('sort_order', $subscriptionPackage->sort_order) }}" min="0">
+                        <input type="number" name="sort_order" id="sort_order" class="form-control" value="{{ old('sort_order', $subscriptionPackage->sort_order) }}" min="0" required>
+                        <small class="text-muted">{{ __('admin.subscription_packages.sort_order_hint') }}</small>
                     </div>
                 </div>
                 <div class="mb-3">

@@ -31,7 +31,7 @@ class UpdateSubscriptionPackageRequest extends FormRequest
             'duration_type' => ['required', Rule::in(['monthly', 'quarterly', 'yearly'])],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
-            'sort_order' => ['nullable', 'integer'],
+            'sort_order' => ['required', 'integer', 'min:0'],
         ];
     }
 
