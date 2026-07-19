@@ -1,7 +1,5 @@
 @php
-    $siteLogoUrl = filled($settings['logo'] ?? null)
-        ? asset($settings['logo'])
-        : asset('site/assets/hisbah-huwat-logo-white.png');
+    $siteLogoUrl = asset('site/assets/hisbah-huwat-logo-white.png');
     $siteFaviconUrl = asset('site/assets/hisbah-huwat-logo.png');
     $siteUrl = rtrim(config('seo.site_url'), '/');
     $supportedLocales = array_keys(config('laravellocalization.supportedLocales', []));
