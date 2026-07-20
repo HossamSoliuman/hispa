@@ -1177,6 +1177,7 @@ return [
             'fish_name' => 'Fish Name',
             'added_qty' => 'Added Quantity',
             'corrected_qty' => 'Corrected Quantity',
+            'difference' => 'Difference',
             'total_kg' => 'Total (Kg)',
             'diff_kg' => 'Difference (Kg)',
             'added_by' => 'Added By',

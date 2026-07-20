@@ -58,7 +58,7 @@
             'colClass' => 'col-md-6 col-lg-3',
         ])
         @include('owner.components.stat-card', [
-            'title' => __('admin.report.stock.diff_kg'),
+            'title' => __('admin.report.stock.difference'),
             'value' => new \Illuminate\Support\HtmlString('<span id="totalDiff">0</span>'),
             'icon' => 'bi bi-arrow-left-right',
             'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
@@ -104,8 +104,8 @@
                             <th>{{ __('admin.report.stock.fish_name') }}</th>
                             <th>{{ __('admin.report.stock.added_qty') }}</th>
                             <th>{{ __('admin.report.stock.corrected_qty') }}</th>
-                            <th>{{ __('admin.report.stock.total_kg') }}</th>
-                            <th>{{ __('admin.report.stock.diff_kg') }}</th>
+                            <th>{{ __('admin.report.stock.total_weight') }}</th>
+                            <th>{{ __('admin.report.stock.difference') }}</th>
                             <th>{{ __('admin.report.stock.added_by') }}</th>
                             <th>{{ __('admin.report.stock.corrected_by') }}</th>
                             <th>{{ __('admin.report.stock.created_at') }}</th>

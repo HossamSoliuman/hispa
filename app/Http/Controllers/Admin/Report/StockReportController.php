@@ -43,7 +43,10 @@ class StockReportController extends Controller
         $stocks = $this->stocksForPrint($request);
 
         $totalFishCount = $stocks->pluck('name')->unique()->count();
-        $totalWeight = formatWeightByUnit($stocks);
+        $totalWeight = formatWeightByUnit($stocks->map(fn (object $stock) => (object) [
+            'weight' => $stock->total_weight,
+            'unit' => $stock->unit,
+        ]));
 
         $settings = $this->getCompanySettings();
 
@@ -67,20 +70,19 @@ class StockReportController extends Controller
     }
 
     /**
-     * Build the printable stock rows. Mirrors StockReportDataTable: prefer the
-     * fish_stocks reconciliation table and fall back to a catch_details
-     * aggregation when it is absent, so the printed report matches the on-screen
-     * table and never queries a missing table.
+     * Build printable stock rows from landed catch details. These records retain
+     * the original weight and selected unit after their remaining stock has been
+     * reduced by sales.
      *
      * @return Collection<int, object>
      */
     private function stocksForPrint(Request $request): Collection
     {
-        if (Schema::hasTable('fish_quantity_stocks')) {
-            return $this->stocksFromFishStocks($request);
-        }
         if (Schema::hasTable('catch_details')) {
             return $this->stocksFromCatchDetails($request);
+        }
+        if (Schema::hasTable('fish_quantity_stocks')) {
+            return $this->stocksFromFishStocks($request);
         }
 
         return collect();
@@ -111,8 +113,8 @@ class StockReportController extends Controller
                 'total_weight' => $stock->quantity,
                 'weight_difference' => null,
                 'unit' => $stock->unit,
-                'unit_display' => $stock->unit?->name ?: __('admin.units.kg'),
-                'added_by' => optional($stock->trip?->boat?->captain)->name ?? '---',
+                'unit_display' => $stock->unit?->name,
+                'added_by' => $stock->trip?->captain?->name ?? $stock->trip?->boat?->captain?->name ?? '---',
                 'correct_by' => '---',
                 'date' => $stock->created_at,
             ];
@@ -125,22 +127,14 @@ class StockReportController extends Controller
     private function stocksFromCatchDetails(Request $request): Collection
     {
         $query = CatchDetail::query()
-            ->selectRaw(
-                'catch_details.fish_id,
-                fish.name_ar as fish_name_ar,
-                fish.name_en as fish_name_en,
-                MAX(addedUser.name) as added_by_name,
-                MAX(catch_details.created_at) as created_at,
-                SUM(catch_details.weight) as total_weight'
-            )
-            ->join('fish', 'catch_details.fish_id', '=', 'fish.id')
-            ->leftJoin('catch_models', 'catch_details.catch_id', '=', 'catch_models.id')
-            ->leftJoin('users as addedUser', 'catch_models.owner_id', '=', 'addedUser.id')
-            ->groupBy('catch_details.fish_id', 'fish.name_ar', 'fish.name_en')
-            ->orderByDesc('total_weight');
+            ->with(['fish', 'unit', 'catch.trip.captain', 'catch.trip.boat.captain'])
+            ->orderByDesc('created_at');
 
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('catch_details.created_at', [$request->start_date, $request->end_date]);
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
         }
         if ($request->filled('fish_type')) {
             $query->where('catch_details.fish_id', $request->fish_type);
@@ -148,14 +142,14 @@ class StockReportController extends Controller
 
         return $query->get()->map(function ($row) {
             return (object) [
-                'name' => (app()->getLocale() === 'en' ? $row->fish_name_en : $row->fish_name_ar) ?: '---',
-                'weight_captain' => $row->total_weight,
-                'weight_counter' => $row->total_weight,
-                'total_weight' => $row->total_weight,
-                'weight_difference' => 0,
-                'unit' => null,
-                'unit_display' => __('admin.units.kg'),
-                'added_by' => $row->added_by_name ?? '---',
+                'name' => $row->fish?->name ?? '---',
+                'weight_captain' => $row->weight,
+                'weight_counter' => null,
+                'total_weight' => $row->weight,
+                'weight_difference' => null,
+                'unit' => $row->unit,
+                'unit_display' => $row->unit?->name,
+                'added_by' => $row->catch?->trip?->captain?->name ?? $row->catch?->trip?->boat?->captain?->name ?? '---',
                 'correct_by' => '---',
                 'date' => $row->created_at,
             ];
