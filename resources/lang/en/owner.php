@@ -198,6 +198,14 @@ return [
         'dates' => [
             'registration_date' => 'Registration Date',
         ],
+        'pending_expenses' => [
+            'title' => 'Pending Expenses',
+            'count_badge' => ':count pending',
+            'total' => 'Total',
+            'view_all' => 'View all',
+            'empty' => 'No pending expenses',
+            'uncategorized' => 'Uncategorized',
+        ],
         'top_five' => [
             'heading' => 'Top 5 indicators this month',
             'month_profit' => 'Month Profit',

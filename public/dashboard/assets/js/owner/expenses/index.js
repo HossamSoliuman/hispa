@@ -13,6 +13,11 @@ function reloadExpensesTable() {
 }
 
 $(document).ready(function () {
+    const requestedStatus = new URLSearchParams(window.location.search).get('status');
+    if (['paid', 'pending'].includes(requestedStatus)) {
+        $('#filterStatus').val(requestedStatus);
+    }
+
     function initDataTable() {
         if ($.fn.DataTable.isDataTable('#expensesTable')) {
             $('#expensesTable').DataTable().destroy();

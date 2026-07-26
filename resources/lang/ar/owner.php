@@ -198,6 +198,14 @@ return [
         'dates' => [
             'registration_date' => 'تاريخ التسجيل',
         ],
+        'pending_expenses' => [
+            'title' => 'المصروفات المعلقة',
+            'count_badge' => ':count معلّق',
+            'total' => 'الإجمالي',
+            'view_all' => 'عرض الكل',
+            'empty' => 'لا توجد مصروفات معلقة',
+            'uncategorized' => 'غير مصنف',
+        ],
         'top_five' => [
             'heading' => 'أهم 5 مؤشرات لهذا الشهر',
             'month_profit' => 'أرباح الشهر',

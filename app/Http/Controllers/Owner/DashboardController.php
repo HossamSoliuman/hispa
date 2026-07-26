@@ -21,6 +21,7 @@ use App\Support\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
@@ -86,7 +87,7 @@ class DashboardController extends Controller
         return [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()];
     }
 
-    public function index()
+    public function index(): View
     {
         $ownerId = $this->ownerId();
         [$from, $to] = $this->currentMonthRange();
@@ -140,6 +141,22 @@ class DashboardController extends Controller
         $alerts = $this->alerts->for($ownerId);
         $alertSummary = $this->alerts->summarize($alerts);
 
+        $pendingExpensesQuery = Expense::query()
+            ->where('owner_id', $ownerId)
+            ->where('status', 'pending');
+
+        $pendingExpensesSummary = [
+            'count' => (clone $pendingExpensesQuery)->count(),
+            'amount' => (float) (clone $pendingExpensesQuery)->sum('final_price'),
+        ];
+
+        $pendingExpenses = $pendingExpensesQuery
+            ->with('category:id,name_ar,name_en')
+            ->oldest('date')
+            ->oldest('id')
+            ->limit(5)
+            ->get();
+
         return view('owner.dashboard.index', compact(
             'totalRevenue',
             'currentMonthRevenue',
@@ -158,7 +175,9 @@ class DashboardController extends Controller
             'currentMonthLabel',
             'currentMonthRangeLabel',
             'alerts',
-            'alertSummary'
+            'alertSummary',
+            'pendingExpenses',
+            'pendingExpensesSummary'
         ));
     }
 
