@@ -8,6 +8,7 @@ use App\Http\Requests\Owner\MaintenanceRequest;
 use App\Models\Boat;
 use App\Models\Category;
 use App\Models\Maintenance;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,10 +21,12 @@ class MaintenanceController extends Controller
         $this->datatable = new MaintenanceDataTable;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $boats = Boat::where('owner_id', auth()->id())->get();
-        $categories = Category::all();
+        $categories = Category::where('type', 'maintenance')
+            ->whereNotNull('parent_id')
+            ->get();
 
         return view('owner.maintenance.index', compact('boats', 'categories'));
     }

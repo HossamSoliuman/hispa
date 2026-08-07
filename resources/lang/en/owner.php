@@ -597,6 +597,8 @@ return [
             'port_label' => 'Port',
         ],
         'maintenance_details' => 'Maintenance Details',
+        'maintenance_subtitle' => 'Scheduled maintenance for all your boats',
+        'all_boats' => 'All Boats',
     ],
     'captain' => [
         'title' => 'Captains',

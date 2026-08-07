@@ -479,6 +479,8 @@ return [
         'cost_expected' => 'التكلفة المتوقعة',
         'description' => 'وصف الصيانة',
         'maintenance_details' => 'تفاصيل الصيانة',
+        'maintenance_subtitle' => 'الصيانة المجدولة لجميع القوارب',
+        'all_boats' => 'كل القوارب',
         'inspections_table' => 'جدول الفحوصات',
         'no_scheduled_inspections' => 'لا توجد فحوصات مجدولة حالياً.',
         'select_boat' => 'اختر القارب',
