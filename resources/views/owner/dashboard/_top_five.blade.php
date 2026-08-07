@@ -25,28 +25,22 @@
         </div>
     </div>
 
-    {{-- 2. Crew dues --}}
+    {{-- 2. Production by species --}}
     <div class="col-xl-3 col-md-6">
         <div class="card shadow-sm border-0 h-100">
-            <div class="card-body d-flex flex-column gap-2">
-                <div class="text-muted small">{{ __('owner.dashboard.top_five.crew_dues') }}</div>
-                <div class="h4 fw-bold mb-0 text-warning">
-                    {!! number_format($tf['crew_pool'], 0) !!}
-                    {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.85rem;height:auto;display:inline-block;'])->render() !!}
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold">{{ __('owner.dashboard.top_five.production_species') }}</span>
+                    <a href="{{ route('owner.reports.production-species') }}" class="small">{{ __('owner.dashboard.top_five.view_all') }}</a>
                 </div>
-                @if ($tf['is_closed'])
-                    <div class="small text-muted">
-                        {{ __('owner.dashboard.top_five.unpaid_dues') }}:
-                        <span class="fw-bold text-danger">
-                            {{ number_format($tf['unpaid_dues'], 0) }}
-                            {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.65rem;height:auto;display:inline-block;'])->render() !!}
-                        </span>
+                @forelse ($tf['species'] as $fish)
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-truncate" style="max-width:60%">{{ $fish['fish_name'] }}</span>
+                        <span class="text-muted">{{ number_format($fish['sold_weight'], 0) }} {{ $fish['unit_name'] ?: __('owner.dashboard.kg') }}</span>
                     </div>
-                    <div><span class="badge bg-success-subtle text-success">{{ __('owner.dashboard.top_five.closed_badge') }}</span></div>
-                @else
-                    <div><span class="badge bg-secondary-subtle text-secondary">{{ __('owner.dashboard.top_five.open_badge') }}</span></div>
-                @endif
-                <a href="{{ route('owner.month-closing.index') }}" class="small mt-auto">{{ __('owner.dashboard.top_five.go_to_closing') }} <i class="bi bi-arrow-left-short"></i></a>
+                @empty
+                    <p class="text-muted small mb-0">{{ __('owner.dashboard.top_five.no_data') }}</p>
+                @endforelse
             </div>
         </div>
     </div>
@@ -110,31 +104,37 @@
         </div>
     </div>
 
-    {{-- 5. Production by species --}}
+    {{-- 5. Crew dues --}}
     <div class="col-xl-3 col-md-6">
         <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small fw-bold">{{ __('owner.dashboard.top_five.production_species') }}</span>
-                    <a href="{{ route('owner.reports.production-species') }}" class="small">{{ __('owner.dashboard.top_five.view_all') }}</a>
+            <div class="card-body d-flex flex-column gap-2">
+                <div class="text-muted small">{{ __('owner.dashboard.top_five.crew_dues') }}</div>
+                <div class="h4 fw-bold mb-0 text-warning">
+                    {!! number_format($tf['crew_pool'], 0) !!}
+                    {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.85rem;height:auto;display:inline-block;'])->render() !!}
                 </div>
-                @forelse ($tf['species'] as $fish)
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span class="text-truncate" style="max-width:60%">{{ $fish['fish_name'] }}</span>
-                        <span class="text-muted">{{ number_format($fish['sold_weight'], 0) }} {{ $fish['unit_name'] ?: __('owner.dashboard.kg') }}</span>
+                @if ($tf['is_closed'])
+                    <div class="small text-muted">
+                        {{ __('owner.dashboard.top_five.unpaid_dues') }}:
+                        <span class="fw-bold text-danger">
+                            {{ number_format($tf['unpaid_dues'], 0) }}
+                            {!! view('components.riyal-icon', ['size' => 'sm', 'style' => 'width:.65rem;height:auto;display:inline-block;'])->render() !!}
+                        </span>
                     </div>
-                @empty
-                    <p class="text-muted small mb-0">{{ __('owner.dashboard.top_five.no_data') }}</p>
-                @endforelse
+                    <div><span class="badge bg-success-subtle text-success">{{ __('owner.dashboard.top_five.closed_badge') }}</span></div>
+                @else
+                    <div><span class="badge bg-secondary-subtle text-secondary">{{ __('owner.dashboard.top_five.open_badge') }}</span></div>
+                @endif
+                <a href="{{ route('owner.month-closing.index') }}" class="small mt-auto">{{ __('owner.dashboard.top_five.go_to_closing') }} <i class="bi bi-arrow-left-short"></i></a>
             </div>
         </div>
     </div>
 
-    {{-- 6. Months closing status (current year) --}}
-    <div class="col-xl-9 col-md-6">
-        <div class="card shadow-sm h-100 border-0">
+    {{-- 6. Months closing status (current year) — 4 per row, 3 rows --}}
+    <div class="col-xl-6 col-md-12">
+        <div class="card shadow-sm h-100 border-0 months-status-card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="small fw-bold">{{ __('owner.dashboard.top_five.months_status') }} {{ $tf['year'] }}</span>
                     <a href="{{ route('owner.month-closing.index') }}" class="small">{{ __('owner.dashboard.top_five.view_all') }}</a>
                 </div>
@@ -148,12 +148,12 @@
                         @php($status = $closed
                             ? __('owner.dashboard.top_five.closed')
                             : ($future ? __('owner.dashboard.top_five.upcoming') : __('owner.dashboard.top_five.not_closed')))
-                        <div class="col-6 col-sm-4 col-xl-2">
+                        <div class="col-6 col-sm-3">
                             <{{ $closed ? 'a' : 'div' }}
                                 @if ($closed) href="{{ route('owner.month-closing.show', $month['closing_id']) }}" @endif
-                                class="d-block text-center text-decoration-none border rounded py-2 px-1 h-100 {{ $cell }}">
-                                <div class="small fw-semibold text-truncate">{{ $month['name'] }}</div>
-                                <div class="d-flex align-items-center justify-content-center gap-1 mt-1" style="font-size:.7rem;">
+                                class="month-cell d-block text-center text-decoration-none border rounded py-1 px-1 h-100 {{ $cell }}">
+                                <div class="month-cell-name fw-semibold text-truncate">{{ $month['name'] }}</div>
+                                <div class="month-cell-status d-flex align-items-center justify-content-center gap-1">
                                     <i class="bi {{ $closed ? 'bi-lock-fill' : ($future ? 'bi-dash-circle' : 'bi-unlock') }}"></i>
                                     <span>{{ $status }}</span>
                                 </div>
@@ -164,4 +164,21 @@
             </div>
         </div>
     </div>
+
+    {{-- 7. Pending expenses (moved out of the alerts panel) --}}
+    <div class="col-xl-3 col-md-6">
+        @include('owner.dashboard._pending_expenses')
+    </div>
 </div>
+
+<style>
+    .months-status-card .month-cell-name {
+        font-size: .72rem;
+        line-height: 1.3;
+    }
+
+    .months-status-card .month-cell-status {
+        font-size: .62rem;
+        line-height: 1.3;
+    }
+</style>
