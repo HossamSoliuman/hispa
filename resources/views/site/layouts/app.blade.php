@@ -69,7 +69,8 @@
     <meta name="twitter:title" content="{{ $seoTitle }}" />
     <meta name="twitter:description" content="{{ $seoDescription }}" />
     <meta name="twitter:image" content="{{ $seoImageUrl }}" />
-    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
+    <link rel="icon" href="{{ $platformFaviconUrl }}" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ $platformAppleTouchIconUrl }}" />
     @if ($isIndexable)
         <script type="application/ld+json">{!! json_encode([
             '@'.'context' => 'https://schema.org',

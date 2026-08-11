@@ -34,10 +34,48 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        $this->app->scoped('platform.branding', function (): array {
+            return $this->resolveBranding(app('platform.settings'));
+        });
+
         // Bind the SupportServiceManager so it can be resolved via the container
         $this->app->singleton(\App\Services\SupportServiceManager::class, function ($app) {
             return new \App\Services\SupportServiceManager;
         });
+    }
+
+    /**
+     * Resolve every platform branding asset once per request.
+     *
+     * The three assets are managed separately because they sit on different
+     * surfaces: `logo` on light backgrounds, `logo_dark` on the blue/navy app
+     * headers, and `favicon` in the browser tab. The dark variant falls back to
+     * the main logo so a single upload still brands the whole application.
+     *
+     * @param  array<string, mixed>  $settings
+     * @return array{platformLogoUrl: string, platformLogoOnDarkUrl: string, platformFaviconUrl: string, platformAppleTouchIconUrl: string, platformLogoSeoPath: string}
+     */
+    protected function resolveBranding(array $settings): array
+    {
+        $path = fn (string $key): ?string => filled($settings[$key] ?? null)
+            ? (string) $settings[$key]
+            : null;
+
+        $url = fn (?string $value): ?string => $value === null
+            ? null
+            : (Str::startsWith($value, ['http://', 'https://', '//']) ? $value : asset($value));
+
+        $logo = $path('logo');
+        $logoDark = $path('logo_dark');
+        $favicon = $path('favicon');
+
+        return [
+            'platformLogoUrl' => $url($logo) ?? asset('site/assets/hisbah-huwat-logo.png'),
+            'platformLogoOnDarkUrl' => $url($logoDark) ?? $url($logo) ?? asset('site/assets/hisbah-huwat-logo-white.png'),
+            'platformFaviconUrl' => $url($favicon) ?? asset('site/assets/hisbah-huwat-favicon.png'),
+            'platformAppleTouchIconUrl' => $url($favicon) ?? asset('site/assets/hisbah-huwat-apple-touch-icon.png'),
+            'platformLogoSeoPath' => $logo ?? config('seo.default_image_path'),
+        ];
     }
 
     /**
@@ -56,38 +94,17 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         View::composer('*', function ($view): void {
-            if (! array_key_exists('settings', $view->getData())) {
+            $data = $view->getData();
+
+            if (! array_key_exists('settings', $data)) {
                 $view->with('settings', app('platform.settings'));
             }
-        });
 
-        View::composer([
-            'site.*',
-            'admin.auth.login',
-            'admin.layouts.master',
-            'admin.layouts.master-auth',
-            'admin.partial.header',
-            'owner.layouts.master',
-            'owner.layouts.master-auth',
-            'owner.partial.header',
-        ], function ($view): void {
-            $settings = app('platform.settings');
-            $uploadedLogoPath = filled($settings['logo'] ?? null)
-                ? (string) $settings['logo']
-                : null;
-            $uploadedLogoUrl = $uploadedLogoPath === null
-                ? null
-                : (
-                    Str::startsWith($uploadedLogoPath, ['http://', 'https://', '//'])
-                        ? $uploadedLogoPath
-                        : asset($uploadedLogoPath)
-                );
-
-            $view->with([
-                'platformLogoUrl' => $uploadedLogoUrl ?? asset('site/assets/hisbah-huwat-logo.png'),
-                'platformLogoOnDarkUrl' => $uploadedLogoUrl ?? asset('site/assets/hisbah-huwat-logo-white.png'),
-                'platformLogoSeoPath' => $uploadedLogoPath ?? config('seo.default_image_path'),
-            ]);
+            foreach (app('platform.branding') as $key => $value) {
+                if (! array_key_exists($key, $data)) {
+                    $view->with($key, $value);
+                }
+            }
         });
 
         // Blade directive to format currency consistently across views.

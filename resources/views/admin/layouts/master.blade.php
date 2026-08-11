@@ -10,7 +10,8 @@
     <meta name="description" content="{{ __('admin.generated.meta_desc_hasbah') }}" />
     <meta name="author" content="{{ __('admin.generated.meta_author') }}" />
     <meta name="keywords" content="{{ __('admin.generated.meta_keywords') }}" />
-    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
+    <link rel="icon" href="{{ $platformFaviconUrl }}" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ $platformAppleTouchIconUrl }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- ================== BEGIN core-css ================== -->
@@ -69,8 +70,10 @@
             background: #3675c2;
         }
 
+        /* The header bar is 3.25rem tall; keep the mark inside it with breathing room. */
         .app-header .brand .brand-logo img {
-            height: 65px !important;
+            height: 34px !important;
+            width: auto;
         }
 
         .app-header .menu-toggler .bar {

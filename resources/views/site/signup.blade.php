@@ -10,7 +10,7 @@
             <div class="pointer-events-none absolute -start-28 top-28 h-80 w-80 rounded-full bg-tide/20 blur-3xl"></div>
             <div class="relative z-10 flex items-center justify-between">
                 <a href="{{ route('landing-page') }}" class="inline-flex">
-                    <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('site.meta.title') }}" class="h-auto w-24 object-contain" />
+                    <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('site.meta.title') }}" class="h-11 w-auto object-contain" />
                 </a>
                 <a href="{{ route('landing-page') }}#pricing" class="text-xs font-bold text-white/62 underline decoration-white/20 underline-offset-4 hover:text-white">{{ __('marketing.checkout.change_plan') }}</a>
             </div>

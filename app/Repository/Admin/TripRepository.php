@@ -5,9 +5,8 @@ namespace App\Repository\Admin;
 use App\Enums\TripStatus;
 use App\Interfaces\CRUD;
 use App\Models\Port;
-use App\Models\Region;
 use App\Models\Trip;
-use App\Models\User;
+use App\Service\Owner\TripFinancialsService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -42,23 +41,28 @@ class TripRepository implements CRUD
 
     public function getDetail($id)
     {
-        $regions = Region::Active()->select('id', 'name')->get();
-        $owners = User::Active()->OwnerRole()->select('id', 'name')->get();
-        $data = Trip::with(['owner', 'captain', 'boat', 'region', 'governorate', 'port', 'fishQuantityStocks.fish'])
-            ->find($id);
+        $data = Trip::with([
+            'owner',
+            'captain',
+            'counter',
+            'boat.captain',
+            'region',
+            'governorate',
+            'port',
+            'catches.details.fish',
+            'catches.details.unit',
+            'sales.customer',
+            'expenses.category',
+            'expenses.vendor',
+        ])->find($id);
 
         if (! $data) {
             return redirect()->back()->with(['error' => 'حدث خطأ ما']);
         }
 
-        $captains = User::Active()->CaptainRole()
-            ->where('owner_id', $data->owner_id)
-            ->select('id', 'name')
-            ->get();
+        $financials = app(TripFinancialsService::class)->compute($data);
 
-        $grouped_fish = collect([]);
-
-        return view('admin.trips.show', compact('regions', 'owners', 'data', 'captains', 'grouped_fish'));
+        return view('admin.trips.show', compact('data', 'financials'));
     }
 
     public function saveData($request)

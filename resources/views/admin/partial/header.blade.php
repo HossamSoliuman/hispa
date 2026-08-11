@@ -31,7 +31,7 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
     <div class="brand">
         <a href="{{ route('admin.dashboard') }}" class="brand-logo d-flex align-items-center">
             <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ __('admin.title') }}"
-                style="height: 120px; width: auto; object-fit: contain;">
+                style="width: auto; object-fit: contain;">
         </a>
     </div>
     <!-- END brand -->

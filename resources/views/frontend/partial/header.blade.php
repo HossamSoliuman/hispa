@@ -27,7 +27,7 @@
         <a href="{{route('frontend.dashboard.user')}}" class="brand-logo">
 					<span class="brand-img">
 <span class="brand-img-text text-theme">
-    <img src="{{ isset($settings['logo']) ? asset($settings['logo']) : asset('default-logo.png') }}"
+    <img src="{{ $platformLogoOnDarkUrl }}"
          alt="{{ $settings['title'] ?? 'حسبة' }}">
 </span>
 					</span>

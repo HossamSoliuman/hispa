@@ -28,7 +28,7 @@
     <div class="brand">
         <a href="{{ route('owner.dashboard') }}" class="brand-logo d-flex align-items-center">
             <img src="{{ $platformLogoOnDarkUrl }}" alt="{{ $settings['title'] ?? __('owner.generated.item_bc71f8') }}"
-                style="height: 120px; width: auto; object-fit: contain;">
+                style="width: auto; object-fit: contain;">
         </a>
     </div>
     <!-- END brand -->

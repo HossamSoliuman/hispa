@@ -10,7 +10,8 @@
     <title>@yield('title', __('site.meta.title'))</title>
     <meta name="description" content="@yield('description', __('site.meta.description'))" />
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="icon" href="{{ asset('site/assets/hisbah-huwat-logo.png') }}" type="image/png" />
+    <link rel="icon" href="{{ $platformFaviconUrl }}" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ $platformAppleTouchIconUrl }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />

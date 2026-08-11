@@ -75,9 +75,8 @@ class PlatformBrandingTest extends TestCase
         $this->assertStringNotContainsString('currentCompany', $ownerHeader);
     }
 
-    public function test_current_layouts_use_the_hard_coded_new_brand_favicon(): void
+    public function test_current_layouts_use_the_managed_favicon(): void
     {
-        $faviconReference = "asset('site/assets/hisbah-huwat-logo.png')";
         $layoutPaths = [
             resource_path('views/site/layouts/app.blade.php'),
             resource_path('views/site/layouts/auth.blade.php'),
@@ -91,9 +90,84 @@ class PlatformBrandingTest extends TestCase
             $layout = file_get_contents($layoutPath);
 
             $this->assertIsString($layout);
-            $this->assertStringContainsString($faviconReference, $layout);
+            $this->assertStringContainsString('$platformFaviconUrl', $layout);
+            $this->assertStringContainsString('$platformAppleTouchIconUrl', $layout);
             $this->assertStringNotContainsString('storage/uploads/favicon.ico', $layout);
+            $this->assertStringNotContainsString('rel="icon" href="{{ asset(', $layout);
         }
+    }
+
+    public function test_branding_falls_back_to_the_shipped_defaults(): void
+    {
+        $branding = $this->brandingFor(view('site.partials.header'));
+
+        $this->assertSame(asset('site/assets/hisbah-huwat-logo.png'), $branding['platformLogoUrl']);
+        $this->assertSame(asset('site/assets/hisbah-huwat-logo-white.png'), $branding['platformLogoOnDarkUrl']);
+        $this->assertSame(asset('site/assets/hisbah-huwat-favicon.png'), $branding['platformFaviconUrl']);
+        $this->assertSame(asset('site/assets/hisbah-huwat-apple-touch-icon.png'), $branding['platformAppleTouchIconUrl']);
+        $this->assertSame(config('seo.default_image_path'), $branding['platformLogoSeoPath']);
+
+        foreach (['logo', 'logo-white', 'favicon', 'apple-touch-icon'] as $asset) {
+            $this->assertFileExists(public_path("site/assets/hisbah-huwat-{$asset}.png"));
+        }
+    }
+
+    public function test_each_branding_asset_is_resolved_from_its_own_setting(): void
+    {
+        $this->createImageSetting('logo', 'uploads/settings/main.png');
+        $this->createImageSetting('logo_dark', 'uploads/settings/dark.png');
+        $this->createImageSetting('favicon', 'uploads/settings/icon.png');
+
+        $branding = $this->brandingFor(view('site.partials.header'));
+
+        $this->assertSame(asset(Storage::url('uploads/settings/main.png')), $branding['platformLogoUrl']);
+        $this->assertSame(asset(Storage::url('uploads/settings/dark.png')), $branding['platformLogoOnDarkUrl']);
+        $this->assertSame(asset(Storage::url('uploads/settings/icon.png')), $branding['platformFaviconUrl']);
+        $this->assertSame(asset(Storage::url('uploads/settings/icon.png')), $branding['platformAppleTouchIconUrl']);
+        $this->assertSame(Storage::url('uploads/settings/main.png'), $branding['platformLogoSeoPath']);
+    }
+
+    public function test_the_dark_logo_falls_back_to_the_main_logo_when_not_uploaded(): void
+    {
+        $this->createImageSetting('logo', 'uploads/settings/main.png');
+
+        $branding = $this->brandingFor(view('site.partials.header'));
+
+        $this->assertSame(asset(Storage::url('uploads/settings/main.png')), $branding['platformLogoOnDarkUrl']);
+        $this->assertSame(asset('site/assets/hisbah-huwat-favicon.png'), $branding['platformFaviconUrl']);
+    }
+
+    public function test_the_favicon_is_independent_of_the_logo(): void
+    {
+        $this->createImageSetting('favicon', 'uploads/settings/icon.png');
+
+        $branding = $this->brandingFor(view('site.partials.header'));
+
+        $this->assertSame(asset('site/assets/hisbah-huwat-logo.png'), $branding['platformLogoUrl']);
+        $this->assertSame(asset(Storage::url('uploads/settings/icon.png')), $branding['platformFaviconUrl']);
+    }
+
+    private function createImageSetting(string $key, string $path): void
+    {
+        Setting::query()->create(['key' => $key, 'value' => $path, 'type' => 'image']);
+    }
+
+    /**
+     * Render a view and read back the branding variables the composer shared with it.
+     *
+     * @return array<string, string>
+     */
+    private function brandingFor(\Illuminate\Contracts\View\View $view): array
+    {
+        $view->render();
+
+        return array_intersect_key($view->getData(), array_flip([
+            'platformLogoUrl',
+            'platformLogoOnDarkUrl',
+            'platformFaviconUrl',
+            'platformAppleTouchIconUrl',
+            'platformLogoSeoPath',
+        ]));
     }
 
     public function test_dashboard_headers_do_not_recolor_uploaded_logos(): void

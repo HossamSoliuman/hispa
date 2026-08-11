@@ -31,6 +31,23 @@ class CompanySettingsRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'domain' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'logo_dark' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'favicon' => ['nullable', 'image', 'mimes:png,webp', 'max:1024'],
+            'remove_logo' => ['nullable', 'boolean'],
+            'remove_logo_dark' => ['nullable', 'boolean'],
+            'remove_favicon' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'logo' => __('admin.settings.company_logo'),
+            'logo_dark' => __('admin.settings.company_logo_dark'),
+            'favicon' => __('admin.settings.favicon'),
         ];
     }
 }

@@ -54,23 +54,39 @@ class SettingController extends Controller
         ));
     }
 
+    /**
+     * Branding assets managed on the company settings tab. Each one targets a
+     * different surface, so they are uploaded and cleared independently.
+     *
+     * @var list<string>
+     */
+    private const BRANDING_KEYS = ['logo', 'logo_dark', 'favicon'];
+
     public function updateCompany(CompanySettingsRequest $request): RedirectResponse
     {
-        $settings = $request->safe()->except('logo');
+        $imageKeys = self::BRANDING_KEYS;
+        $settings = $request->safe()->except([
+            ...$imageKeys,
+            ...array_map(fn (string $key): string => 'remove_'.$key, $imageKeys),
+        ]);
 
-        if ($request->hasFile('logo')) {
-            $currentLogo = Setting::where('key', 'logo')->first();
+        foreach ($imageKeys as $key) {
+            if ($request->hasFile($key)) {
+                $this->deleteStoredSettingFile($key);
+                $settings[$key] = UploadFile($request->file($key), 'uploads/settings');
 
-            if ($currentLogo?->getRawOriginal('value')) {
-                deleteFile($currentLogo->getRawOriginal('value'));
+                continue;
             }
 
-            $settings['logo'] = UploadFile($request->file('logo'), 'uploads/settings');
+            if ($request->boolean('remove_'.$key)) {
+                $this->deleteStoredSettingFile($key);
+                $settings[$key] = '';
+            }
         }
 
-        DB::transaction(function () use ($settings): void {
+        DB::transaction(function () use ($settings, $imageKeys): void {
             foreach ($settings as $key => $value) {
-                $this->setSetting($key, (string) ($value ?? ''), $key === 'logo' ? 'image' : 'text');
+                $this->setSetting($key, (string) ($value ?? ''), in_array($key, $imageKeys, true) ? 'image' : 'text');
             }
 
             if (array_key_exists('title', $settings)) {
@@ -81,6 +97,19 @@ class SettingController extends Controller
         return redirect()
             ->route('admin.settings.index', ['tab' => 'company'])
             ->with('success', __('admin.swal.saved_success'));
+    }
+
+    /**
+     * Remove the file currently backing an image setting, if there is one.
+     */
+    private function deleteStoredSettingFile(string $key): void
+    {
+        $current = Setting::query()->where('key', $key)->first();
+        $storedPath = $current?->getRawOriginal('value');
+
+        if (filled($storedPath)) {
+            deleteFile($storedPath);
+        }
     }
 
     /**

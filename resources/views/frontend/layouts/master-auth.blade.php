@@ -8,7 +8,8 @@
     <meta name="description" content="حسبة - الحل الأمثل لإدارة مشاريعك ومتابعة أعمالك بسهولة" />
     <meta name="author" content="حسبة" />
     <meta name="keywords" content="حسبة, حسبة, إدارة مشاريع, تطبيق ويب" />
-    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ $platformFaviconUrl }}" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ $platformAppleTouchIconUrl }}" />
 
     <!-- ================== BEGIN core-css ================== -->
     <link href="{{ asset('dashboard/assets/css/vendor.min.css') }}" rel="stylesheet">

@@ -4,7 +4,9 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminSettingsTest extends TestCase
@@ -60,6 +62,87 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('Hesba Platform', $settings['bank_account_name']);
         $this->assertSame('SA0380000000608010167519', $settings['bank_account_number']);
         $this->assertSame('Transfer then upload the receipt.', $settings['payment_instructions']);
+    }
+
+    public function test_each_branding_asset_is_uploaded_to_its_own_setting(): void
+    {
+        $this->withoutMiddleware();
+        Storage::fake('public');
+
+        $response = $this->post(route('admin.settings.company'), [
+            'title' => 'حسبة',
+            'logo' => UploadedFile::fake()->image('main.png'),
+            'logo_dark' => UploadedFile::fake()->image('dark.png'),
+            'favicon' => UploadedFile::fake()->image('icon.png'),
+        ]);
+
+        $response->assertRedirect(route('admin.settings.index', ['tab' => 'company']));
+
+        foreach (['logo', 'logo_dark', 'favicon'] as $key) {
+            $setting = Setting::query()->where('key', $key)->first();
+
+            $this->assertNotNull($setting, "missing setting: {$key}");
+            $this->assertSame('image', $setting->type);
+            Storage::disk('public')->assertExists($setting->getRawOriginal('value'));
+        }
+
+        $paths = Setting::query()->whereIn('key', ['logo', 'logo_dark', 'favicon'])
+            ->get()
+            ->map(fn (Setting $setting): string => $setting->getRawOriginal('value'));
+
+        $this->assertCount(3, $paths->unique(), 'each asset must be stored separately');
+    }
+
+    public function test_a_branding_asset_can_be_cleared_back_to_the_shipped_default(): void
+    {
+        $this->withoutMiddleware();
+        Storage::fake('public');
+
+        $this->post(route('admin.settings.company'), [
+            'logo' => UploadedFile::fake()->image('main.png'),
+            'favicon' => UploadedFile::fake()->image('icon.png'),
+        ]);
+
+        $faviconPath = Setting::query()->where('key', 'favicon')->first()->getRawOriginal('value');
+        $logoPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
+
+        $this->post(route('admin.settings.company'), ['remove_favicon' => '1']);
+
+        $this->assertSame('', Setting::query()->where('key', 'favicon')->first()->getRawOriginal('value'));
+        Storage::disk('public')->assertMissing($faviconPath);
+
+        $this->assertSame($logoPath, Setting::query()->where('key', 'logo')->first()->getRawOriginal('value'));
+        Storage::disk('public')->assertExists($logoPath);
+    }
+
+    public function test_replacing_a_branding_asset_deletes_the_previous_file(): void
+    {
+        $this->withoutMiddleware();
+        Storage::fake('public');
+
+        $this->post(route('admin.settings.company'), ['logo' => UploadedFile::fake()->image('first.png')]);
+        $firstPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
+
+        $this->post(route('admin.settings.company'), ['logo' => UploadedFile::fake()->image('second.png')]);
+        $secondPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
+
+        $this->assertNotSame($firstPath, $secondPath);
+        Storage::disk('public')->assertMissing($firstPath);
+        Storage::disk('public')->assertExists($secondPath);
+    }
+
+    public function test_saving_the_company_tab_without_files_keeps_the_existing_branding(): void
+    {
+        $this->withoutMiddleware();
+        Storage::fake('public');
+
+        $this->post(route('admin.settings.company'), ['logo' => UploadedFile::fake()->image('main.png')]);
+        $logoPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
+
+        $this->post(route('admin.settings.company'), ['title' => 'حسبة حوات']);
+
+        $this->assertSame($logoPath, Setting::query()->where('key', 'logo')->first()->getRawOriginal('value'));
+        Storage::disk('public')->assertExists($logoPath);
     }
 
     public function test_admin_settings_page_no_longer_renders_the_general_settings_tab(): void

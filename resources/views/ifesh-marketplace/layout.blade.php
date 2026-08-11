@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <title>{{ __('landing-page.header.ifesh_market') }} | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ $platformFaviconUrl }}" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ $platformAppleTouchIconUrl }}" />
 
     <!-- Core CSS -->
     <link href="{{ asset('dashboard/assets/css/vendor.min.css') }}" rel="stylesheet">

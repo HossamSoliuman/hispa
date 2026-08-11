@@ -7,6 +7,26 @@
 @section('css')
     <style>
         .small-text th, .small-text td { font-size: 12px; text-align: center !important; vertical-align: middle; }
+
+        .branding-preview {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            min-height: 92px;
+            padding: 10px;
+        }
+
+        .branding-preview img { max-height: 68px; max-width: 100%; object-fit: contain; }
+
+        /* The swatches mirror the real surfaces each asset lands on, so a contrast
+           problem shows up here instead of after publishing. */
+        .branding-preview-light { background: #ffffff; border: 1px solid rgba(0, 0, 0, .12); }
+        .branding-preview-dark { background: #14304f; border: 1px solid rgba(0, 0, 0, .12); }
+        .branding-preview-icon {
+            background: repeating-conic-gradient(#e9edf1 0% 25%, #ffffff 0% 50%) 50% / 16px 16px;
+            border: 1px solid rgba(0, 0, 0, .12);
+        }
+        .branding-preview-icon img { max-height: 56px; }
     </style>
 @endsection
 
@@ -88,6 +108,25 @@
 
 @section('script')
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-branding-input]').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    const file = input.files && input.files[0];
+                    const preview = document.querySelector('[data-branding-preview="' + input.dataset.brandingInput + '"]');
+
+                    if (!file || !preview) {
+                        return;
+                    }
+
+                    const objectUrl = URL.createObjectURL(file);
+                    preview.addEventListener('load', function () {
+                        URL.revokeObjectURL(objectUrl);
+                    }, { once: true });
+                    preview.src = objectUrl;
+                });
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
             const tab = urlParams.get('tab');

@@ -7,7 +7,8 @@
     <meta name="description" content="حسبة - الحل الأمثل لإدارة مشاريعك ومتابعة أعصيّاد بسهولة" />
     <meta name="author" content="حسبة" />
     <meta name="keywords" content="حسبة, حسبة, إدارة مشاريع, تطبيق ويب" />
-    <link rel="icon" href="{{ asset('storage/uploads/favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ $platformFaviconUrl }}" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ $platformAppleTouchIconUrl }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- ================== BEGIN core-css ================== -->
