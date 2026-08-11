@@ -59,7 +59,14 @@ class GovDashboardDesignTest extends TestCase
         $this->assertStringContainsString('background-image: none !important', $html);
         $this->assertStringContainsString('dashboard/assets/css/images/cover-dark.jpg', $html);
         $this->assertStringContainsString('--gov-panel: rgba(14, 34, 45, .76)', $html);
-        $this->assertStringContainsString('href="'.asset('favicon.ico').'"', $html);
+        $this->assertStringContainsString(
+            '<link rel="icon" href="'.asset('site/assets/hisbah-huwat-favicon.png').'" type="image/png" />',
+            $html,
+        );
+        $this->assertStringContainsString(
+            '<link rel="apple-touch-icon" href="'.asset('site/assets/hisbah-huwat-apple-touch-icon.png').'" />',
+            $html,
+        );
         $this->assertStringContainsString('data-gov-theme-toggle', $html);
         $this->assertStringContainsString("document.cookie = 'gov_theme=' + nextTheme", $html);
         $this->assertStringContainsString('gov-menu-section', $html);

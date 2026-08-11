@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin\Report;
 use App\Http\Controllers\Controller;
 use App\Models\Boat;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class BoatReportController extends Controller
 {
@@ -16,7 +18,7 @@ class BoatReportController extends Controller
     /**
      * On-screen platform-wide boats report (every owner's boats).
      */
-    public function index()
+    public function index(): View
     {
         $boats = Boat::with(['owner', 'boat_type', 'captain'])
             ->orderBy('id', 'desc')
@@ -39,11 +41,11 @@ class BoatReportController extends Controller
      * view. Admin oversees every owner, so no owner_id filter is applied; an
      * optional boat_id narrows the report to a single boat.
      */
-    public function print(Request $request)
+    public function print(Request $request): Response
     {
         $boat_id = $request->input('boat_id');
 
-        $query = Boat::with(['captain', 'boat_type', 'maintenances', 'expenses']);
+        $query = Boat::with(['owner', 'captain', 'boat_type', 'maintenances', 'expenses']);
 
         if ($boat_id) {
             $query->where('id', $boat_id);
@@ -76,7 +78,7 @@ class BoatReportController extends Controller
             'settings',
             'qrCode',
             'boat_id'
-        ), ['showReportInfo' => false, 'showReportSummary' => false])), [], $filename);
+        ), ['reportScope' => 'platform', 'showOwnerColumn' => true])), [], $filename);
     }
 
     /**

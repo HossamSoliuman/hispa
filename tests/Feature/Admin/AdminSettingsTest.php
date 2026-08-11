@@ -71,9 +71,9 @@ class AdminSettingsTest extends TestCase
 
         $response = $this->post(route('admin.settings.company'), [
             'title' => 'حسبة',
-            'logo' => UploadedFile::fake()->image('main.png'),
-            'logo_dark' => UploadedFile::fake()->image('dark.png'),
-            'favicon' => UploadedFile::fake()->image('icon.png'),
+            'logo' => $this->fakePng('main.png'),
+            'logo_dark' => $this->fakePng('dark.png'),
+            'favicon' => $this->fakePng('icon.png'),
         ]);
 
         $response->assertRedirect(route('admin.settings.index', ['tab' => 'company']));
@@ -99,8 +99,8 @@ class AdminSettingsTest extends TestCase
         Storage::fake('public');
 
         $this->post(route('admin.settings.company'), [
-            'logo' => UploadedFile::fake()->image('main.png'),
-            'favicon' => UploadedFile::fake()->image('icon.png'),
+            'logo' => $this->fakePng('main.png'),
+            'favicon' => $this->fakePng('icon.png'),
         ]);
 
         $faviconPath = Setting::query()->where('key', 'favicon')->first()->getRawOriginal('value');
@@ -120,10 +120,10 @@ class AdminSettingsTest extends TestCase
         $this->withoutMiddleware();
         Storage::fake('public');
 
-        $this->post(route('admin.settings.company'), ['logo' => UploadedFile::fake()->image('first.png')]);
+        $this->post(route('admin.settings.company'), ['logo' => $this->fakePng('first.png')]);
         $firstPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
 
-        $this->post(route('admin.settings.company'), ['logo' => UploadedFile::fake()->image('second.png')]);
+        $this->post(route('admin.settings.company'), ['logo' => $this->fakePng('second.png')]);
         $secondPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
 
         $this->assertNotSame($firstPath, $secondPath);
@@ -136,7 +136,7 @@ class AdminSettingsTest extends TestCase
         $this->withoutMiddleware();
         Storage::fake('public');
 
-        $this->post(route('admin.settings.company'), ['logo' => UploadedFile::fake()->image('main.png')]);
+        $this->post(route('admin.settings.company'), ['logo' => $this->fakePng('main.png')]);
         $logoPath = Setting::query()->where('key', 'logo')->first()->getRawOriginal('value');
 
         $this->post(route('admin.settings.company'), ['title' => 'حسبة حوات']);
@@ -163,5 +163,13 @@ class AdminSettingsTest extends TestCase
 
         $this->assertStringNotContainsString('href="'.route('admin.notifications').'"', $html);
         $this->assertStringNotContainsString('bi bi-bell-fill', $html);
+    }
+
+    private function fakePng(string $name): UploadedFile
+    {
+        return UploadedFile::fake()->createWithContent(
+            $name,
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+        );
     }
 }

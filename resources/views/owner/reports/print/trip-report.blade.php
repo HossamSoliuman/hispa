@@ -1,4 +1,7 @@
 @php
+    $reportScope = $reportScope ?? 'owner';
+    $showOwnerColumn = (bool) ($showOwnerColumn ?? false);
+    $showPlatformOwner = $reportScope === 'platform' && $showOwnerColumn;
     $isRtl = app()->getLocale() == 'ar';
     $startAlign = $isRtl ? 'right' : 'left';
     $endAlign = $isRtl ? 'left' : 'right';
@@ -10,18 +13,29 @@
     };
 
     if ($trip) {
-        $reportTitle = __('owner.reports.trip_report').' #'.$trip->number;
+        $reportTitle = ($reportScope === 'platform'
+            ? __('admin.report.trips.platform_print_title')
+            : __('owner.reports.trip_report')).' #'.$trip->number;
         $depart = $trip->start_date ? $trip->start_date->format('Y-m-d') : null;
         $returnDate = $trip->end_date ? $trip->end_date->format('Y-m-d') : null;
         $reportSubtitle = $depart && $returnDate && $depart !== $returnDate
             ? __('owner.reports.from_date').' '.$depart.' '.__('owner.reports.to_date').' '.$returnDate
             : ($depart ?? '');
     } else {
-        $reportTitle = __('owner.reports.all_trips_report');
+        $reportTitle = $reportScope === 'platform'
+            ? __('admin.report.trips.platform_print_title')
+            : __('owner.reports.all_trips_report');
         $reportSubtitle = $fromDate || $toDate
             ? __('owner.reports.from_date').' '.($fromDate ?? '—').' '.__('owner.reports.to_date').' '.($toDate ?? '—')
             : '';
     }
+
+    $statusFilter = filled($filters['status'] ?? null)
+        ? (\App\Enums\TripStatus::tryFrom($filters['status'])?->label() ?? $filters['status'])
+        : null;
+    $boatFilter = filled($filters['boat_id'] ?? null)
+        ? ($trips->firstWhere('boat_id', $filters['boat_id'])?->boat?->name ?? '#'.$filters['boat_id'])
+        : null;
 @endphp
 
 <x-report-layout
@@ -37,13 +51,49 @@
     .fact-value { font-size: 9.5pt; font-weight: 700; color: #1a1a1a; }
 
     .summary-table { width: 60%; }
-    .empty { color: #888; }
 </style>
 
     <x-report-masthead
         :title="$reportTitle"
         :subtitle="$reportSubtitle"
         :settings="$settings" />
+
+    @if(collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty())
+        <table class="info-bar">
+            <tr>
+                @if(filled($filters['trip_id'] ?? null))
+                    <td>
+                        <span class="ib-label">{{ __('owner.trips.trip_number') }}</span>
+                        <span class="ib-value">#{{ $trip?->number ?? $filters['trip_id'] }}</span>
+                    </td>
+                @endif
+                @if(filled($filters['from_date'] ?? null))
+                    <td>
+                        <span class="ib-label">{{ __('owner.reports.from_date') }}</span>
+                        <span class="ib-value">{{ $filters['from_date'] }}</span>
+                    </td>
+                @endif
+                @if(filled($filters['to_date'] ?? null))
+                    <td>
+                        <span class="ib-label">{{ __('owner.reports.to_date') }}</span>
+                        <span class="ib-value">{{ $filters['to_date'] }}</span>
+                    </td>
+                @endif
+                @if($statusFilter)
+                    <td>
+                        <span class="ib-label">{{ __('owner.trips.status') }}</span>
+                        <span class="ib-value">{{ $statusFilter }}</span>
+                    </td>
+                @endif
+                @if($boatFilter)
+                    <td>
+                        <span class="ib-label">{{ __('owner.trips.boat_name') }}</span>
+                        <span class="ib-value">{{ $boatFilter }}</span>
+                    </td>
+                @endif
+            </tr>
+        </table>
+    @endif
 
     @if(isset($trips) && $trips->isEmpty())
         <p class="empty">{{ __('owner.reports.no_data_found') }}</p>
@@ -59,6 +109,12 @@
         {{-- Key facts — clean, borderless --}}
         <table class="facts">
             <tr>
+                @if($reportScope === 'platform')
+                    <td>
+                        <span class="fact-label">{{ __('admin.report.trips.owner') }}</span>
+                        <span class="fact-value">{{ $trip->owner?->name ?? __('owner.reports.not_available') }}</span>
+                    </td>
+                @endif
                 <td>
                     <span class="fact-label">{{ __('owner.trips.show.captain') }}</span>
                     <span class="fact-value">{{ $trip->captain?->name ?? __('owner.trips.no_captain') }}</span>
@@ -260,17 +316,32 @@
 
         <table class="report-table block">
             <thead>
-                <tr>
-                    <th style="width:5%;">#</th>
-                    <th style="width:12%;">{{ __('owner.trips.trip_number') }}</th>
-                    <th class="col-text" style="width:15%;">{{ __('owner.trips.captain_name') }}</th>
-                    <th style="width:11%;">{{ __('owner.trips.departure_date') }}</th>
-                    <th style="width:9%;">{{ __('owner.reports.duration') }}</th>
-                    <th style="width:10%;">{{ __('owner.trips.status') }}</th>
-                    <th style="width:14%;">{{ __('owner.trips.total_catch') }}</th>
-                    <th class="col-num" style="width:12%;">{{ __('owner.reports.total_revenue') }}</th>
-                    <th class="col-num" style="width:12%;">{{ __('owner.reports.net_profit') }}</th>
-                </tr>
+                @if($showPlatformOwner)
+                    <tr>
+                        <th style="width:4%;">#</th>
+                        <th style="width:10%;">{{ __('owner.trips.trip_number') }}</th>
+                        <th class="col-text" style="width:14%;">{{ __('admin.report.trips.owner') }}</th>
+                        <th class="col-text" style="width:13%;">{{ __('owner.trips.captain_name') }}</th>
+                        <th style="width:10%;">{{ __('owner.trips.departure_date') }}</th>
+                        <th style="width:8%;">{{ __('owner.reports.duration') }}</th>
+                        <th style="width:9%;">{{ __('owner.trips.status') }}</th>
+                        <th style="width:12%;">{{ __('owner.trips.total_catch') }}</th>
+                        <th class="col-num" style="width:10%;">{{ __('owner.reports.total_revenue') }}</th>
+                        <th class="col-num" style="width:10%;">{{ __('owner.reports.net_profit') }}</th>
+                    </tr>
+                @else
+                    <tr>
+                        <th style="width:5%;">#</th>
+                        <th style="width:12%;">{{ __('owner.trips.trip_number') }}</th>
+                        <th class="col-text" style="width:15%;">{{ __('owner.trips.captain_name') }}</th>
+                        <th style="width:11%;">{{ __('owner.trips.departure_date') }}</th>
+                        <th style="width:9%;">{{ __('owner.reports.duration') }}</th>
+                        <th style="width:10%;">{{ __('owner.trips.status') }}</th>
+                        <th style="width:14%;">{{ __('owner.trips.total_catch') }}</th>
+                        <th class="col-num" style="width:12%;">{{ __('owner.reports.total_revenue') }}</th>
+                        <th class="col-num" style="width:12%;">{{ __('owner.reports.net_profit') }}</th>
+                    </tr>
+                @endif
             </thead>
             <tbody>
                 @foreach($trips as $i => $tripItem)
@@ -278,6 +349,9 @@
                     <tr>
                         <td>{{ $i + 1 }}</td>
                         <td>#{{ $tripItem->number }}</td>
+                        @if($showPlatformOwner)
+                            <td class="col-text">{{ $tripItem->owner?->name ?? __('owner.reports.not_available') }}</td>
+                        @endif
                         <td class="col-text">{{ $tripItem->captain->name ?? __('owner.trips.no_captain') }}</td>
                         <td>{{ $tripItem->start_date ? $tripItem->start_date->format('Y-m-d') : '-' }}</td>
                         <td>{{ $tripItem->duration_text ?? '-' }}</td>
@@ -290,7 +364,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="6" class="col-text">{{ __('owner.reports.financial_summary') }}</td>
+                    <td colspan="{{ $showPlatformOwner ? 7 : 6 }}" class="col-text">{{ __('owner.reports.financial_summary') }}</td>
                     <td>{{ $formatByUnit($statistics['total_catch_by_unit']) }}</td>
                     <td class="col-num"><x-report-money :amount="$statistics['total_revenue']" /></td>
                     <td class="col-num"><x-report-money :amount="$statistics['net_profit']" /></td>
@@ -298,5 +372,13 @@
             </tfoot>
         </table>
     @endif
+
+    <table class="report-footer">
+        <tr>
+            <td class="rf-text">
+                {{ $settings['company_name'] ?? $settings['title'] ?? '' }} &mdash; {{ __('owner.reports.all_rights_reserved') }} &copy; {{ date('Y') }}
+            </td>
+        </tr>
+    </table>
 
 </x-report-layout>

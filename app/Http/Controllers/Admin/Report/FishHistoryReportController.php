@@ -41,7 +41,7 @@ class FishHistoryReportController extends Controller
      */
     public function print(Request $request): Response
     {
-        $query = FishStockHistory::with(['fish', 'user'])
+        $query = FishStockHistory::with(['fish.owner', 'user'])
             ->select('fish_stock_histories.*')
             ->selectRaw('(
                 SELECT SUM(fsh2.changed_weight)
@@ -64,6 +64,7 @@ class FishHistoryReportController extends Controller
             ->map(function (FishStockHistory $record): FishStockHistory {
                 $record->fish_name = optional($record->fish)->name ?? '---';
                 $record->user_name = optional($record->user)->name ?? '---';
+                $record->owner_name = optional($record->fish?->owner)->name ?? '---';
 
                 return $record;
             });
@@ -93,7 +94,7 @@ class FishHistoryReportController extends Controller
             'from',
             'to',
             'fishName'
-        ), ['showReportInfo' => false, 'showReportSummary' => false])), [], $filename);
+        ), ['reportScope' => 'platform', 'showOwnerColumn' => true])), [], $filename);
     }
 
     /**

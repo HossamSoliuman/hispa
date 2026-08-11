@@ -33,7 +33,7 @@
         @else
             <tr>
                 <td colspan="{{ count($headers) }}" style="text-align: center; padding: 30px; color: #95a5a6;">
-                    {{ __('dalal.reports.no_data') }}
+                    {{ __('common.no_data') }}
                 </td>
             </tr>
         @endif

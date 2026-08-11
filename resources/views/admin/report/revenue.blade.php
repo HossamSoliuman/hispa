@@ -2,85 +2,81 @@
 @section('title')
     {{ __('admin.report.revenue.title') }}
 @endsection
-@section('css')
-    <style>
-        #revenueTable th, #revenueTable td { text-align: center !important; vertical-align: middle; font-size: 12px; }
-        #revenueTable th { font-weight: bold; }
-    </style>
-@endsection
 @section('content')
-    <div class="d-flex align-items-center mb-3">
+    <div class="mb-4 d-flex align-items-start">
         <div>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.revenue.report') }}</a></li>
-                <li class="breadcrumb-item active">{{ __('admin.report.revenue.title') }}</li>
-            </ul>
-            <h1 class="page-header mb-0">{{ __('admin.report.revenue.title') }}</h1>
+            <h2 class="fw-bold text-dark mb-1">{{ __('admin.report.revenue.title') }}</h2>
+            <p class="mb-0 text-muted">{{ __('admin.report.revenue.subtitle') }}</p>
         </div>
         <div class="ms-auto">
-            <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
+            <button type="button" onclick="printReport()" class="btn btn-outline-theme">
                 <i class="bi bi-printer me-1"></i> {{ __('admin.report.revenue.print') }}
             </button>
         </div>
     </div>
 
     <div class="row g-3 mb-4">
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.revenue.kpi.total_invoices'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalInvoices) . '</span>'),
-            'icon' => 'bi bi-receipt',
-            'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.revenue.kpi.paid_revenue'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($paidRevenue, 2) . '</span> ' . view('components.riyal-icon', ['size' => 'sm'])->render()),
-            'icon' => 'bi bi-cash-coin',
-            'gradient' => 'linear-gradient(135deg, #198754, #157347)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.revenue.kpi.pending_amount'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($pendingAmount, 2) . '</span> ' . view('components.riyal-icon', ['size' => 'sm'])->render()),
-            'icon' => 'bi bi-hourglass-split',
-            'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.revenue.kpi.active_subscriptions'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($activeSubscriptions) . '</span>'),
-            'icon' => 'bi bi-people',
-            'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
+        <x-stat-card
+            :title="__('admin.report.revenue.kpi.total_invoices')"
+            icon="bi bi-receipt"
+            colClass="col-md-6 col-lg-3"
+        >
+            <x-slot:value><span>{{ number_format($totalInvoices) }}</span></x-slot:value>
+        </x-stat-card>
+        <x-stat-card
+            :title="__('admin.report.revenue.kpi.paid_revenue')"
+            icon="bi bi-cash-coin"
+            colClass="col-md-6 col-lg-3"
+        >
+            <x-slot:value><span>{{ number_format($paidRevenue, 2) }}</span> <x-riyal-icon size="sm" /></x-slot:value>
+        </x-stat-card>
+        <x-stat-card
+            :title="__('admin.report.revenue.kpi.pending_amount')"
+            icon="bi bi-hourglass-split"
+            colClass="col-md-6 col-lg-3"
+        >
+            <x-slot:value><span>{{ number_format($pendingAmount, 2) }}</span> <x-riyal-icon size="sm" /></x-slot:value>
+        </x-stat-card>
+        <x-stat-card
+            :title="__('admin.report.revenue.kpi.active_subscriptions')"
+            icon="bi bi-people"
+            colClass="col-md-6 col-lg-3"
+        >
+            <x-slot:value><span>{{ number_format($activeSubscriptions) }}</span></x-slot:value>
+        </x-stat-card>
     </div>
 
-    <div class="tab-content py-4">
-        <div class="tab-pane fade show active" id="allTab">
-            <form method="GET" action="{{ route('admin.revenue-report') }}" class="row mb-3">
-                <div class="col-md-3">
-                    <label for="start_date">{{ __('admin.report.revenue.from_date') }}</label>
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.revenue-report') }}" class="row g-3 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label for="start_date" class="form-label">{{ __('admin.report.revenue.from_date') }}</label>
                     <input type="date" name="start_date" id="start_date" class="form-control" value="{{ $from }}">
                 </div>
-                <div class="col-md-3">
-                    <label for="end_date">{{ __('admin.report.revenue.to_date') }}</label>
+                <div class="col-12 col-md-3">
+                    <label for="end_date" class="form-label">{{ __('admin.report.revenue.to_date') }}</label>
                     <input type="date" name="end_date" id="end_date" class="form-control" value="{{ $to }}">
                 </div>
-                <div class="col-md-3">
-                    <label for="payment_status">{{ __('admin.report.revenue.status') }}</label>
-                    <select name="payment_status" id="payment_status" class="form-control">
+                <div class="col-12 col-md-3">
+                    <label for="payment_status" class="form-label">{{ __('admin.report.revenue.status') }}</label>
+                    <select name="payment_status" id="payment_status" class="form-select">
                         <option value="">{{ __('admin.report.revenue.all') }}</option>
                         <option value="paid" @selected(request('payment_status') === 'paid')>{{ __('admin.report.revenue.paid') }}</option>
                         <option value="pending" @selected(request('payment_status') === 'pending')>{{ __('admin.report.revenue.pending') }}</option>
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm">{{ __('admin.report.revenue.filter') }}</button>
-                    <a href="{{ route('admin.revenue-report') }}" class="btn btn-secondary btn-sm">{{ __('admin.report.revenue.reset') }}</a>
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">{{ __('admin.report.revenue.filter') }}</button>
+                    <a href="{{ route('admin.revenue-report') }}" class="btn btn-outline-secondary">{{ __('admin.report.revenue.reset') }}</a>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
             <div class="table-responsive">
-                <table id="revenueTable" class="table table-sm table-bordered table-hover text-center" style="width:100%">
+                <table id="revenueTable" class="table table-bordered table-hover align-middle text-center mb-0">
                     <thead>
                         <tr>
                             <th>{{ __('admin.report.revenue.id') }}</th>
@@ -102,9 +98,9 @@
                                 <td>{{ $invoice->invoice_number }}</td>
                                 <td>{{ optional($invoice->user)->name ?? '---' }}</td>
                                 <td>{{ optional(optional($invoice->subscription)->package)->name ?? '---' }}</td>
-                                <td>{{ number_format((float) $invoice->amount, 2) }} {!! view('components.riyal-icon')->render() !!}</td>
-                                <td>{{ number_format((float) $invoice->vat_amount, 2) }} {!! view('components.riyal-icon')->render() !!}</td>
-                                <td>{{ number_format((float) $invoice->total_amount, 2) }} {!! view('components.riyal-icon')->render() !!}</td>
+                                <td>{{ number_format((float) $invoice->amount, 2) }} <x-riyal-icon size="sm" /></td>
+                                <td>{{ number_format((float) $invoice->vat_amount, 2) }} <x-riyal-icon size="sm" /></td>
+                                <td>{{ number_format((float) $invoice->total_amount, 2) }} <x-riyal-icon size="sm" /></td>
                                 <td>
                                     @if($invoice->isPaid())
                                         <span class="badge bg-success">{{ __('admin.report.revenue.paid') }}</span>

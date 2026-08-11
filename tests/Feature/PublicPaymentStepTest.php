@@ -124,7 +124,7 @@ class PublicPaymentStepTest extends TestCase
         [$owner, $invoice] = $this->ownerWithPendingInvoice();
 
         $response = $this->actingAs($owner, 'owner')->postJson(route('site.checkout.payment'), [
-            'bank_transfer_receipt' => UploadedFile::fake()->image('receipt.jpg'),
+            'bank_transfer_receipt' => $this->fakePng('receipt.png'),
         ]);
 
         $response->assertOk()
@@ -192,5 +192,13 @@ class PublicPaymentStepTest extends TestCase
             'duration_type' => 'yearly',
             'is_active' => true,
         ]);
+    }
+
+    private function fakePng(string $name): UploadedFile
+    {
+        return UploadedFile::fake()->createWithContent(
+            $name,
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+        );
     }
 }

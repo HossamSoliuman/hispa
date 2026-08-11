@@ -117,6 +117,8 @@ class TripReportController extends Controller
         $toDate = $request->filled('end_date') ? Carbon::parse($request->end_date)->format('Y-m-d') : null;
 
         $trip = $trip_id ? $trips->first() : null;
+        $reportScope = 'platform';
+        $showOwnerColumn = true;
 
         $filename = $trip_id
             ? 'trip-'.($trips->first()?->number ?? $trip_id).'.pdf'
@@ -131,7 +133,9 @@ class TripReportController extends Controller
             'fromDate',
             'toDate',
             'trip',
-            'filters'
+            'filters',
+            'reportScope',
+            'showOwnerColumn'
         )), [], $filename);
     }
 

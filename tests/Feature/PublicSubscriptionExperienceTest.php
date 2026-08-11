@@ -208,7 +208,10 @@ class PublicSubscriptionExperienceTest extends TestCase
         $this->assertStringContainsString('grid-template-rows: min-content min-content', $css);
         $this->assertStringContainsString('.owner-login-shell-corners', $css);
         $this->assertStringContainsString('.owner-login-form-panel', $css);
-        $this->assertStringContainsString('font-size: clamp(1.75rem, 2.4vw, 2.15rem)', $css);
+        $this->assertMatchesRegularExpression(
+            '/\\.owner-login-form-content h1\\s*\\{[^}]*font-size:\\s*clamp\\(1\\.50rem,\\s*2vw,\\s*2rem\\);[^}]*\\}/s',
+            $css,
+        );
         $this->assertStringContainsString('background: transparent', $css);
         $this->assertStringContainsString('height: min(37rem', $css);
         $this->assertStringContainsString('height: 2.75rem', $css);

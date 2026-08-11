@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Subscription;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class RevenueReportController extends Controller
 {
@@ -31,11 +32,12 @@ class RevenueReportController extends Controller
     /**
      * Printable (PDF) subscriptions & revenue report using the shared report layout.
      */
-    public function print(Request $request)
+    public function print(Request $request): Response
     {
         [$invoices, $kpis, $filters] = $this->buildReport($request);
 
         $settings = $this->getCompanySettings();
+        $documentNumber = '#'.str_pad((string) $kpis['totalInvoices'], 8, '0', STR_PAD_LEFT);
 
         $from = $filters['from'];
         $to = $filters['to'];
@@ -46,6 +48,7 @@ class RevenueReportController extends Controller
         return pdf_report(view('admin.report.revenue_print', array_merge($kpis, [
             'invoices' => $invoices,
             'settings' => $settings,
+            'documentNumber' => $documentNumber,
             'from' => $from,
             'to' => $to,
             'status' => $status,

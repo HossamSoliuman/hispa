@@ -1,7 +1,36 @@
+@php
+    /** @var 'owner'|'platform' $reportScope */
+    $reportScope = $reportScope ?? 'owner';
+
+    /** @var bool $showOwnerColumn */
+    $showOwnerColumn = $showOwnerColumn ?? false;
+
+    $isPlatformReport = $reportScope === 'platform' && $showOwnerColumn;
+    $captainWeightTotal = formatWeightByUnit($stocks->map(fn (object $stock): object => (object) [
+        'weight' => $stock->weight_captain ?? 0,
+        'unit' => $stock->unit,
+    ]));
+    $counterWeightTotal = formatWeightByUnit($stocks
+        ->filter(fn (object $stock): bool => $stock->weight_counter !== null)
+        ->map(fn (object $stock): object => (object) [
+            'weight' => $stock->weight_counter,
+            'unit' => $stock->unit,
+        ]));
+    $stockWeightTotal = formatWeightByUnit($stocks->map(fn (object $stock): object => (object) [
+        'weight' => $stock->total_weight ?? 0,
+        'unit' => $stock->unit,
+    ]));
+    $differenceWeightTotal = formatWeightByUnit($stocks
+        ->filter(fn (object $stock): bool => $stock->weight_difference !== null)
+        ->map(fn (object $stock): object => (object) [
+            'weight' => $stock->weight_difference,
+            'unit' => $stock->unit,
+        ]));
+@endphp
 <x-report-layout :settings="$settings ?? []">
     <x-report-header
         :settings="$settings"
-        :title="__('owner.stock_report.print_title')"
+        :title="$reportScope === 'platform' ? __('admin.report.stock.platform_print_title') : __('owner.stock_report.print_title')"
     />
 
     @if ($showReportInfo ?? true)
@@ -30,31 +59,59 @@
         ['label' => __('owner.stock_report.total_weight'), 'value' => $totalWeight],
     ]" />
 
-    <x-report-table :headers="[
-        '#',
-        __('owner.stock_report.fish_name'),
-        __('owner.stock_report.captain_weight'),
-        __('owner.stock_report.counter_weight'),
-        __('owner.stock_report.total_weight'),
-        __('owner.stock_report.difference'),
-        __('owner.stock_report.added_by'),
-        __('owner.stock_report.corrected_by'),
-        __('owner.stock_report.date'),
-    ]" :data="$stocks">
-        @foreach($stocks as $index => $stock)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $stock->name }}</td>
-                <td>{{ number_format($stock->weight_captain ?? 0, 2) }} {{ $stock->unit_display ?? __('owner.stock_report.kg') }}</td>
-                <td>{{ $stock->weight_counter === null ? '---' : number_format($stock->weight_counter, 2) . ' ' . ($stock->unit_display ?? __('owner.stock_report.kg')) }}</td>
-                <td>{{ number_format($stock->total_weight ?? 0, 2) }} {{ $stock->unit_display ?? __('owner.stock_report.kg') }}</td>
-                <td>{{ $stock->weight_difference === null ? '---' : number_format($stock->weight_difference, 2) . ' ' . ($stock->unit_display ?? __('owner.stock_report.kg')) }}</td>
-                <td>{{ $stock->added_by ?? '---' }}</td>
-                <td>{{ $stock->correct_by ?? '---' }}</td>
-                <td>{{ $stock->date ? (class_exists('\\Alkoumi\\LaravelHijriDate\\Hijri') ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $stock->date) : \Carbon\Carbon::parse($stock->date)->format('d/m/Y')) : '---' }}</td>
-            </tr>
-        @endforeach
-    </x-report-table>
+    @if($stocks->isEmpty())
+        <div class="alert alert-warning">
+            <strong>{{ __('owner.reports.no_data_found') }}</strong>
+            <p class="mb-0 text-muted">{{ __('owner.reports.try_adjust_filters') }}</p>
+        </div>
+    @else
+        <table class="report-table block">
+            <thead>
+                <tr>
+                    <th style="width:4%;">#</th>
+                    <th class="col-text" style="width:{{ $isPlatformReport ? '12%' : '14%' }};">{{ __('owner.stock_report.fish_name') }}</th>
+                    @if($isPlatformReport)
+                        <th class="col-text" style="width:12%;">{{ __('admin.report.stock.owner') }}</th>
+                    @endif
+                    <th class="col-num" style="width:{{ $isPlatformReport ? '10%' : '11%' }};">{{ __('owner.stock_report.captain_weight') }}</th>
+                    <th class="col-num" style="width:{{ $isPlatformReport ? '10%' : '11%' }};">{{ __('owner.stock_report.counter_weight') }}</th>
+                    <th class="col-num" style="width:{{ $isPlatformReport ? '10%' : '11%' }};">{{ __('owner.stock_report.total_weight') }}</th>
+                    <th class="col-num" style="width:{{ $isPlatformReport ? '10%' : '11%' }};">{{ __('owner.stock_report.difference') }}</th>
+                    <th class="col-text" style="width:{{ $isPlatformReport ? '10%' : '11%' }};">{{ __('owner.stock_report.added_by') }}</th>
+                    <th class="col-text" style="width:{{ $isPlatformReport ? '10%' : '11%' }};">{{ __('owner.stock_report.corrected_by') }}</th>
+                    <th class="col-text" style="width:{{ $isPlatformReport ? '12%' : '16%' }};">{{ __('owner.stock_report.date') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($stocks as $index => $stock)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td class="col-text">{{ $stock->name }}</td>
+                        @if($isPlatformReport)
+                            <td class="col-text">{{ $stock->owner_name ?? '---' }}</td>
+                        @endif
+                        <td class="col-num">{{ number_format($stock->weight_captain ?? 0, 2) }} {{ $stock->unit_display ?? __('owner.stock_report.kg') }}</td>
+                        <td class="col-num">{{ $stock->weight_counter === null ? '---' : number_format($stock->weight_counter, 2) . ' ' . ($stock->unit_display ?? __('owner.stock_report.kg')) }}</td>
+                        <td class="col-num">{{ number_format($stock->total_weight ?? 0, 2) }} {{ $stock->unit_display ?? __('owner.stock_report.kg') }}</td>
+                        <td class="col-num">{{ $stock->weight_difference === null ? '---' : number_format($stock->weight_difference, 2) . ' ' . ($stock->unit_display ?? __('owner.stock_report.kg')) }}</td>
+                        <td class="col-text">{{ $stock->added_by ?? '---' }}</td>
+                        <td class="col-text">{{ $stock->correct_by ?? '---' }}</td>
+                        <td class="col-text">{{ $stock->date ? (class_exists('\\Alkoumi\\LaravelHijriDate\\Hijri') ? \Alkoumi\LaravelHijriDate\Hijri::Date('d/m/Y', $stock->date) : \Carbon\Carbon::parse($stock->date)->format('d/m/Y')) : '---' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="col-text" colspan="{{ $isPlatformReport ? 3 : 2 }}">{{ __('owner.sales.total') }}</td>
+                    <td class="col-num">{{ $captainWeightTotal }}</td>
+                    <td class="col-num">{{ $counterWeightTotal }}</td>
+                    <td class="col-num">{{ $stockWeightTotal }}</td>
+                    <td class="col-num">{{ $differenceWeightTotal }}</td>
+                    <td class="col-text" colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+    @endif
 
     @if ($showReportSummary ?? true)
     <x-report-summary :qr-code="$settings['qr_code'] ?? null">

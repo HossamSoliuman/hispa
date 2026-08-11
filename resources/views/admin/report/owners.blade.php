@@ -13,54 +13,79 @@
         ];
     @endphp
 
-    <div class="d-flex align-items-center mb-3">
+    <div class="mb-4 d-flex align-items-start">
         <div>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.owners.report') }}</a></li>
-                <li class="breadcrumb-item active">{{ __('admin.report.owners.title') }}</li>
-            </ul>
-            <h1 class="page-header mb-0">{{ __('admin.report.owners.title') }}</h1>
+            <h2 class="mb-1">{{ __('admin.report.owners.title') }}</h2>
+            <p class="text-muted mb-0">{{ __('admin.report.owners.subtitle') }}</p>
         </div>
         <div class="ms-auto">
-            <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
-                <i class="bi bi-printer me-1"></i> {{ __('admin.report.owners.print') }}
+            <button type="button" onclick="printReport()" class="btn btn-outline-theme">
+                <i class="bi bi-printer me-1"></i> {{ __('admin.report.print') }}
             </button>
         </div>
     </div>
 
     <div class="row g-3 mb-4">
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.owners.kpi.total_owners'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalOwners) . '</span>'),
-            'icon' => 'bi bi-people',
-            'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.owners.kpi.active_owners'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($activeOwners) . '</span>'),
-            'icon' => 'bi bi-patch-check',
-            'gradient' => 'linear-gradient(135deg, #198754, #157347)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.owners.kpi.total_boats'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalBoats) . '</span>'),
-            'icon' => 'bi bi-water',
-            'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.owners.kpi.total_quota'),
-            'value' => new \Illuminate\Support\HtmlString('<span>' . number_format($totalQuota) . '</span>'),
-            'icon' => 'bi bi-diagram-3',
-            'gradient' => 'linear-gradient(135deg, #0dcaf0, #0aa2c0)',
-            'colClass' => 'col-md-6 col-lg-3',
-        ])
+        <x-stat-card
+            :title="__('admin.report.owners.kpi.total_owners')"
+            :value="number_format($totalOwners)"
+            icon="bi bi-people"
+            gradient="linear-gradient(135deg, #0d6efd, #0b5ed7)"
+            col-class="col-md-6 col-lg-3"
+        />
+        <x-stat-card
+            :title="__('admin.report.owners.kpi.active_owners')"
+            :value="number_format($activeOwners)"
+            icon="bi bi-patch-check"
+            gradient="linear-gradient(135deg, #198754, #157347)"
+            col-class="col-md-6 col-lg-3"
+        />
+        <x-stat-card
+            :title="__('admin.report.owners.kpi.total_boats')"
+            :value="number_format($totalBoats)"
+            icon="bi bi-water"
+            gradient="linear-gradient(135deg, #fd7e14, #ea5d0a)"
+            col-class="col-md-6 col-lg-3"
+        />
+        <x-stat-card
+            :title="__('admin.report.owners.kpi.total_quota')"
+            :value="number_format($totalQuota)"
+            icon="bi bi-diagram-3"
+            gradient="linear-gradient(135deg, #0dcaf0, #0aa2c0)"
+            col-class="col-md-6 col-lg-3"
+        />
     </div>
 
-    <div class="tab-content py-4">
-        <div class="tab-pane fade show active" id="allTab">
+    <div class="card mb-3">
+        <div class="card-body">
+            <form id="ownersFilters" method="GET" action="{{ route('admin.owner-report') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">{{ __('admin.report.owners.status') }}</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="">{{ __('admin.filters.all') }}</option>
+                            @foreach (['active', 'pending', 'trial', 'expired', 'suspended'] as $status)
+                                <option value="{{ $status }}" @selected(request('status') === $status)>
+                                    {{ __('admin.report.owners.status_labels.' . $status) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel me-1"></i> {{ __('admin.actions.filter') }}
+                        </button>
+                        <a href="{{ route('admin.owner-report') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> {{ __('admin.actions.reset') }}
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered table-hover text-center align-middle">
                     <thead>
@@ -109,7 +134,11 @@
 @section('script')
     <script type="text/javascript">
         function printReport() {
-            window.open('{{ route('admin.owner-report.print') }}', '_blank');
+            const form = document.getElementById('ownersFilters');
+            const query = new URLSearchParams(new FormData(form)).toString();
+            const printUrl = '{{ route('admin.owner-report.print') }}';
+
+            window.open(query ? `${printUrl}?${query}` : printUrl, '_blank');
         }
     </script>
 @endsection

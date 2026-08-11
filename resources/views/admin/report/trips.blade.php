@@ -2,75 +2,57 @@
 @section('title')
     {{ __('admin.report.trip.title') }}
 @endsection
-@section('css')
-    <style>
-        #datatableDefault th,
-        #datatableDefault td {
-            text-align: center !important;
-            vertical-align: middle;
-        }
-
-        .small-text th,
-        .small-text td {
-            font-size: 12px;
-            text-align: center !important;
-            vertical-align: middle;
-            font-weight: bold;
-        }
-    </style>
-@endsection
 @section('content')
-    <div class="d-flex align-items-center mb-3">
+    <div class="mb-4 d-flex align-items-start">
         <div>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.trip.report') }}</a></li>
-                <li class="breadcrumb-item active">{{ __('admin.report.trip.title') }}</li>
-            </ul>
-            <h1 class="page-header mb-0">{{ __('admin.report.trip.title') }}</h1>
+            <h2 class="mb-1">{{ __('admin.report.trip.title') }}</h2>
+            <p class="text-muted mb-0">{{ __('admin.report.trip.subtitle') }}</p>
         </div>
         <div class="ms-auto">
-            <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
-                <i class="bi bi-printer me-1"></i> {{ __('admin.report.trip.print') }}
+            <button type="button" onclick="printReport()" class="btn btn-outline-theme">
+                <i class="bi bi-printer me-1"></i> {{ __('admin.report.print') }}
             </button>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.trip.total_trips_count'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_trips">0</span>'),
-            'icon' => 'bi bi-compass',
-            'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-6',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.trip.total_weight'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span>'),
-            'icon' => 'bi bi-box-seam',
-            'gradient' => 'linear-gradient(135deg, #fd7e14, #ea5d0a)',
-            'colClass' => 'col-md-6',
-        ])
-    </div>
-
     @php
+        $totalTripsValue = new \Illuminate\Support\HtmlString('<span id="summary_total_trips">0</span>');
+        $totalWeightValue = new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span>');
         $monthStart = \Illuminate\Support\Carbon::now()->startOfMonth()->format('Y-m-d');
         $monthEnd = \Illuminate\Support\Carbon::now()->endOfMonth()->format('Y-m-d');
     @endphp
 
-    <div class="tab-content py-4">
-        <div class="tab-pane fade show active" id="allTab">
-            <div class="row mb-3">
+    <div class="row g-3 mb-4">
+        <x-stat-card
+            :title="__('admin.report.trip.total_trips_count')"
+            :value="$totalTripsValue"
+            icon="bi bi-compass"
+            gradient="linear-gradient(135deg, #0d6efd, #0b5ed7)"
+            col-class="col-md-6"
+        />
+        <x-stat-card
+            :title="__('admin.report.trip.total_weight')"
+            :value="$totalWeightValue"
+            icon="bi bi-box-seam"
+            gradient="linear-gradient(135deg, #fd7e14, #ea5d0a)"
+            col-class="col-md-6"
+        />
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label for="start_date">{{ __('admin.report.trip.from_date') }}</label>
+                    <label for="start_date" class="form-label">{{ __('admin.report.trip.from_date') }}</label>
                     <input type="date" id="start_date" class="form-control" value="{{ $monthStart }}" data-default="{{ $monthStart }}">
                 </div>
                 <div class="col-md-3">
-                    <label for="end_date">{{ __('admin.report.trip.to_date') }}</label>
+                    <label for="end_date" class="form-label">{{ __('admin.report.trip.to_date') }}</label>
                     <input type="date" id="end_date" class="form-control" value="{{ $monthEnd }}" data-default="{{ $monthEnd }}">
                 </div>
                 <div class="col-md-2">
-                    <label for="status_filter">{{ __('admin.report.trip.status') }}</label>
-                    <select id="status_filter" class="form-control">
+                    <label for="status_filter" class="form-label">{{ __('admin.report.trip.status') }}</label>
+                    <select id="status_filter" class="form-select">
                         <option value="">{{ __('admin.report.trip.all') }}</option>
                         @foreach (\App\Enums\TripStatus::cases() as $status)
                             <option value="{{ $status->value }}">{{ $status->label() }}</option>
@@ -78,8 +60,8 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="boat_filter">{{ __('admin.report.trip.owner') }}</label>
-                    <select id="boat_filter" class="form-control">
+                    <label for="boat_filter" class="form-label">{{ __('admin.report.trip.boat') }}</label>
+                    <select id="boat_filter" class="form-select">
                         <option value="">{{ __('admin.report.trip.all') }}</option>
                         @foreach ($boats as $boat)
                             <option value="{{ $boat->id }}">{{ app()->getLocale() == 'ar' ? $boat->name_ar : $boat->name_en }}</option>
@@ -87,10 +69,15 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-flex align-items-end gap-2">
-                    <button id="filterBtn" class="btn btn-primary btn-sm">{{ __('admin.report.trip.filter') }}</button>
-                    <button id="resetBtn" class="btn btn-secondary btn-sm">{{ __('admin.report.trip.reset') }}</button>
+                    <button id="filterBtn" type="button" class="btn btn-primary">{{ __('admin.report.trip.filter') }}</button>
+                    <button id="resetBtn" type="button" class="btn btn-outline-secondary">{{ __('admin.report.trip.reset') }}</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
             <div class="table-responsive">
                 <table id="datatableDefault" class="table table-sm table-bordered table-hover text-center small-text" style="width:100%">
                     <thead>

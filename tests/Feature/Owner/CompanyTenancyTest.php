@@ -100,7 +100,7 @@ class CompanyTenancyTest extends TestCase
             'phone' => '0595233393',
             'address' => 'Al Qunfudah',
             'website' => 'www.fishhouse.test',
-            'logo' => UploadedFile::fake()->image('logo.png'),
+            'logo' => $this->fakePng('logo.png'),
         ]);
 
         $response->assertRedirect();
@@ -113,5 +113,13 @@ class CompanyTenancyTest extends TestCase
         $this->assertSame('AG-9', $company->record_number);
         $this->assertNotNull($company->logo);
         Storage::disk('public')->assertExists($company->logo);
+    }
+
+    private function fakePng(string $name): UploadedFile
+    {
+        return UploadedFile::fake()->createWithContent(
+            $name,
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+        );
     }
 }

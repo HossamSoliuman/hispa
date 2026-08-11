@@ -2,82 +2,65 @@
 @section('title')
     {{ __('admin.report.fish_history.title') }}
 @endsection
-@section('css')
-    <style>
-        #datatableDefault th,
-        #datatableDefault td {
-            text-align: center !important;
-            vertical-align: middle;
-        }
-
-        .small-text th,
-        .small-text td {
-            font-size: 12px;
-            text-align: center !important;
-            vertical-align: middle;
-            font-weight: bold;
-        }
-    </style>
-@endsection
 @section('content')
-    <div class="d-flex align-items-center mb-3">
+    <div class="mb-4 d-flex align-items-start">
         <div>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.reports-hub') }}">{{ __('admin.report.fish_history.report') }}</a></li>
-                <li class="breadcrumb-item active">{{ __('admin.report.fish_history.title') }}</li>
-            </ul>
-            <h1 class="page-header mb-0">{{ __('admin.report.fish_history.title') }}</h1>
+            <h2 class="mb-1">{{ __('admin.report.fish_history.title') }}</h2>
+            <p class="text-muted mb-0">{{ __('admin.report.fish_history.subtitle') }}</p>
         </div>
         <div class="ms-auto">
-            <button type="button" onclick="printReport()" class="btn btn-outline-theme btn-equal">
-                <i class="bi bi-printer me-1"></i> {{ __('admin.report.fish_history.print') }}
+            <button type="button" onclick="printReport()" class="btn btn-outline-theme">
+                <i class="bi bi-printer me-1"></i> {{ __('admin.report.print') }}
             </button>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.fish_history.total_history_count'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_records">0</span>'),
-            'icon' => 'bi bi-clock-history',
-            'gradient' => 'linear-gradient(135deg, #0d6efd, #0b5ed7)',
-            'colClass' => 'col-md-6 col-lg-4',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.fish_history.total_fish_count'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_fish">0</span>'),
-            'icon' => 'bi bi-basket',
-            'gradient' => 'linear-gradient(135deg, #6f42c1, #59339d)',
-            'colClass' => 'col-md-6 col-lg-4',
-        ])
-        @include('owner.components.stat-card', [
-            'title' => __('admin.report.fish_history.total_remaining_weight'),
-            'value' => new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span>'),
-            'icon' => 'bi bi-box-seam',
-            'gradient' => 'linear-gradient(135deg, #198754, #157347)',
-            'colClass' => 'col-md-6 col-lg-4',
-        ])
-    </div>
-
     @php
+        $totalHistoryValue = new \Illuminate\Support\HtmlString('<span id="summary_total_records">0</span>');
+        $totalFishValue = new \Illuminate\Support\HtmlString('<span id="summary_total_fish">0</span>');
+        $totalWeightValue = new \Illuminate\Support\HtmlString('<span id="summary_total_weight">0</span>');
         $monthStart = \Illuminate\Support\Carbon::now()->startOfMonth()->format('Y-m-d');
         $monthEnd = \Illuminate\Support\Carbon::now()->endOfMonth()->format('Y-m-d');
     @endphp
 
-    <div class="tab-content py-4">
-        <div class="tab-pane fade show active" id="allTab">
-            <div class="row mb-3">
+    <div class="row g-3 mb-4">
+        <x-stat-card
+            :title="__('admin.report.fish_history.total_history_count')"
+            :value="$totalHistoryValue"
+            icon="bi bi-clock-history"
+            gradient="linear-gradient(135deg, #0d6efd, #0b5ed7)"
+            col-class="col-md-6 col-lg-4"
+        />
+        <x-stat-card
+            :title="__('admin.report.fish_history.total_fish_count')"
+            :value="$totalFishValue"
+            icon="bi bi-basket"
+            gradient="linear-gradient(135deg, #6f42c1, #59339d)"
+            col-class="col-md-6 col-lg-4"
+        />
+        <x-stat-card
+            :title="__('admin.report.fish_history.total_remaining_weight')"
+            :value="$totalWeightValue"
+            icon="bi bi-box-seam"
+            gradient="linear-gradient(135deg, #198754, #157347)"
+            col-class="col-md-6 col-lg-4"
+        />
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label for="start_date">{{ __('admin.report.fish_history.from_date') }}</label>
+                    <label for="start_date" class="form-label">{{ __('admin.report.fish_history.from_date') }}</label>
                     <input type="date" id="start_date" class="form-control" value="{{ $monthStart }}" data-default="{{ $monthStart }}">
                 </div>
                 <div class="col-md-3">
-                    <label for="end_date">{{ __('admin.report.fish_history.to_date') }}</label>
+                    <label for="end_date" class="form-label">{{ __('admin.report.fish_history.to_date') }}</label>
                     <input type="date" id="end_date" class="form-control" value="{{ $monthEnd }}" data-default="{{ $monthEnd }}">
                 </div>
                 <div class="col-md-3">
-                    <label for="fish_filter">{{ __('admin.report.fish_history.fish_type') }}</label>
-                    <select id="fish_filter" class="form-control">
+                    <label for="fish_filter" class="form-label">{{ __('admin.report.fish_history.fish_type') }}</label>
+                    <select id="fish_filter" class="form-select">
                         <option value="">{{ __('admin.report.fish_history.all') }}</option>
                         @foreach ($fish as $item)
                             <option value="{{ $item->id }}">{{ app()->getLocale() == 'ar' ? $item->name_ar : $item->name_en }}</option>
@@ -85,10 +68,15 @@
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end gap-2">
-                    <button id="filterBtn" class="btn btn-primary btn-sm">{{ __('admin.report.fish_history.filter') }}</button>
-                    <button id="resetBtn" class="btn btn-secondary btn-sm">{{ __('admin.report.fish_history.reset') }}</button>
+                    <button id="filterBtn" type="button" class="btn btn-primary">{{ __('admin.report.fish_history.filter') }}</button>
+                    <button id="resetBtn" type="button" class="btn btn-outline-secondary">{{ __('admin.report.fish_history.reset') }}</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
             <div class="table-responsive">
                 <table id="datatableDefault" class="table table-sm table-bordered table-hover text-center small-text" style="width:100%">
                     <thead>
